@@ -9,6 +9,7 @@
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
 .ff-display{font-family:'Fraunces',serif}
@@ -17,17 +18,19 @@
 @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 .rise{animation:rise .7s cubic-bezier(.2,.7,.2,1) both}
 body{margin:0}
+.clamp2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
 const { useState, useEffect } = React;
+const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ====== CAMBIÁ ESTO ======
-const WHATSAPP = "5492494000000"; // tu número con código de país, sin + ni espacios
-// ==========================
-
+const WHATSAPP = "5492494000000";
+const wa = `https://wa.me/${WHATSAPP}`;
 const C = { paper:"#F3EEE2", ink:"#2C2A24", moss:"#3E4F3F", sage:"#7C8F6F", clay:"#BE6A4A", sun:"#E2A94E" };
 const PHRASES = ["Tandil es un lugar soñado","Donde el aire huele a sierra","Vení a desconectar entre cerros"];
 const NAV = [
@@ -36,33 +39,10 @@ const NAV = [
   { key:"gastro", label:"Gastronomía", e:"🍴" },
   { key:"conoce", label:"Conocé Tandil", e:"🌿" },
 ];
-const IMG = (id) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=900&q=80`;
-const wa = `https://wa.me/${WHATSAPP}`;
+const IMG = (p) => (!p ? "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=900&q=80" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=900&q=80`));
+const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
+const capRange = (r) => { const caps=(r.units||[]).map(u=>u.capacity).filter(Boolean); if(!caps.length) return r.capacity?("hasta "+r.capacity):""; const mn=Math.min(...caps),mx=Math.max(...caps); return mn===mx?("hasta "+mx):(mn+" a "+mx); };
 
-const CABINS = [
-  { name:"Corazón de la Sierra", zone:"Don Bosco", price:78000, rating:4.94, cap:6, photo:"photo-1518780664697-55e3ad937233", tag:"Pet friendly" },
-  { name:"Rincón del Abra", zone:"La Blanca", price:64000, rating:4.88, cap:4, photo:"photo-1470770841072-f978cf4d019e", tag:"Promo 4 noches" },
-  { name:"Refugio en las Sierras", zone:"Don Bosco", price:95000, rating:4.97, cap:8, photo:"photo-1571896349842-33c89424de2d", tag:"Ideal grupos" },
-  { name:"Alta Vista", zone:"Sierras del Tigre", price:59000, rating:4.76, cap:5, photo:"photo-1505693416388-ac5ce068fe85", tag:"Con pileta" },
-  { name:"Jardín Serrano", zone:"Don Bosco", price:67000, rating:4.82, cap:6, photo:"photo-1600585154340-be6161a56a0c", tag:"Desayuno" },
-  { name:"Posada del Pinar", zone:"El Centinela", price:71000, rating:4.79, cap:6, photo:"photo-1559128010-7c1ad6e1b6a5", tag:"Cerca del centro" },
-];
-const ACTIVITIES = [
-  { name:"La Piedra Movediza", tag:"Ícono de Tandil", img:"photo-1551632811-561732d1e306", desc:"La original cayó en 1912; hoy una réplica corona el cerro con vista total a la ciudad." },
-  { name:"Cerro El Centinela", tag:"Aerosilla & aventura", img:"photo-1454942901704-3c44c11b2ad1", desc:"Subí en aerosilla, hacé tirolesa y comé entre las sierras. Imperdible con chicos." },
-  { name:"Dique del Fuerte", tag:"Costanera & mate", img:"photo-1437209484568-e63b90a34f8b", desc:"A 20 min del centro. Bicis, kayak y atardeceres sobre el agua." },
-  { name:"Parque Independencia", tag:"Castillo Morisco", img:"photo-1505765050516-f72dcac9c60e", desc:"Cerro con castillo y la mejor panorámica de Tandil." },
-  { name:"Monte Calvario", tag:"Senderos & Vía Crucis", img:"photo-1464822759023-fed622ff2c3b", desc:"Bosque, gruta de Lourdes y el famoso Vía Crucis de Semana Santa." },
-  { name:"Reserva Sierra del Tigre", tag:"Trekking & fauna", img:"photo-1469474968028-56623f02e42e", desc:"Senderos serranos con miradores y fauna autóctona." },
-];
-const FOOD = [
-  { name:"Época de Quesos", tag:"Picadas & quesos", img:"photo-1452195100486-9cc805987862", desc:"Clásico de clásicos. Picadas en una casona de 1800 con quesos y embutidos regionales." },
-  { name:"Antares", tag:"Cervecería artesanal", img:"photo-1535958636474-b021ee887b13", desc:"La parada nocturna por excelencia. Cervezas tandilenses y buena cocina." },
-  { name:"Parrilla El Trébol", tag:"Parrilla libre", img:"photo-1544025162-d76694265947", desc:"Favorita de los locales para comer asado sin apuro." },
-  { name:"Syquet", tag:"Jamón crudo & vinos", img:"photo-1414235077428-338989a2e8c0", desc:"Tabla de fiambres serranos y carta de vinos en pleno centro." },
-  { name:"Don Rosendo", tag:"Embutidos artesanales", img:"photo-1601924638867-3a6de6b7a500", desc:"Salames con Denominación de Origen para llevar o probar en el lugar." },
-  { name:"El Criollo", tag:"Cocina regional", img:"photo-1517248135467-4c7edcad34c4", desc:"Platos caseros y abundantes, ambiente familiar." },
-];
 const FACTS = [
   { e:"🧀", text:"El salame de Tandil tiene Denominación de Origen: el único del país con ese sello." },
   { e:"🪨", text:"Las sierras de Tandil están entre las más antiguas del planeta: más de 2.000 millones de años." },
@@ -148,35 +128,74 @@ function MobileMenu({ open, go, onClose }) {
 }
 
 function SearchCard() {
+  const toList = () => { const el = document.getElementById("aloj"); if (el) el.scrollIntoView({ behavior: "smooth" }); };
   return (
     <div className="bg-white rounded-[26px] shadow-[0_20px_50px_-20px_rgba(62,79,63,0.45)] border border-black/5 p-2.5 flex flex-col sm:flex-row gap-1.5">
       <div className="flex-1 flex items-center gap-3 px-4 py-3"><span>📍</span><div><div className="ff-body text-[10px] uppercase tracking-widest text-stone-400 font-semibold">Destino</div><div className="ff-body text-sm" style={{ color: C.ink }}>Tandil, Buenos Aires</div></div></div>
       <div className="hidden sm:block w-px bg-stone-200 my-2.5"></div>
-      <div className="flex-1 flex items-center gap-3 px-4 py-3"><span>📅</span><div><div className="ff-body text-[10px] uppercase tracking-widest text-stone-400 font-semibold">Fechas</div><div className="ff-body text-sm" style={{ color: C.ink }}>Elegí tus días</div></div></div>
+      <div className="flex-1 flex items-center gap-3 px-4 py-3"><span>📅</span><div><div className="ff-body text-[10px] uppercase tracking-widest text-stone-400 font-semibold">Fechas</div><div className="ff-body text-sm" style={{ color: C.ink }}>Elegí en cada alojamiento</div></div></div>
       <div className="hidden sm:block w-px bg-stone-200 my-2.5"></div>
-      <div className="flex items-center gap-3 px-4 py-3"><span>👥</span><div><div className="ff-body text-[10px] uppercase tracking-widest text-stone-400 font-semibold">Huéspedes</div><div className="ff-body text-sm" style={{ color: C.ink }}>2 personas</div></div></div>
-      <a href={wa} target="_blank" rel="noreferrer" className="rounded-[20px] px-6 py-3.5 flex items-center justify-center gap-2 ff-body font-semibold text-sm text-white" style={{ background: C.clay }}>🔍 Buscar</a>
+      <div className="flex items-center gap-3 px-4 py-3"><span>👥</span><div><div className="ff-body text-[10px] uppercase tracking-widest text-stone-400 font-semibold">Huéspedes</div><div className="ff-body text-sm" style={{ color: C.ink }}>Para todos</div></div></div>
+      <button onClick={toList} className="rounded-[20px] px-6 py-3.5 flex items-center justify-center gap-2 ff-body font-semibold text-sm text-white" style={{ background: C.clay }}>🔍 Buscar</button>
     </div>
   );
 }
 
 function CabinCard({ c }) {
+  const cover = c.banner || (c.photos && c.photos[0]);
+  const tag = c.promo_text ? "Promo" : (c.pet_friendly ? "Pet friendly" : null);
   return (
-    <a href={wa} target="_blank" rel="noreferrer" className="rise group cursor-pointer block">
+    <a href={"cabana.html?slug=" + c.slug} className="rise group cursor-pointer block">
       <div className="relative aspect-[5/6] rounded-[26px] overflow-hidden">
-        <img src={IMG(c.photo)} alt={c.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+        <img src={IMG(cover)} alt={c.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent"></div>
-        <span className="absolute top-3.5 left-3.5 rounded-full px-3 py-1 ff-body text-[12px] font-semibold backdrop-blur" style={{ background: "rgba(255,255,255,0.85)", color: C.moss }}>{c.tag}</span>
-        <span className="absolute top-3.5 right-3.5 w-9 h-9 grid place-items-center rounded-full bg-white/85 backdrop-blur" style={{ color: C.clay }}>♥</span>
+        {tag && <span className="absolute top-3.5 left-3.5 rounded-full px-3 py-1 ff-body text-[12px] font-semibold backdrop-blur" style={{ background: "rgba(255,255,255,0.85)", color: C.moss }}>{tag}</span>}
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          <div className="flex items-end justify-between">
-            <div><h3 className="ff-display text-xl leading-tight">{c.name}</h3><p className="ff-body text-sm text-white/80">{c.zone} · hasta {c.cap}</p></div>
-            <span className="ff-body text-sm">★ {c.rating}</span>
-          </div>
+          <h3 className="ff-display text-xl leading-tight">{c.name}</h3>
+          <p className="ff-body text-sm text-white/80">{c.zone}{capRange(c) ? " · " + capRange(c) : ""}</p>
         </div>
       </div>
-      <p className="ff-body text-sm mt-3" style={{ color: C.ink }}><span className="font-bold">desde ${c.price.toLocaleString("es-AR")}</span><span className="text-stone-500"> / noche</span></p>
+      <p className="ff-body text-sm mt-3" style={{ color: C.ink }}><span className="font-bold">desde {money(c.price)}</span><span className="text-stone-500"> / noche</span></p>
     </a>
+  );
+}
+
+function Home({ cabins, loading }) {
+  const [f, setF] = useState(null);
+  const FILTERS = [["pet","Pet friendly"],["pileta","Con pileta"],["parrilla","Con parrilla"],["grupos","Para grupos"]];
+  const match = (c) => {
+    if (!f) return true;
+    if (f === "pet") return c.pet_friendly;
+    if (f === "pileta") return (c.amenities||[]).includes("pileta");
+    if (f === "parrilla") return (c.amenities||[]).includes("parrilla");
+    if (f === "grupos") { const caps=(c.units||[]).map(u=>u.capacity); const mx=caps.length?Math.max(...caps):(c.capacity||0); return mx>=6; }
+    return true;
+  };
+  const show = cabins.filter(match);
+  return (
+    <div>
+      <section className="relative" style={{ background: C.paper }}>
+        <div className="max-w-6xl mx-auto px-5 sm:px-6 pt-12 sm:pt-16 pb-16 text-center">
+          <p className="ff-body text-[12px] uppercase tracking-[0.25em] font-semibold mb-4" style={{ color: C.sage }}>Sierras de Tandil · Buenos Aires</p>
+          <h1 className="ff-display text-[44px] sm:text-7xl leading-[0.95]" style={{ color: C.ink }}>Respirá hondo,<br /><span className="italic" style={{ color: C.moss }}>llegaste a las sierras</span></h1>
+          <p className="ff-body text-stone-500 max-w-md mx-auto mt-5 text-[15px] leading-relaxed">Cabañas con alma serrana para desconectar de verdad. Encontrá tu refugio entre cerros, silencio y cielo abierto.</p>
+          <div className="max-w-3xl mx-auto mt-9"><SearchCard /></div>
+          <div className="flex flex-wrap gap-2 mt-5 justify-center">
+            {FILTERS.map(([k, l]) => <button key={k} onClick={() => setF(f === k ? null : k)} className="rounded-full px-4 py-2 ff-body text-sm border transition" style={f === k ? { background: C.moss, color: "white", borderColor: C.moss } : { borderColor: "rgba(62,79,63,0.25)", color: C.moss }}>{l}</button>)}
+          </div>
+        </div>
+      </section>
+      <Band text="Elegí tu refugio entre las sierras" />
+      <section id="aloj" className="pb-16" style={{ background: C.paper }}>
+        <div className="max-w-6xl mx-auto px-5 sm:px-6 pt-10">
+          <div className="mb-7"><h2 className="ff-display text-3xl" style={{ color: C.ink }}>Alojamientos elegidos</h2><p className="ff-body text-stone-500 text-[15px] mt-1">Una selección para empezar a soñar tu escapada.</p></div>
+          {loading ? <p className="ff-body text-stone-500 py-10 text-center">Cargando alojamientos…</p>
+          : cabins.length === 0 ? <p className="ff-body text-stone-500 py-10 text-center">Pronto vas a ver los alojamientos acá.</p>
+          : show.length === 0 ? <p className="ff-body text-stone-500 py-10 text-center">No hay alojamientos con ese filtro. Probá otro.</p>
+          : <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{show.map((c, i) => <CabinCard key={i} c={c} />)}</div>}
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -192,48 +211,42 @@ function PageTitle({ kicker, title, sub }) {
   );
 }
 
-function InfoGrid({ items }) {
-  return (
-    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {items.map((a, i) => (
-        <div key={i} className="rise rounded-[24px] overflow-hidden bg-white border border-black/5">
-          <div className="aspect-[16/11] overflow-hidden bg-stone-200"><img src={IMG(a.img)} alt={a.name} className="w-full h-full object-cover hover:scale-105 transition duration-700" /></div>
-          <div className="p-5"><span className="ff-body text-[11px] uppercase tracking-widest font-semibold" style={{ color: C.sage }}>{a.tag}</span><h3 className="ff-display text-xl mt-0.5" style={{ color: C.ink }}>{a.name}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed">{a.desc}</p></div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function Home() {
+function ActivitiesPage({ acts, loading }) {
   return (
     <div>
-      <section className="relative" style={{ background: C.paper }}>
-        <div className="max-w-6xl mx-auto px-5 sm:px-6 pt-12 sm:pt-16 pb-16 text-center">
-          <p className="ff-body text-[12px] uppercase tracking-[0.25em] font-semibold mb-4" style={{ color: C.sage }}>Sierras de Tandil · Buenos Aires</p>
-          <h1 className="ff-display text-[44px] sm:text-7xl leading-[0.95]" style={{ color: C.ink }}>Respirá hondo,<br /><span className="italic" style={{ color: C.moss }}>llegaste a las sierras</span></h1>
-          <p className="ff-body text-stone-500 max-w-md mx-auto mt-5 text-[15px] leading-relaxed">Cabañas con alma serrana para desconectar de verdad. Encontrá tu refugio entre cerros, silencio y cielo abierto.</p>
-          <div className="max-w-3xl mx-auto mt-9"><SearchCard /></div>
-          <div className="flex flex-wrap gap-2 mt-5 justify-center">{["Pet friendly","Con pileta","Vista a las sierras","Para grupos"].map((t) => <span key={t} className="rounded-full px-4 py-2 ff-body text-sm border" style={{ borderColor: "rgba(62,79,63,0.25)", color: C.moss }}>{t}</span>)}</div>
-        </div>
-      </section>
-      <Band text="Elegí tu refugio entre las sierras" />
-      <section className="pb-16" style={{ background: C.paper }}>
-        <div className="max-w-6xl mx-auto px-5 sm:px-6 pt-10">
-          <div className="mb-7"><h2 className="ff-display text-3xl" style={{ color: C.ink }}>Alojamientos elegidos</h2><p className="ff-body text-stone-500 text-[15px] mt-1">Una selección para empezar a soñar tu escapada.</p></div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{CABINS.map((c, i) => <CabinCard key={i} c={c} />)}</div>
-        </div>
+      <PageTitle kicker="Paseos & aventura" title="Qué hacer en Tandil" sub="Cerros, agua, historia y aire puro. Estos son los imperdibles para tu estadía." />
+      <section className="max-w-6xl mx-auto px-5 sm:px-6 py-12">
+        {loading ? <p className="ff-body text-stone-500 text-center py-10">Cargando…</p>
+        : acts.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">Pronto vas a ver las actividades acá.</p>
+        : <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{acts.map((a, i) => (
+            <a key={i} href={"actividad.html?slug=" + a.slug} className="rise rounded-[24px] overflow-hidden bg-white border border-black/5 block">
+              <div className="aspect-[16/11] overflow-hidden bg-stone-200"><img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} className="w-full h-full object-cover hover:scale-105 transition duration-700" /></div>
+              <div className="p-5">{a.category && <span className="ff-body text-[11px] uppercase tracking-widest font-semibold" style={{ color: C.sage }}>{a.category}</span>}<h3 className="ff-display text-xl mt-0.5" style={{ color: C.ink }}>{a.name}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed clamp2">{a.blurb}</p>{a.duration && <p className="ff-body text-sm text-stone-400 mt-2">⏱ {a.duration}</p>}</div>
+            </a>
+          ))}</div>}
       </section>
     </div>
   );
 }
 
-function ActivitiesPage() {
-  return (<div><PageTitle kicker="Paseos & aventura" title="Qué hacer en Tandil" sub="Cerros, agua, historia y aire puro. Estos son los imperdibles para tu estadía." /><section className="max-w-6xl mx-auto px-5 sm:px-6 py-12"><InfoGrid items={ACTIVITIES} /></section></div>);
+function FoodPage({ food, loading }) {
+  return (
+    <div>
+      <PageTitle kicker="Sabores serranos" title="Dónde comer en Tandil" sub="De las picadas con salame con Denominación de Origen a la cervecería artesanal: comé como un local." />
+      <section className="max-w-6xl mx-auto px-5 sm:px-6 py-12">
+        {loading ? <p className="ff-body text-stone-500 text-center py-10">Cargando…</p>
+        : food.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">Pronto vas a ver los lugares acá.</p>
+        : <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{food.map((a, i) => (
+            <a key={i} href={"resto.html?slug=" + a.slug} className="rise rounded-[24px] overflow-hidden bg-white border border-black/5 block">
+              <div className="aspect-[16/11] overflow-hidden bg-stone-200"><img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} className="w-full h-full object-cover hover:scale-105 transition duration-700" /></div>
+              <div className="p-5"><div className="flex gap-1.5 mb-1">{a.sin_tacc && <span className="ff-body text-[11px] rounded-full px-2 py-0.5" style={{ background:"#eef2e8", color:C.moss }}>Sin TACC</span>}{a.vegetariano && <span className="ff-body text-[11px] rounded-full px-2 py-0.5" style={{ background:"#eef2e8", color:C.moss }}>Veggie</span>}</div><h3 className="ff-display text-xl" style={{ color: C.ink }}>{a.name}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed clamp2">{a.blurb}</p></div>
+            </a>
+          ))}</div>}
+      </section>
+    </div>
+  );
 }
-function FoodPage() {
-  return (<div><PageTitle kicker="Sabores serranos" title="Dónde comer en Tandil" sub="De las picadas con salame con Denominación de Origen a la cervecería artesanal: comé como un local." /><section className="max-w-6xl mx-auto px-5 sm:px-6 py-12"><InfoGrid items={FOOD} /></section></div>);
-}
+
 function AboutPage() {
   return (
     <div>
@@ -242,18 +255,14 @@ function AboutPage() {
         <div className="rounded-[26px] overflow-hidden mb-8"><img src={IMG("photo-1500534314209-a25ddb2bd429")} className="w-full aspect-[16/8] object-cover bg-stone-200" /></div>
         <p className="ff-body text-lg text-stone-600 leading-relaxed mb-4">Tandil es una ciudad serrana del centro de la provincia de Buenos Aires, rodeada de cerros milenarios, arroyos y aire limpio. Combina la calma del campo con la comodidad de una ciudad completa.</p>
         <p className="ff-body text-lg text-stone-600 leading-relaxed mb-10">Es famosa por sus embutidos y quesos artesanales, su turismo religioso en Semana Santa y sus paisajes de sierras suaves, perfectas para caminar, andar en bici o simplemente desconectar.</p>
-        <div className="grid sm:grid-cols-3 gap-4 mb-12">
-          {[{ e:"🚌", t:"A 4 horas de CABA", s:"Por Ruta 226 o micro directo" },{ e:"⛰️", t:"Sierras milenarias", s:"Más de 2.000 millones de años" },{ e:"✨", t:"Salame con D.O.", s:"El único del país con ese sello" }].map((x, i) => (
-            <div key={i} className="rounded-[22px] p-5 bg-white border border-black/5"><div className="text-2xl">{x.e}</div><div className="ff-display text-lg mt-2" style={{ color: C.ink }}>{x.t}</div><div className="ff-body text-sm text-stone-500">{x.s}</div></div>
-          ))}
-        </div>
         <h2 className="ff-display text-2xl mb-5" style={{ color: C.ink }}>✨ Datos curiosos</h2>
         <div className="grid sm:grid-cols-2 gap-4">{FACTS.map((f, i) => <div key={i} className="flex gap-3 bg-white border border-black/5 rounded-[20px] p-4"><span className="text-2xl">{f.e}</span><p className="ff-body text-sm text-stone-600 leading-relaxed">{f.text}</p></div>)}</div>
       </section>
     </div>
   );
 }
-function OwnersPage({ go }) {
+
+function OwnersPage() {
   const benefits = [
     { t:"Tu propia landing", s:"Cada cabaña con su página, fotos, precios y calendario propio." },
     { t:"Reservas directas", s:"Las consultas te llegan por WhatsApp, sin intermediarios eternos." },
@@ -273,6 +282,7 @@ function OwnersPage({ go }) {
     </div>
   );
 }
+
 function ContactPage() {
   return (
     <div>
@@ -292,6 +302,17 @@ function ContactPage() {
 function App() {
   const [menu, setMenu] = useState(false);
   const [view, setView] = useState("home");
+  const [data, setData] = useState({ loading: true, cabins: [], acts: [], food: [] });
+  useEffect(() => {
+    (async () => {
+      const [a, b, c] = await Promise.all([
+        db.from("cabins").select("*").order("created_at", { ascending: false }),
+        db.from("activities").select("*").order("created_at", { ascending: false }),
+        db.from("restaurants").select("*").order("created_at", { ascending: false }),
+      ]);
+      setData({ loading: false, cabins: a.data || [], acts: b.data || [], food: c.data || [] });
+    })();
+  }, []);
   const go = (v) => { setView(v); setMenu(false); window.scrollTo({ top: 0 }); };
   useEffect(() => { window.scrollTo({ top: 0 }); }, [view]);
   return (
@@ -299,11 +320,11 @@ function App() {
       <PreHeader />
       <Header view={view} go={go} onOpen={() => setMenu(true)} />
       <MobileMenu open={menu} go={go} onClose={() => setMenu(false)} />
-      {view === "home" && <Home />}
-      {view === "qhacer" && <ActivitiesPage />}
-      {view === "gastro" && <FoodPage />}
+      {view === "home" && <Home cabins={data.cabins} loading={data.loading} />}
+      {view === "qhacer" && <ActivitiesPage acts={data.acts} loading={data.loading} />}
+      {view === "gastro" && <FoodPage food={data.food} loading={data.loading} />}
       {view === "conoce" && <AboutPage />}
-      {view === "owners" && <OwnersPage go={go} />}
+      {view === "owners" && <OwnersPage />}
       {view === "contacto" && <ContactPage />}
       <footer className="py-10 text-center ff-body text-sm" style={{ background: C.moss, color: "rgba(255,255,255,0.7)" }}>
         <div>TandilStay · hecho con calma en las sierras de Tandil</div>
