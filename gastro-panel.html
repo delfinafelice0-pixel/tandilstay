@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Panel Gastronomía · TandilStay</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+.ff-display{font-family:'Fraunces',serif}.ff-body{font-family:'Hanken Grotesk',sans-serif}body{margin:0}
+</style>
+</head>
+<body><div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const C = { paper:"#F3EEE2", ink:"#2C2A24", moss:"#3E4F3F", clay:"#BE6A4A" };
+const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=900&q=80`));
+const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
+const slugify = (s) => (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+
+const EMPTY = { name:"", operator:"", zone:"", whatsapp:"", phone:"", blurb:"", sinTacc:false, vegetariano:false, reserva:false, comoReservar:"", menuUrl:"", videos:[], banner:"", photos:[], menu:[] };
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano, reserva:r.reserva, comoReservar:r.como_reservar||"", menuUrl:r.menu_url||"", videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], menu:r.menu||[] });
+const toRow = (c) => { const r = { slug:c.slug||slugify(c.name), name:c.name, operator:c.operator, zone:c.zone, whatsapp:c.whatsapp, phone:c.phone, blurb:c.blurb, sin_tacc:c.sinTacc, vegetariano:c.vegetariano, reserva:c.reserva, como_reservar:c.comoReservar, menu_url:c.menuUrl, videos:c.videos, banner:c.banner, photos:c.photos, menu:c.menu }; if(c.id) r.id=c.id; return r; };
+
+const Field = ({ label, children }) => (<label className="block mb-3"><span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">{label}</span><div className="mt-1">{children}</div></label>);
+
+async function up(file, prefix){ const path=prefix+"-"+Date.now()+"-"+Math.random().toString(36).slice(2)+"-"+file.name.replace(/[^a-zA-Z0-9.]/g,"_"); const { error }=await db.storage.from("fotos").upload(path,file); if(error) return null; return db.storage.from("fotos").getPublicUrl(path).data.publicUrl; }
+
+function Editor({ c, set }) {
+  const [uploading,setUploading]=useState(false);
+  const uploadBanner = async (e)=>{ const f=(e.target.files||[])[0]; if(!f)return; setUploading(true); const u=await up(f,"resto-banner"); if(u) set({...c,banner:u}); setUploading(false); e.target.value=""; };
+  const uploadGallery = async (e)=>{ const fs=Array.from(e.target.files||[]); if(!fs.length)return; setUploading(true); const urls=[]; for(const f of fs){ const u=await up(f,"resto"); if(u) urls.push(u);} set({...c,photos:[...c.photos,...urls]}); setUploading(false); e.target.value=""; };
+  const uploadItem = async (e,i)=>{ const f=(e.target.files||[])[0]; if(!f)return; setUploading(true); const u=await up(f,"plato"); if(u) set({...c,menu:c.menu.map((x,j)=>j===i?{...x,photo:u}:x)}); setUploading(false); e.target.value=""; };
+  const setItem=(i,patch)=>set({...c,menu:c.menu.map((x,j)=>j===i?{...x,...patch}:x)});
+  return (
+    <div className="grid md:grid-cols-2 gap-6">
+      <div className="space-y-5">
+        <div className="bg-white rounded-2xl border border-black/5 p-5">
+          <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Datos</h3>
+          <Field label="Nombre"><input value={c.name} onChange={e=>set({...c,name:e.target.value})} className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
+          <Field label="Operador / cuenta (opcional)"><input value={c.operator} onChange={e=>set({...c,operator:e.target.value})} placeholder="Ej: sabores-tandil" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
+          <Field label="Dirección / ubicación (como en Google Maps)"><input value={c.zone} onChange={e=>set({...c,zone:e.target.value})} placeholder="Ej: 14 de Julio 604, Tandil" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
+          {c.zone && <iframe title="mapa" loading="lazy" className="w-full h-40 rounded-xl border border-black/5 mb-3" src={"https://www.google.com/maps?q="+encodeURIComponent(c.zone)+"&output=embed"}></iframe>}
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="WhatsApp"><input value={c.whatsapp} onChange={e=>set({...c,whatsapp:e.target.value})} placeholder="54920..." className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
+            <Field label="Teléfono"><input value={c.phone} onChange={e=>set({...c,phone:e.target.value})} className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
+          </div>
+          <Field label="Descripción"><textarea value={c.blurb} onChange={e=>set({...c,blurb:e.target.value})} rows={2} className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm resize-none" /></Field>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-black/5 p-5">
+          <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Opciones y reserva</h3>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {[["sinTacc","🌾 Sin TACC"],["vegetariano","🥗 Vegetariano"]].map(([k,l])=>(
+              <button key={k} onClick={()=>set({...c,[k]:!c[k]})} className={"rounded-full px-3 py-1.5 ff-body text-sm border "+(c[k]?"text-white":"text-stone-600 border-stone-300")} style={c[k]?{background:C.moss,borderColor:C.moss}:{}}>{l}{c[k]?" ✓":""}</button>
+            ))}
+          </div>
+          <button onClick={()=>set({...c,reserva:!c.reserva})} className={"rounded-xl px-4 py-2.5 ff-body text-sm border w-full text-left mb-2 "+(c.reserva?"border-amber-300 text-amber-700 bg-amber-50":"border-stone-300 text-stone-600")}>{c.reserva?"📅 Con reserva":"🚶 Sin reserva (llegás y listo)"}</button>
+          {c.reserva && <Field label="Cómo hacer la reserva"><textarea value={c.comoReservar} onChange={e=>set({...c,comoReservar:e.target.value})} rows={2} placeholder="Ej: Reservá por WhatsApp o por Instagram con 1 día de anticipación" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm resize-none" /></Field>}
+          <Field label="Menú digital (link, opcional)"><input value={c.menuUrl} onChange={e=>set({...c,menuUrl:e.target.value})} placeholder="https://..." className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-black/5 p-5">
+          <h3 className="ff-display text-lg mb-2" style={{color:C.ink}}>🎬 Videos</h3>
+          <div className="space-y-2">
+            {c.videos.map((v,i)=>(
+              <div key={i} className="flex items-center gap-2">
+                <input value={v} onChange={e=>set({...c,videos:c.videos.map((x,j)=>j===i?e.target.value:x)})} placeholder="Link de YouTube/Instagram" className="flex-1 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                <button onClick={()=>set({...c,videos:c.videos.filter((_,j)=>j!==i)})} className="text-rose-500">🗑️</button>
+              </div>
+            ))}
+          </div>
+          <button onClick={()=>set({...c,videos:[...c.videos,""]})} className="mt-3 ff-body text-sm font-semibold" style={{color:C.clay}}>+ Agregar video</button>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-black/5 p-5">
+          <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Fotos</h3>
+          <span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">Banner</span>
+          <div className="mt-1 mb-3">
+            {c.banner ? <div className="relative inline-block w-full"><img src={IMG(c.banner)} className="w-full h-28 rounded-xl object-cover bg-stone-200" /><button onClick={()=>set({...c,banner:""})} className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-rose-500 text-white text-xs grid place-items-center">✕</button></div>
+            : <label className="block"><span className="inline-flex cursor-pointer rounded-xl px-4 py-2.5 ff-body text-sm font-semibold text-white" style={{background:C.clay,opacity:uploading?0.6:1}}>{uploading?"Subiendo…":"🖼️ Subir banner"}</span><input type="file" accept="image/*" onChange={uploadBanner} disabled={uploading} className="hidden" /></label>}
+          </div>
+          <span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">Galería</span>
+          {c.photos.length>0 && <div className="grid grid-cols-3 gap-2 my-2">{c.photos.map((p,i)=><div key={i} className="relative"><img src={IMG(p)} className="w-full h-20 rounded-lg object-cover bg-stone-200" /><button onClick={()=>set({...c,photos:c.photos.filter((_,j)=>j!==i)})} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-white text-xs grid place-items-center">✕</button></div>)}</div>}
+          <label className="block mt-2"><span className="inline-flex cursor-pointer rounded-xl px-4 py-2.5 ff-body text-sm font-semibold text-white" style={{background:C.moss,opacity:uploading?0.6:1}}>{uploading?"Subiendo…":"📷 Subir fotos"}</span><input type="file" accept="image/*" multiple onChange={uploadGallery} disabled={uploading} className="hidden" /></label>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-black/5 p-5 h-fit">
+        <h3 className="ff-display text-lg mb-1" style={{color:C.ink}}>🍽️ Menú</h3>
+        <p className="ff-body text-sm text-stone-500 mb-4">Cargá tus platos con foto, precio y categoría.</p>
+        <div className="space-y-4">
+          {c.menu.map((it,i)=>(
+            <div key={i} className="border border-stone-200 rounded-xl p-3">
+              <div className="flex gap-3">
+                <label className="shrink-0 cursor-pointer">
+                  {it.photo ? <img src={IMG(it.photo)} className="w-20 h-20 rounded-lg object-cover bg-stone-200" /> : <span className="w-20 h-20 rounded-lg bg-stone-100 grid place-items-center text-2xl">📷</span>}
+                  <input type="file" accept="image/*" onChange={e=>uploadItem(e,i)} className="hidden" />
+                </label>
+                <div className="flex-1 space-y-2">
+                  <input value={it.name||""} onChange={e=>setItem(i,{name:e.target.value})} placeholder="Nombre del plato" className="w-full border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                  <div className="flex gap-2">
+                    <input value={it.category||""} onChange={e=>setItem(i,{category:e.target.value})} placeholder="Categoría (Entradas, Principales...)" className="flex-1 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                    <div className="flex items-center border border-stone-300 rounded-lg px-2 w-28"><span className="text-stone-400 text-sm">$</span><input type="number" value={it.price||""} onChange={e=>setItem(i,{price:+e.target.value})} className="w-full py-1.5 ff-body text-sm outline-none" /></div>
+                  </div>
+                  <input value={it.desc||""} onChange={e=>setItem(i,{desc:e.target.value})} placeholder="Descripción corta" className="w-full border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                </div>
+                <button onClick={()=>set({...c,menu:c.menu.filter((_,j)=>j!==i)})} className="text-rose-500 self-start">🗑️</button>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button onClick={()=>set({...c,menu:[...c.menu,{name:"",category:"",price:0,desc:"",photo:""}]})} className="mt-3 ff-body text-sm font-semibold" style={{color:C.clay}}>+ Agregar plato</button>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [session,setSession]=useState(null), [ready,setReady]=useState(false);
+  const [email,setEmail]=useState(""), [pass,setPass]=useState(""), [authErr,setAuthErr]=useState("");
+  const [list,setList]=useState([]), [editing,setEditing]=useState(null), [saving,setSaving]=useState(false), [toast,setToast]=useState(""), [profile,setProfile]=useState(null);
+  useEffect(()=>{ db.auth.getSession().then(({data})=>{setSession(data.session);setReady(true);}); const {data:sub}=db.auth.onAuthStateChange((_e,s)=>setSession(s)); return ()=>sub.subscription.unsubscribe(); },[]);
+  const load=async()=>{ const {data:{user}}=await db.auth.getUser(); const {data:prof}=await db.from("profiles").select("role,operator").eq("id",user.id).maybeSingle(); setProfile(prof||null); const isAdmin=prof&&prof.role==="admin"; const res=isAdmin?await db.from("restaurants").select("*").order("created_at",{ascending:false}):await db.from("restaurants").select("*").eq("operator",(prof&&prof.operator)||"___none___").order("created_at",{ascending:false}); if(res.data) setList(res.data.map(fromRow)); };
+  useEffect(()=>{ if(session) load(); },[session]);
+  const flash=(m)=>{ setToast(m); setTimeout(()=>setToast(""),2500); };
+  const login=async()=>{ setAuthErr(""); const {error}=await db.auth.signInWithPassword({email,password:pass}); if(error) setAuthErr("No pudimos entrar. Revisá email y contraseña."); };
+  const save=async()=>{ if(!editing.name){flash("Poné un nombre");return;} setSaving(true); const {error}=await db.from("restaurants").upsert(toRow(editing)).select(); setSaving(false); if(error){flash("Error al guardar");return;} flash("Guardado ✓"); setEditing(null); load(); };
+  const remove=async(id)=>{ if(!confirm("¿Borrar este lugar?"))return; await db.from("restaurants").delete().eq("id",id); load(); };
+  if(!ready) return <div className="min-h-screen grid place-items-center ff-body" style={{background:C.paper,color:C.moss}}>Cargando…</div>;
+  if(!session) return (
+    <div className="min-h-screen grid place-items-center ff-body px-5" style={{background:C.paper}}>
+      <div className="w-full max-w-sm bg-white rounded-2xl border border-black/5 p-7">
+        <div className="text-center mb-5"><div className="text-3xl">🍴</div><h1 className="ff-display text-2xl mt-1" style={{color:C.ink}}>Panel Gastronomía</h1></div>
+        <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" className="w-full border border-stone-300 rounded-xl px-3 py-2.5 ff-body text-sm mb-2" />
+        <input value={pass} onChange={e=>setPass(e.target.value)} type="password" placeholder="Contraseña" onKeyDown={e=>{if(e.key==="Enter")login();}} className="w-full border border-stone-300 rounded-xl px-3 py-2.5 ff-body text-sm mb-3" />
+        {authErr && <p className="ff-body text-sm text-rose-600 mb-3">{authErr}</p>}
+        <button onClick={login} className="w-full text-white rounded-xl py-3 ff-body font-semibold" style={{background:C.moss}}>Entrar</button>
+      </div>
+    </div>
+  );
+  return (
+    <div className="min-h-screen ff-body" style={{background:C.paper}}>
+      <header className="sticky top-0 z-30 border-b border-black/5" style={{background:C.paper}}>
+        <div className="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2.5"><div className="w-9 h-9 rounded-xl grid place-items-center text-xl" style={{background:C.clay}}>🍴</div><div><div className="ff-display text-lg leading-none" style={{color:C.ink}}>Gastronomía</div><div className="ff-body text-[11px] text-stone-500">TandilStay</div></div></div>
+          <div className="flex items-center gap-2">
+            {editing ? (<>
+              <button onClick={()=>setEditing(null)} className="rounded-full px-4 py-2 ff-body text-sm border border-stone-300 text-stone-600">Cancelar</button>
+              <button onClick={save} disabled={saving} className="rounded-full px-4 py-2 ff-body text-sm font-semibold text-white disabled:opacity-50" style={{background:C.clay}}>{saving?"Guardando…":"Guardar"}</button>
+            </>) : (<>
+              <button onClick={()=>setEditing({...EMPTY, operator:(profile&&profile.operator)||""})} className="rounded-full px-4 py-2 ff-body text-sm font-semibold text-white" style={{background:C.clay}}>+ Nuevo</button>
+              <button onClick={()=>db.auth.signOut()} className="rounded-full px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">Salir</button>
+            </>)}
+          </div>
+        </div>
+        {toast && <div className="text-center ff-body text-xs py-1" style={{background:"#e7efe3",color:C.moss}}>{toast}</div>}
+      </header>
+      <div className="max-w-5xl mx-auto px-5 py-6">
+        {editing ? <Editor c={editing} set={setEditing} />
+        : list.length===0 ? <div className="text-center py-16"><p className="ff-display text-xl mb-1" style={{color:C.ink}}>Sin lugares todavía</p><p className="ff-body text-stone-500">Cargá el primero con “+ Nuevo”.</p></div>
+        : <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">{list.map(c=>(
+            <div key={c.id} className="bg-white rounded-2xl border border-black/5 overflow-hidden">
+              <div className="aspect-[16/10] bg-stone-200">{(c.banner||c.photos[0]) && <img src={IMG(c.banner||c.photos[0])} className="w-full h-full object-cover" />}</div>
+              <div className="p-4"><h3 className="ff-display text-lg" style={{color:C.ink}}>{c.name}</h3><p className="ff-body text-sm text-stone-500">{c.zone}</p>
+                <div className="flex gap-2 mt-3"><button onClick={()=>setEditing(c)} className="flex-1 rounded-lg py-2 ff-body text-sm font-semibold text-white" style={{background:C.moss}}>Editar</button><a href={"resto.html?slug="+c.slug} target="_blank" rel="noreferrer" className="rounded-lg px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">👁️ Ver</a><button onClick={()=>remove(c.id)} className="rounded-lg px-3 py-2 ff-body text-sm border border-stone-300 text-rose-500">🗑️</button></div>
+              </div>
+            </div>
+          ))}</div>}
+      </div>
+      <footer className="py-8 text-center ff-body text-sm" style={{background:C.moss,color:"rgba(255,255,255,0.7)"}}>Gastronomía · TandilStay · Creado por Brote 🌱</footer>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

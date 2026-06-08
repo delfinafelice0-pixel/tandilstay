@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Alojamientos · TandilStay</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+.ff-display{font-family:'Fraunces',serif}.ff-body{font-family:'Hanken Grotesk',sans-serif}body{margin:0}
+</style>
+</head>
+<body><div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const C = { paper:"#F3EEE2", ink:"#2C2A24", moss:"#3E4F3F", clay:"#BE6A4A" };
+const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=900&q=80`));
+const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
+const capLabel = (c) => { const caps=(c.units||[]).map(u=>u.capacity).filter(Boolean); if(!caps.length) return c.capacity?`hasta ${c.capacity}`:""; const mn=Math.min(...caps),mx=Math.max(...caps); return mn===mx?`hasta ${mx}`:`${mn} a ${mx}`; };
+
+function App() {
+  const [state,setState]=useState({loading:true});
+  const op = new URLSearchParams(location.search).get("op") || "";
+  useEffect(()=>{
+    (async()=>{
+      if(!op){ setState({none:true}); return; }
+      const { data, error } = await db.from("cabins").select("slug,name,zone,price,banner,photos,capacity,units").ilike("operator", op).order("created_at",{ascending:false});
+      if(error){ setState({error:true}); return; }
+      setState({ list: data||[] });
+    })();
+  },[]);
+  if(state.loading) return <div className="min-h-screen grid place-items-center ff-body" style={{background:C.paper,color:C.moss}}>Cargando…</div>;
+  if(state.none) return <div className="min-h-screen grid place-items-center ff-body p-6 text-center" style={{background:C.paper,color:C.ink}}>Falta indicar el operador en la dirección (?op=...).</div>;
+  if(state.error) return <div className="min-h-screen grid place-items-center ff-body p-6 text-center" style={{background:C.paper,color:C.ink}}>Hubo un error. Recargá.</div>;
+  const list = state.list;
+  return (
+    <div className="min-h-screen ff-body" style={{background:C.paper}}>
+      <div className="text-center" style={{background:C.moss}}>
+        <div className="max-w-5xl mx-auto px-6 py-14">
+          <p className="ff-body text-[12px] uppercase tracking-[0.25em] font-semibold mb-3" style={{color:"#E2A94E"}}>Sierras de Tandil</p>
+          <h1 className="ff-display text-4xl sm:text-5xl text-white">{op}</h1>
+          <p className="ff-body text-white/75 mt-3">Todos nuestros alojamientos en un solo lugar.</p>
+        </div>
+      </div>
+      <div className="max-w-6xl mx-auto px-5 sm:px-6 py-10">
+        {list.length===0 ? (
+          <p className="ff-body text-stone-500 text-center py-10">Todavía no hay alojamientos cargados para este operador.</p>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {list.map((c,i)=>{
+              const cover = c.banner || (c.photos&&c.photos[0]) || "photo-1518780664697-55e3ad937233";
+              return (
+                <a key={i} href={"cabana.html?slug="+c.slug} className="group block">
+                  <div className="relative aspect-[5/6] rounded-[26px] overflow-hidden">
+                    <img src={IMG(cover)} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                      <h3 className="ff-display text-xl leading-tight">{c.name}</h3>
+                      <p className="ff-body text-sm text-white/80">{c.zone}{capLabel(c)?" · "+capLabel(c)+" huéspedes":""}</p>
+                    </div>
+                  </div>
+                  <p className="ff-body text-sm mt-3" style={{color:C.ink}}><span className="font-bold">desde {money(c.price)}</span><span className="text-stone-500"> / noche</span></p>
+                </a>
+              );
+            })}
+          </div>
+        )}
+      </div>
+      <footer className="py-8 text-center ff-body text-sm" style={{background:C.moss,color:"rgba(255,255,255,0.7)"}}>{op} · vía TandilStay · Creado por Brote 🌱</footer>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

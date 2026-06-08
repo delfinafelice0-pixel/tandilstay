@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cabaña · TandilStay</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+.ff-display{font-family:'Fraunces',serif}.ff-body{font-family:'Hanken Grotesk',sans-serif}
+body{margin:0}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const C = { paper:"#F3EEE2", ink:"#2C2A24", moss:"#3E4F3F", clay:"#BE6A4A" };
+const A = C.clay;
+const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=1200&q=80`));
+const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
+const kFmt = (n) => (n >= 1000 ? Math.round(n/1000)+"k" : ""+n);
+const pad = (n) => String(n).padStart(2,"0");
+const iso = (dt) => `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+const parseD = (s) => (s ? new Date(s+"T00:00:00") : null);
+const addDay = (dt,n=1) => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()+n);
+const isWeekend = (d) => { const w = parseD(d).getDay(); return w===5||w===6; };
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+const AMEN = { wifi:"📶 WiFi", parrilla:"🔥 Parrilla", pileta:"🏊 Pileta", cochera:"🚗 Cochera", desayuno:"☕ Desayuno" };
+const DOW = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, promoText:r.promo_text||"", promos:r.promos||[], blocked:r.blocked||[], overrides:r.overrides||{}, units:r.units||[], banner:r.banner||"", photos:r.photos||[] });
+const nightlyPrice = (c,d) => (c.overrides && c.overrides[d]!=null ? c.overrides[d] : (isWeekend(d) && c.weekendPrice ? c.weekendPrice : c.price));
+function computeStay(c,ci,co){ if(!ci||!co) return null; let d=parseD(ci); const e=parseD(co); let sub=0,n=0; while(d<e){ sub+=nightlyPrice(c,iso(d)); n++; d=addDay(d); } let pct=0; (c.promos||[]).forEach(p=>{if(n>=p.min&&p.pct>pct)pct=p.pct;}); const disc=Math.round(sub*pct/100); return {n,sub,pct,disc,total:sub-disc}; }
+const isAvail = (c,ci,co) => { if(!ci||!co) return true; let d=parseD(ci); const e=parseD(co); while(d<e){ if(c.blocked.includes(iso(d))) return false; d=addDay(d); } return true; };
+const capLabel = (c) => { const caps=(c.units||[]).map(u=>u.capacity).filter(Boolean); if(!caps.length) return `hasta ${c.capacity} huéspedes`; const mn=Math.min(...caps), mx=Math.max(...caps); return mn===mx?`hasta ${mx} huéspedes`:`${mn} a ${mx} huéspedes`; };
+
+function Calendar({ cursor, setCursor, blocked, ci, co, onDay, priceOf }) {
+  const y=cursor.getFullYear(), m=cursor.getMonth();
+  const startDow=new Date(y,m,1).getDay();
+  const dim=new Date(y,m+1,0).getDate();
+  const cells=[]; for(let i=0;i<startDow;i++) cells.push(null); for(let d=1;d<=dim;d++) cells.push(d);
+  const canPrev = new Date(y,m,1) > new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
+  return (
+    <div className="select-none">
+      <div className="flex items-center justify-between mb-3">
+        <button disabled={!canPrev} onClick={()=>setCursor(new Date(y,m-1,1))} className="px-2 py-1 rounded-lg hover:bg-black/5 disabled:opacity-30">‹</button>
+        <span className="ff-display text-lg" style={{color:C.ink}}>{MONTHS[m]} {y}</span>
+        <button onClick={()=>setCursor(new Date(y,m+1,1))} className="px-2 py-1 rounded-lg hover:bg-black/5">›</button>
+      </div>
+      <div className="grid grid-cols-7 gap-1 text-center mb-1">{DOW.map(d=><div key={d} className="ff-body text-[11px] font-semibold text-stone-400">{d}</div>)}</div>
+      <div className="grid grid-cols-7 gap-1">
+        {cells.map((d,i)=>{
+          if(!d) return <div key={i} />;
+          const day=`${y}-${pad(m+1)}-${pad(d)}`;
+          const past=parseD(day)<TODAY;
+          const isBlocked=blocked.includes(day);
+          const inRange=ci&&co&&day>=ci&&day<co;
+          const isStart=day===ci;
+          let cls="ff-body rounded-lg h-12 flex flex-col items-center justify-center transition text-sm ";
+          let style={};
+          if(past) cls+="text-stone-300 line-through cursor-not-allowed";
+          else if(isBlocked) cls+="bg-rose-50 text-rose-300 line-through cursor-not-allowed";
+          else if(isStart||inRange){ cls+="text-white cursor-pointer"; style={background:A}; }
+          else cls+="text-stone-700 cursor-pointer hover:bg-black/5";
+          return <button key={i} className={cls} style={style} disabled={past||isBlocked} onClick={()=>onDay(day,{past,isBlocked})}><span>{d}</span>{!past && <span className={"text-[9px] leading-none mt-0.5 "+((isStart||inRange)?"text-white/80":"text-stone-400")}>{kFmt(priceOf(day))}</span>}</button>;
+        })}
+      </div>
+    </div>
+  );
+}
+
+function Landing({ c }) {
+  const [q,setQ]=useState({ci:"",co:""});
+  const [main,setMain]=useState(0);
+  const [cursor,setCursor]=useState(new Date(2026,5,1));
+  const stay=computeStay(c,q.ci,q.co);
+  const avail=isAvail(c,q.ci,q.co);
+  const pick=(day,info)=>{ if(info.past||info.isBlocked) return; if(!q.ci||(q.ci&&q.co)){setQ({ci:day,co:""});return;} if(day<=q.ci){setQ({ci:day,co:""});return;} let d=parseD(q.ci),ok=true; while(d<parseD(day)){if(c.blocked.includes(iso(d))){ok=false;break;}d=addDay(d);} setQ(ok?{ci:q.ci,co:day}:{ci:day,co:""}); };
+  let msg=`Hola! Quiero consultar por ${c.name}.`; if(q.ci&&q.co) msg+=` Del ${q.ci} al ${q.co}.`; if(stay&&avail) msg+=` Total estimado ${money(stay.total)}.`;
+  const wa=`https://wa.me/${c.whatsapp}?text=${encodeURIComponent(msg)}`;
+  const photos = c.photos.length ? c.photos : ["photo-1518780664697-55e3ad937233"];
+  const cover = c.banner || photos[0];
+  return (
+    <div style={{background:C.paper}}>
+      <div className="relative h-[58vh] min-h-[420px] overflow-hidden">
+        <img src={IMG(cover)} className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-black/25" />
+        <div className="relative h-full max-w-5xl mx-auto px-6 flex flex-col justify-end pb-10">
+          <a href="index.html" className="absolute top-6 left-6 ff-body text-white/80 text-sm">‹ TandilStay</a>
+          {c.zone && <div className="flex items-center gap-2 mb-2 text-white/85 ff-body text-sm">📍 {c.zone}</div>}
+          <h1 className="ff-display text-4xl sm:text-6xl text-white leading-[0.95]">{c.name}</h1>
+          <div className="flex items-center gap-3 mt-3 flex-wrap">
+            <a href={wa} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-white rounded-full px-6 py-3 ff-body font-semibold" style={{background:A}}>💬 Reservar</a>
+            <span className="ff-body text-white/80 text-sm">{capLabel(c)}{c.petFriendly?" · 🐾 pet friendly":""}</span>
+          </div>
+        </div>
+        {photos.length>1 && <div className="absolute bottom-4 right-4 flex gap-1.5">{photos.slice(0,5).map((_,i)=><button key={i} onClick={()=>setMain(i)} className={"h-2 rounded-full transition-all "+(i===main?"w-6 bg-white":"w-2 bg-white/50")} style={{display:"none"}} />)}</div>}
+      </div>
+
+      {c.promoText && (
+        <div className="max-w-5xl mx-auto px-6 mt-6">
+          <div className="rounded-2xl px-5 py-4 flex items-start gap-3 text-white" style={{background:A}}>
+            <span className="text-lg">🏷️</span>
+            <div><div className="ff-body font-semibold">{c.promoText}</div>{c.promos.length>0 && <div className="ff-body text-sm text-white/80 mt-0.5">{c.promos.map(p=>`${p.min}+ noches −${p.pct}%`).join(" · ")}</div>}</div>
+          </div>
+        </div>
+      )}
+
+      <div className="max-w-5xl mx-auto px-6 py-10 grid md:grid-cols-3 gap-8">
+        <div className="md:col-span-2 space-y-8">
+          {c.blurb && <div><h2 className="ff-display text-2xl mb-2" style={{color:C.ink}}>Sobre el lugar</h2><p className="ff-body text-stone-600 leading-relaxed">{c.blurb}</p></div>}
+          {c.photos.length>0 && <div><h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Galería</h2><div className="grid grid-cols-2 sm:grid-cols-3 gap-2">{c.photos.map((p,i)=><img key={i} src={IMG(p)} className="w-full aspect-square object-cover rounded-xl bg-stone-200" />)}</div></div>}
+          {(c.units||[]).length>0 && (
+            <div>
+              <h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Nuestras cabañas</h2>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {c.units.map((u,i)=>(
+                  <div key={i} className="flex items-center justify-between bg-white border border-black/5 rounded-xl px-4 py-3">
+                    <span className="ff-body font-semibold" style={{color:C.ink}}>{u.name||("Cabaña "+(i+1))}</span>
+                    <span className="ff-body text-sm text-stone-500">👥 hasta {u.capacity}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {c.amenities.length>0 && (
+            <div><h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Comodidades</h2><div className="grid grid-cols-2 gap-3">{c.amenities.map(a=><div key={a} className="ff-body text-stone-700">{AMEN[a]}</div>)}</div></div>
+          )}
+          {c.zone && (
+            <div>
+              <h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Cómo llegar</h2>
+              <p className="ff-body text-stone-600 mb-3">📍 {c.zone}</p>
+              <iframe title="mapa" loading="lazy" className="w-full h-72 rounded-2xl border border-black/5" src={"https://www.google.com/maps?q="+encodeURIComponent(c.zone)+"&output=embed"}></iframe>
+            </div>
+          )}
+          <div>
+            <h2 className="ff-display text-2xl mb-1" style={{color:C.ink}}>Disponibilidad y precios</h2>
+            <p className="ff-body text-sm text-stone-500 mb-3">Cada día muestra su tarifa. Tocá entrada y salida.</p>
+            <div className="border border-black/10 rounded-2xl p-4 max-w-sm bg-white"><Calendar cursor={cursor} setCursor={setCursor} blocked={c.blocked} ci={q.ci} co={q.co} priceOf={(d)=>nightlyPrice(c,d)} onDay={pick} /></div>
+          </div>
+        </div>
+        <div className="md:col-span-1">
+          <div className="sticky top-4 bg-white border border-black/10 rounded-2xl p-5 shadow-lg">
+            <div className="ff-display text-2xl mb-1" style={{color:C.ink}}>desde {money(c.price)} <span className="ff-body text-stone-500 text-sm">/ noche</span></div>
+            {c.weekendPrice && <p className="ff-body text-xs text-stone-500 mb-3">Finde: {money(c.weekendPrice)} / noche</p>}
+            <div className="grid grid-cols-2 rounded-xl border border-stone-300 overflow-hidden mb-3 ff-body text-sm">
+              <div className="p-3 border-r border-stone-300"><div className="text-[10px] uppercase text-stone-400 font-semibold">Entrada</div><div style={{color:C.ink}}>{q.ci||"—"}</div></div>
+              <div className="p-3"><div className="text-[10px] uppercase text-stone-400 font-semibold">Salida</div><div style={{color:C.ink}}>{q.co||"—"}</div></div>
+            </div>
+            {stay ? (avail ? (
+              <div>
+                <div className="ff-body text-sm text-stone-600 space-y-1.5 mb-3">
+                  <div className="flex justify-between"><span>{stay.n} noches</span><span>{money(stay.sub)}</span></div>
+                  {stay.pct>0 && <div className="flex justify-between font-semibold" style={{color:A}}><span>Promo −{stay.pct}%</span><span>−{money(stay.disc)}</span></div>}
+                </div>
+                <div className="flex justify-between ff-body font-bold border-t border-stone-200 pt-3 mb-4" style={{color:C.ink}}><span>Total</span><span>{money(stay.total)}</span></div>
+              </div>
+            ) : <div className="bg-rose-50 text-rose-700 ff-body text-sm rounded-xl p-3 mb-4">No disponible en esas fechas.</div>)
+            : <p className="ff-body text-sm text-stone-400 mb-4">Elegí fechas en el calendario.</p>}
+            <a href={wa} target="_blank" rel="noreferrer" className="block text-center w-full text-white rounded-xl py-3 ff-body font-semibold" style={{background:A}}>💬 Reservar por WhatsApp</a>
+          </div>
+        </div>
+      </div>
+      <footer className="py-8 text-center ff-body text-sm" style={{background:C.moss,color:"rgba(255,255,255,0.7)"}}>{c.name} · vía TandilStay · Creado por Brote 🌱</footer>
+    </div>
+  );
+}
+
+function App() {
+  const [state,setState]=useState({ loading:true });
+  useEffect(()=>{
+    const slug = new URLSearchParams(location.search).get("slug");
+    (async()=>{
+      if(slug){
+        const { data, error } = await db.from("cabins").select("*").eq("slug", slug).limit(1);
+        if(error){ setState({error:true}); return; }
+        if(data && data[0]) setState({ cabin: fromRow(data[0]) }); else setState({ notfound:true });
+      } else {
+        const { data } = await db.from("cabins").select("slug,name,zone,price,photos").order("created_at",{ascending:false});
+        setState({ listing: data||[] });
+      }
+    })();
+  },[]);
+
+  if(state.loading) return <div className="min-h-screen grid place-items-center ff-body" style={{background:C.paper,color:C.moss}}>Cargando…</div>;
+  if(state.error) return <div className="min-h-screen grid place-items-center ff-body p-6 text-center" style={{background:C.paper,color:C.ink}}>Hubo un error al cargar. Recargá la página.</div>;
+  if(state.notfound) return <div className="min-h-screen grid place-items-center ff-body p-6 text-center" style={{background:C.paper,color:C.ink}}>No encontramos esa cabaña. <a href="cabana.html" className="underline ml-1" style={{color:C.clay}}>Ver todas</a></div>;
+  if(state.cabin) return <div className="ff-body"><Landing c={state.cabin} /></div>;
+
+  return (
+    <div className="min-h-screen ff-body" style={{background:C.paper}}>
+      <div className="max-w-5xl mx-auto px-6 py-12">
+        <h1 className="ff-display text-3xl mb-1" style={{color:C.ink}}>Elegí un alojamiento</h1>
+        <p className="ff-body text-stone-500 mb-6">Tocá una cabaña para ver su landing.</p>
+        {state.listing.length===0 ? (
+          <p className="ff-body text-stone-500">Todavía no hay alojamientos cargados. Cargá uno en el panel.</p>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {state.listing.map((c,i)=>(
+              <a key={i} href={"cabana.html?slug="+c.slug} className="block bg-white rounded-2xl border border-black/5 overflow-hidden">
+                <div className="aspect-[16/10] bg-stone-200">{c.photos && c.photos[0] && <img src={IMG(c.photos[0])} className="w-full h-full object-cover" />}</div>
+                <div className="p-4"><h3 className="ff-display text-lg" style={{color:C.ink}}>{c.name}</h3><p className="ff-body text-sm text-stone-500">{c.zone}</p><p className="ff-body text-sm mt-1" style={{color:C.ink}}><span className="font-bold">{money(c.price)}</span> / noche</p></div>
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

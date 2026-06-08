@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Panel · TandilStay</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+.ff-display{font-family:'Fraunces',serif}.ff-body{font-family:'Hanken Grotesk',sans-serif}
+body{margin:0}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const C = { paper:"#F3EEE2", ink:"#2C2A24", moss:"#3E4F3F", sage:"#7C8F6F", clay:"#BE6A4A" };
+const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=900&q=80`));
+const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
+const kFmt = (n) => (n >= 1000 ? Math.round(n/1000)+"k" : ""+n);
+const pad = (n) => String(n).padStart(2,"0");
+const iso = (dt) => `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+const parseD = (s) => (s ? new Date(s+"T00:00:00") : null);
+const addDay = (dt,n=1) => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()+n);
+const isWeekend = (d) => { const w = parseD(d).getDay(); return w===5||w===6; };
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+const AMEN = { wifi:"📶 WiFi", parrilla:"🔥 Parrilla", pileta:"🏊 Pileta", cochera:"🚗 Cochera", desayuno:"☕ Desayuno" };
+const DOW = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const slugify = (s) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+
+const EMPTY = { name:"", operator:"", zone:"", whatsapp:"", blurb:"", capacity:2, bedrooms:1, bathrooms:1, price:0, weekendPrice:null, amenities:[], petFriendly:false, promoText:"", promos:[], blocked:[], overrides:{}, units:[], banner:"", photos:[] };
+
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, promoText:r.promo_text||"", promos:r.promos||[], blocked:r.blocked||[], overrides:r.overrides||{}, units:r.units||[], banner:r.banner||"", photos:r.photos||[] });
+const toRow = (c) => { const r = { slug: c.slug || slugify(c.name), name:c.name, operator:c.operator, zone:c.zone, whatsapp:c.whatsapp, blurb:c.blurb, capacity:c.capacity, bedrooms:c.bedrooms, bathrooms:c.bathrooms, price:c.price, weekend_price:c.weekendPrice, amenities:c.amenities, pet_friendly:c.petFriendly, promo_text:c.promoText, promos:c.promos, blocked:c.blocked, overrides:c.overrides, units:c.units, banner:c.banner, photos:c.photos }; if (c.id) r.id = c.id; return r; };
+
+const nightlyPrice = (c,d) => (c.overrides && c.overrides[d]!=null ? c.overrides[d] : (isWeekend(d) && c.weekendPrice ? c.weekendPrice : c.price));
+
+function Calendar({ cursor, setCursor, blocked, selectedDay, onDay, priceOf }) {
+  const y=cursor.getFullYear(), m=cursor.getMonth();
+  const startDow=new Date(y,m,1).getDay();
+  const dim=new Date(y,m+1,0).getDate();
+  const cells=[]; for(let i=0;i<startDow;i++) cells.push(null); for(let d=1;d<=dim;d++) cells.push(d);
+  const canPrev = new Date(y,m,1) > new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
+  return (
+    <div className="select-none">
+      <div className="flex items-center justify-between mb-3">
+        <button disabled={!canPrev} onClick={()=>setCursor(new Date(y,m-1,1))} className="px-2 py-1 rounded-lg hover:bg-black/5 disabled:opacity-30">‹</button>
+        <span className="ff-display text-lg" style={{color:C.ink}}>{MONTHS[m]} {y}</span>
+        <button onClick={()=>setCursor(new Date(y,m+1,1))} className="px-2 py-1 rounded-lg hover:bg-black/5">›</button>
+      </div>
+      <div className="grid grid-cols-7 gap-1 text-center mb-1">{DOW.map(d=><div key={d} className="ff-body text-[11px] font-semibold text-stone-400">{d}</div>)}</div>
+      <div className="grid grid-cols-7 gap-1">
+        {cells.map((d,i)=>{
+          if(!d) return <div key={i} />;
+          const day=`${y}-${pad(m+1)}-${pad(d)}`;
+          const past=parseD(day)<TODAY;
+          const isBlocked=blocked.includes(day);
+          const isSel=day===selectedDay;
+          let cls="ff-body rounded-lg flex flex-col items-center justify-center transition text-sm "+(priceOf?"h-12":"h-9")+" ";
+          let style={};
+          if(past) cls+="text-stone-300 line-through cursor-not-allowed";
+          else if(isBlocked) cls+="bg-rose-100 text-rose-500 cursor-pointer";
+          else cls+="text-stone-700 cursor-pointer hover:bg-black/5";
+          if(isSel) style.boxShadow=`0 0 0 2px ${C.clay}`;
+          return (
+            <button key={i} className={cls} style={style} disabled={past} onClick={()=>onDay(day,{past,isBlocked})}>
+              <span>{d}</span>
+              {priceOf && !past && <span className="text-[9px] leading-none mt-0.5 opacity-70">{kFmt(priceOf(day))}</span>}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const Field = ({ label, children }) => (<label className="block mb-3"><span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">{label}</span><div className="mt-1">{children}</div></label>);
+
+function Editor({ c, set }) {
+  const [cursor,setCursor]=useState(new Date(2026,5,1));
+  const [mode,setMode]=useState("block");
+  const [selDay,setSelDay]=useState(null);
+  const [priceInput,setPriceInput]=useState("");
+  const [uploading,setUploading]=useState(false);
+  const upload = async (e) => {
+    const files = Array.from(e.target.files||[]);
+    if(!files.length) return;
+    setUploading(true);
+    const urls=[];
+    for(const f of files){
+      const path = Date.now()+"-"+Math.random().toString(36).slice(2)+"-"+f.name.replace(/[^a-zA-Z0-9.]/g,"_");
+      const { error } = await db.storage.from("fotos").upload(path, f);
+      if(!error){ const { data } = db.storage.from("fotos").getPublicUrl(path); urls.push(data.publicUrl); }
+    }
+    set({...c, photos:[...c.photos, ...urls]});
+    setUploading(false);
+    e.target.value="";
+  };
+  const uploadBanner = async (e) => {
+    const f = (e.target.files||[])[0]; if(!f) return;
+    setUploading(true);
+    const path = "banner-"+Date.now()+"-"+f.name.replace(/[^a-zA-Z0-9.]/g,"_");
+    const { error } = await db.storage.from("fotos").upload(path, f);
+    if(!error){ const { data } = db.storage.from("fotos").getPublicUrl(path); set({...c, banner:data.publicUrl}); }
+    setUploading(false); e.target.value="";
+  };
+  const toggleBlock = (day) => set({ ...c, blocked: c.blocked.includes(day) ? c.blocked.filter(x=>x!==day) : [...c.blocked, day] });
+  const setOverride = (val) => { const o={...(c.overrides||{})}; if(val) o[selDay]=+val; else delete o[selDay]; set({...c, overrides:o}); };
+  return (
+    <div className="grid md:grid-cols-2 gap-6">
+      <div className="space-y-5">
+        <div className="bg-white rounded-2xl border border-black/5 p-5">
+          <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Datos</h3>
+          <Field label="Nombre"><input value={c.name} onChange={e=>set({...c,name:e.target.value})} className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
+          <Field label="Dirección / ubicación (como en Google Maps)"><input value={c.zone} onChange={e=>set({...c,zone:e.target.value})} placeholder="Ej: López de Osornio 1264, Tandil" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
+          {c.zone && <iframe title="mapa" loading="lazy" className="w-full h-40 rounded-xl border border-black/5 mb-3" src={"https://www.google.com/maps?q="+encodeURIComponent(c.zone)+"&output=embed"}></iframe>}
+          <Field label="WhatsApp (cód país, sin +)"><input value={c.whatsapp} onChange={e=>set({...c,whatsapp:e.target.value})} className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
+          <Field label="Operador / cuenta (agrupa alojamientos de un mismo dueño)"><input value={c.operator} onChange={e=>set({...c,operator:e.target.value})} placeholder="Ej: hospedatentandil" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
+          <Field label="Descripción"><textarea value={c.blurb} onChange={e=>set({...c,blurb:e.target.value})} rows={3} className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm resize-none" /></Field>
+          <div className="grid grid-cols-3 gap-3">
+            {[["capacity","Huéspedes"],["bedrooms","Dormit."],["bathrooms","Baños"]].map(([k,l])=>(
+              <Field key={k} label={l}><div className="flex items-center gap-1.5"><button onClick={()=>set({...c,[k]:Math.max(1,c[k]-1)})} className="p-1.5 border border-stone-300 rounded-lg">−</button><span className="ff-body font-semibold w-5 text-center">{c[k]}</span><button onClick={()=>set({...c,[k]:c[k]+1})} className="p-1.5 border border-stone-300 rounded-lg">+</button></div></Field>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-black/5 p-5">
+          <h3 className="ff-display text-lg mb-1" style={{color:C.ink}}>🏡 Unidades / cabañas</h3>
+          <p className="ff-body text-sm text-stone-500 mb-3">Cargá cada cabaña del complejo con cuántos huéspedes entran.</p>
+          <div className="space-y-2">
+            {(c.units||[]).map((u,i)=>(
+              <div key={i} className="flex items-center gap-2">
+                <input value={u.name} onChange={e=>set({...c,units:c.units.map((x,j)=>j===i?{...x,name:e.target.value}:x)})} placeholder={"Cabaña "+(i+1)} className="flex-1 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                <div className="flex items-center gap-1">
+                  <button onClick={()=>set({...c,units:c.units.map((x,j)=>j===i?{...x,capacity:Math.max(1,(x.capacity||1)-1)}:x)})} className="p-1.5 border border-stone-300 rounded-lg">−</button>
+                  <span className="ff-body text-sm w-12 text-center">{u.capacity||1} 👥</span>
+                  <button onClick={()=>set({...c,units:c.units.map((x,j)=>j===i?{...x,capacity:(x.capacity||1)+1}:x)})} className="p-1.5 border border-stone-300 rounded-lg">+</button>
+                </div>
+                <button onClick={()=>set({...c,units:c.units.filter((_,j)=>j!==i)})} className="text-rose-500">🗑️</button>
+              </div>
+            ))}
+          </div>
+          <button onClick={()=>set({...c,units:[...(c.units||[]),{name:"",capacity:2}]})} className="mt-3 ff-body text-sm font-semibold" style={{color:C.clay}}>+ Agregar cabaña</button>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-black/5 p-5">
+          <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Precios</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Precio noche"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="text-stone-400 text-sm">$</span><input type="number" value={c.price} onChange={e=>set({...c,price:+e.target.value})} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
+            <Field label="Precio finde"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="text-stone-400 text-sm">$</span><input type="number" placeholder={String(c.price)} value={c.weekendPrice||""} onChange={e=>set({...c,weekendPrice:e.target.value?+e.target.value:null})} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
+          </div>
+          <Field label="Comodidades"><div className="flex flex-wrap gap-2">{Object.keys(AMEN).map(k=>{const on=c.amenities.includes(k);return <button key={k} onClick={()=>set({...c,amenities:on?c.amenities.filter(a=>a!==k):[...c.amenities,k]})} className={"rounded-full px-3 py-1.5 ff-body text-sm border "+(on?"text-white":"text-stone-600 border-stone-300")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{AMEN[k]}{on?" ✓":""}</button>;})}</div></Field>
+          <button onClick={()=>set({...c,petFriendly:!c.petFriendly})} className={"rounded-xl px-4 py-2.5 ff-body text-sm border w-full text-left "+(c.petFriendly?"border-emerald-300 text-emerald-800 bg-emerald-50":"border-stone-300 text-stone-600")}>🐾 Pet friendly {c.petFriendly?"activado ✓":"desactivado"}</button>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-black/5 p-5">
+          <h3 className="ff-display text-lg mb-2" style={{color:C.ink}}>🏷️ Promociones</h3>
+          <Field label="Mensaje libre"><textarea value={c.promoText} onChange={e=>set({...c,promoText:e.target.value})} rows={2} placeholder="Ej: 2x1 de lunes a jueves · Mascota gratis" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm resize-none" /></Field>
+          <span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">Descuentos por noches</span>
+          <div className="space-y-2 mt-2">
+            {c.promos.map((p,i)=>(
+              <div key={i} className="flex items-center gap-2 ff-body text-sm">
+                <span className="text-stone-500">Desde</span>
+                <input type="number" value={p.min} onChange={e=>set({...c,promos:c.promos.map((x,j)=>j===i?{...x,min:+e.target.value}:x)})} className="w-14 border border-stone-300 rounded-lg px-2 py-1.5" />
+                <span className="text-stone-500">noches</span>
+                <input type="number" value={p.pct} onChange={e=>set({...c,promos:c.promos.map((x,j)=>j===i?{...x,pct:+e.target.value}:x)})} className="w-14 border border-stone-300 rounded-lg px-2 py-1.5" />
+                <span className="text-stone-500">%</span>
+                <button onClick={()=>set({...c,promos:c.promos.filter((_,j)=>j!==i)})} className="ml-auto text-rose-500">🗑️</button>
+              </div>
+            ))}
+          </div>
+          <button onClick={()=>set({...c,promos:[...c.promos,{min:2,pct:5}]})} className="mt-3 ff-body text-sm font-semibold" style={{color:C.clay}}>+ Agregar descuento</button>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-black/5 p-5">
+          <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Fotos</h3>
+          <span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">Foto de portada (banner)</span>
+          <div className="mt-1 mb-3">
+            {c.banner ? (
+              <div className="relative inline-block">
+                <img src={IMG(c.banner)} className="w-full h-32 rounded-xl object-cover bg-stone-200" />
+                <button onClick={()=>set({...c,banner:""})} className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-rose-500 text-white text-xs grid place-items-center">✕</button>
+              </div>
+            ) : (
+              <label className="block"><span className="inline-flex items-center gap-2 cursor-pointer rounded-xl px-4 py-2.5 ff-body text-sm font-semibold text-white" style={{background:C.clay, opacity:uploading?0.6:1}}>{uploading?"Subiendo…":"🖼️ Subir banner"}</span><input type="file" accept="image/*" onChange={uploadBanner} disabled={uploading} className="hidden" /></label>
+            )}
+          </div>
+          <span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">Galería (resto de las fotos)</span>
+          {c.photos.length>0 && (
+            <div className="grid grid-cols-3 gap-2 my-2">
+              {c.photos.map((p,i)=>(
+                <div key={i} className="relative">
+                  <img src={IMG(p)} className="w-full h-20 rounded-lg object-cover bg-stone-200" />
+                  <button onClick={()=>set({...c,photos:c.photos.filter((_,j)=>j!==i)})} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-white text-xs grid place-items-center">✕</button>
+                </div>
+              ))}
+            </div>
+          )}
+          <label className="block mt-2"><span className="inline-flex items-center gap-2 cursor-pointer rounded-xl px-4 py-2.5 ff-body text-sm font-semibold text-white" style={{background:C.moss, opacity:uploading?0.6:1}}>{uploading?"Subiendo…":"📷 Subir fotos"}</span><input type="file" accept="image/*" multiple onChange={upload} disabled={uploading} className="hidden" /></label>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-black/5 p-5 h-fit">
+        <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Calendario</h3>
+        <div className="flex gap-2 mb-4">
+          <button onClick={()=>{setMode("block");setSelDay(null);}} className={"flex-1 rounded-xl py-2 ff-body text-sm border "+(mode==="block"?"border-rose-300 text-rose-700 bg-rose-50":"border-stone-300 text-stone-600")}>🚫 Bloquear</button>
+          <button onClick={()=>{setMode("price");setSelDay(null);}} className={"flex-1 rounded-xl py-2 ff-body text-sm border "+(mode==="price"?"border-amber-300 text-amber-700 bg-amber-50":"border-stone-300 text-stone-600")}>🏷️ Precio por día</button>
+        </div>
+        {mode==="block" ? (
+          <div><p className="ff-body text-sm text-stone-500 mb-3">Tocá un día para ocuparlo o liberarlo.</p><Calendar cursor={cursor} setCursor={setCursor} blocked={c.blocked} onDay={(day,info)=>{if(!info.past) toggleBlock(day);}} /></div>
+        ) : (
+          <div>
+            <p className="ff-body text-sm text-stone-500 mb-3">Tocá un día para ponerle precio especial.</p>
+            <Calendar cursor={cursor} setCursor={setCursor} blocked={c.blocked} selectedDay={selDay} priceOf={(d)=>nightlyPrice(c,d)} onDay={(day,info)=>{if(info.past)return;setSelDay(day);setPriceInput(c.overrides[day]!=null?String(c.overrides[day]):"");}} />
+            {selDay && (
+              <div className="mt-4 bg-stone-50 rounded-xl p-3">
+                <div className="ff-body text-sm text-stone-700 mb-2">Precio para <strong>{selDay}</strong></div>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center border border-stone-300 rounded-lg px-2 bg-white flex-1"><span className="text-stone-400 text-sm">$</span><input type="number" value={priceInput} onChange={e=>setPriceInput(e.target.value)} placeholder={String(nightlyPrice(c,selDay))} className="w-full py-2 ff-body text-sm outline-none" /></div>
+                  <button onClick={()=>setOverride(priceInput)} className="text-white rounded-lg px-3 py-2 ff-body text-sm font-semibold" style={{background:C.moss}}>Aplicar</button>
+                  <button onClick={()=>{setOverride("");setPriceInput("");}} className="border border-stone-300 rounded-lg px-3 py-2 ff-body text-sm text-stone-600">Quitar</button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [session,setSession]=useState(null);
+  const [authReady,setAuthReady]=useState(false);
+  const [email,setEmail]=useState("");
+  const [pass,setPass]=useState("");
+  const [authErr,setAuthErr]=useState("");
+  const [list,setList]=useState([]);
+  const [loadingList,setLoadingList]=useState(false);
+  const [editing,setEditing]=useState(null);
+  const [saving,setSaving]=useState(false);
+  const [toast,setToast]=useState("");
+  const [profile,setProfile]=useState(null);
+
+  useEffect(()=>{
+    db.auth.getSession().then(({data})=>{ setSession(data.session); setAuthReady(true); });
+    const { data: sub } = db.auth.onAuthStateChange((_e,s)=>setSession(s));
+    return ()=>sub.subscription.unsubscribe();
+  },[]);
+
+  const load = async () => {
+    setLoadingList(true);
+    const { data:{ user } } = await db.auth.getUser();
+    const { data: prof } = await db.from("profiles").select("role,operator").eq("id",user.id).maybeSingle();
+    setProfile(prof||null);
+    const isAdmin = prof && prof.role==="admin";
+    const res = isAdmin
+      ? await db.from("cabins").select("*").order("created_at",{ascending:false})
+      : await db.from("cabins").select("*").eq("operator",(prof&&prof.operator)||"___none___").order("created_at",{ascending:false});
+    if(!res.error && res.data) setList(res.data.map(fromRow));
+    setLoadingList(false);
+  };
+  useEffect(()=>{ if(session) load(); },[session]);
+
+  const flash = (m) => { setToast(m); setTimeout(()=>setToast(""),2500); };
+
+  const login = async () => {
+    setAuthErr("");
+    const { error } = await db.auth.signInWithPassword({ email, password: pass });
+    if(error) setAuthErr("No pudimos entrar. Revisá el email y la contraseña.");
+  };
+  const logout = async () => { await db.auth.signOut(); setList([]); setEditing(null); };
+
+  const save = async () => {
+    if(!editing.name){ flash("Poné un nombre"); return; }
+    setSaving(true);
+    const { error } = await db.from("cabins").upsert(toRow(editing)).select();
+    setSaving(false);
+    if(error){ flash("Error al guardar"); return; }
+    flash("Guardado ✓"); setEditing(null); load();
+  };
+  const remove = async (id) => {
+    if(!confirm("¿Borrar este alojamiento?")) return;
+    await db.from("cabins").delete().eq("id",id);
+    load();
+  };
+
+  if(!authReady) return <div className="min-h-screen grid place-items-center ff-body" style={{background:C.paper,color:C.moss}}>Cargando…</div>;
+
+  if(!session) return (
+    <div className="min-h-screen grid place-items-center ff-body px-5" style={{background:C.paper}}>
+      <div className="w-full max-w-sm bg-white rounded-2xl border border-black/5 p-7">
+        <div className="text-center mb-5"><div className="text-3xl">⛰️</div><h1 className="ff-display text-2xl mt-1" style={{color:C.ink}}>Panel TandilStay</h1><p className="ff-body text-sm text-stone-500">Entrá para gestionar los alojamientos</p></div>
+        <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" className="w-full border border-stone-300 rounded-xl px-3 py-2.5 ff-body text-sm mb-2" />
+        <input value={pass} onChange={e=>setPass(e.target.value)} type="password" placeholder="Contraseña" onKeyDown={e=>{if(e.key==="Enter")login();}} className="w-full border border-stone-300 rounded-xl px-3 py-2.5 ff-body text-sm mb-3" />
+        {authErr && <p className="ff-body text-sm text-rose-600 mb-3">{authErr}</p>}
+        <button onClick={login} className="w-full text-white rounded-xl py-3 ff-body font-semibold" style={{background:C.moss}}>Entrar</button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen ff-body" style={{background:C.paper}}>
+      <header className="sticky top-0 z-30 border-b border-black/5" style={{background:C.paper}}>
+        <div className="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2.5"><div className="w-9 h-9 rounded-xl grid place-items-center text-xl" style={{background:C.moss}}>⛰️</div><div><div className="ff-display text-lg leading-none" style={{color:C.ink}}>Panel</div><div className="ff-body text-[11px] text-stone-500">TandilStay</div></div></div>
+          <div className="flex items-center gap-2">
+            {editing ? (
+              <>
+                <button onClick={()=>setEditing(null)} className="rounded-full px-4 py-2 ff-body text-sm border border-stone-300 text-stone-600">Cancelar</button>
+                <button onClick={save} disabled={saving} className="rounded-full px-4 py-2 ff-body text-sm font-semibold text-white disabled:opacity-50" style={{background:C.clay}}>{saving?"Guardando…":"Guardar"}</button>
+              </>
+            ) : (
+              <>
+                <button onClick={()=>setEditing({...EMPTY, operator:(profile&&profile.operator)||""})} className="rounded-full px-4 py-2 ff-body text-sm font-semibold text-white" style={{background:C.clay}}>+ Nuevo</button>
+                <button onClick={logout} className="rounded-full px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">Salir</button>
+              </>
+            )}
+          </div>
+        </div>
+        {toast && <div className="text-center ff-body text-xs py-1" style={{background:"#e7efe3",color:C.moss}}>{toast}</div>}
+      </header>
+
+      <div className="max-w-5xl mx-auto px-5 py-6">
+        {editing ? (
+          <Editor c={editing} set={setEditing} />
+        ) : loadingList ? (
+          <p className="ff-body text-stone-500 text-center py-16">Cargando alojamientos…</p>
+        ) : list.length===0 ? (
+          <div className="text-center py-16"><p className="ff-display text-xl mb-1" style={{color:C.ink}}>Todavía no hay alojamientos</p><p className="ff-body text-stone-500 mb-4">Cargá el primero con el botón “+ Nuevo”.</p></div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {list.map((c)=>(
+              <div key={c.id} className="bg-white rounded-2xl border border-black/5 overflow-hidden">
+                <div className="aspect-[16/10] bg-stone-200">{c.photos[0] && <img src={IMG(c.photos[0])} className="w-full h-full object-cover" />}</div>
+                <div className="p-4">
+                  <h3 className="ff-display text-lg" style={{color:C.ink}}>{c.name}</h3>
+                  <p className="ff-body text-sm text-stone-500">{c.zone}</p>
+                  {c.operator && <a href={"operador.html?op="+encodeURIComponent(c.operator)} target="_blank" rel="noreferrer" className="ff-body text-xs" style={{color:C.clay}}>👤 {c.operator}</a>}
+                  <p className="ff-body text-sm mt-1" style={{color:C.ink}}><span className="font-bold">{money(c.price)}</span> / noche · hasta {c.capacity}</p>
+                  <div className="flex gap-2 mt-3">
+                    <button onClick={()=>setEditing(c)} className="flex-1 rounded-lg py-2 ff-body text-sm font-semibold text-white" style={{background:C.moss}}>Editar</button>
+                    <a href={"cabana.html?slug="+c.slug} target="_blank" rel="noreferrer" className="rounded-lg px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">👁️ Ver</a>
+                    <button onClick={()=>remove(c.id)} className="rounded-lg px-3 py-2 ff-body text-sm border border-stone-300 text-rose-500">🗑️</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <footer className="py-8 text-center ff-body text-sm" style={{background:C.moss,color:"rgba(255,255,255,0.7)"}}>Panel TandilStay · Creado por Brote 🌱</footer>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

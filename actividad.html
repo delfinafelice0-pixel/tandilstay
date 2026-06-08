@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Actividad · TandilStay</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+.ff-display{font-family:'Fraunces',serif}.ff-body{font-family:'Hanken Grotesk',sans-serif}body{margin:0}
+</style>
+</head>
+<body><div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const C = { paper:"#F3EEE2", ink:"#2C2A24", moss:"#3E4F3F", clay:"#BE6A4A" };
+const A = C.clay;
+const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=1200&q=80`));
+const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", category:r.category||"", price:r.price||0, duration:r.duration||"", schedule:r.schedule||"", reserva:r.reserva, comoReservar:r.como_reservar||"", incluye:r.incluye||[], videos:r.videos||[], banner:r.banner||"", photos:r.photos||[] });
+const ytEmbed = (url) => { const m=(url||"").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/); return m?`https://www.youtube.com/embed/${m[1]}`:null; };
+
+function Act({ c }) {
+  const cover = c.banner || c.photos[0] || "photo-1551632811-561732d1e306";
+  const wa = c.whatsapp ? `https://wa.me/${c.whatsapp}?text=`+encodeURIComponent(`Hola! Quiero consultar por ${c.name}.`) : null;
+  return (
+    <div style={{background:C.paper}} className="ff-body">
+      <div className="relative h-[52vh] min-h-[380px] overflow-hidden">
+        <img src={IMG(cover)} className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/30" />
+        <a href="index.html" className="absolute top-6 left-6 ff-body text-white/80 text-sm">‹ TandilStay</a>
+        <div className="relative h-full max-w-5xl mx-auto px-6 flex flex-col justify-end pb-10">
+          {c.category && <span className="ff-body text-[12px] uppercase tracking-[0.2em] font-semibold mb-2" style={{color:"#E2A94E"}}>{c.category}</span>}
+          <h1 className="ff-display text-4xl sm:text-6xl text-white leading-[0.95]">{c.name}</h1>
+          {c.zone && <div className="text-white/85 ff-body text-sm mt-2">📍 {c.zone}</div>}
+        </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-6 -mt-6 relative">
+        <div className="bg-white rounded-2xl border border-black/5 shadow-lg grid grid-cols-3 divide-x divide-stone-200 overflow-hidden">
+          <div className="p-4 text-center"><div className="ff-body text-[10px] uppercase tracking-widest text-stone-400 font-semibold">Precio</div><div className="ff-display text-lg" style={{color:C.ink}}>{c.price>0?"desde "+money(c.price):"Consultar"}</div></div>
+          <div className="p-4 text-center"><div className="ff-body text-[10px] uppercase tracking-widest text-stone-400 font-semibold">Duración</div><div className="ff-display text-lg" style={{color:C.ink}}>{c.duration||"—"}</div></div>
+          <div className="p-4 text-center"><div className="ff-body text-[10px] uppercase tracking-widest text-stone-400 font-semibold">Reserva</div><div className="ff-display text-lg" style={{color:C.ink}}>{c.reserva?"Sí":"No"}</div></div>
+        </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-6 py-10 space-y-10">
+        {c.blurb && <p className="ff-body text-lg text-stone-600 leading-relaxed max-w-2xl">{c.blurb}</p>}
+
+        {c.incluye.filter(Boolean).length>0 && (
+          <div><h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Qué incluye</h2><div className="grid sm:grid-cols-2 gap-2">{c.incluye.filter(Boolean).map((x,i)=><div key={i} className="flex items-center gap-2 ff-body text-stone-700"><span style={{color:A}}>✓</span>{x}</div>)}</div></div>
+        )}
+
+        {c.schedule && <div><h2 className="ff-display text-2xl mb-2" style={{color:C.ink}}>Horarios</h2><p className="ff-body text-stone-600 whitespace-pre-line">{c.schedule}</p></div>}
+
+        {c.reserva && c.comoReservar && (
+          <div className="rounded-2xl px-5 py-4 flex items-start gap-3 bg-white border border-black/5"><span className="text-xl">📅</span><div><div className="ff-display text-lg" style={{color:C.ink}}>Cómo reservar</div><p className="ff-body text-stone-600 text-sm mt-0.5">{c.comoReservar}</p></div></div>
+        )}
+
+        {c.videos.filter(Boolean).length>0 && (
+          <div><h2 className="ff-display text-2xl mb-4" style={{color:C.ink}}>Videos</h2><div className="grid sm:grid-cols-2 gap-4">{c.videos.filter(Boolean).map((v,i)=>{const yt=ytEmbed(v);return yt?<iframe key={i} title={"v"+i} className="w-full aspect-video rounded-2xl border border-black/5" src={yt} allowFullScreen></iframe>:<a key={i} href={v} target="_blank" rel="noreferrer" className="rounded-2xl border border-black/5 bg-white p-4 ff-body" style={{color:C.ink}}>▶ Ver video</a>;})}</div></div>
+        )}
+
+        {c.photos.length>0 && <div><h2 className="ff-display text-2xl mb-4" style={{color:C.ink}}>Fotos</h2><div className="grid grid-cols-2 sm:grid-cols-3 gap-2">{c.photos.map((p,i)=><img key={i} src={IMG(p)} className="w-full aspect-square object-cover rounded-xl bg-stone-200" />)}</div></div>}
+
+        {c.zone && <div><h2 className="ff-display text-2xl mb-4" style={{color:C.ink}}>Cómo llegar</h2><p className="ff-body text-stone-600 mb-3">📍 {c.zone}</p><iframe title="mapa" loading="lazy" className="w-full h-72 rounded-2xl border border-black/5" src={"https://www.google.com/maps?q="+encodeURIComponent(c.zone)+"&output=embed"}></iframe></div>}
+
+        <div className="flex flex-wrap gap-3">
+          {wa && <a href={wa} target="_blank" rel="noreferrer" className="rounded-full px-6 py-3 ff-body font-semibold text-white" style={{background:A}}>💬 Consultar / Reservar</a>}
+          {c.phone && <a href={"tel:"+c.phone} className="rounded-full px-6 py-3 ff-body font-semibold border" style={{borderColor:C.moss,color:C.moss}}>📞 {c.phone}</a>}
+        </div>
+      </div>
+      <footer className="py-8 text-center ff-body text-sm" style={{background:C.moss,color:"rgba(255,255,255,0.7)"}}>{c.name} · vía TandilStay · Creado por Brote 🌱</footer>
+    </div>
+  );
+}
+
+function App() {
+  const [state,setState]=useState({loading:true});
+  useEffect(()=>{
+    const slug=new URLSearchParams(location.search).get("slug");
+    (async()=>{
+      if(slug){ const {data,error}=await db.from("activities").select("*").eq("slug",slug).limit(1); if(error){setState({error:true});return;} if(data&&data[0]) setState({c:fromRow(data[0])}); else setState({notfound:true}); }
+      else { const {data}=await db.from("activities").select("slug,name,category,duration,banner,photos").order("created_at",{ascending:false}); setState({listing:data||[]}); }
+    })();
+  },[]);
+  if(state.loading) return <div className="min-h-screen grid place-items-center ff-body" style={{background:C.paper,color:C.moss}}>Cargando…</div>;
+  if(state.error) return <div className="min-h-screen grid place-items-center ff-body p-6 text-center" style={{background:C.paper,color:C.ink}}>Hubo un error. Recargá.</div>;
+  if(state.notfound) return <div className="min-h-screen grid place-items-center ff-body p-6 text-center" style={{background:C.paper,color:C.ink}}>No encontramos esa actividad. <a href="actividad.html" className="underline ml-1" style={{color:C.clay}}>Ver todas</a></div>;
+  if(state.c) return <Act c={state.c} />;
+  return (
+    <div className="min-h-screen ff-body" style={{background:C.paper}}>
+      <div className="max-w-5xl mx-auto px-6 py-12">
+        <h1 className="ff-display text-3xl mb-1" style={{color:C.ink}}>Qué hacer en Tandil</h1>
+        <p className="ff-body text-stone-500 mb-6">Tocá una actividad para ver más.</p>
+        {state.listing.length===0 ? <p className="ff-body text-stone-500">Todavía no hay actividades cargadas.</p>
+        : <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">{state.listing.map((c,i)=>(
+            <a key={i} href={"actividad.html?slug="+c.slug} className="block bg-white rounded-2xl border border-black/5 overflow-hidden">
+              <div className="aspect-[16/10] bg-stone-200">{(c.banner||(c.photos&&c.photos[0])) && <img src={IMG(c.banner||c.photos[0])} className="w-full h-full object-cover" />}</div>
+              <div className="p-4"><h3 className="ff-display text-lg" style={{color:C.ink}}>{c.name}</h3><p className="ff-body text-sm text-stone-500">{c.category}{c.duration?" · "+c.duration:""}</p></div>
+            </a>
+          ))}</div>}
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
