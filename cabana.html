@@ -26,6 +26,7 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const C = { paper:"#F3EEE2", ink:"#2C2A24", moss:"#3E4F3F", clay:"#BE6A4A" };
 const A = C.clay;
 const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=1200&q=80`));
+const ytEmbed = (url) => { const m=(url||"").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/); return m?`https://www.youtube.com/embed/${m[1]}`:null; };
 const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
 const kFmt = (n) => (n >= 1000 ? Math.round(n/1000)+"k" : ""+n);
 const pad = (n) => String(n).padStart(2,"0");
@@ -38,7 +39,7 @@ const AMEN = { wifi:"📶 WiFi", parrilla:"🔥 Parrilla", pileta:"🏊 Pileta",
 const DOW = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
 const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
-const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, promoText:r.promo_text||"", promos:r.promos||[], blocked:r.blocked||[], overrides:r.overrides||{}, units:r.units||[], banner:r.banner||"", photos:r.photos||[] });
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, promoText:r.promo_text||"", promos:r.promos||[], blocked:r.blocked||[], overrides:r.overrides||{}, units:r.units||[], videos:r.videos||[], banner:r.banner||"", photos:r.photos||[] });
 const nightlyPrice = (c,d) => (c.overrides && c.overrides[d]!=null ? c.overrides[d] : (isWeekend(d) && c.weekendPrice ? c.weekendPrice : c.price));
 function computeStay(c,ci,co){ if(!ci||!co) return null; let d=parseD(ci); const e=parseD(co); let sub=0,n=0; while(d<e){ sub+=nightlyPrice(c,iso(d)); n++; d=addDay(d); } let pct=0; (c.promos||[]).forEach(p=>{if(n>=p.min&&p.pct>pct)pct=p.pct;}); const disc=Math.round(sub*pct/100); return {n,sub,pct,disc,total:sub-disc}; }
 const isAvail = (c,ci,co) => { if(!ci||!co) return true; let d=parseD(ci); const e=parseD(co); while(d<e){ if(c.blocked.includes(iso(d))) return false; d=addDay(d); } return true; };
@@ -120,6 +121,7 @@ function Landing({ c }) {
         <div className="md:col-span-2 space-y-8">
           {c.blurb && <div><h2 className="ff-display text-2xl mb-2" style={{color:C.ink}}>Sobre el lugar</h2><p className="ff-body text-stone-600 leading-relaxed">{c.blurb}</p></div>}
           {c.photos.length>0 && <div><h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Galería</h2><div className="grid grid-cols-2 sm:grid-cols-3 gap-2">{c.photos.map((p,i)=><img key={i} src={IMG(p)} className="w-full aspect-square object-cover rounded-xl bg-stone-200" />)}</div></div>}
+          {(c.videos||[]).filter(Boolean).length>0 && <div><h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Videos</h2><div className="grid sm:grid-cols-2 gap-4">{c.videos.filter(Boolean).map((v,i)=>{ const yt=ytEmbed(v); return yt ? <iframe key={i} title={"v"+i} className="w-full aspect-video rounded-2xl border border-black/5" src={yt} allowFullScreen></iframe> : <a key={i} href={v} target="_blank" rel="noreferrer" className="rounded-2xl border border-black/5 bg-white p-4 ff-body" style={{color:C.ink}}>▶ Ver video</a>; })}</div></div>}
           {(c.units||[]).length>0 && (
             <div>
               <h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Nuestras cabañas</h2>

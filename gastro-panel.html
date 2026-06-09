@@ -125,13 +125,13 @@ function Editor({ c, set }) {
 function App() {
   const [session,setSession]=useState(null), [ready,setReady]=useState(false);
   const [email,setEmail]=useState(""), [pass,setPass]=useState(""), [authErr,setAuthErr]=useState("");
-  const [list,setList]=useState([]), [editing,setEditing]=useState(null), [saving,setSaving]=useState(false), [toast,setToast]=useState(""), [profile,setProfile]=useState(null);
+  const [list,setList]=useState([]), [editing,setEditing]=useState(null), [saving,setSaving]=useState(false), [toast,setToast]=useState(""), [profile,setProfile]=useState(null), [soloEditor,setSoloEditor]=useState(false);
   useEffect(()=>{ db.auth.getSession().then(({data})=>{setSession(data.session);setReady(true);}); const {data:sub}=db.auth.onAuthStateChange((_e,s)=>setSession(s)); return ()=>sub.subscription.unsubscribe(); },[]);
-  const load=async()=>{ const {data:{user}}=await db.auth.getUser(); const {data:prof}=await db.from("profiles").select("role,operator").eq("id",user.id).maybeSingle(); setProfile(prof||null); const isAdmin=prof&&prof.role==="admin"; const res=isAdmin?await db.from("restaurants").select("*").order("created_at",{ascending:false}):await db.from("restaurants").select("*").eq("operator",(prof&&prof.operator)||"___none___").order("created_at",{ascending:false}); if(res.data) setList(res.data.map(fromRow)); };
+  const load=async()=>{ const {data:{user}}=await db.auth.getUser(); const {data:prof}=await db.from("profiles").select("role,operator,max_listings").eq("id",user.id).maybeSingle(); setProfile(prof||null); const isAdmin=prof&&prof.role==="admin"; if(prof&&!isAdmin){ const dest={hospedaje:"panel.html",gastronomia:"gastro-panel.html",actividad:"act-panel.html"}[prof.role]; if(dest&&dest!=="gastro-panel.html"){ window.location.replace(dest); return; } } const res=isAdmin?await db.from("restaurants").select("*").order("created_at",{ascending:false}):await db.from("restaurants").select("*").eq("operator",(prof&&prof.operator)||"___none___").order("created_at",{ascending:false}); const rows=res.data?res.data.map(fromRow):[]; setList(rows); const lim=prof?prof.max_listings:null; if(lim===1&&!isAdmin){ setSoloEditor(true); setEditing(rows[0]?rows[0]:{...EMPTY,operator:(prof&&prof.operator)||""}); } else setSoloEditor(false); };
   useEffect(()=>{ if(session) load(); },[session]);
   const flash=(m)=>{ setToast(m); setTimeout(()=>setToast(""),2500); };
   const login=async()=>{ setAuthErr(""); const {error}=await db.auth.signInWithPassword({email,password:pass}); if(error) setAuthErr("No pudimos entrar. Revisá email y contraseña."); };
-  const save=async()=>{ if(!editing.name){flash("Poné un nombre");return;} setSaving(true); const {error}=await db.from("restaurants").upsert(toRow(editing)).select(); setSaving(false); if(error){flash("Error al guardar");return;} flash("Guardado ✓"); setEditing(null); load(); };
+  const save=async()=>{ if(!editing.name){flash("Poné un nombre");return;} setSaving(true); const {data,error}=await db.from("restaurants").upsert(toRow(editing)).select(); setSaving(false); if(error){flash("Error al guardar");return;} flash("Guardado ✓"); if(soloEditor){ if(data&&data[0]) setEditing(fromRow(data[0])); } else { setEditing(null); load(); } };
   const remove=async(id)=>{ if(!confirm("¿Borrar este lugar?"))return; await db.from("restaurants").delete().eq("id",id); load(); };
   if(!ready) return <div className="min-h-screen grid place-items-center ff-body" style={{background:C.paper,color:C.moss}}>Cargando…</div>;
   if(!session) return (
@@ -145,17 +145,20 @@ function App() {
       </div>
     </div>
   );
+  const lim=profile?profile.max_listings:null; const atLimit=lim!=null&&list.length>=lim&&!(profile&&profile.role==="admin"); const verSitio=editing&&editing.slug?"resto.html?slug="+editing.slug:null;
   return (
     <div className="min-h-screen ff-body" style={{background:C.paper}}>
       <header className="sticky top-0 z-30 border-b border-black/5" style={{background:C.paper}}>
         <div className="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5"><div className="w-9 h-9 rounded-xl grid place-items-center text-xl" style={{background:C.clay}}>🍴</div><div><div className="ff-display text-lg leading-none" style={{color:C.ink}}>Gastronomía</div><div className="ff-body text-[11px] text-stone-500">TandilStay</div></div></div>
           <div className="flex items-center gap-2">
-            {editing ? (<>
-              <button onClick={()=>setEditing(null)} className="rounded-full px-4 py-2 ff-body text-sm border border-stone-300 text-stone-600">Cancelar</button>
+            {(editing||soloEditor) ? (<>
+              {verSitio && <a href={verSitio} target="_blank" rel="noreferrer" className="rounded-full px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">👁️ Ver sitio</a>}
+              {!soloEditor && <button onClick={()=>setEditing(null)} className="rounded-full px-4 py-2 ff-body text-sm border border-stone-300 text-stone-600">Cancelar</button>}
               <button onClick={save} disabled={saving} className="rounded-full px-4 py-2 ff-body text-sm font-semibold text-white disabled:opacity-50" style={{background:C.clay}}>{saving?"Guardando…":"Guardar"}</button>
+              {soloEditor && <button onClick={()=>db.auth.signOut()} className="rounded-full px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">Salir</button>}
             </>) : (<>
-              <button onClick={()=>setEditing({...EMPTY, operator:(profile&&profile.operator)||""})} className="rounded-full px-4 py-2 ff-body text-sm font-semibold text-white" style={{background:C.clay}}>+ Nuevo</button>
+              {!atLimit && <button onClick={()=>setEditing({...EMPTY, operator:(profile&&profile.operator)||""})} className="rounded-full px-4 py-2 ff-body text-sm font-semibold text-white" style={{background:C.clay}}>+ Nuevo</button>}
               <button onClick={()=>db.auth.signOut()} className="rounded-full px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">Salir</button>
             </>)}
           </div>
@@ -163,7 +166,7 @@ function App() {
         {toast && <div className="text-center ff-body text-xs py-1" style={{background:"#e7efe3",color:C.moss}}>{toast}</div>}
       </header>
       <div className="max-w-5xl mx-auto px-5 py-6">
-        {editing ? <Editor c={editing} set={setEditing} />
+        {(editing||soloEditor) ? (editing ? <Editor c={editing} set={setEditing} /> : <p className="ff-body text-stone-500 text-center py-16">Cargando…</p>)
         : list.length===0 ? <div className="text-center py-16"><p className="ff-display text-xl mb-1" style={{color:C.ink}}>Sin lugares todavía</p><p className="ff-body text-stone-500">Cargá el primero con “+ Nuevo”.</p></div>
         : <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">{list.map(c=>(
             <div key={c.id} className="bg-white rounded-2xl border border-black/5 overflow-hidden">
