@@ -28,7 +28,7 @@ function App() {
   const [email,setEmail]=useState(""), [pass,setPass]=useState(""), [authErr,setAuthErr]=useState("");
   const [tab,setTab]=useState("usuarios");
   const [profiles,setProfiles]=useState([]);
-  const [nu,setNu]=useState({ email:"", password:"", role:"hospedaje", operator:"" });
+  const [nu,setNu]=useState({ email:"", password:"", role:"hospedaje", operator:"", max_listings:"" });
   const [msg,setMsg]=useState(""); const [busy,setBusy]=useState(false);
   const [counts,setCounts]=useState({});
 
@@ -43,10 +43,20 @@ function App() {
   const crearUsuario=async()=>{
     if(!nu.email||!nu.password){ flash("Completá email y contraseña"); return; }
     setBusy(true);
-    const { data, error } = await db.functions.invoke("super-action", { body: nu });
+    const body = { ...nu, max_listings: nu.max_listings===""?null:parseInt(nu.max_listings,10) };
+    const { data, error } = await db.functions.invoke("super-action", { body });
     setBusy(false);
     if(error || (data&&data.error)){ flash("Error: "+((data&&data.error)||error.message)); return; }
-    flash("Usuario creado ✓"); setNu({ email:"", password:"", role:"hospedaje", operator:"" }); loadProfiles();
+    flash("Usuario creado ✓"); setNu({ email:"", password:"", role:"hospedaje", operator:"", max_listings:"" }); loadProfiles();
+  };
+  const delUser=async(p)=>{
+    if(session && p.id===session.user.id){ flash("No podés borrarte a vos misma"); return; }
+    if(!confirm("¿Borrar a "+p.email+"? Pierde el acceso y se elimina su cuenta.")) return;
+    setBusy(true);
+    const { data, error } = await db.functions.invoke("super-action", { body:{ action:"delete", id:p.id } });
+    setBusy(false);
+    if(error || (data&&data.error)){ flash("Error: "+((data&&data.error)||error.message)); return; }
+    flash("Usuario borrado ✓"); loadProfiles();
   };
   const updateProfile=async(id,patch)=>{ await db.from("profiles").update(patch).eq("id",id); loadProfiles(); };
 
@@ -92,7 +102,8 @@ function App() {
               <input value={nu.email} onChange={e=>setNu({...nu,email:e.target.value})} placeholder="Email" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm mb-2" />
               <input value={nu.password} onChange={e=>setNu({...nu,password:e.target.value})} placeholder="Contraseña" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm mb-2" />
               <select value={nu.role} onChange={e=>setNu({...nu,role:e.target.value})} className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm mb-2 bg-white">{ROLES.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select>
-              <input value={nu.operator} onChange={e=>setNu({...nu,operator:e.target.value})} placeholder="Operador (ej: hospedatentandil)" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm mb-3" />
+              <input value={nu.operator} onChange={e=>setNu({...nu,operator:e.target.value})} placeholder="Operador (ej: hospedatentandil)" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm mb-2" />
+              <input value={nu.max_listings} onChange={e=>setNu({...nu,max_listings:e.target.value.replace(/[^0-9]/g,"")})} placeholder="¿Cuántas publicaciones puede cargar? (vacío = sin tope)" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm mb-3" />
               <button onClick={crearUsuario} disabled={busy} className="w-full text-white rounded-xl py-2.5 ff-body font-semibold disabled:opacity-50" style={{background:C.clay}}>{busy?"Creando…":"Crear usuario"}</button>
               <p className="ff-body text-xs text-stone-400 mt-2">El usuario entra a su panel según su rol con ese email y contraseña.</p>
             </div>
@@ -105,6 +116,13 @@ function App() {
                     <div className="flex gap-2 mt-2">
                       <select value={p.role||"hospedaje"} onChange={e=>updateProfile(p.id,{role:e.target.value})} className="border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm bg-white">{ROLES.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select>
                       <input defaultValue={p.operator||""} onBlur={e=>updateProfile(p.id,{operator:e.target.value})} placeholder="operador" className="flex-1 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                    </div>
+                    <div className="flex gap-2 mt-2 items-center">
+                      <div className="flex items-center gap-1.5">
+                        <span className="ff-body text-xs text-stone-500">Publicaciones:</span>
+                        <input defaultValue={p.max_listings??""} onBlur={e=>updateProfile(p.id,{max_listings:e.target.value===""?null:parseInt(e.target.value,10)})} placeholder="sin tope" className="w-20 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                      </div>
+                      {!(session && p.id===session.user.id) && <button onClick={()=>delUser(p)} disabled={busy} className="ml-auto rounded-lg px-3 py-1.5 ff-body text-sm border border-rose-200 text-rose-600 disabled:opacity-50">🗑️ Borrar</button>}
                     </div>
                   </div>
                 ))}
