@@ -43,7 +43,7 @@ function App() {
   const crearUsuario=async()=>{
     if(!nu.email||!nu.password){ flash("Completá email y contraseña"); return; }
     setBusy(true);
-    const { data, error } = await db.functions.invoke("admin-create-user", { body: nu });
+    const { data, error } = await db.functions.invoke("super-action", { body: nu });
     setBusy(false);
     if(error || (data&&data.error)){ flash("Error: "+((data&&data.error)||error.message)); return; }
     flash("Usuario creado ✓"); setNu({ email:"", password:"", role:"hospedaje", operator:"" }); loadProfiles();
