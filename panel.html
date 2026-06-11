@@ -254,6 +254,31 @@ function Editor({ c, set }) {
   );
 }
 
+function ProfileBar({ profile }) {
+  if(!profile) return null;
+  const RUBRO = { hospedaje:"Hospedaje", gastronomia:"Gastronomía", actividad:"Actividad", admin:"Admin" }[profile.role] || profile.role || "";
+  const fmt = (s) => s ? s.split("-").reverse().join("/") : "—";
+  let st = { label:"Pago sin registrar", bg:"#ececec", fg:"#777" };
+  if(profile.next_due){ const t=new Date(); t.setHours(0,0,0,0); const d=new Date(profile.next_due+"T00:00:00"); const days=Math.round((d-t)/86400000);
+    st = days<0 ? {label:"Pago vencido", bg:"#fde8e8", fg:"#b23b3b"} : days<=7 ? {label:"Vence en "+days+" días", bg:"#fdf0d8", fg:"#9a6b1e"} : {label:"Al día", bg:"#e7efe3", fg:C.moss}; }
+  const initial = (profile.operator||profile._email||"?").trim().charAt(0).toUpperCase();
+  const lim = profile.max_listings;
+  return (
+    <div className="bg-white rounded-2xl border border-black/5 p-4 mb-5 flex flex-wrap items-center gap-4">
+      <div className="w-12 h-12 rounded-full grid place-items-center text-white ff-display text-lg shrink-0" style={{background:C.moss}}>{initial}</div>
+      <div className="min-w-0">
+        <div className="ff-display text-lg leading-tight" style={{color:C.ink}}>{profile.operator||"Tu cuenta"}</div>
+        <div className="ff-body text-xs text-stone-500">{profile._email} · {RUBRO} · {lim!=null?(lim+" publicación"+(lim===1?"":"es")):"sin tope"}</div>
+      </div>
+      <div className="sm:ml-auto flex items-center gap-4 flex-wrap">
+        <div><div className="ff-body text-[11px] text-stone-500">Último pago</div><div className="ff-body text-sm" style={{color:C.ink}}>{fmt(profile.last_paid)}</div></div>
+        <div><div className="ff-body text-[11px] text-stone-500">Próximo pago</div><div className="ff-body text-sm" style={{color:C.ink}}>{fmt(profile.next_due)}</div></div>
+        <span className="ff-body text-xs rounded-full px-2.5 py-1" style={{background:st.bg,color:st.fg}}>{st.label}</span>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [session,setSession]=useState(null);
   const [authReady,setAuthReady]=useState(false);
@@ -277,8 +302,8 @@ function App() {
   const load = async () => {
     setLoadingList(true);
     const { data:{ user } } = await db.auth.getUser();
-    const { data: prof } = await db.from("profiles").select("role,operator,max_listings").eq("id",user.id).maybeSingle();
-    setProfile(prof||null);
+    const { data: prof } = await db.from("profiles").select("role,operator,max_listings,last_paid,next_due").eq("id",user.id).maybeSingle();
+    setProfile(prof ? {...prof, _email:user.email} : null);
     const isAdmin = prof && prof.role==="admin";
     if(prof && !isAdmin){
       const dest = { hospedaje:"panel.html", gastronomia:"gastro-panel.html", actividad:"act-panel.html" }[prof.role];
@@ -364,6 +389,7 @@ function App() {
       </header>
 
       <div className="max-w-5xl mx-auto px-5 py-6">
+        <ProfileBar profile={profile} />
         {(editing || soloEditor) ? (
           editing ? <Editor c={editing} set={setEditing} /> : <p className="ff-body text-stone-500 text-center py-16">Cargando…</p>
         ) : loadingList ? (

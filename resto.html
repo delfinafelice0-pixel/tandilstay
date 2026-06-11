@@ -26,7 +26,37 @@ const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
 const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano, reserva:r.reserva, comoReservar:r.como_reservar||"", menuUrl:r.menu_url||"", videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], menu:r.menu||[] });
 const ytEmbed = (url) => { const m=(url||"").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/); return m?`https://www.youtube.com/embed/${m[1]}`:null; };
 
-function Resto({ c }) {
+function Nearby({ acts=[], food=[], cabins=[] }) {
+  const IMGc = (x) => IMG(x.banner || (x.photos && x.photos[0]));
+  const Strip = ({ kicker, title, items, href, sub }) => (items && items.length>0) ? (
+    <div className="mb-9">
+      <p className="ff-body text-[11px] uppercase tracking-[0.25em] font-semibold mb-1" style={{color:C.clay}}>{kicker}</p>
+      <h3 className="ff-display text-2xl mb-4" style={{color:C.ink}}>{title}</h3>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {items.slice(0,4).map((x,i)=>(
+          <a key={i} href={href(x)} className="block bg-white rounded-2xl border border-black/5 overflow-hidden hover:shadow-md transition">
+            <div className="aspect-[16/11] bg-stone-200"><img src={IMGc(x)} className="w-full h-full object-cover" /></div>
+            <div className="p-3"><h4 className="ff-display text-base leading-tight" style={{color:C.ink}}>{x.name}</h4>{sub(x) && <p className="ff-body text-xs text-stone-500 mt-0.5">{sub(x)}</p>}</div>
+          </a>
+        ))}
+      </div>
+    </div>
+  ) : null;
+  if((!acts||!acts.length) && (!food||!food.length) && (!cabins||!cabins.length)) return null;
+  return (
+    <section style={{background:C.paper}}>
+      <div className="max-w-5xl mx-auto px-5 sm:px-6 py-12 border-t border-black/5">
+        <h2 className="ff-display text-3xl mb-1" style={{color:C.ink}}>Para tu escapada en Tandil</h2>
+        <p className="ff-body text-stone-500 mb-8">Lo mejor de la zona para completar tu salida.</p>
+        <Strip kicker="Dónde quedarte" title="Hospedajes" items={cabins} href={x=>"cabana.html?slug="+x.slug} sub={x=>x.zone||""} />
+        <Strip kicker="Qué hacer" title="Actividades" items={acts} href={x=>"actividad.html?slug="+x.slug} sub={x=>[x.category,x.duration].filter(Boolean).join(" · ")} />
+        <Strip kicker="Dónde comer" title="Gastronomía" items={food} href={x=>"resto.html?slug="+x.slug} sub={x=>x.zone||""} />
+      </div>
+    </section>
+  );
+}
+
+function Resto({ c, cabins=[], acts=[] }) {
   const cover = c.banner || c.photos[0] || "photo-1517248135467-4c7edcad34c4";
   const cats = [...new Set(c.menu.map(i=>i.category||"Menú"))];
   const wa = c.whatsapp ? `https://wa.me/${c.whatsapp}` : null;
@@ -105,6 +135,7 @@ function Resto({ c }) {
           {c.phone && <a href={"tel:"+c.phone} className="rounded-full px-6 py-3 ff-body font-semibold border" style={{borderColor:C.moss,color:C.moss}}>📞 {c.phone}</a>}
         </div>
       </div>
+      <Nearby cabins={cabins} acts={acts} />
       <footer className="py-8 text-center ff-body text-sm" style={{background:C.moss,color:"rgba(255,255,255,0.7)"}}>{c.name} · vía TandilStay · Creado por Brote 🌱</footer>
     </div>
   );
@@ -115,14 +146,14 @@ function App() {
   useEffect(()=>{
     const slug=new URLSearchParams(location.search).get("slug");
     (async()=>{
-      if(slug){ const {data,error}=await db.from("restaurants").select("*").eq("slug",slug).limit(1); if(error){setState({error:true});return;} if(data&&data[0]) setState({c:fromRow(data[0])}); else setState({notfound:true}); }
+      if(slug){ const [r,cab,act]=await Promise.all([db.from("restaurants").select("*").eq("slug",slug).limit(1),db.from("cabins").select("slug,name,zone,price,banner,photos").order("created_at",{ascending:false}),db.from("activities").select("slug,name,category,duration,banner,photos").order("created_at",{ascending:false})]); if(r.error){setState({error:true});return;} if(r.data&&r.data[0]) setState({c:fromRow(r.data[0]),cabins:cab.data||[],acts:act.data||[]}); else setState({notfound:true}); }
       else { const {data}=await db.from("restaurants").select("slug,name,zone,banner,photos").order("created_at",{ascending:false}); setState({listing:data||[]}); }
     })();
   },[]);
   if(state.loading) return <div className="min-h-screen grid place-items-center ff-body" style={{background:C.paper,color:C.moss}}>Cargando…</div>;
   if(state.error) return <div className="min-h-screen grid place-items-center ff-body p-6 text-center" style={{background:C.paper,color:C.ink}}>Hubo un error. Recargá.</div>;
   if(state.notfound) return <div className="min-h-screen grid place-items-center ff-body p-6 text-center" style={{background:C.paper,color:C.ink}}>No encontramos ese lugar. <a href="resto.html" className="underline ml-1" style={{color:C.clay}}>Ver todos</a></div>;
-  if(state.c) return <Resto c={state.c} />;
+  if(state.c) return <Resto c={state.c} cabins={state.cabins} acts={state.acts} />;
   return (
     <div className="min-h-screen ff-body" style={{background:C.paper}}>
       <div className="max-w-5xl mx-auto px-6 py-12">

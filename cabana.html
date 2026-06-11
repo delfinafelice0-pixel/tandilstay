@@ -80,7 +80,37 @@ function Calendar({ cursor, setCursor, blocked, ci, co, onDay, priceOf }) {
   );
 }
 
-function Landing({ c }) {
+function Nearby({ acts=[], food=[], cabins=[] }) {
+  const IMGc = (x) => IMG(x.banner || (x.photos && x.photos[0]));
+  const Strip = ({ kicker, title, items, href, sub }) => (items && items.length>0) ? (
+    <div className="mb-9">
+      <p className="ff-body text-[11px] uppercase tracking-[0.25em] font-semibold mb-1" style={{color:C.clay}}>{kicker}</p>
+      <h3 className="ff-display text-2xl mb-4" style={{color:C.ink}}>{title}</h3>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {items.slice(0,4).map((x,i)=>(
+          <a key={i} href={href(x)} className="block bg-white rounded-2xl border border-black/5 overflow-hidden hover:shadow-md transition">
+            <div className="aspect-[16/11] bg-stone-200"><img src={IMGc(x)} className="w-full h-full object-cover" /></div>
+            <div className="p-3"><h4 className="ff-display text-base leading-tight" style={{color:C.ink}}>{x.name}</h4>{sub(x) && <p className="ff-body text-xs text-stone-500 mt-0.5">{sub(x)}</p>}</div>
+          </a>
+        ))}
+      </div>
+    </div>
+  ) : null;
+  if((!acts||!acts.length) && (!food||!food.length) && (!cabins||!cabins.length)) return null;
+  return (
+    <section style={{background:C.paper}}>
+      <div className="max-w-5xl mx-auto px-5 sm:px-6 py-12 border-t border-black/5">
+        <h2 className="ff-display text-3xl mb-1" style={{color:C.ink}}>Para tu escapada en Tandil</h2>
+        <p className="ff-body text-stone-500 mb-8">Lo mejor de la zona para completar tu estadía.</p>
+        <Strip kicker="Dónde quedarte" title="Hospedajes" items={cabins} href={x=>"cabana.html?slug="+x.slug} sub={x=>x.zone||""} />
+        <Strip kicker="Qué hacer" title="Actividades" items={acts} href={x=>"actividad.html?slug="+x.slug} sub={x=>[x.category,x.duration].filter(Boolean).join(" · ")} />
+        <Strip kicker="Dónde comer" title="Gastronomía" items={food} href={x=>"resto.html?slug="+x.slug} sub={x=>x.zone||""} />
+      </div>
+    </section>
+  );
+}
+
+function Landing({ c, acts=[], food=[] }) {
   const [q,setQ]=useState({ci:"",co:""});
   const [main,setMain]=useState(0);
   const [cursor,setCursor]=useState(new Date(2026,5,1));
@@ -173,6 +203,7 @@ function Landing({ c }) {
           </div>
         </div>
       </div>
+      <Nearby acts={acts} food={food} />
       <footer className="py-8 text-center ff-body text-sm" style={{background:C.moss,color:"rgba(255,255,255,0.7)"}}>{c.name} · vía TandilStay · Creado por Brote 🌱</footer>
     </div>
   );
@@ -184,9 +215,13 @@ function App() {
     const slug = new URLSearchParams(location.search).get("slug");
     (async()=>{
       if(slug){
-        const { data, error } = await db.from("cabins").select("*").eq("slug", slug).limit(1);
-        if(error){ setState({error:true}); return; }
-        if(data && data[0]) setState({ cabin: fromRow(data[0]) }); else setState({ notfound:true });
+        const [cab, act, res] = await Promise.all([
+          db.from("cabins").select("*").eq("slug", slug).limit(1),
+          db.from("activities").select("slug,name,category,duration,banner,photos").order("created_at",{ascending:false}),
+          db.from("restaurants").select("slug,name,zone,banner,photos").order("created_at",{ascending:false}),
+        ]);
+        if(cab.error){ setState({error:true}); return; }
+        if(cab.data && cab.data[0]) setState({ cabin: fromRow(cab.data[0]), acts: act.data||[], food: res.data||[] }); else setState({ notfound:true });
       } else {
         const { data } = await db.from("cabins").select("slug,name,zone,price,photos").order("created_at",{ascending:false});
         setState({ listing: data||[] });
@@ -197,7 +232,7 @@ function App() {
   if(state.loading) return <div className="min-h-screen grid place-items-center ff-body" style={{background:C.paper,color:C.moss}}>Cargando…</div>;
   if(state.error) return <div className="min-h-screen grid place-items-center ff-body p-6 text-center" style={{background:C.paper,color:C.ink}}>Hubo un error al cargar. Recargá la página.</div>;
   if(state.notfound) return <div className="min-h-screen grid place-items-center ff-body p-6 text-center" style={{background:C.paper,color:C.ink}}>No encontramos esa cabaña. <a href="cabana.html" className="underline ml-1" style={{color:C.clay}}>Ver todas</a></div>;
-  if(state.cabin) return <div className="ff-body"><Landing c={state.cabin} /></div>;
+  if(state.cabin) return <div className="ff-body"><Landing c={state.cabin} acts={state.acts} food={state.food} /></div>;
 
   return (
     <div className="min-h-screen ff-body" style={{background:C.paper}}>
