@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Carta · TandilStay</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+.ff-display{font-family:'Fraunces',serif}.ff-body{font-family:'Hanken Grotesk',sans-serif}body{margin:0}
+.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+</style>
+</head>
+<body><div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const C = { paper:"#F3EEE2", ink:"#2C2A24", moss:"#3E4F3F", clay:"#BE6A4A", sun:"#E2A94E" };
+const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=1200&q=80`));
+const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano, menu:r.menu||[], banner:r.banner||"", photos:r.photos||[] });
+const slugId = (s) => "cat-" + String(s).replace(/[^a-zA-Z0-9]+/g,"-");
+
+function Menu({ c }) {
+  const cats = [...new Set(c.menu.map(i=>i.category||"Menú"))];
+  const [active, setActive] = useState(cats[0]||"");
+  const wa = c.whatsapp ? `https://wa.me/${c.whatsapp}?text=`+encodeURIComponent(`Hola! Quiero consultar / reservar en ${c.name}.`) : null;
+  const tags = [c.sinTacc && "Sin TACC", c.vegetariano && "Opciones veggie"].filter(Boolean);
+  const go = (cat) => { setActive(cat); const el=document.getElementById(slugId(cat)); if(el){ const y=el.getBoundingClientRect().top+window.scrollY-92; window.scrollTo({top:y,behavior:"smooth"}); } };
+  const hasBanner = !!c.banner;
+  return (
+    <div className="ff-body" style={{background:C.paper, minHeight:"100vh"}}>
+      <header className="relative">
+        {hasBanner && <div className="absolute inset-0 overflow-hidden"><img src={IMG(c.banner)} className="w-full h-full object-cover" /><div className="absolute inset-0" style={{background:"linear-gradient(180deg, rgba(44,42,36,.45), rgba(44,42,36,.88))"}} /></div>}
+        <div className="relative max-w-2xl mx-auto px-6 py-12 text-center">
+          <a href={"resto.html?slug="+c.slug} className={"ff-body text-xs "+(hasBanner?"text-white/70":"text-stone-400")}>‹ Volver a {c.name}</a>
+          <div className="ff-body text-[11px] uppercase tracking-[0.3em] font-semibold mt-5 mb-2" style={{color:hasBanner?"#F0D9A8":C.clay}}>Nuestra carta</div>
+          <h1 className="ff-display text-4xl sm:text-5xl leading-tight" style={{color:hasBanner?"#fff":C.ink}}>{c.name}</h1>
+          {c.zone && <p className={"ff-body text-sm mt-2 "+(hasBanner?"text-white/80":"text-stone-500")}>📍 {c.zone}</p>}
+          {tags.length>0 && <div className="flex gap-2 justify-center mt-4">{tags.map((t,i)=><span key={i} className="rounded-full px-3 py-1 ff-body text-xs font-semibold" style={{background:hasBanner?"rgba(255,255,255,.92)":"#fff",color:C.moss}}>{t}</span>)}</div>}
+        </div>
+      </header>
+
+      {cats.length>1 && (
+        <div className="sticky top-0 z-20 border-b border-black/5" style={{background:"rgba(243,238,226,.93)", backdropFilter:"blur(8px)", WebkitBackdropFilter:"blur(8px)"}}>
+          <div className="max-w-2xl mx-auto px-3 flex gap-1.5 overflow-x-auto py-2.5 no-scrollbar">
+            {cats.map((cat,i)=><button key={i} onClick={()=>go(cat)} className="rounded-full px-4 py-1.5 ff-body text-sm whitespace-nowrap transition border" style={active===cat?{background:C.moss,color:"#fff",borderColor:C.moss}:{color:C.moss,borderColor:"rgba(62,79,63,0.22)"}}>{cat}</button>)}
+          </div>
+        </div>
+      )}
+
+      <main className="max-w-2xl mx-auto px-5 sm:px-6 py-8">
+        {c.menu.length===0 ? <p className="ff-body text-stone-500 text-center py-16">La carta todavía no está cargada.</p> :
+          cats.map((cat,ci)=>(
+            <section key={ci} id={slugId(cat)} className="mb-10" style={{scrollMarginTop:"96px"}}>
+              <h2 className="ff-display text-2xl" style={{color:C.ink}}>{cat}</h2>
+              <div className="h-px w-12 mt-2 mb-5" style={{background:C.clay}} />
+              <div className="space-y-3">
+                {c.menu.filter(i=>(i.category||"Menú")===cat).map((it,i)=>(
+                  <div key={i} className="flex gap-4 items-start bg-white rounded-2xl border border-black/5 p-3.5">
+                    {it.photo && <img src={IMG(it.photo)} className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover shrink-0 bg-stone-200" />}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-baseline gap-3">
+                        <h3 className="ff-display text-lg leading-tight" style={{color:C.ink}}>{it.name}</h3>
+                        {it.price>0 && <span className="ff-body font-bold whitespace-nowrap" style={{color:C.clay}}>{money(it.price)}</span>}
+                      </div>
+                      {it.desc && <p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed">{it.desc}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))
+        }
+      </main>
+
+      {wa && (
+        <div className="max-w-2xl mx-auto px-5 sm:px-6 pb-8">
+          <a href={wa} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 rounded-full py-4 ff-body font-semibold text-white" style={{background:C.clay}}>💬 Reservar / consultar por WhatsApp</a>
+        </div>
+      )}
+      <footer className="py-8 text-center ff-body text-sm" style={{background:C.moss,color:"rgba(255,255,255,0.7)"}}>{c.name} · carta vía TandilStay · Brote 🌱</footer>
+    </div>
+  );
+}
+
+function App(){
+  const [state,setState]=useState({loading:true});
+  useEffect(()=>{ (async()=>{
+    const slug=new URLSearchParams(location.search).get("slug");
+    if(!slug){ setState({notfound:true}); return; }
+    const {data,error}=await db.from("restaurants").select("*").eq("slug",slug).limit(1);
+    if(error){ setState({error:true}); return; }
+    if(data&&data[0]){ document.title="Carta · "+data[0].name; setState({c:fromRow(data[0])}); } else setState({notfound:true});
+  })(); },[]);
+  const center = (txt) => <div className="ff-body" style={{minHeight:"100vh",background:C.paper,color:C.ink,display:"grid",placeItems:"center",padding:"24px",textAlign:"center"}}>{txt}</div>;
+  if(state.loading) return center("Cargando carta…");
+  if(state.notfound||state.error) return center("No encontramos esta carta.");
+  return <Menu c={state.c} />;
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

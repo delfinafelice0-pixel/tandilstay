@@ -124,7 +124,7 @@ function Editor({ c, set }) {
 
 function printQR(c){
   if(!c.slug){ alert("Primero guardá el restaurante para generar el QR."); return; }
-  const url = new URL("resto.html?slug="+c.slug, location.href).href;
+  const url = new URL("menu.html?slug="+c.slug, location.href).href;
   const qr = "https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&data="+encodeURIComponent(url);
   const w = window.open("", "_blank");
   if(!w){ alert("Permití las ventanas emergentes para imprimir el QR."); return; }

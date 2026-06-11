@@ -105,25 +105,12 @@ function Resto({ c, cabins=[], acts=[] }) {
         )}
 
         {c.menu.length>0 && (
-          <div>
-            <h2 className="ff-display text-3xl mb-5" style={{color:C.ink}}>El menú</h2>
-            {cats.map((cat,ci)=>(
-              <div key={ci} className="mb-8">
-                <h3 className="ff-display text-xl mb-4" style={{color:A}}>{cat}</h3>
-                <div className="grid sm:grid-cols-2 gap-5">
-                  {c.menu.filter(i=>(i.category||"Menú")===cat).map((it,i)=>(
-                    <div key={i} className="flex gap-4 bg-white rounded-2xl border border-black/5 overflow-hidden">
-                      {it.photo && <img src={IMG(it.photo)} className="w-28 h-28 object-cover shrink-0 bg-stone-200" />}
-                      <div className="py-3 pr-3 flex-1">
-                        <div className="flex justify-between items-start gap-2"><span className="ff-display text-lg leading-tight" style={{color:C.ink}}>{it.name}</span>{it.price>0 && <span className="ff-body font-bold whitespace-nowrap" style={{color:A}}>{money(it.price)}</span>}</div>
-                        {it.desc && <p className="ff-body text-sm text-stone-500 mt-1">{it.desc}</p>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+          <a href={"menu.html?slug="+c.slug} className="block rounded-3xl p-6 sm:p-8 text-center" style={{background:C.moss}}>
+            <div className="ff-body text-[11px] uppercase tracking-[0.25em] font-semibold mb-2" style={{color:"#E2A94E"}}>Nuestra carta</div>
+            <div className="ff-display text-2xl sm:text-3xl text-white mb-1">Mirá el menú completo</div>
+            <p className="ff-body text-white/70 text-sm mb-5">{c.menu.length} {c.menu.length===1?"plato":"platos"} para elegir</p>
+            <span className="inline-block rounded-full px-6 py-3 ff-body font-semibold" style={{background:"#E2A94E",color:C.ink}}>📋 Abrir carta</span>
+          </a>
         )}
 
         {c.menuUrl && <a href={c.menuUrl} target="_blank" rel="noreferrer" className="inline-block rounded-full px-6 py-3 ff-body font-semibold text-white" style={{background:C.moss}}>📋 Ver menú completo</a>}
