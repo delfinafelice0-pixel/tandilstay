@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sembrar datos de prueba · TandilStay</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+:root{--paper:#F3EEE2;--ink:#2C2A24;--moss:#3E4F3F;--clay:#BE6A4A}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:'Hanken Grotesk',sans-serif}
+.wrap{max-width:680px;margin:0 auto;padding:40px 20px}
+h1{font-family:'Fraunces',serif;font-weight:600;font-size:30px;margin:0 0 4px}
+.sub{color:#6b6b60;margin:0 0 24px}
+.card{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:18px;padding:22px;margin-bottom:16px}
+button{font-family:inherit;font-weight:600;font-size:15px;border:none;border-radius:12px;padding:13px 20px;cursor:pointer}
+.primary{background:var(--clay);color:#fff}
+.ghost{background:#fff;color:#b23b3b;border:1px solid #f0c9c9}
+button:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.who{font-size:14px;color:#6b6b60}
+.who b{color:var(--ink)}
+#log{margin-top:18px;font-size:14px;line-height:1.7;white-space:pre-wrap}
+.ok{color:var(--moss);font-weight:600}.err{color:#b23b3b;font-weight:600}
+a.link{display:block;color:var(--clay);text-decoration:none;font-weight:600;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.06)}
+.muted{color:#9a9a8e;font-size:13px}
+footer{text-align:center;color:#9a9a8e;font-size:13px;margin-top:30px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🌱 Datos de prueba</h1>
+  <p class="sub">Carga 3 hospedajes, 3 actividades y 3 restaurantes de ejemplo (con fotos, videos y menús) para ver el sitio funcionando.</p>
+
+  <div class="card">
+    <div class="who" id="who">Verificando sesión…</div>
+    <div class="row" style="margin-top:14px">
+      <button class="primary" id="btnSeed" disabled>Cargar datos de prueba</button>
+      <button class="ghost" id="btnWipe" disabled>Borrar datos de prueba</button>
+    </div>
+    <div id="log"></div>
+  </div>
+
+  <div class="card" id="links" style="display:none">
+    <div style="font-family:'Fraunces',serif;font-size:20px;margin-bottom:6px">Mirá el resultado</div>
+    <a class="link" href="index.html?v=6" target="_blank">🏠 Home general de TandilStay</a>
+    <a class="link" href="operador.html?op=lacartuja&rubro=hospedaje&v=6" target="_blank">⛰️ Operador de hospedaje — La Cartuja (op=lacartuja)</a>
+    <a class="link" href="operador.html?op=aventuratandil&rubro=actividad&v=6" target="_blank">🧭 Operador de actividades — Aventura Tandil (op=aventuratandil)</a>
+    <a class="link" href="operador.html?op=saborestandil&rubro=gastronomia&v=6" target="_blank">🍴 Operador de gastronomía — Sabores Tandil (op=saborestandil)</a>
+    <p class="muted" style="margin:10px 0 0">Las fotos son de relleno (picsum) y los videos son de ejemplo: reemplazalos por los reales cuando quieras.</p>
+  </div>
+
+  <footer>Sembradora · TandilStay · Creado por Brote 🌱</footer>
+</div>
+
+<script>
+const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const pic = (s,w,h) => "https://picsum.photos/seed/"+s+"/"+w+"/"+h;
+const VID = "https://www.youtube.com/watch?v=aqz-KE-bpKQ"; // video de ejemplo (Big Buck Bunny)
+
+const CABINS = [
+  { slug:"test-mirador-del-lago", name:"Mirador del Lago", operator:"lacartuja", zone:"Lago del Fuerte, Tandil", whatsapp:"5492494111111",
+    blurb:"Cabaña con vista al Lago del Fuerte, ideal para parejas y familias. Desayuno casero y silencio de sierra.",
+    capacity:4, bedrooms:2, bathrooms:1, price:95000, weekend_price:120000, amenities:["wifi","parrilla","pileta"], pet_friendly:true,
+    promo_text:"10% en estadías de 4+ noches", promos:[{min:4,pct:10}], blocked:[], overrides:{},
+    units:[{name:"Cabaña Caldén",capacity:4},{name:"Cabaña Aromo",capacity:2}], videos:[VID],
+    banner:pic("ts-cab-mirador",1200,800), photos:[pic("ts-cab-mirador-1",800,800),pic("ts-cab-mirador-2",800,800),pic("ts-cab-mirador-3",800,800)] },
+  { slug:"test-casa-de-piedra", name:"Casa de Piedra", operator:"lacartuja", zone:"Cerro El Centinela, Tandil", whatsapp:"5492494111111",
+    blurb:"Refugio de piedra al pie del cerro. Chimenea, desayuno casero y cochera techada.",
+    capacity:2, bedrooms:1, bathrooms:1, price:78000, weekend_price:95000, amenities:["wifi","desayuno","cochera"], pet_friendly:false,
+    promo_text:"", promos:[], blocked:[], overrides:{}, units:[], videos:[],
+    banner:pic("ts-cab-piedra",1200,800), photos:[pic("ts-cab-piedra-1",800,800),pic("ts-cab-piedra-2",800,800),pic("ts-cab-piedra-3",800,800)] },
+  { slug:"test-refugio-del-bosque", name:"Refugio del Bosque", operator:"lacartuja", zone:"Sierra del Tigre, Tandil", whatsapp:"5492494111111",
+    blurb:"Casa grande para grupos, rodeada de bosque. Parrilla, pileta y mucho espacio verde.",
+    capacity:6, bedrooms:3, bathrooms:2, price:130000, weekend_price:160000, amenities:["wifi","parrilla","pileta","cochera"], pet_friendly:true,
+    promo_text:"15% en semanas completas", promos:[{min:5,pct:15}], blocked:[], overrides:{},
+    units:[{name:"Casa Grande",capacity:6}], videos:[VID],
+    banner:pic("ts-cab-bosque",1200,800), photos:[pic("ts-cab-bosque-1",800,800),pic("ts-cab-bosque-2",800,800),pic("ts-cab-bosque-3",800,800)] },
+];
+
+const ACTS = [
+  { slug:"test-trekking-centinela", name:"Trekking al Cerro El Centinela", operator:"aventuratandil", zone:"Cerro El Centinela, Tandil",
+    whatsapp:"5492494222222", phone:"+54 9 249 422-2222", blurb:"Caminata guiada hasta la cima del cerro más famoso de Tandil, con vistas de 360°.",
+    category:"Trekking", price:12000, duration:"3 horas", schedule:"Sábados y domingos · 9:00 y 15:00", reserva:true,
+    como_reservar:"Escribinos por WhatsApp con tu fecha y cantidad de personas.", incluye:["Guía certificado","Agua","Snack serrano","Seguro"],
+    videos:[VID], banner:pic("ts-act-trek",1200,800), photos:[pic("ts-act-trek-1",800,800),pic("ts-act-trek-2",800,800),pic("ts-act-trek-3",800,800)] },
+  { slug:"test-cabalgata-sierras", name:"Cabalgata por las Sierras", operator:"aventuratandil", zone:"Sierra del Tigre, Tandil",
+    whatsapp:"5492494222222", phone:"+54 9 249 422-2222", blurb:"Recorrido a caballo por senderos serranos, apto para principiantes.",
+    category:"Cabalgata", price:18000, duration:"2 horas", schedule:"Todos los días · 10:00 y 16:00", reserva:true,
+    como_reservar:"Reservá con 24 hs de anticipación por WhatsApp.", incluye:["Caballo y casco","Guía baqueano","Mate y bizcochos"],
+    videos:[], banner:pic("ts-act-cab",1200,800), photos:[pic("ts-act-cab-1",800,800),pic("ts-act-cab-2",800,800),pic("ts-act-cab-3",800,800)] },
+  { slug:"test-kayak-lago", name:"Kayak en el Lago del Fuerte", operator:"aventuratandil", zone:"Lago del Fuerte, Tandil",
+    whatsapp:"5492494222222", phone:"+54 9 249 422-2222", blurb:"Salida en kayak por el lago, ideal para hacer al atardecer.",
+    category:"Kayak", price:9000, duration:"1.5 horas", schedule:"Miércoles a domingos · por la tarde", reserva:false,
+    como_reservar:"", incluye:["Kayak doble o simple","Chaleco salvavidas","Instrucción básica"],
+    videos:[], banner:pic("ts-act-kayak",1200,800), photos:[pic("ts-act-kayak-1",800,800),pic("ts-act-kayak-2",800,800),pic("ts-act-kayak-3",800,800)] },
+];
+
+const RESTOS = [
+  { slug:"test-almacen-serrano", name:"Almacén Serrano", operator:"saborestandil", zone:"Centro, Tandil",
+    whatsapp:"5492494333333", phone:"+54 9 249 433-3333", blurb:"Picadas con salame con Denominación de Origen, quesos de la zona y vinos regionales.",
+    sin_tacc:true, vegetariano:true, reserva:true, como_reservar:"Reservá tu mesa por WhatsApp, sobre todo los fines de semana.",
+    menu_url:"", videos:[VID], banner:pic("ts-res-almacen",1200,800),
+    photos:[pic("ts-res-almacen-1",800,800),pic("ts-res-almacen-2",800,800),pic("ts-res-almacen-3",800,800)],
+    menu:[
+      {name:"Picada serrana para 2", category:"Para compartir", price:18000, desc:"Salame DO, quesos, aceitunas y pan casero.", photo:pic("ts-plato-picada",600,400)},
+      {name:"Tabla de quesos", category:"Para compartir", price:14000, desc:"Selección de quesos artesanales de Tandil.", photo:pic("ts-plato-quesos",600,400)},
+      {name:"Provoleta a la parrilla", category:"Para compartir", price:7500, desc:"Con orégano y aceite de oliva.", photo:""},
+      {name:"Flan casero", category:"Postres", price:4500, desc:"Con dulce de leche y crema.", photo:pic("ts-plato-flan",600,400)},
+      {name:"Copa de Malbec", category:"Bebidas", price:3800, desc:"Bodega regional.", photo:""},
+    ] },
+  { slug:"test-parrilla-del-cerro", name:"Parrilla del Cerro", operator:"saborestandil", zone:"Avenida Avellaneda, Tandil",
+    whatsapp:"5492494333333", phone:"+54 9 249 433-3333", blurb:"Asado de campo y achuras a la parrilla, con vista a las sierras.",
+    sin_tacc:false, vegetariano:false, reserva:true, como_reservar:"Reservas por WhatsApp para grupos de 6 o más.",
+    menu_url:"", videos:[], banner:pic("ts-res-parrilla",1200,800),
+    photos:[pic("ts-res-parrilla-1",800,800),pic("ts-res-parrilla-2",800,800),pic("ts-res-parrilla-3",800,800)],
+    menu:[
+      {name:"Asado de tira (x kg)", category:"Parrilla", price:22000, desc:"Tira de asado a las brasas.", photo:pic("ts-plato-asado",600,400)},
+      {name:"Bife de chorizo", category:"Parrilla", price:16000, desc:"Con guarnición a elección.", photo:""},
+      {name:"Mollejas", category:"Achuras", price:13000, desc:"Crocantes, con limón.", photo:pic("ts-plato-molleja",600,400)},
+      {name:"Ensalada mixta", category:"Guarniciones", price:5000, desc:"Lechuga, tomate y cebolla.", photo:""},
+    ] },
+  { slug:"test-cerveceria-sierra-brava", name:"Cervecería Sierra Brava", operator:"saborestandil", zone:"Villa del Lago, Tandil",
+    whatsapp:"5492494333333", phone:"+54 9 249 433-3333", blurb:"Cervezas artesanales de Tandil, hamburguesas y opciones veggie.",
+    sin_tacc:false, vegetariano:true, reserva:false, como_reservar:"",
+    menu_url:"", videos:[], banner:pic("ts-res-cerveceria",1200,800),
+    photos:[pic("ts-res-cerveceria-1",800,800),pic("ts-res-cerveceria-2",800,800),pic("ts-res-cerveceria-3",800,800)],
+    menu:[
+      {name:"Pinta IPA", category:"Cervezas", price:4500, desc:"Lúpulo intenso, amarga y aromática.", photo:pic("ts-plato-ipa",600,400)},
+      {name:"Pinta Honey", category:"Cervezas", price:4500, desc:"Suave, con miel de la zona.", photo:""},
+      {name:"Hamburguesa de la casa", category:"Para comer", price:11000, desc:"Doble carne, cheddar y panceta.", photo:pic("ts-plato-burger",600,400)},
+      {name:"Hamburguesa veggie", category:"Para comer", price:9500, desc:"Medallón de legumbres y verdes.", photo:""},
+    ] },
+];
+
+const ALL = [
+  { table:"cabins", rows:CABINS },
+  { table:"activities", rows:ACTS },
+  { table:"restaurants", rows:RESTOS },
+];
+
+const logEl = document.getElementById("log");
+const linksEl = document.getElementById("links");
+const btnSeed = document.getElementById("btnSeed");
+const btnWipe = document.getElementById("btnWipe");
+function log(html){ logEl.innerHTML += html + "\n"; }
+function clearLog(){ logEl.innerHTML = ""; }
+
+(async function init(){
+  try{
+    const { data:{ session } } = await db.auth.getSession();
+    if(!session){
+      document.getElementById("who").innerHTML = "⚠️ No hay sesión iniciada. Entrá primero como admin en <b>admin.html</b> o <b>panel.html</b> (en este mismo navegador) y volvé a abrir esta página.";
+      return;
+    }
+    document.getElementById("who").innerHTML = "Sesión iniciada como <b>"+session.user.email+"</b>. Listo para cargar.";
+    btnSeed.disabled = false;
+    btnWipe.disabled = false;
+  }catch(e){
+    document.getElementById("who").innerHTML = "⚠️ No se pudo verificar la sesión: "+e.message;
+  }
+})();
+
+btnSeed.onclick = async () => {
+  btnSeed.disabled = true; btnWipe.disabled = true; clearLog(); linksEl.style.display="none";
+  let totalErr = 0;
+  for(const { table, rows } of ALL){
+    const slugs = rows.map(r=>r.slug);
+    try{
+      await db.from(table).delete().in("slug", slugs); // limpia los de prueba previos
+      const { error } = await db.from(table).insert(rows);
+      if(error){ totalErr++; log("<span class='err'>✗ "+table+": "+error.message+"</span>"); }
+      else { log("<span class='ok'>✓ "+table+": "+rows.length+" cargados</span>"); }
+    }catch(e){ totalErr++; log("<span class='err'>✗ "+table+": "+e.message+"</span>"); }
+  }
+  if(totalErr===0){
+    log("\n<span class='ok'>¡Listo! Datos de prueba cargados.</span>");
+    linksEl.style.display="block";
+  } else {
+    log("\n<span class='err'>Hubo errores. Si dicen algo de \"permission\" o \"policy\", avisame y lo cargamos por SQL.</span>");
+  }
+  btnSeed.disabled = false; btnWipe.disabled = false;
+};
+
+btnWipe.onclick = async () => {
+  if(!confirm("¿Borrar los datos de prueba (los que empiezan con \"test-\")?")) return;
+  btnSeed.disabled = true; btnWipe.disabled = true; clearLog(); linksEl.style.display="none";
+  for(const { table, rows } of ALL){
+    const slugs = rows.map(r=>r.slug);
+    try{
+      const { error } = await db.from(table).delete().in("slug", slugs);
+      if(error) log("<span class='err'>✗ "+table+": "+error.message+"</span>");
+      else log("<span class='ok'>✓ "+table+": borrados</span>");
+    }catch(e){ log("<span class='err'>✗ "+table+": "+e.message+"</span>"); }
+  }
+  log("\n<span class='ok'>Datos de prueba eliminados.</span>");
+  btnSeed.disabled = false; btnWipe.disabled = false;
+};
+</script>
+</body>
+</html>
