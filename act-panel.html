@@ -22,7 +22,7 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const C = { paper:"#F3EEE2", ink:"#2C2A24", moss:"#3E4F3F", clay:"#BE6A4A" };
 const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=900&q=80`));
 const slugify = (s) => (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
-const CATS = ["Aventura","Naturaleza","Cultura","Familiar","Relax","Gastronómica"];
+const CATS = ["Aventura","Naturaleza","Cultura","Familiar","Relax","Gastronómica","Alquiler de bicis"];
 
 const EMPTY = { name:"", operator:"", zone:"", whatsapp:"", phone:"", blurb:"", category:"", price:0, duration:"", schedule:"", reserva:false, comoReservar:"", incluye:[], videos:[], banner:"", photos:[] };
 const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", category:r.category||"", price:r.price||0, duration:r.duration||"", schedule:r.schedule||"", reserva:r.reserva, comoReservar:r.como_reservar||"", incluye:r.incluye||[], videos:r.videos||[], banner:r.banner||"", photos:r.photos||[] });

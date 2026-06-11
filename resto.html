@@ -76,7 +76,7 @@ function Nearby({ acts=[], food=[], cabins=[] }) {
 function Resto({ c, cabins=[], acts=[] }) {
   const cover = c.banner || c.photos[0] || "photo-1517248135467-4c7edcad34c4";
   const cats = [...new Set(c.menu.map(i=>i.category||"Menú"))];
-  const wa = c.whatsapp ? `https://wa.me/${c.whatsapp}` : null;
+  const wa = c.whatsapp ? `https://wa.me/${c.whatsapp}?text=`+encodeURIComponent(`Hola! Quiero consultar / reservar en ${c.name}.`) : null;
   return (
     <div style={{background:C.paper}} className="ff-body">
       <SiteHeader />

@@ -127,16 +127,15 @@ function MobileMenu({ open, go, onClose }) {
   );
 }
 
-function SearchCard() {
-  const toList = () => { const el = document.getElementById("aloj"); if (el) el.scrollIntoView({ behavior: "smooth" }); };
+function SearchCard({ guests, setGuests, onSearch }) {
   return (
     <div className="bg-white rounded-[26px] shadow-[0_20px_50px_-20px_rgba(62,79,63,0.45)] border border-black/5 p-2.5 flex flex-col sm:flex-row gap-1.5">
       <div className="flex-1 flex items-center gap-3 px-4 py-3"><span>📍</span><div><div className="ff-body text-[10px] uppercase tracking-widest text-stone-400 font-semibold">Destino</div><div className="ff-body text-sm" style={{ color: C.ink }}>Tandil, Buenos Aires</div></div></div>
       <div className="hidden sm:block w-px bg-stone-200 my-2.5"></div>
       <div className="flex-1 flex items-center gap-3 px-4 py-3"><span>📅</span><div><div className="ff-body text-[10px] uppercase tracking-widest text-stone-400 font-semibold">Fechas</div><div className="ff-body text-sm" style={{ color: C.ink }}>Elegí en cada alojamiento</div></div></div>
       <div className="hidden sm:block w-px bg-stone-200 my-2.5"></div>
-      <div className="flex items-center gap-3 px-4 py-3"><span>👥</span><div><div className="ff-body text-[10px] uppercase tracking-widest text-stone-400 font-semibold">Huéspedes</div><div className="ff-body text-sm" style={{ color: C.ink }}>Para todos</div></div></div>
-      <button onClick={toList} className="rounded-[20px] px-6 py-3.5 flex items-center justify-center gap-2 ff-body font-semibold text-sm text-white" style={{ background: C.clay }}>🔍 Buscar</button>
+      <div className="flex items-center gap-3 px-4 py-3"><span>👥</span><div><div className="ff-body text-[10px] uppercase tracking-widest text-stone-400 font-semibold">Huéspedes</div><select value={guests} onChange={e=>setGuests(e.target.value)} className="ff-body text-sm bg-transparent outline-none cursor-pointer" style={{ color: C.ink }}><option value="">Para todos</option><option value="2">1–2 personas</option><option value="4">3–4 personas</option><option value="6">5–6 personas</option><option value="8">7 o más</option></select></div></div>
+      <button onClick={onSearch} className="rounded-[20px] px-6 py-3.5 flex items-center justify-center gap-2 ff-body font-semibold text-sm text-white" style={{ background: C.clay }}>🔍 Buscar</button>
     </div>
   );
 }
@@ -161,17 +160,30 @@ function CabinCard({ c }) {
 }
 
 function Home({ cabins, loading }) {
-  const [f, setF] = useState(null);
-  const FILTERS = [["pet","Pet friendly"],["pileta","Con pileta"],["parrilla","Con parrilla"],["grupos","Para grupos"]];
+  const [amen, setAmen] = useState([]);
+  const [zona, setZona] = useState("");
+  const [guests, setGuests] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [order, setOrder] = useState("");
+  const AMEN = [["pet","🐾 Pet friendly"],["pileta","🏊 Pileta"],["parrilla","🔥 Parrilla"],["wifi","📶 WiFi"]];
+  const zonas = [...new Set(cabins.map(c=>c.zone).filter(Boolean))].sort();
+  const capOf = (c) => { const caps=(c.units||[]).map(u=>u.capacity).filter(Boolean); return caps.length?Math.max(...caps):(c.capacity||0); };
+  const toggleAmen = (k) => setAmen(a => a.includes(k) ? a.filter(x=>x!==k) : [...a, k]);
   const match = (c) => {
-    if (!f) return true;
-    if (f === "pet") return c.pet_friendly;
-    if (f === "pileta") return (c.amenities||[]).includes("pileta");
-    if (f === "parrilla") return (c.amenities||[]).includes("parrilla");
-    if (f === "grupos") { const caps=(c.units||[]).map(u=>u.capacity); const mx=caps.length?Math.max(...caps):(c.capacity||0); return mx>=6; }
+    if (zona && c.zone !== zona) return false;
+    if (guests && capOf(c) < parseInt(guests,10)) return false;
+    if (maxPrice && (c.price||0) > parseInt(maxPrice,10)) return false;
+    for (const k of amen) { if (k==="pet") { if(!c.pet_friendly) return false; } else if (!(c.amenities||[]).includes(k)) return false; }
     return true;
   };
-  const show = cabins.filter(match);
+  let show = cabins.filter(match);
+  if (order==="asc") show = [...show].sort((a,b)=>(a.price||0)-(b.price||0));
+  else if (order==="desc") show = [...show].sort((a,b)=>(b.price||0)-(a.price||0));
+  const activeCount = amen.length + (zona?1:0) + (guests?1:0) + (maxPrice?1:0) + (order?1:0);
+  const clear = () => { setAmen([]); setZona(""); setGuests(""); setMaxPrice(""); setOrder(""); };
+  const onSearch = () => { const el=document.getElementById("aloj"); if(el) el.scrollIntoView({behavior:"smooth"}); };
+  const selCls = "ff-body text-sm rounded-full border bg-white px-3.5 py-2 cursor-pointer";
+  const selStyle = { borderColor:"rgba(62,79,63,0.25)", color:C.moss };
   return (
     <div>
       <section className="relative" style={{ background: C.paper }}>
@@ -179,19 +191,27 @@ function Home({ cabins, loading }) {
           <p className="ff-body text-[12px] uppercase tracking-[0.25em] font-semibold mb-4" style={{ color: C.sage }}>Sierras de Tandil · Buenos Aires</p>
           <h1 className="ff-display text-[44px] sm:text-7xl leading-[0.95]" style={{ color: C.ink }}>Respirá hondo,<br /><span className="italic" style={{ color: C.moss }}>llegaste a las sierras</span></h1>
           <p className="ff-body text-stone-500 max-w-md mx-auto mt-5 text-[15px] leading-relaxed">Cabañas con alma serrana para desconectar de verdad. Encontrá tu refugio entre cerros, silencio y cielo abierto.</p>
-          <div className="max-w-3xl mx-auto mt-9"><SearchCard /></div>
+          <div className="max-w-3xl mx-auto mt-9"><SearchCard guests={guests} setGuests={setGuests} onSearch={onSearch} /></div>
           <div className="flex flex-wrap gap-2 mt-5 justify-center">
-            {FILTERS.map(([k, l]) => <button key={k} onClick={() => setF(f === k ? null : k)} className="rounded-full px-4 py-2 ff-body text-sm border transition" style={f === k ? { background: C.moss, color: "white", borderColor: C.moss } : { borderColor: "rgba(62,79,63,0.25)", color: C.moss }}>{l}</button>)}
+            {AMEN.map(([k, l]) => <button key={k} onClick={() => toggleAmen(k)} className="rounded-full px-4 py-2 ff-body text-sm border transition" style={amen.includes(k) ? { background: C.moss, color: "white", borderColor: C.moss } : { borderColor: "rgba(62,79,63,0.25)", color: C.moss }}>{l}</button>)}
           </div>
         </div>
       </section>
       <Band text="Elegí tu refugio entre las sierras" />
       <section id="aloj" className="pb-16" style={{ background: C.paper }}>
         <div className="max-w-6xl mx-auto px-5 sm:px-6 pt-10">
-          <div className="mb-7"><h2 className="ff-display text-3xl" style={{ color: C.ink }}>Alojamientos elegidos</h2><p className="ff-body text-stone-500 text-[15px] mt-1">Una selección para empezar a soñar tu escapada.</p></div>
+          <div className="mb-5"><h2 className="ff-display text-3xl" style={{ color: C.ink }}>Alojamientos elegidos</h2><p className="ff-body text-stone-500 text-[15px] mt-1">Una selección para empezar a soñar tu escapada.</p></div>
+          <div className="flex flex-wrap items-center gap-2 mb-7">
+            <select value={zona} onChange={e=>setZona(e.target.value)} className={selCls} style={selStyle}><option value="">📍 Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}</select>
+            <select value={guests} onChange={e=>setGuests(e.target.value)} className={selCls} style={selStyle}><option value="">👥 Huéspedes</option><option value="2">1–2</option><option value="4">3–4</option><option value="6">5–6</option><option value="8">7+</option></select>
+            <select value={maxPrice} onChange={e=>setMaxPrice(e.target.value)} className={selCls} style={selStyle}><option value="">💲 Precio</option><option value="80000">Hasta $80.000</option><option value="120000">Hasta $120.000</option><option value="180000">Hasta $180.000</option></select>
+            <select value={order} onChange={e=>setOrder(e.target.value)} className={selCls} style={selStyle}><option value="">↕ Orden</option><option value="asc">Precio: menor a mayor</option><option value="desc">Precio: mayor a menor</option></select>
+            {activeCount>0 && <button onClick={clear} className="ff-body text-sm rounded-full px-3.5 py-2 border" style={{borderColor:"rgba(190,106,74,0.45)", color:C.clay}}>Limpiar ✕</button>}
+            <span className="ff-body text-sm text-stone-400 ml-auto">{show.length} {show.length===1?"lugar":"lugares"}</span>
+          </div>
           {loading ? <p className="ff-body text-stone-500 py-10 text-center">Cargando alojamientos…</p>
           : cabins.length === 0 ? <p className="ff-body text-stone-500 py-10 text-center">Pronto vas a ver los alojamientos acá.</p>
-          : show.length === 0 ? <p className="ff-body text-stone-500 py-10 text-center">No hay alojamientos con ese filtro. Probá otro.</p>
+          : show.length === 0 ? <p className="ff-body text-stone-500 py-10 text-center">No hay alojamientos con esos filtros. Probá aflojar alguno.</p>
           : <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{show.map((c, i) => <CabinCard key={i} c={c} />)}</div>}
         </div>
       </section>
