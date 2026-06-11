@@ -301,7 +301,7 @@ function ContactPage() {
 
 function App() {
   const [menu, setMenu] = useState(false);
-  const [view, setView] = useState("home");
+  const [view, setView] = useState(new URLSearchParams(location.search).get("view") || "home");
   const [data, setData] = useState({ loading: true, cabins: [], acts: [], food: [] });
   useEffect(() => {
     (async () => {

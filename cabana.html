@@ -80,6 +80,23 @@ function Calendar({ cursor, setCursor, blocked, ci, co, onDay, priceOf }) {
   );
 }
 
+function SiteHeader() {
+  const N = [["home","Hospedajes"],["qhacer","Actividades"],["gastro","Gastronomía"],["conoce","Conocé Tandil"]];
+  return (
+    <header className="relative z-30 border-b border-black/5" style={{background:C.paper}}>
+      <div className="max-w-6xl mx-auto px-5 sm:px-6 h-[58px] flex items-center justify-between gap-3">
+        <a href="index.html" className="flex items-center gap-2 shrink-0">
+          <div className="w-9 h-9 rounded-2xl grid place-items-center" style={{background:C.moss}}><svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="#E2A94E" strokeWidth="2" strokeLinejoin="round"><circle cx="17" cy="7" r="2.4" /><path d="M2 19 L9 9 L13 15 L16.5 11 L22 19 Z" /></svg></div>
+          <span className="ff-display text-lg tracking-tight" style={{color:C.ink}}>TandilStay</span>
+        </a>
+        <nav className="flex items-center gap-3 sm:gap-5 ff-body text-[13px] sm:text-[15px] overflow-x-auto" style={{color:C.ink}}>
+          {N.map(([k,l])=><a key={k} href={"index.html?view="+k} className="hover:opacity-60 whitespace-nowrap">{l}</a>)}
+        </nav>
+      </div>
+    </header>
+  );
+}
+
 function Nearby({ acts=[], food=[], cabins=[] }) {
   const IMGc = (x) => IMG(x.banner || (x.photos && x.photos[0]));
   const Strip = ({ kicker, title, items, href, sub }) => (items && items.length>0) ? (
@@ -123,6 +140,7 @@ function Landing({ c, acts=[], food=[] }) {
   const cover = c.banner || photos[0];
   return (
     <div style={{background:C.paper}}>
+      <SiteHeader />
       <div className="relative h-[58vh] min-h-[420px] overflow-hidden">
         <img src={IMG(cover)} className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-black/25" />
