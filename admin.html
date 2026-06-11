@@ -28,7 +28,7 @@ function App() {
   const [email,setEmail]=useState(""), [pass,setPass]=useState(""), [authErr,setAuthErr]=useState("");
   const [tab,setTab]=useState("usuarios");
   const [profiles,setProfiles]=useState([]);
-  const [nu,setNu]=useState({ email:"", password:"", role:"hospedaje", operator:"", max_listings:"" });
+  const [nu,setNu]=useState({ email:"", password:"", role:"hospedaje", operator:"", max_listings:"1" });
   const [msg,setMsg]=useState(""); const [busy,setBusy]=useState(false);
   const [counts,setCounts]=useState({});
 
@@ -47,7 +47,7 @@ function App() {
     const { data, error } = await db.functions.invoke("super-action", { body });
     setBusy(false);
     if(error || (data&&data.error)){ flash("Error: "+((data&&data.error)||error.message)); return; }
-    flash("Usuario creado ✓"); setNu({ email:"", password:"", role:"hospedaje", operator:"", max_listings:"" }); loadProfiles();
+    flash("Usuario creado ✓"); setNu({ email:"", password:"", role:"hospedaje", operator:"", max_listings:"1" }); loadProfiles();
   };
   const delUser=async(p)=>{
     if(session && p.id===session.user.id){ flash("No podés borrarte a vos misma"); return; }
