@@ -59,6 +59,11 @@ function App() {
     flash("Usuario borrado ✓"); loadProfiles();
   };
   const updateProfile=async(id,patch)=>{ await db.from("profiles").update(patch).eq("id",id); loadProfiles(); };
+  const billingStatus=(nd)=>{ if(!nd) return {label:"Sin pago",bg:"#ececec",fg:"#777"}; const t=new Date();t.setHours(0,0,0,0); const d=new Date(nd+"T00:00:00"); const days=Math.round((d-t)/86400000); if(days<0) return {label:"Vencido",bg:"#fde8e8",fg:"#b23b3b"}; if(days<=7) return {label:"Vence en "+days+"d",bg:"#fdf0d8",fg:"#9a6b1e"}; return {label:"Al día",bg:"#e7efe3",fg:C.moss}; };
+  const todayISO=()=>new Date().toISOString().slice(0,10);
+  const addMonthISO=(d)=>{ const x=new Date(d+"T00:00:00"); x.setMonth(x.getMonth()+1); return x.toISOString().slice(0,10); };
+  const markPaid=(p)=>{ const lp=todayISO(); updateProfile(p.id,{last_paid:lp,next_due:addMonthISO(lp)}); };
+  const copyUrl=(rel)=>{ try{ navigator.clipboard.writeText(new URL(rel,location.href).href); flash("Link copiado ✓"); }catch(e){ flash("No se pudo copiar"); } };
 
   if(!ready) return <div className="min-h-screen grid place-items-center ff-body" style={{background:C.paper,color:C.moss}}>Cargando…</div>;
   if(!session) return (
@@ -110,22 +115,61 @@ function App() {
             <div className="bg-white rounded-2xl border border-black/5 p-5">
               <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Usuarios ({profiles.length})</h3>
               <div className="space-y-3">
-                {profiles.map(p=>(
-                  <div key={p.id} className="border border-stone-200 rounded-xl p-3">
-                    <div className="ff-body text-sm font-semibold" style={{color:C.ink}}>{p.email}</div>
-                    <div className="flex gap-2 mt-2">
-                      <select value={p.role||"hospedaje"} onChange={e=>updateProfile(p.id,{role:e.target.value})} className="border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm bg-white">{ROLES.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select>
-                      <input defaultValue={p.operator||""} onBlur={e=>updateProfile(p.id,{operator:e.target.value})} placeholder="operador" className="flex-1 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
-                    </div>
-                    <div className="flex gap-2 mt-2 items-center">
-                      <div className="flex items-center gap-1.5">
-                        <span className="ff-body text-xs text-stone-500">Publicaciones:</span>
-                        <input defaultValue={p.max_listings??""} onBlur={e=>updateProfile(p.id,{max_listings:e.target.value===""?null:parseInt(e.target.value,10)})} placeholder="sin tope" className="w-20 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                {profiles.map(p=>{
+                  const rubro = p.role && p.role!=="admin" ? p.role : null;
+                  const landing = p.operator ? ("operador.html?op="+encodeURIComponent(p.operator)+(rubro?("&rubro="+rubro):"")) : null;
+                  const panelHref = PANELS[p.role] || null;
+                  const st = billingStatus(p.next_due);
+                  const initial = (p.operator||p.email||"?").trim().charAt(0).toUpperCase();
+                  const isMe = session && p.id===session.user.id;
+                  return (
+                  <div key={p.id} className="border border-stone-200 rounded-xl p-3.5">
+                    <div className="flex items-center gap-2.5">
+                      {p.logo ? <img src={p.logo} className="w-9 h-9 rounded-full object-cover shrink-0" /> : <div className="w-9 h-9 rounded-full grid place-items-center text-white ff-display text-sm shrink-0" style={{background:C.moss}}>{initial}</div>}
+                      <div className="min-w-0 flex-1">
+                        <div className="ff-body text-sm font-semibold truncate" style={{color:C.ink}}>{p.operator||"(sin operador)"}</div>
+                        <div className="ff-body text-xs text-stone-500 truncate">{p.email}</div>
                       </div>
-                      {!(session && p.id===session.user.id) && <button onClick={()=>delUser(p)} disabled={busy} className="ml-auto rounded-lg px-3 py-1.5 ff-body text-sm border border-rose-200 text-rose-600 disabled:opacity-50">🗑️ Borrar</button>}
+                      <span className="ff-body text-[11px] rounded-full px-2 py-0.5 shrink-0" style={{background:st.bg,color:st.fg}}>{st.label}</span>
+                    </div>
+
+                    <div className="flex gap-2 mt-3">
+                      <select value={p.role||"hospedaje"} onChange={e=>updateProfile(p.id,{role:e.target.value})} className="border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm bg-white">{ROLES.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select>
+                      <input defaultValue={p.operator||""} onBlur={e=>updateProfile(p.id,{operator:e.target.value})} placeholder="operador" className="flex-1 min-w-0 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="ff-body text-xs text-stone-500">Pub.</span>
+                        <input defaultValue={p.max_listings??""} onBlur={e=>updateProfile(p.id,{max_listings:e.target.value===""?null:parseInt(e.target.value,10)})} placeholder="∞" className="w-12 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                      </div>
+                    </div>
+
+                    {landing && (
+                      <div className="flex items-center gap-1.5 mt-2.5 bg-stone-50 rounded-lg px-2 py-1.5">
+                        <span className="ff-body text-xs text-stone-500 shrink-0">🔗</span>
+                        <span className="ff-body text-xs truncate flex-1" style={{color:C.ink}}>{landing}</span>
+                        <button onClick={()=>copyUrl(landing)} className="rounded-md px-2 py-1 ff-body text-xs border border-stone-300 text-stone-600 shrink-0">Copiar</button>
+                        <a href={landing} target="_blank" rel="noreferrer" className="rounded-md px-2 py-1 ff-body text-xs text-white shrink-0" style={{background:C.clay}}>Abrir front</a>
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap items-end gap-x-3 gap-y-2 mt-2.5">
+                      <div>
+                        <div className="ff-body text-[11px] text-stone-500 mb-0.5">Último pago</div>
+                        <input key={"lp"+(p.last_paid||"")} type="date" defaultValue={p.last_paid||""} onBlur={e=>updateProfile(p.id,{last_paid:e.target.value||null})} className="border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                      </div>
+                      <div>
+                        <div className="ff-body text-[11px] text-stone-500 mb-0.5">Próximo pago</div>
+                        <input key={"nd"+(p.next_due||"")} type="date" defaultValue={p.next_due||""} onBlur={e=>updateProfile(p.id,{next_due:e.target.value||null})} className="border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                      </div>
+                      <button onClick={()=>markPaid(p)} className="rounded-lg px-3 py-1.5 ff-body text-xs font-semibold text-white" style={{background:C.moss}}>✓ Pagó hoy</button>
+                    </div>
+
+                    <div className="flex items-center gap-3 mt-3">
+                      {panelHref && <a href={panelHref} target="_blank" rel="noreferrer" className="ff-body text-xs" style={{color:C.clay}}>Abrir su panel →</a>}
+                      {!isMe && <button onClick={()=>delUser(p)} disabled={busy} className="ml-auto rounded-lg px-3 py-1.5 ff-body text-sm border border-rose-200 text-rose-600 disabled:opacity-50">🗑️ Borrar</button>}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>

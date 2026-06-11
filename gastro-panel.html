@@ -133,7 +133,17 @@ function printQR(c){
 }
 
 function ProfileBar({ profile }) {
+  const [logo, setLogo] = useState("");
+  const [upLogo, setUpLogo] = useState(false);
   if(!profile) return null;
+  const shown = logo || profile.logo || "";
+  const onLogo = async (e) => {
+    const f=(e.target.files||[])[0]; if(!f) return; setUpLogo(true);
+    const path="logo-"+Date.now()+"-"+f.name.replace(/[^a-zA-Z0-9.]/g,"_");
+    const { error } = await db.storage.from("fotos").upload(path, f);
+    if(!error){ const { data } = db.storage.from("fotos").getPublicUrl(path); const url=data.publicUrl; if(profile._id) await db.from("profiles").update({logo:url}).eq("id", profile._id); setLogo(url); } else { alert("No se pudo subir el logo."); }
+    setUpLogo(false); e.target.value="";
+  };
   const RUBRO = { hospedaje:"Hospedaje", gastronomia:"Gastronomía", actividad:"Actividad", admin:"Admin" }[profile.role] || profile.role || "";
   const fmt = (s) => s ? s.split("-").reverse().join("/") : "—";
   let st = { label:"Pago sin registrar", bg:"#ececec", fg:"#777" };
@@ -143,7 +153,11 @@ function ProfileBar({ profile }) {
   const lim = profile.max_listings;
   return (
     <div className="bg-white rounded-2xl border border-black/5 p-4 mb-5 flex flex-wrap items-center gap-4">
-      <div className="w-12 h-12 rounded-full grid place-items-center text-white ff-display text-lg shrink-0" style={{background:C.moss}}>{initial}</div>
+      <label className="relative shrink-0 cursor-pointer" title="Subir / cambiar logo">
+        <div className="w-12 h-12 rounded-full grid place-items-center text-white ff-display text-lg overflow-hidden" style={{background:C.moss}}>{shown ? <img src={shown} className="w-full h-full object-cover" /> : initial}</div>
+        <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full grid place-items-center text-[10px] text-white border-2 border-white" style={{background:C.clay}}>{upLogo?"…":"✎"}</span>
+        <input type="file" accept="image/*" onChange={onLogo} disabled={upLogo} className="hidden" />
+      </label>
       <div className="min-w-0">
         <div className="ff-display text-lg leading-tight" style={{color:C.ink}}>{profile.operator||"Tu cuenta"}</div>
         <div className="ff-body text-xs text-stone-500">{profile._email} · {RUBRO} · {lim!=null?(lim+" publicación"+(lim===1?"":"es")):"sin tope"}</div>
@@ -162,7 +176,7 @@ function App() {
   const [email,setEmail]=useState(""), [pass,setPass]=useState(""), [authErr,setAuthErr]=useState("");
   const [list,setList]=useState([]), [editing,setEditing]=useState(null), [saving,setSaving]=useState(false), [toast,setToast]=useState(""), [profile,setProfile]=useState(null), [soloEditor,setSoloEditor]=useState(false);
   useEffect(()=>{ db.auth.getSession().then(({data})=>{setSession(data.session);setReady(true);}); const {data:sub}=db.auth.onAuthStateChange((_e,s)=>setSession(s)); return ()=>sub.subscription.unsubscribe(); },[]);
-  const load=async()=>{ const {data:{user}}=await db.auth.getUser(); const {data:prof}=await db.from("profiles").select("role,operator,max_listings,last_paid,next_due").eq("id",user.id).maybeSingle(); setProfile(prof ? {...prof, _email:user.email} : null); const isAdmin=prof&&prof.role==="admin"; if(prof&&!isAdmin){ const dest={hospedaje:"panel.html",gastronomia:"gastro-panel.html",actividad:"act-panel.html"}[prof.role]; if(dest&&dest!=="gastro-panel.html"){ window.location.replace(dest); return; } } const res=isAdmin?await db.from("restaurants").select("*").order("created_at",{ascending:false}):await db.from("restaurants").select("*").eq("operator",(prof&&prof.operator)||"___none___").order("created_at",{ascending:false}); const rows=res.data?res.data.map(fromRow):[]; setList(rows); const lim=prof?prof.max_listings:null; if(lim===1&&!isAdmin){ setSoloEditor(true); setEditing(rows[0]?rows[0]:{...EMPTY,operator:(prof&&prof.operator)||""}); } else setSoloEditor(false); };
+  const load=async()=>{ const {data:{user}}=await db.auth.getUser(); const {data:prof}=await db.from("profiles").select("role,operator,max_listings,last_paid,next_due,logo").eq("id",user.id).maybeSingle(); setProfile(prof ? {...prof, _email:user.email, _id:user.id} : null); const isAdmin=prof&&prof.role==="admin"; if(prof&&!isAdmin){ const dest={hospedaje:"panel.html",gastronomia:"gastro-panel.html",actividad:"act-panel.html"}[prof.role]; if(dest&&dest!=="gastro-panel.html"){ window.location.replace(dest); return; } } const res=isAdmin?await db.from("restaurants").select("*").order("created_at",{ascending:false}):await db.from("restaurants").select("*").eq("operator",(prof&&prof.operator)||"___none___").order("created_at",{ascending:false}); const rows=res.data?res.data.map(fromRow):[]; setList(rows); const lim=prof?prof.max_listings:null; if(lim===1&&!isAdmin){ setSoloEditor(true); setEditing(rows[0]?rows[0]:{...EMPTY,operator:(prof&&prof.operator)||""}); } else setSoloEditor(false); };
   useEffect(()=>{ if(session) load(); },[session]);
   const flash=(m)=>{ setToast(m); setTimeout(()=>setToast(""),2500); };
   const login=async()=>{ setAuthErr(""); const {error}=await db.auth.signInWithPassword({email,password:pass}); if(error) setAuthErr("No pudimos entrar. Revisá email y contraseña."); };
