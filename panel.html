@@ -39,10 +39,10 @@ const DOW = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
 const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const slugify = (s) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 
-const EMPTY = { name:"", operator:"", zone:"", whatsapp:"", blurb:"", capacity:2, bedrooms:1, bathrooms:1, price:0, weekendPrice:null, amenities:[], petFriendly:false, promoText:"", promos:[], blocked:[], overrides:{}, units:[], videos:[], banner:"", photos:[] };
+const EMPTY = { name:"", operator:"", zone:"", whatsapp:"", blurb:"", capacity:2, bedrooms:1, bathrooms:1, price:0, weekendPrice:null, amenities:[], petFriendly:false, promoText:"", promos:[], blocked:[], overrides:{}, units:[], videos:[], banner:"", photos:[], ical_urls:[] };
 
-const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, promoText:r.promo_text||"", promos:r.promos||[], blocked:r.blocked||[], overrides:r.overrides||{}, units:r.units||[], videos:r.videos||[], banner:r.banner||"", photos:r.photos||[] });
-const toRow = (c) => { const r = { slug: c.slug || slugify(c.name), name:c.name, operator:c.operator, zone:c.zone, whatsapp:c.whatsapp, blurb:c.blurb, capacity:c.capacity, bedrooms:c.bedrooms, bathrooms:c.bathrooms, price:c.price, weekend_price:c.weekendPrice, amenities:c.amenities, pet_friendly:c.petFriendly, promo_text:c.promoText, promos:c.promos, blocked:c.blocked, overrides:c.overrides, units:c.units, videos:c.videos, banner:c.banner, photos:c.photos }; if (c.id) r.id = c.id; return r; };
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, promoText:r.promo_text||"", promos:r.promos||[], blocked:r.blocked||[], overrides:r.overrides||{}, units:r.units||[], videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], ical_urls:r.ical_urls||[], ical_blocked:r.ical_blocked||[], ical_synced_at:r.ical_synced_at||null });
+const toRow = (c) => { const r = { slug: c.slug || slugify(c.name), name:c.name, operator:c.operator, zone:c.zone, whatsapp:c.whatsapp, blurb:c.blurb, capacity:c.capacity, bedrooms:c.bedrooms, bathrooms:c.bathrooms, price:c.price, weekend_price:c.weekendPrice, amenities:c.amenities, pet_friendly:c.petFriendly, promo_text:c.promoText, promos:c.promos, blocked:c.blocked, overrides:c.overrides, units:c.units, videos:c.videos, banner:c.banner, photos:c.photos, ical_urls:c.ical_urls||[] }; if (c.id) r.id = c.id; return r; };
 
 const nightlyPrice = (c,d) => (c.overrides && c.overrides[d]!=null ? c.overrides[d] : (isWeekend(d) && c.weekendPrice ? c.weekendPrice : c.price));
 
@@ -93,6 +93,23 @@ function Editor({ c, set }) {
   const [selDay,setSelDay]=useState(null);
   const [priceInput,setPriceInput]=useState("");
   const [uploading,setUploading]=useState(false);
+  const [syncing,setSyncing]=useState(false);
+  const [syncMsg,setSyncMsg]=useState("");
+  const fmtSync = (s) => { if(!s) return ""; const d=new Date(s); return d.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"})+" "+d.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}); };
+  const syncIcal = async () => {
+    if(!c.name){ setSyncMsg("Poné un nombre y guardá primero."); return; }
+    if(!(c.ical_urls||[]).length){ setSyncMsg("Pegá al menos un link de Booking o Airbnb."); return; }
+    setSyncing(true); setSyncMsg("");
+    const { data: saved, error: e1 } = await db.from("cabins").upsert(toRow(c)).select();
+    if(e1){ setSyncing(false); setSyncMsg("No se pudo guardar antes de sincronizar."); return; }
+    const slug = (saved && saved[0] && saved[0].slug) || c.slug;
+    const { data, error } = await db.functions.invoke("dynamic-action", { body:{ slug } });
+    setSyncing(false);
+    if(error || (data && data.error)){ setSyncMsg("No se pudo sincronizar. Revisá que el link sea el de exportar calendario (.ics)."); return; }
+    const { data: fresh } = await db.from("cabins").select("*").eq("slug",slug).maybeSingle();
+    if(fresh) set(fromRow(fresh));
+    setSyncMsg("Listo ✓ Se importaron "+((data&&data.count!=null)?data.count:0)+" fechas ocupadas.");
+  };
   const upload = async (e) => {
     const files = Array.from(e.target.files||[]);
     if(!files.length) return;
@@ -225,7 +242,8 @@ function Editor({ c, set }) {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-black/5 p-5 h-fit">
+      <div className="space-y-5 h-fit">
+      <div className="bg-white rounded-2xl border border-black/5 p-5">
         <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Calendario</h3>
         <div className="flex gap-2 mb-4">
           <button onClick={()=>{setMode("block");setSelDay(null);}} className={"flex-1 rounded-xl py-2 ff-body text-sm border "+(mode==="block"?"border-rose-300 text-rose-700 bg-rose-50":"border-stone-300 text-stone-600")}>🚫 Bloquear</button>
@@ -250,6 +268,17 @@ function Editor({ c, set }) {
           </div>
         )}
       </div>
+      <div className="bg-white rounded-2xl border border-black/5 p-5">
+        <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>🔄 Sincronizar con Booking / Airbnb</h3>
+        <p className="ff-body text-sm text-stone-500 mb-3">Pegá el link de "exportar calendario" (iCal / .ics) de Booking y/o Airbnb, uno por línea. Las fechas reservadas allá van a aparecer ocupadas acá solas.</p>
+        <textarea value={(c.ical_urls||[]).join("\n")} onChange={e=>set({...c, ical_urls: e.target.value.split("\n").map(s=>s.trim()).filter(Boolean)})} rows={3} placeholder="Pegá acá los links .ics (uno por línea)" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-xs resize-none" />
+        <div className="flex items-center justify-between gap-2 mt-3 flex-wrap">
+          <span className="ff-body text-xs text-stone-400">{c.ical_synced_at ? ("Última: "+fmtSync(c.ical_synced_at)+" · "+((c.ical_blocked||[]).length)+" fechas") : "Todavía sin sincronizar"}</span>
+          <button onClick={syncIcal} disabled={syncing} className="rounded-xl px-4 py-2 ff-body text-sm font-semibold text-white disabled:opacity-50" style={{background:C.moss}}>{syncing?"Sincronizando…":"🔄 Sincronizar ahora"}</button>
+        </div>
+        {syncMsg && <p className="ff-body text-xs mt-2" style={{color:C.clay}}>{syncMsg}</p>}
+      </div>
+    </div>
     </div>
   );
 }
