@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cómo cargar tu lugar · TandilStay</title>
+<meta name="description" content="Guía simple para operadores de TandilStay: cómo entrar, cargar tu lugar, subir fotos y publicar." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Crect%20width%3D%2724%27%20height%3D%2724%27%20rx%3D%276%27%20fill%3D%27%233E4F3F%27/%3E%3Ccircle%20cx%3D%2717%27%20cy%3D%277.5%27%20r%3D%272.2%27%20fill%3D%27%23E2A94E%27/%3E%3Cpath%20d%3D%27M3%2018%20L8.5%209%20L12%2013.5%20L15%2010%20L21%2018%20Z%27%20fill%3D%27none%27%20stroke%3D%27%23E2A94E%27%20stroke-width%3D%271.8%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E" />
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+:root{--paper:#F3EEE2;--ink:#2C2A24;--moss:#3E4F3F;--clay:#BE6A4A;--sun:#E2A94E;--sage:#8A9A82;--card:#FFFFFF}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Hanken Grotesk',sans-serif;background:var(--paper);color:var(--ink);line-height:1.6}
+.disp{font-family:'Fraunces',serif}
+a{color:var(--clay)}
+.top{position:sticky;top:0;z-index:10;background:rgba(243,238,226,.92);backdrop-filter:blur(6px);border-bottom:1px solid rgba(0,0,0,.06)}
+.top .in{max-width:760px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600}
+.logo{width:34px;height:34px;border-radius:11px;background:var(--moss);display:grid;place-items:center;flex:none}
+.back{font-size:14px;font-weight:600;text-decoration:none;white-space:nowrap}
+.wrap{max-width:760px;margin:0 auto;padding:30px 20px 70px}
+.kicker{font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:700;color:var(--clay)}
+h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,6vw,44px);line-height:1.05;margin:8px 0 10px}
+h2{font-family:'Fraunces',serif;font-weight:600;font-size:24px;margin:34px 0 14px}
+.lead{color:#6b6b60;font-size:17px;max-width:600px}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 4px}
+.pill{font-family:inherit;font-weight:600;font-size:14px;border:1px solid rgba(62,79,63,.25);background:#fff;color:var(--moss);border-radius:999px;padding:8px 16px;cursor:pointer}
+.pill.on{background:var(--moss);color:#fff;border-color:var(--moss)}
+.hint{font-size:13px;color:#8a8678;margin-top:6px}
+.steps{display:flex;flex-direction:column;gap:14px;margin-top:6px}
+.step{background:var(--card);border:1px solid rgba(0,0,0,.07);border-radius:16px;padding:16px 18px;display:flex;gap:14px}
+.num{flex:none;width:34px;height:34px;border-radius:50%;background:var(--moss);color:#fff;display:grid;place-items:center;font-family:'Fraunces',serif;font-weight:600}
+.step h3{font-size:16px;margin-bottom:2px}
+.step p{font-size:15px;color:#555}
+.tag{display:inline-block;background:var(--paper);border:1px solid rgba(0,0,0,.08);border-radius:7px;padding:1px 7px;font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap}
+.card{background:var(--card);border:1px solid rgba(0,0,0,.07);border-radius:16px;padding:18px 20px}
+ul.clean{list-style:none;display:flex;flex-direction:column;gap:9px}
+ul.clean li{padding-left:22px;position:relative;font-size:15px;color:#444}
+ul.clean li:before{content:"›";position:absolute;left:4px;color:var(--clay);font-weight:700}
+ul.clean li b{color:var(--ink)}
+.statusrow{display:flex;flex-direction:column;gap:10px}
+.status{display:flex;align-items:center;gap:12px;font-size:15px}
+.dot{width:12px;height:12px;border-radius:50%;flex:none}
+.faq{display:flex;flex-direction:column;gap:10px}
+.faq details{background:var(--card);border:1px solid rgba(0,0,0,.07);border-radius:14px;padding:4px 16px}
+.faq summary{cursor:pointer;font-weight:600;padding:12px 0;list-style:none}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary:before{content:"+ ";color:var(--clay);font-weight:700}
+.faq details[open] summary:before{content:"– "}
+.faq p{font-size:15px;color:#555;padding:0 0 14px}
+.note{background:#fbf6ec;border:1px solid #ecdcbe;border-radius:14px;padding:14px 16px;font-size:14.5px;color:#7a5a22;margin-top:14px}
+footer{text-align:center;color:#8a8678;font-size:13px;margin-top:46px}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="in">
+    <div class="brand">
+      <span class="logo"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#E2A94E" stroke-width="2" stroke-linejoin="round"><circle cx="17" cy="7" r="2.4"/><path d="M2 19 L9 9 L13 15 L16.5 11 L22 19 Z"/></svg></span>
+      <span>Centro de ayuda</span>
+    </div>
+    <a class="back" id="back" href="panel.html">← Volver a mi panel</a>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="kicker">Guía para operadores</div>
+  <h1>Cargar tu lugar es fácil</h1>
+  <p class="lead">No hace falta saber nada de tecnología. Seguí estos pasos y en unos minutos tu publicación queda lista y online. Elegí tu rubro para ver lo que te toca:</p>
+
+  <div class="pills">
+    <button class="pill" data-pill="hospedaje">🏡 Hospedaje</button>
+    <button class="pill" data-pill="gastronomia">🍴 Gastronomía</button>
+    <button class="pill" data-pill="actividad">🧭 Actividad</button>
+  </div>
+  <div class="hint">Estás viendo la guía de tu rubro. Podés cambiarla con los botones de arriba.</div>
+
+  <h2>Paso a paso</h2>
+  <div class="steps">
+    <div class="step"><div class="num">1</div><div><h3>Entrá a tu panel</h3><p>Usá el mail y la contraseña que te dimos (sin espacios). Cuando termines, tenés el botón <span class="tag">Salir</span> arriba a la derecha.</p></div></div>
+    <div class="step"><div class="num">2</div><div><h3>Abrí tu publicación</h3><p>Si tenés una sola, ya aparece lista para editar. Si tenés varias, tocá <span class="tag">+ Nuevo</span> para crear una, o <span class="tag">Editar</span> en la que quieras cambiar.</p></div></div>
+    <div class="step"><div class="num">3</div><div><h3>Completá los datos</h3><p>Nombre, ubicación, WhatsApp, precio y una buena descripción. Más abajo te dejo exactamente qué conviene poner en tu rubro.</p></div></div>
+    <div class="step"><div class="num">4</div><div><h3>Subí las fotos</h3><p>Tocá <span class="tag">🖼️ Subir banner</span> para la foto principal (la portada) y <span class="tag">📷 Subir fotos</span> para el resto. Se suben desde tu compu o celular, no necesitás ningún link. Si querés, sumá un video con <span class="tag">+ Agregar video</span> pegando el enlace de YouTube.</p></div></div>
+    <div class="step"><div class="num">5</div><div><h3>Guardá</h3><p>Botón <span class="tag">Guardar</span> arriba a la derecha. Cuando aparece <b>“Guardado ✓”</b>, ya está publicado.</p></div></div>
+    <div class="step"><div class="num">6</div><div><h3>Mirá cómo quedó</h3><p>Tocá <span class="tag">👁️ Ver sitio</span> para ver tu página tal como la ve un visitante. Si no ves un cambio recién hecho, refrescá la página.</p></div></div>
+  </div>
+
+  <h2>Qué cargar en tu lugar</h2>
+
+  <div class="card" data-rubro="hospedaje">
+    <ul class="clean">
+      <li><b>Nombre</b> del hospedaje.</li>
+      <li><b>Ubicación</b> (como en Google Maps), ej: <i>López de Osornio 1264, Tandil</i>.</li>
+      <li><b>WhatsApp</b> con código de país, ej: <i>+54 9 249 …</i> — es por donde te van a escribir para reservar.</li>
+      <li><b>Capacidad</b>, dormitorios y baños.</li>
+      <li><b>Precio por noche</b> (y precio de finde si es distinto).</li>
+      <li><b>Comodidades</b>: wifi, parrilla, pileta, cochera, desayuno… y si admite <b>mascotas</b>.</li>
+      <li><b>Promos</b> o mensaje libre (opcional), ej: <i>2x1 de lunes a jueves</i>.</li>
+      <li>Si dentro del mismo lugar tenés <b>varias cabañas/unidades</b>, cargalas en la sección de unidades.</li>
+    </ul>
+  </div>
+
+  <div class="card" data-rubro="gastronomia">
+    <ul class="clean">
+      <li><b>Nombre</b> del lugar.</li>
+      <li><b>Ubicación</b> (como en Google Maps).</li>
+      <li><b>WhatsApp / teléfono</b> de contacto.</li>
+      <li>Una <b>descripción</b> corta y rica del lugar.</li>
+      <li>Si tenés opciones <b>sin TACC</b> o <b>vegetarianas</b>, marcalo.</li>
+      <li><b>La carta</b>: con <span class="tag">+ Agregar plato</span> cargás cada plato con nombre, categoría (entradas, principales, postres…), precio, descripción y foto.</li>
+      <li>Después podés generar el <b>QR de tu carta</b> desde el panel, para imprimir y poner en la mesa.</li>
+    </ul>
+  </div>
+
+  <div class="card" data-rubro="actividad">
+    <ul class="clean">
+      <li><b>Nombre</b> de la actividad.</li>
+      <li><b>Punto de encuentro / ubicación</b>.</li>
+      <li><b>WhatsApp / teléfono</b> de contacto.</li>
+      <li>Una <b>descripción</b> de la experiencia.</li>
+      <li><b>Categoría</b> (trekking, cabalgata, alquiler de bicis, etc.).</li>
+      <li><b>Precio</b> y <b>duración</b>.</li>
+      <li><b>Horarios</b> y cómo se reserva.</li>
+      <li><b>Qué incluye</b>: sumá cada ítem con <span class="tag">+ Agregar ítem</span>.</li>
+    </ul>
+  </div>
+
+  <div class="note">📸 <b>Tip de fotos:</b> sacalas apaisadas (horizontales) y con buena luz. La portada es la que más se ve, así que poné ahí la mejor. Mostrá frente, interior y el entorno.</div>
+
+  <h2>Los estados de pago</h2>
+  <div class="card statusrow">
+    <div class="status"><span class="dot" style="background:#3E4F3F"></span><div><b>Al día</b> — está todo en orden.</div></div>
+    <div class="status"><span class="dot" style="background:#E2A94E"></span><div><b>Vence en X días</b> — se acerca el vencimiento, coordiná el pago.</div></div>
+    <div class="status"><span class="dot" style="background:#b23b3b"></span><div><b>Pago vencido</b> — figura impago. Cuando pagues, lo actualizamos y vuelve a verde.</div></div>
+    <p class="hint" style="margin-top:4px">Las fechas y el monto los maneja TandilStay; vos solo los ves en tu panel.</p>
+  </div>
+
+  <h2>Si algo no anda</h2>
+  <div class="faq">
+    <details><summary>No me deja entrar</summary><p>Revisá que el mail y la contraseña estén tal cual te los pasamos, sin espacios de más. Si copiás y pegás, fijate que no se cuele un espacio al final. Si seguís sin poder, escribinos.</p></details>
+    <details><summary>Hice un cambio y no lo veo</summary><p>Refrescá la página (o cerrá y volvé a abrir tu panel). A veces tarda unos segundos en aparecer.</p></details>
+    <details><summary>La foto no sube</summary><p>Probá con una imagen más liviana o en formato JPG. Si es muy grande, puede tardar; esperá a que diga “Subiendo…” y termine.</p></details>
+    <details><summary>Me equivoqué en algo que ya cargué</summary><p>Entrá a <span class="tag">Editar</span>, corregí lo que haga falta y tocá <span class="tag">Guardar</span>. Se puede cambiar todas las veces que quieras.</p></details>
+    <details><summary>Quiero cambiar mi logo</summary><p>Arriba del todo de tu panel está el círculo con tu inicial y un lapicito ✎. Tocalo y elegí la imagen de tu logo.</p></details>
+  </div>
+
+  <footer>¿Te trabaste con algo? Escribile a quien te dio el acceso a TandilStay.<br>TandilStay · Creado por Brote 🌱</footer>
+</div>
+
+<script>
+  var params=new URLSearchParams(location.search);
+  var rubro=params.get('rubro');
+  if(['hospedaje','gastronomia','actividad'].indexOf(rubro)<0) rubro='hospedaje';
+  var panelOf={hospedaje:'panel.html',gastronomia:'gastro-panel.html',actividad:'act-panel.html'};
+  function setRubro(r){
+    rubro=r;
+    document.querySelectorAll('[data-pill]').forEach(function(p){ p.classList.toggle('on', p.dataset.pill===r); });
+    document.querySelectorAll('[data-rubro]').forEach(function(b){ b.style.display = (b.dataset.rubro===r)?'':'none'; });
+    document.getElementById('back').setAttribute('href', panelOf[r]);
+  }
+  document.querySelectorAll('[data-pill]').forEach(function(p){ p.addEventListener('click',function(){ setRubro(p.dataset.pill); }); });
+  setRubro(rubro);
+</script>
+</body>
+</html>
