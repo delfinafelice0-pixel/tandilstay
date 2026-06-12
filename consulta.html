@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Consultá a varias cabañas · TandilStay</title>
+<meta name="description" content="Contanos qué buscás y mandá una sola consulta a todas las cabañas de Tandil que coinciden." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Crect%20width%3D%2724%27%20height%3D%2724%27%20rx%3D%276%27%20fill%3D%27%233E4F3F%27/%3E%3Ccircle%20cx%3D%2717%27%20cy%3D%277.5%27%20r%3D%272.2%27%20fill%3D%27%23E2A94E%27/%3E%3Cpath%20d%3D%27M3%2018%20L8.5%209%20L12%2013.5%20L15%2010%20L21%2018%20Z%27%20fill%3D%27none%27%20stroke%3D%27%23E2A94E%27%20stroke-width%3D%271.8%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="TandilStay" />
+<meta property="og:locale" content="es_AR" />
+<meta property="og:title" content="Consultá a varias cabañas · TandilStay" />
+<meta property="og:description" content="Contanos qué buscás y mandá una sola consulta a todas las cabañas de Tandil que coinciden." />
+<meta property="og:url" content="https://delfinafelice0-pixel.github.io/tandilstay/consulta.html" />
+<meta property="og:image" content="https://delfinafelice0-pixel.github.io/tandilstay/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="TandilStay" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Consultá a varias cabañas · TandilStay" />
+<meta name="twitter:description" content="Contanos qué buscás y mandá una sola consulta a todas las cabañas de Tandil que coinciden." />
+<meta name="twitter:image" content="https://delfinafelice0-pixel.github.io/tandilstay/og.png" />
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+.ff-display{font-family:'Fraunces',serif}.ff-body{font-family:'Hanken Grotesk',sans-serif}
+body{margin:0;background:#F3EEE2}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const C = { paper:"#F3EEE2", ink:"#2C2A24", moss:"#3E4F3F", clay:"#BE6A4A", sun:"#E2A94E" };
+const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=800&q=80`));
+const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
+const pad = (n) => String(n).padStart(2,"0");
+const parseD = (s) => (s ? new Date(s+"T00:00:00") : null);
+const addDay = (dt,n=1) => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()+n);
+const isoD = (dt) => `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+const fromRow = (r) => ({ slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:(r.whatsapp||"").replace(/\D/g,""), email:r.email||"", capacity:r.capacity||0, price:r.price||0, banner:r.banner||"", photos:r.photos||[], blocked:[...new Set([...(r.blocked||[]), ...(r.ical_blocked||[])])] });
+const isAvail = (c,ci,co) => { if(!ci||!co) return true; let d=parseD(ci); const e=parseD(co); if(e<=d) return true; while(d<e){ if(c.blocked.includes(isoD(d))) return false; d=addDay(d); } return true; };
+const fmtDate = (s) => { const d=parseD(s); return d? `${pad(d.getDate())}/${pad(d.getMonth()+1)}` : ""; };
+
+function Logo(){ return (
+  <a href="index.html" className="flex items-center gap-2.5 no-underline">
+    <span className="w-9 h-9 rounded-xl grid place-items-center" style={{background:C.moss}}>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#E2A94E" strokeWidth="2" strokeLinejoin="round"><circle cx="17" cy="7" r="2.4"/><path d="M2 19 L9 9 L13 15 L16.5 11 L22 19 Z"/></svg>
+    </span>
+    <span><span className="ff-display text-lg leading-none block" style={{color:C.ink}}>TandilStay</span><span className="ff-body text-[11px] text-stone-500">Tandil</span></span>
+  </a>
+); }
+
+function App(){
+  const [all,setAll]=useState(null);
+  const [zona,setZona]=useState(""), [huesp,setHuesp]=useState(""), [ci,setCi]=useState(""), [co,setCo]=useState(""), [presu,setPresu]=useState("");
+  const [nombre,setNombre]=useState(""), [contacto,setContacto]=useState(""), [msg,setMsg]=useState("");
+  const [results,setResults]=useState(null);
+
+  useEffect(()=>{ db.from("cabins").select("*").then(({data})=>setAll((data||[]).map(fromRow))); },[]);
+  const zonas = all ? [...new Set(all.map(c=>c.zone).filter(Boolean))].sort() : [];
+
+  const search = () => {
+    if(!all) return;
+    let l=[...all];
+    if(huesp) l=l.filter(c=>c.capacity>=Number(huesp));
+    if(presu) l=l.filter(c=>!c.price || c.price<=Number(presu));
+    if(zona) l=l.filter(c=>c.zone===zona);
+    if(ci&&co) l=l.filter(c=>isAvail(c,ci,co));
+    setResults(l);
+    setTimeout(()=>{ const el=document.getElementById("res"); if(el) el.scrollIntoView({behavior:"smooth"}); },60);
+  };
+
+  const lineas = () => {
+    const L=[];
+    if(ci&&co) L.push(`Fechas: ${ci} al ${co}`);
+    if(huesp) L.push(`Huéspedes: ${huesp}`);
+    if(zona) L.push(`Zona: ${zona}`);
+    if(presu) L.push(`Presupuesto máx. por noche: ${money(presu)}`);
+    return L;
+  };
+  const cuerpo = () => {
+    let t = "¡Hola! Estoy buscando alojamiento en Tandil y quería hacerles una consulta.\n\n";
+    const L=lineas(); if(L.length) t += L.join("\n")+"\n";
+    if(msg) t += `\n${msg}\n`;
+    t += `\nMis datos: ${nombre||"(sin nombre)"}`;
+    if(contacto) t += ` — ${contacto}`;
+    t += "\n\n¡Gracias!";
+    return t;
+  };
+
+  const conMail = results ? results.filter(c=>c.email) : [];
+  const conWa = results ? results.filter(c=>c.whatsapp) : [];
+  const mailtoUrl = () => `mailto:?bcc=${encodeURIComponent(conMail.map(c=>c.email).join(","))}&subject=${encodeURIComponent("Consulta de disponibilidad — Tandil")}&body=${encodeURIComponent(cuerpo())}`;
+  const waText = (c) => encodeURIComponent(`¡Hola! Vi ${c.name} en TandilStay y quería consultar disponibilidad.` + (ci&&co?` Fechas: ${ci} al ${co}.`:"") + (huesp?` Para ${huesp} personas.`:"") + (msg?` ${msg}`:"") + (nombre?` Soy ${nombre}.`:""));
+
+  const Field = ({label, children}) => (<label className="block"><span className="ff-body text-xs font-semibold tracking-wide uppercase text-stone-500">{label}</span><div className="mt-1">{children}</div></label>);
+  const inputC = "w-full border border-stone-300 rounded-xl px-3 py-2.5 ff-body text-sm bg-white";
+
+  return (
+    <div className="min-h-screen">
+      <header className="bg-[#F3EEE2]/90 backdrop-blur border-b border-black/5 sticky top-0 z-10">
+        <div className="max-w-3xl mx-auto px-5 py-3 flex items-center justify-between">
+          <Logo/>
+          <a href="index.html" className="ff-body text-sm font-semibold no-underline" style={{color:C.clay}}>← Volver</a>
+        </div>
+      </header>
+
+      <div className="max-w-3xl mx-auto px-5 py-8">
+        <p className="ff-body text-xs tracking-[0.2em] uppercase font-bold" style={{color:C.clay}}>Consulta a varias a la vez</p>
+        <h1 className="ff-display font-semibold mt-2" style={{color:C.ink, fontSize:"clamp(28px,5vw,40px)", lineHeight:1.05}}>Contanos qué buscás y te conectamos con las cabañas que coinciden</h1>
+        <p className="ff-body text-stone-600 mt-3">Completá el filtro, así tu consulta le llega solo a las cabañas que de verdad te sirven. Después la mandás a todas juntas por mail (o por WhatsApp a las que quieras).</p>
+
+        <div className="bg-white rounded-2xl border border-black/5 p-5 mt-6 space-y-4">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Field label="Llegada"><input type="date" value={ci} onChange={e=>setCi(e.target.value)} className={inputC} /></Field>
+            <Field label="Salida"><input type="date" value={co} onChange={e=>setCo(e.target.value)} className={inputC} /></Field>
+            <Field label="Huéspedes"><input type="number" min="1" value={huesp} onChange={e=>setHuesp(e.target.value)} placeholder="¿Cuántos son?" className={inputC} /></Field>
+            <Field label="Presupuesto máx. / noche"><input type="number" min="0" value={presu} onChange={e=>setPresu(e.target.value)} placeholder="Opcional" className={inputC} /></Field>
+            <Field label="Zona">
+              <select value={zona} onChange={e=>setZona(e.target.value)} className={inputC}>
+                <option value="">Cualquiera</option>
+                {zonas.map(z=><option key={z} value={z}>{z}</option>)}
+              </select>
+            </Field>
+          </div>
+          <div className="border-t border-stone-100 pt-4 grid sm:grid-cols-2 gap-4">
+            <Field label="Tu nombre"><input value={nombre} onChange={e=>setNombre(e.target.value)} className={inputC} /></Field>
+            <Field label="Tu WhatsApp o mail"><input value={contacto} onChange={e=>setContacto(e.target.value)} placeholder="Para que te respondan" className={inputC} /></Field>
+          </div>
+          <Field label="Mensaje (opcional)"><textarea value={msg} onChange={e=>setMsg(e.target.value)} rows={3} placeholder="Ej: somos 2 adultos y un bebé, buscamos algo con pileta…" className={inputC+" resize-none"} /></Field>
+          <button onClick={search} className="w-full rounded-xl py-3 ff-body font-semibold text-white" style={{background:C.moss}}>Buscar cabañas</button>
+        </div>
+
+        {results && (
+          <div id="res" className="mt-8">
+            {results.length===0 ? (
+              <div className="bg-white rounded-2xl border border-black/5 p-8 text-center">
+                <p className="ff-display text-xl" style={{color:C.ink}}>No encontramos cabañas con ese filtro</p>
+                <p className="ff-body text-stone-500 mt-2">Probá ampliando las fechas, los huéspedes o el presupuesto.</p>
+              </div>
+            ) : (
+              <>
+                <div className="rounded-2xl p-5 mb-5" style={{background:"#e7efe3"}}>
+                  <p className="ff-display text-xl" style={{color:C.moss}}>Encontramos {results.length} {results.length===1?"cabaña":"cabañas"} para vos</p>
+                  <p className="ff-body text-sm text-stone-600 mt-1">Mandá tu consulta a todas las que tienen mail con un solo envío (van en copia oculta, no se ven entre ellas).</p>
+                  {conMail.length>0 ? (
+                    <a href={mailtoUrl()} className="inline-block mt-3 rounded-xl px-5 py-3 ff-body font-semibold text-white no-underline" style={{background:C.moss}}>✉️ Enviar consulta por mail a {conMail.length} {conMail.length===1?"cabaña":"cabañas"}</a>
+                  ) : (
+                    <p className="ff-body text-sm mt-3 text-stone-500">Ninguna de estas cargó su mail todavía, pero podés escribirles por WhatsApp acá abajo 👇</p>
+                  )}
+                  <p className="ff-body text-xs text-stone-500 mt-2">Se abrirá tu app de mail con todo escrito; solo tocás “enviar”.</p>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {results.map(c=>(
+                    <div key={c.slug} className="bg-white rounded-2xl border border-black/5 overflow-hidden">
+                      <a href={`cabana.html?slug=${c.slug}`} className="block h-36 bg-stone-200" style={IMG(c.banner||c.photos[0])?{backgroundImage:`url(${IMG(c.banner||c.photos[0])})`,backgroundSize:"cover",backgroundPosition:"center"}:{}}></a>
+                      <div className="p-4">
+                        <h3 className="ff-display text-lg" style={{color:C.ink}}>{c.name}</h3>
+                        <p className="ff-body text-sm text-stone-500">{c.zone}</p>
+                        <p className="ff-body text-sm mt-1" style={{color:C.ink}}><span className="font-bold">{money(c.price)}</span> / noche · hasta {c.capacity}</p>
+                        <div className="flex gap-2 mt-3">
+                          {c.whatsapp && <a href={`https://wa.me/${c.whatsapp}?text=${waText(c)}`} target="_blank" rel="noreferrer" className="flex-1 text-center rounded-lg px-3 py-2 ff-body text-sm font-semibold text-white no-underline" style={{background:"#25D366"}}>WhatsApp</a>}
+                          <a href={`cabana.html?slug=${c.slug}`} className="rounded-lg px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600 no-underline">Ver</a>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        <p className="ff-body text-xs text-stone-400 text-center mt-10">TandilStay · Creado por Brote 🌱</p>
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
