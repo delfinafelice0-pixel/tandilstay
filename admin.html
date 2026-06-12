@@ -60,6 +60,7 @@ function App() {
   };
   const updateProfile=async(id,patch)=>{ await db.from("profiles").update(patch).eq("id",id); loadProfiles(); };
   const billingStatus=(nd)=>{ if(!nd) return {label:"Sin pago",bg:"#ececec",fg:"#777"}; const t=new Date();t.setHours(0,0,0,0); const d=new Date(nd+"T00:00:00"); const days=Math.round((d-t)/86400000); if(days<0) return {label:"Vencido",bg:"#fde8e8",fg:"#b23b3b"}; if(days<=7) return {label:"Vence en "+days+"d",bg:"#fdf0d8",fg:"#9a6b1e"}; return {label:"Al día",bg:"#e7efe3",fg:C.moss}; };
+  const fmtDate=(s)=> s ? new Date(s+"T00:00:00").toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric"}) : "—";
   const todayISO=()=>new Date().toISOString().slice(0,10);
   const addMonthISO=(d)=>{ const x=new Date(d+"T00:00:00"); x.setMonth(x.getMonth()+1); return x.toISOString().slice(0,10); };
   const markPaid=(p)=>{ const lp=todayISO(); updateProfile(p.id,{last_paid:lp,next_due:addMonthISO(lp)}); };
@@ -174,14 +175,74 @@ function App() {
             </div>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-3 gap-4">
-            {[["Hospedajes",counts.cabins,"panel.html"],["Gastronomía",counts.restaurants,"gastro-panel.html"],["Actividades",counts.activities,"act-panel.html"]].map(([l,n,href],i)=>(
-              <a key={i} href={href} className="bg-white rounded-2xl border border-black/5 p-6 block">
-                <div className="ff-display text-3xl" style={{color:C.ink}}>{n??"…"}</div>
-                <div className="ff-body text-stone-500">{l}</div>
-                <div className="ff-body text-sm mt-3" style={{color:C.clay}}>Abrir panel →</div>
-              </a>
-            ))}
+          <div className="space-y-6">
+            <div className="grid sm:grid-cols-3 gap-4">
+              {[["Hospedajes",counts.cabins,"panel.html"],["Gastronomía",counts.restaurants,"gastro-panel.html"],["Actividades",counts.activities,"act-panel.html"]].map(([l,n,href],i)=>(
+                <a key={i} href={href} className="bg-white rounded-2xl border border-black/5 p-6 block">
+                  <div className="ff-display text-3xl" style={{color:C.ink}}>{n??"…"}</div>
+                  <div className="ff-body text-stone-500">{l}</div>
+                  <div className="ff-body text-sm mt-3" style={{color:C.clay}}>Abrir panel →</div>
+                </a>
+              ))}
+            </div>
+
+            {(()=>{
+              const sortedByDue=[...profiles].filter(p=>p.role!=="admin").sort((a,b)=>{
+                if(!a.next_due&&!b.next_due) return 0;
+                if(!a.next_due) return 1;
+                if(!b.next_due) return -1;
+                return a.next_due<b.next_due?-1:a.next_due>b.next_due?1:0;
+              });
+              return (
+              <div className="bg-white rounded-2xl border border-black/5 p-5">
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                  <h3 className="ff-display text-lg" style={{color:C.ink}}>Cobros · vencimientos</h3>
+                  <span className="ff-body text-xs text-stone-500">{sortedByDue.length} operadores · el próximo a vencer va primero</span>
+                </div>
+                <div className="overflow-x-auto -mx-2 px-2">
+                  <table className="w-full ff-body text-sm border-collapse">
+                    <thead>
+                      <tr className="text-left text-stone-400 ff-body text-[11px] uppercase tracking-wide">
+                        <th className="py-2 pr-3 font-semibold">Operador</th>
+                        <th className="py-2 px-3 font-semibold">Rubro</th>
+                        <th className="py-2 px-3 font-semibold whitespace-nowrap">Último pago</th>
+                        <th className="py-2 px-3 font-semibold">Vence</th>
+                        <th className="py-2 px-3 font-semibold">Estado</th>
+                        <th className="py-2 pl-3 font-semibold text-right">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedByDue.length===0 && <tr><td colSpan="6" className="py-6 text-center text-stone-400">Todavía no hay operadores cargados.</td></tr>}
+                      {sortedByDue.map((p,idx)=>{
+                        const st=billingStatus(p.next_due);
+                        const rubroLabel=(ROLES.find(r=>r[0]===p.role)||[null,"—"])[1];
+                        const initial=(p.operator||p.email||"?").trim().charAt(0).toUpperCase();
+                        const top=idx===0 && !!p.next_due;
+                        return (
+                        <tr key={p.id} className="border-t border-stone-100" style={top?{background:"#fbf6ec"}:{}}>
+                          <td className="py-2.5 pr-3">
+                            <div className="flex items-center gap-2">
+                              {p.logo ? <img src={p.logo} className="w-7 h-7 rounded-full object-cover shrink-0" /> : <div className="w-7 h-7 rounded-full grid place-items-center text-white ff-display text-xs shrink-0" style={{background:C.moss}}>{initial}</div>}
+                              <div className="min-w-0">
+                                <div className="font-semibold truncate" style={{color:C.ink}}>{p.operator||"(sin operador)"}{top && <span className="ml-1.5 text-[10px] font-semibold" style={{color:C.clay}}>⏰ próximo</span>}</div>
+                                <div className="text-[11px] text-stone-400 truncate">{p.email}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-3 text-stone-600 whitespace-nowrap">{rubroLabel}</td>
+                          <td className="py-2.5 px-3 text-stone-600 whitespace-nowrap">{fmtDate(p.last_paid)}</td>
+                          <td className="py-2.5 px-3 whitespace-nowrap font-semibold" style={{color:C.ink}}>{fmtDate(p.next_due)}</td>
+                          <td className="py-2.5 px-3 whitespace-nowrap"><span className="ff-body text-[11px] rounded-full px-2 py-0.5" style={{background:st.bg,color:st.fg}}>{st.label}</span></td>
+                          <td className="py-2.5 pl-3 text-right whitespace-nowrap"><button onClick={()=>markPaid(p)} className="rounded-lg px-2.5 py-1 ff-body text-xs font-semibold text-white" style={{background:C.moss}}>✓ Pagó hoy</button></td>
+                        </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              );
+            })()}
           </div>
         )}
       </div>
