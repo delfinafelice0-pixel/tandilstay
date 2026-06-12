@@ -167,7 +167,7 @@ function App() {
   useEffect(()=>{
     const slug=new URLSearchParams(location.search).get("slug");
     (async()=>{
-      if(slug){ const [r,cab,act]=await Promise.all([db.from("restaurants").select("*").eq("slug",slug).limit(1),db.from("cabins").select("slug,name,zone,price,banner,photos").order("created_at",{ascending:false}),db.from("activities").select("slug,name,category,duration,banner,photos").order("created_at",{ascending:false})]); if(r.error){setState({error:true});return;} if(r.data&&r.data[0]) setState({c:fromRow(r.data[0]),cabins:cab.data||[],acts:act.data||[]}); else setState({notfound:true}); db.rpc("bump_view",{p_rubro:"gastronomia",p_slug:slug}); }
+      if(slug){ const [r,cab,act]=await Promise.all([db.from("restaurants").select("*").eq("slug",slug).limit(1),db.from("cabins").select("slug,name,zone,price,banner,photos").order("created_at",{ascending:false}),db.from("activities").select("slug,name,category,duration,banner,photos").order("created_at",{ascending:false})]); if(r.error){setState({error:true});return;} if(r.data&&r.data[0]) setState({c:fromRow(r.data[0]),cabins:cab.data||[],acts:act.data||[]}); else setState({notfound:true}); db.rpc("bump_view",{p_rubro:"gastronomia",p_slug:slug}).then(()=>{}); }
       else { const {data}=await db.from("restaurants").select("slug,name,zone,banner,photos").order("created_at",{ascending:false}); setState({listing:data||[]}); }
     })();
   },[]);

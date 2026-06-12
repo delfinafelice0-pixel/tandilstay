@@ -256,7 +256,7 @@ function App() {
         ]);
         if(cab.error){ setState({error:true}); return; }
         if(cab.data && cab.data[0]) setState({ cabin: fromRow(cab.data[0]), acts: act.data||[], food: res.data||[] }); else setState({ notfound:true });
-        db.rpc("bump_view",{ p_rubro:"hospedaje", p_slug:slug });
+        db.rpc("bump_view",{ p_rubro:"hospedaje", p_slug:slug }).then(()=>{});
       } else {
         const { data } = await db.from("cabins").select("slug,name,zone,price,photos").order("created_at",{ascending:false});
         setState({ listing: data||[] });
