@@ -335,6 +335,7 @@ function App() {
   const [soloEditor,setSoloEditor]=useState(false);
   const [toast,setToast]=useState("");
   const [profile,setProfile]=useState(null);
+  const [views,setViews]=useState({});
 
   useEffect(()=>{
     db.auth.getSession().then(({data})=>{ setSession(data.session); setAuthReady(true); });
@@ -357,6 +358,7 @@ function App() {
       : await db.from("cabins").select("*").eq("operator",(prof&&prof.operator)||"___none___").order("created_at",{ascending:false});
     const rows = (!res.error && res.data) ? res.data.map(fromRow) : [];
     setList(rows);
+    db.rpc("my_views").then(({data})=>{ const vm={}; (data||[]).forEach(r=>{ if(r.rubro==="hospedaje") vm[r.slug]=r.total; }); setViews(vm); });
     const lim = prof ? prof.max_listings : null;
     if(lim===1 && !isAdmin){ setSoloEditor(true); setEditing(rows[0] ? rows[0] : {...EMPTY, operator:(prof&&prof.operator)||""}); }
     else setSoloEditor(false);
@@ -450,6 +452,7 @@ function App() {
                   <p className="ff-body text-sm text-stone-500">{c.zone}</p>
                   {c.operator && <a href={"operador.html?op="+encodeURIComponent(c.operator)} target="_blank" rel="noreferrer" className="ff-body text-xs" style={{color:C.clay}}>👤 {c.operator}</a>}
                   <p className="ff-body text-sm mt-1" style={{color:C.ink}}><span className="font-bold">{money(c.price)}</span> / noche · hasta {c.capacity}</p>
+                  <p className="ff-body text-xs text-stone-400 mt-1">👁 {views[c.slug]||0} visitas</p>
                   <div className="flex gap-2 mt-3">
                     <button onClick={()=>setEditing(c)} className="flex-1 rounded-lg py-2 ff-body text-sm font-semibold text-white" style={{background:C.moss}}>Editar</button>
                     <a href={c.operator ? "operador.html?op="+encodeURIComponent(c.operator)+"&rubro=hospedaje" : "cabana.html?slug="+c.slug} target="_blank" rel="noreferrer" className="rounded-lg px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">👁️ Ver</a>
