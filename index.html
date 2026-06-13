@@ -216,6 +216,17 @@ function Home({ cabins, loading }) {
         </div>
       </section>
       <Band text="Elegí tu refugio entre las sierras" />
+      <a href="consulta.html" className="block no-underline">
+        <div className="w-full px-5 py-7" style={{ background: C.clay }}>
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <div>
+              <p className="ff-display text-2xl sm:text-[28px] text-white leading-tight">¿No sabés cuál elegir?</p>
+              <p className="ff-body text-white/85 text-[15px] mt-1">Contanos qué buscás y mandá una sola consulta a todas las cabañas que coinciden.</p>
+            </div>
+            <span className="shrink-0 rounded-full px-6 py-3 ff-body font-semibold whitespace-nowrap" style={{ background: C.sun, color: C.ink }}>✉️ Consultar a varias</span>
+          </div>
+        </div>
+      </a>
       <section id="aloj" className="pb-16" style={{ background: C.paper }}>
         <div className="max-w-6xl mx-auto px-5 sm:px-6 pt-10">
           <div className="mb-5"><h2 className="ff-display text-3xl" style={{ color: C.ink }}>Alojamientos elegidos</h2><p className="ff-body text-stone-500 text-[15px] mt-1">Una selección para empezar a soñar tu escapada.</p></div>
