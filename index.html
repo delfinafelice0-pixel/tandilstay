@@ -186,7 +186,7 @@ function Home({ cabins, loading, go }) {
       <section className="relative overflow-hidden flex items-end h-screen min-h-[600px]" style={{ height:"100svh" }}>
         <div className="absolute inset-0 kb" style={{ backgroundImage:`url(${HERO_IMG})`, backgroundSize:"cover", backgroundPosition:"center" }}></div>
         <div className="absolute inset-0" style={{ background:"linear-gradient(180deg,rgba(20,24,20,0.34) 0%,rgba(20,24,20,0) 32%,rgba(20,24,20,0.12) 64%,rgba(18,22,18,0.74) 100%)" }}></div>
-        <div className="relative z-10 max-w-6xl mx-auto w-full px-5 sm:px-6 pb-[74px] text-white">
+        <div className="relative z-10 max-w-6xl mx-auto w-full px-5 sm:px-6 pb-32 sm:pb-40 text-white">
           <p className="rise ff-body text-[12px] uppercase tracking-[0.3em] font-semibold text-white/85">Hospedaje · Gastronomía · Actividades</p>
           <h1 className="rise ff-display text-[44px] sm:text-7xl lg:text-[88px] leading-[1.02] mt-5 max-w-[16ch]" style={{ fontWeight:300, letterSpacing:"-0.02em", animationDelay:".08s" }}>Descubrí Tandil, <span className="italic">sin apuro.</span></h1>
           <p className="rise ff-body text-white/90 max-w-[44ch] mt-6 text-[16px] sm:text-[19px]" style={{ animationDelay:".16s" }}>Los lugares más lindos para dormir, comer y perderte entre las sierras — elegidos uno por uno.</p>
@@ -195,6 +195,27 @@ function Home({ cabins, loading, go }) {
             <a href="consulta.html" className="navlink ff-body text-[15px] text-white/90">¿No sabés cuál elegir? →</a>
           </div>
           <div className="rise mt-12" style={{ animationDelay:".32s" }}><Horizon color="#fff" /></div>
+        </div>
+      </section>
+
+      {/* BUSCADOR */}
+      <section className="px-5 sm:px-6 relative z-20 -mt-20 sm:-mt-16" style={{ background:"transparent" }}>
+        <div className="reveal max-w-4xl mx-auto bg-white rounded-[26px] border border-black/5 p-2.5 flex flex-col sm:flex-row items-stretch gap-1" style={{ boxShadow:"0 36px 80px -44px rgba(62,79,63,0.6)" }}>
+          <div className="flex-1 px-5 py-3">
+            <div className="ff-body text-[10px] uppercase tracking-[0.22em] text-stone-400 font-semibold mb-1">Zona</div>
+            <select value={zona} onChange={e=>setZona(e.target.value)} className="w-full ff-body text-[15px] bg-transparent outline-none cursor-pointer" style={{ color:C.ink }}><option value="">Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}</select>
+          </div>
+          <div className="hidden sm:block w-px bg-stone-200 my-3"></div>
+          <div className="flex-1 px-5 py-3">
+            <div className="ff-body text-[10px] uppercase tracking-[0.22em] text-stone-400 font-semibold mb-1">Huéspedes</div>
+            <select value={guests} onChange={e=>setGuests(e.target.value)} className="w-full ff-body text-[15px] bg-transparent outline-none cursor-pointer" style={{ color:C.ink }}><option value="">Para todos</option><option value="2">1–2 personas</option><option value="4">3–4 personas</option><option value="6">5–6 personas</option><option value="8">7 o más</option></select>
+          </div>
+          <div className="hidden sm:block w-px bg-stone-200 my-3"></div>
+          <div className="flex-1 px-5 py-3">
+            <div className="ff-body text-[10px] uppercase tracking-[0.22em] text-stone-400 font-semibold mb-1">Precio</div>
+            <select value={maxPrice} onChange={e=>setMaxPrice(e.target.value)} className="w-full ff-body text-[15px] bg-transparent outline-none cursor-pointer" style={{ color:C.ink }}><option value="">Cualquiera</option><option value="80000">Hasta $80.000</option><option value="120000">Hasta $120.000</option><option value="180000">Hasta $180.000</option></select>
+          </div>
+          <button onClick={goAloj} className="rounded-[20px] px-7 py-4 flex items-center justify-center gap-2 ff-body font-semibold text-[15px] text-white transition-transform duration-500 hover:-translate-y-0.5" style={{ background:C.moss }}>🔍 Buscar</button>
         </div>
       </section>
 
@@ -220,11 +241,8 @@ function Home({ cabins, loading, go }) {
           <h2 className="ff-display text-3xl sm:text-5xl mt-3 leading-[1.04]" style={{ color: C.ink, fontWeight:300 }}>Lugares para quedarte<br className="hidden sm:block" /> con ganas de volver.</h2>
         </div>
         <div className="reveal flex flex-wrap items-center gap-2 mb-9">
-          <select value={zona} onChange={e=>setZona(e.target.value)} className={selCls} style={selStyle}><option value="">Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}</select>
-          <select value={guests} onChange={e=>setGuests(e.target.value)} className={selCls} style={selStyle}><option value="">Huéspedes</option><option value="2">1–2</option><option value="4">3–4</option><option value="6">5–6</option><option value="8">7+</option></select>
-          <select value={maxPrice} onChange={e=>setMaxPrice(e.target.value)} className={selCls} style={selStyle}><option value="">Precio</option><option value="80000">Hasta $80.000</option><option value="120000">Hasta $120.000</option><option value="180000">Hasta $180.000</option></select>
           <select value={order} onChange={e=>setOrder(e.target.value)} className={selCls} style={selStyle}><option value="">Ordenar</option><option value="asc">Precio: menor a mayor</option><option value="desc">Precio: mayor a menor</option></select>
-          {activeCount>0 && <button onClick={clear} className="ff-body text-[13px] rounded-full px-4 py-2 border" style={{ borderColor:"rgba(190,106,74,0.4)", color:C.clay }}>Limpiar ✕</button>}
+          {activeCount>0 && <button onClick={clear} className="ff-body text-[13px] rounded-full px-4 py-2 border" style={{ borderColor:"rgba(190,106,74,0.4)", color:C.clay }}>Limpiar filtros ✕</button>}
           <span className="ff-body text-[13px] text-stone-400 ml-auto">{show.length} {show.length===1?"lugar":"lugares"}</span>
         </div>
         {loading ? <p className="ff-body text-stone-500 py-12 text-center">Cargando alojamientos…</p>
@@ -269,13 +287,31 @@ function PageTitle({ kicker, title, sub }) {
 }
 
 function ActivitiesPage({ acts, loading }) {
+  const [zona, setZona] = useState("");
+  const [cat, setCat] = useState("");
+  const zonas = [...new Set(acts.map(a=>a.zone).filter(Boolean))].sort();
+  const cats = [...new Set(acts.map(a=>a.category).filter(Boolean))].sort();
+  const show = acts.filter(a => (!zona || a.zone===zona) && (!cat || a.category===cat));
+  const active = (zona?1:0)+(cat?1:0);
+  const clear = () => { setZona(""); setCat(""); };
+  const selCls = "ff-body text-[13px] rounded-full border bg-transparent px-4 py-2 cursor-pointer";
+  const selStyle = { borderColor:"rgba(36,34,28,0.18)", color:C.moss };
   return (
     <div style={{ background: C.paper }}>
       <PageTitle kicker="Paseos & aventura" title="Qué hacer en Tandil" sub="Cerros, agua, historia y aire puro. Estos son los imperdibles para tu estadía." />
       <section className="max-w-6xl mx-auto px-5 sm:px-6 pb-24">
+        {!loading && acts.length>0 && (
+          <div className="reveal flex flex-wrap items-center gap-2 mb-9">
+            <select value={cat} onChange={e=>setCat(e.target.value)} className={selCls} style={selStyle}><option value="">Todas las categorías</option>{cats.map(z=><option key={z} value={z}>{z}</option>)}</select>
+            <select value={zona} onChange={e=>setZona(e.target.value)} className={selCls} style={selStyle}><option value="">Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}</select>
+            {active>0 && <button onClick={clear} className="ff-body text-[13px] rounded-full px-4 py-2 border" style={{ borderColor:"rgba(190,106,74,0.4)", color:C.clay }}>Limpiar ✕</button>}
+            <span className="ff-body text-[13px] text-stone-400 ml-auto">{show.length} {show.length===1?"actividad":"actividades"}</span>
+          </div>
+        )}
         {loading ? <p className="ff-body text-stone-500 text-center py-10">Cargando…</p>
         : acts.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">Pronto vas a ver las actividades acá.</p>
-        : <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">{acts.map((a, i) => (
+        : show.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">No hay actividades con esos filtros. Probá aflojar alguno.</p>
+        : <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">{show.map((a, i) => (
             <a key={i} href={"actividad.html?slug=" + a.slug} className="group block">
               <div className="aspect-[4/3] rounded-md overflow-hidden" style={{ background: C.mist }}><img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} className="w-full h-full object-cover imgzoom" /></div>
               <div className="mt-4">{a.category && <div className="ff-body text-[11px] uppercase tracking-[0.24em] font-semibold" style={{ color: C.sage }}>{a.category}</div>}<h3 className="ff-display text-xl mt-1" style={{ color: C.ink, fontWeight:400 }}>{a.name}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed clamp2">{a.blurb}</p>{a.duration && <p className="ff-body text-[13px] text-stone-400 mt-2">⏱ {a.duration}</p>}</div>
@@ -287,13 +323,30 @@ function ActivitiesPage({ acts, loading }) {
 }
 
 function FoodPage({ food, loading }) {
+  const [zona, setZona] = useState("");
+  const [diet, setDiet] = useState("");
+  const zonas = [...new Set(food.map(f=>f.zone).filter(Boolean))].sort();
+  const show = food.filter(a => (!zona || a.zone===zona) && (diet!=="sintacc" || a.sin_tacc) && (diet!=="veggie" || a.vegetariano));
+  const active = (zona?1:0)+(diet?1:0);
+  const clear = () => { setZona(""); setDiet(""); };
+  const selCls = "ff-body text-[13px] rounded-full border bg-transparent px-4 py-2 cursor-pointer";
+  const selStyle = { borderColor:"rgba(36,34,28,0.18)", color:C.moss };
   return (
     <div style={{ background: C.paper }}>
       <PageTitle kicker="Sabores serranos" title="Dónde comer en Tandil" sub="De las picadas con salame con Denominación de Origen a la cervecería artesanal: comé como un local." />
       <section className="max-w-6xl mx-auto px-5 sm:px-6 pb-24">
+        {!loading && food.length>0 && (
+          <div className="reveal flex flex-wrap items-center gap-2 mb-9">
+            <select value={zona} onChange={e=>setZona(e.target.value)} className={selCls} style={selStyle}><option value="">Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}</select>
+            <select value={diet} onChange={e=>setDiet(e.target.value)} className={selCls} style={selStyle}><option value="">Toda la cocina</option><option value="sintacc">Sin TACC</option><option value="veggie">Vegetariano</option></select>
+            {active>0 && <button onClick={clear} className="ff-body text-[13px] rounded-full px-4 py-2 border" style={{ borderColor:"rgba(190,106,74,0.4)", color:C.clay }}>Limpiar ✕</button>}
+            <span className="ff-body text-[13px] text-stone-400 ml-auto">{show.length} {show.length===1?"lugar":"lugares"}</span>
+          </div>
+        )}
         {loading ? <p className="ff-body text-stone-500 text-center py-10">Cargando…</p>
         : food.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">Pronto vas a ver los lugares acá.</p>
-        : <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">{food.map((a, i) => (
+        : show.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">No hay lugares con esos filtros. Probá aflojar alguno.</p>
+        : <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">{show.map((a, i) => (
             <a key={i} href={"resto.html?slug=" + a.slug} className="group block">
               <div className="aspect-[4/3] rounded-md overflow-hidden" style={{ background: C.mist }}><img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} className="w-full h-full object-cover imgzoom" /></div>
               <div className="mt-4"><div className="flex gap-1.5 mb-1">{a.sin_tacc && <span className="ff-body text-[11px] rounded-full px-2 py-0.5" style={{ background:"#eef2e8", color:C.moss }}>Sin TACC</span>}{a.vegetariano && <span className="ff-body text-[11px] rounded-full px-2 py-0.5" style={{ background:"#eef2e8", color:C.moss }}>Veggie</span>}</div><h3 className="ff-display text-xl" style={{ color: C.ink, fontWeight:400 }}>{a.name}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed clamp2">{a.blurb}</p></div>
