@@ -29,6 +29,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
 .ff-display{font-family:'Fraunces',serif}.ff-body{font-family:'Hanken Grotesk',sans-serif}
 body{margin:0}
+
+html{scroll-behavior:smooth}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.lift{transition:transform .4s cubic-bezier(.2,.7,.2,1),box-shadow .4s ease}
+.lift:hover{transform:translateY(-6px);box-shadow:0 18px 42px -20px rgba(44,42,36,.45)}
+@media (prefers-reduced-motion: reduce){.reveal{opacity:1!important;transform:none!important;transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
@@ -121,7 +128,7 @@ function Nearby({ acts=[], food=[], cabins=[] }) {
       <h3 className="ff-display text-2xl mb-4" style={{color:C.ink}}>{title}</h3>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {items.slice(0,4).map((x,i)=>(
-          <a key={i} href={href(x)} className="block bg-white rounded-2xl border border-black/5 overflow-hidden hover:shadow-md transition">
+          <a key={i} href={href(x)} className="lift block bg-white rounded-2xl border border-black/5 overflow-hidden hover:shadow-md transition">
             <div className="aspect-[16/11] bg-stone-200"><img src={IMGc(x)} className="w-full h-full object-cover" /></div>
             <div className="p-3"><h4 className="ff-display text-base leading-tight" style={{color:C.ink}}>{x.name}</h4>{sub(x) && <p className="ff-body text-xs text-stone-500 mt-0.5">{sub(x)}</p>}</div>
           </a>
@@ -132,7 +139,7 @@ function Nearby({ acts=[], food=[], cabins=[] }) {
   if((!acts||!acts.length) && (!food||!food.length) && (!cabins||!cabins.length)) return null;
   return (
     <section style={{background:C.paper}}>
-      <div className="max-w-5xl mx-auto px-5 sm:px-6 py-12 border-t border-black/5">
+      <div className="reveal max-w-5xl mx-auto px-5 sm:px-6 py-12 border-t border-black/5">
         <h2 className="ff-display text-3xl mb-1" style={{color:C.ink}}>Para tu escapada en Tandil</h2>
         <p className="ff-body text-stone-500 mb-8">Lo mejor de la zona para completar tu estadía.</p>
         <Strip kicker="Dónde quedarte" title="Hospedajes" items={cabins} href={x=>"cabana.html?slug="+x.slug} sub={x=>x.zone||""} />
@@ -291,6 +298,18 @@ function App() {
   );
 }
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+<script>
+(function(){
+  function setup(){
+    if(!('IntersectionObserver' in window)){document.querySelectorAll('.reveal').forEach(function(e){e.classList.add('in')});return;}
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:0.12,rootMargin:'0px 0px -6% 0px'});
+    function scan(){document.querySelectorAll('.reveal:not(.in)').forEach(function(el){io.observe(el);});}
+    scan();
+    new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
+  }
+  if(document.readyState!=='loading'){setup();}else{document.addEventListener('DOMContentLoaded',setup);}
+})();
 </script>
 </body>
 </html>

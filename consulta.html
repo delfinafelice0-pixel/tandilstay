@@ -29,6 +29,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
 .ff-display{font-family:'Fraunces',serif}.ff-body{font-family:'Hanken Grotesk',sans-serif}
 body{margin:0;background:#F3EEE2}
+
+html{scroll-behavior:smooth}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.lift{transition:transform .4s cubic-bezier(.2,.7,.2,1),box-shadow .4s ease}
+.lift:hover{transform:translateY(-6px);box-shadow:0 18px 42px -20px rgba(44,42,36,.45)}
+@media (prefers-reduced-motion: reduce){.reveal{opacity:1!important;transform:none!important;transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
@@ -119,7 +126,7 @@ function App(){
         <h1 className="ff-display font-semibold mt-2" style={{color:C.ink, fontSize:"clamp(28px,5vw,40px)", lineHeight:1.05}}>Contanos qué buscás y te conectamos con las cabañas que coinciden</h1>
         <p className="ff-body text-stone-600 mt-3">Completá el filtro, así tu consulta le llega solo a las cabañas que de verdad te sirven. Después la mandás a todas juntas por mail (o por WhatsApp a las que quieras).</p>
 
-        <div className="bg-white rounded-2xl border border-black/5 p-5 mt-6 space-y-4">
+        <div className="reveal bg-white rounded-2xl border border-black/5 p-5 mt-6 space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label="Llegada"><input type="date" value={ci} onChange={e=>setCi(e.target.value)} className={inputC} /></Field>
             <Field label="Salida"><input type="date" value={co} onChange={e=>setCo(e.target.value)} className={inputC} /></Field>
@@ -162,7 +169,7 @@ function App(){
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   {results.map(c=>(
-                    <div key={c.slug} className="bg-white rounded-2xl border border-black/5 overflow-hidden">
+                    <div key={c.slug} className="lift bg-white rounded-2xl border border-black/5 overflow-hidden">
                       <a href={`cabana.html?slug=${c.slug}`} className="block h-36 bg-stone-200" style={IMG(c.banner||c.photos[0])?{backgroundImage:`url(${IMG(c.banner||c.photos[0])})`,backgroundSize:"cover",backgroundPosition:"center"}:{}}></a>
                       <div className="p-4">
                         <h3 className="ff-display text-lg" style={{color:C.ink}}>{c.name}</h3>
@@ -187,6 +194,18 @@ function App(){
   );
 }
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+<script>
+(function(){
+  function setup(){
+    if(!('IntersectionObserver' in window)){document.querySelectorAll('.reveal').forEach(function(e){e.classList.add('in')});return;}
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:0.12,rootMargin:'0px 0px -6% 0px'});
+    function scan(){document.querySelectorAll('.reveal:not(.in)').forEach(function(el){io.observe(el);});}
+    scan();
+    new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
+  }
+  if(document.readyState!=='loading'){setup();}else{document.addEventListener('DOMContentLoaded',setup);}
+})();
 </script>
 </body>
 </html>
