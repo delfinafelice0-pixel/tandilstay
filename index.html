@@ -34,6 +34,12 @@
 .rise{animation:rise .7s cubic-bezier(.2,.7,.2,1) both}
 body{margin:0}
 .clamp2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+html{scroll-behavior:smooth}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.lift{transition:transform .4s cubic-bezier(.2,.7,.2,1),box-shadow .4s ease}
+.lift:hover{transform:translateY(-6px);box-shadow:0 18px 42px -20px rgba(44,42,36,.45)}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}.reveal{opacity:1!important;transform:none!important;transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
@@ -159,7 +165,7 @@ function CabinCard({ c }) {
   const cover = c.banner || (c.photos && c.photos[0]);
   const tag = c.promo_text ? "Promo" : (c.pet_friendly ? "Pet friendly" : null);
   return (
-    <a href={"cabana.html?slug=" + c.slug} className="rise group cursor-pointer block">
+    <a href={"cabana.html?slug=" + c.slug} className="rise lift group cursor-pointer block">
       <div className="relative aspect-[5/6] rounded-[26px] overflow-hidden">
         <img src={IMG(cover)} alt={c.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent"></div>
@@ -203,11 +209,11 @@ function Home({ cabins, loading }) {
     <div>
       <section className="relative" style={{ background: C.paper }}>
         <div className="max-w-6xl mx-auto px-5 sm:px-6 pt-12 sm:pt-16 pb-16 text-center">
-          <p className="ff-body text-[12px] uppercase tracking-[0.25em] font-semibold mb-4" style={{ color: C.sage }}>Sierras de Tandil · Buenos Aires</p>
-          <h1 className="ff-display text-[44px] sm:text-7xl leading-[0.95]" style={{ color: C.ink }}>Respirá hondo,<br /><span className="italic" style={{ color: C.moss }}>llegaste a las sierras</span></h1>
-          <p className="ff-body text-stone-500 max-w-md mx-auto mt-5 text-[15px] leading-relaxed">Cabañas con alma serrana para desconectar de verdad. Encontrá tu refugio entre cerros, silencio y cielo abierto.</p>
-          <div className="max-w-3xl mx-auto mt-9"><SearchCard guests={guests} setGuests={setGuests} onSearch={onSearch} /></div>
-          <div className="mt-5 flex justify-center">
+          <p className="rise ff-body text-[12px] uppercase tracking-[0.25em] font-semibold mb-4" style={{ color: C.sage }}>Sierras de Tandil · Buenos Aires</p>
+          <h1 className="rise ff-display text-[44px] sm:text-7xl leading-[0.95]" style={{ color: C.ink, animationDelay: ".08s" }}>Respirá hondo,<br /><span className="italic" style={{ color: C.moss }}>llegaste a las sierras</span></h1>
+          <p className="rise ff-body text-stone-500 max-w-md mx-auto mt-5 text-[15px] leading-relaxed" style={{ animationDelay: ".16s" }}>Cabañas con alma serrana para desconectar de verdad. Encontrá tu refugio entre cerros, silencio y cielo abierto.</p>
+          <div className="rise max-w-3xl mx-auto mt-9" style={{ animationDelay: ".24s" }}><SearchCard guests={guests} setGuests={setGuests} onSearch={onSearch} /></div>
+          <div className="rise mt-5 flex justify-center" style={{ animationDelay: ".32s" }}>
             <a href="consulta.html" className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 ff-body text-sm font-semibold no-underline shadow-sm transition hover:opacity-90" style={{ background: C.sun, color: C.ink }}>✉️ ¿No sabés cuál elegir? Consultá a varias a la vez</a>
           </div>
           <div className="flex flex-wrap gap-2 mt-5 justify-center">
@@ -218,7 +224,7 @@ function Home({ cabins, loading }) {
       <Band text="Elegí tu refugio entre las sierras" />
       <a href="consulta.html" className="block no-underline">
         <div className="w-full px-5 py-7" style={{ background: C.clay }}>
-          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div className="reveal max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
             <div>
               <p className="ff-display text-2xl sm:text-[28px] text-white leading-tight">¿No sabés cuál elegir?</p>
               <p className="ff-body text-white/85 text-[15px] mt-1">Contanos qué buscás y mandá una sola consulta a todas las cabañas que coinciden.</p>
@@ -229,7 +235,7 @@ function Home({ cabins, loading }) {
       </a>
       <section id="aloj" className="pb-16" style={{ background: C.paper }}>
         <div className="max-w-6xl mx-auto px-5 sm:px-6 pt-10">
-          <div className="mb-5"><h2 className="ff-display text-3xl" style={{ color: C.ink }}>Alojamientos elegidos</h2><p className="ff-body text-stone-500 text-[15px] mt-1">Una selección para empezar a soñar tu escapada.</p></div>
+          <div className="reveal mb-5"><h2 className="ff-display text-3xl" style={{ color: C.ink }}>Alojamientos elegidos</h2><p className="ff-body text-stone-500 text-[15px] mt-1">Una selección para empezar a soñar tu escapada.</p></div>
           <div className="flex flex-wrap items-center gap-2 mb-7">
             <select value={zona} onChange={e=>setZona(e.target.value)} className={selCls} style={selStyle}><option value="">📍 Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}</select>
             <select value={guests} onChange={e=>setGuests(e.target.value)} className={selCls} style={selStyle}><option value="">👥 Huéspedes</option><option value="2">1–2</option><option value="4">3–4</option><option value="6">5–6</option><option value="8">7+</option></select>
@@ -241,7 +247,7 @@ function Home({ cabins, loading }) {
           {loading ? <p className="ff-body text-stone-500 py-10 text-center">Cargando alojamientos…</p>
           : cabins.length === 0 ? <p className="ff-body text-stone-500 py-10 text-center">Pronto vas a ver los alojamientos acá.</p>
           : show.length === 0 ? <p className="ff-body text-stone-500 py-10 text-center">No hay alojamientos con esos filtros. Probá aflojar alguno.</p>
-          : <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{show.map((c, i) => <CabinCard key={i} c={c} />)}</div>}
+          : <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{show.map((c, i) => <CabinCard key={i} c={c} />)}</div>}
         </div>
       </section>
     </div>
@@ -251,7 +257,7 @@ function Home({ cabins, loading }) {
 function PageTitle({ kicker, title, sub }) {
   return (
     <div style={{ background: C.moss }}>
-      <div className="max-w-6xl mx-auto px-5 sm:px-6 py-12 sm:py-16 text-center">
+      <div className="reveal max-w-6xl mx-auto px-5 sm:px-6 py-12 sm:py-16 text-center">
         <p className="ff-body text-[12px] uppercase tracking-[0.25em] font-semibold mb-3" style={{ color: C.sun }}>{kicker}</p>
         <h1 className="ff-display text-4xl sm:text-5xl text-white leading-tight">{title}</h1>
         {sub && <p className="ff-body text-white/75 max-w-lg mx-auto mt-4">{sub}</p>}
@@ -267,8 +273,8 @@ function ActivitiesPage({ acts, loading }) {
       <section className="max-w-6xl mx-auto px-5 sm:px-6 py-12">
         {loading ? <p className="ff-body text-stone-500 text-center py-10">Cargando…</p>
         : acts.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">Pronto vas a ver las actividades acá.</p>
-        : <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{acts.map((a, i) => (
-            <a key={i} href={"actividad.html?slug=" + a.slug} className="rise rounded-[24px] overflow-hidden bg-white border border-black/5 block">
+        : <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{acts.map((a, i) => (
+            <a key={i} href={"actividad.html?slug=" + a.slug} className="rise lift rounded-[24px] overflow-hidden bg-white border border-black/5 block">
               <div className="aspect-[16/11] overflow-hidden bg-stone-200"><img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} className="w-full h-full object-cover hover:scale-105 transition duration-700" /></div>
               <div className="p-5">{a.category && <span className="ff-body text-[11px] uppercase tracking-widest font-semibold" style={{ color: C.sage }}>{a.category}</span>}<h3 className="ff-display text-xl mt-0.5" style={{ color: C.ink }}>{a.name}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed clamp2">{a.blurb}</p>{a.duration && <p className="ff-body text-sm text-stone-400 mt-2">⏱ {a.duration}</p>}</div>
             </a>
@@ -285,8 +291,8 @@ function FoodPage({ food, loading }) {
       <section className="max-w-6xl mx-auto px-5 sm:px-6 py-12">
         {loading ? <p className="ff-body text-stone-500 text-center py-10">Cargando…</p>
         : food.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">Pronto vas a ver los lugares acá.</p>
-        : <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{food.map((a, i) => (
-            <a key={i} href={"resto.html?slug=" + a.slug} className="rise rounded-[24px] overflow-hidden bg-white border border-black/5 block">
+        : <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{food.map((a, i) => (
+            <a key={i} href={"resto.html?slug=" + a.slug} className="rise lift rounded-[24px] overflow-hidden bg-white border border-black/5 block">
               <div className="aspect-[16/11] overflow-hidden bg-stone-200"><img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} className="w-full h-full object-cover hover:scale-105 transition duration-700" /></div>
               <div className="p-5"><div className="flex gap-1.5 mb-1">{a.sin_tacc && <span className="ff-body text-[11px] rounded-full px-2 py-0.5" style={{ background:"#eef2e8", color:C.moss }}>Sin TACC</span>}{a.vegetariano && <span className="ff-body text-[11px] rounded-full px-2 py-0.5" style={{ background:"#eef2e8", color:C.moss }}>Veggie</span>}</div><h3 className="ff-display text-xl" style={{ color: C.ink }}>{a.name}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed clamp2">{a.blurb}</p></div>
             </a>
@@ -364,6 +370,13 @@ function App() {
   }, []);
   const go = (v) => { setView(v); setMenu(false); window.scrollTo({ top: 0 }); };
   useEffect(() => { window.scrollTo({ top: 0 }); }, [view]);
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll(".reveal:not(.in)"));
+    if (!("IntersectionObserver" in window)) { els.forEach(e => e.classList.add("in")); return; }
+    const io = new IntersectionObserver((ents) => { ents.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }); }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
+    els.forEach(e => io.observe(e));
+    return () => io.disconnect();
+  }, [view, data]);
   return (
     <div className="min-h-screen ff-body" style={{ background: C.paper }}>
       <PreHeader />
