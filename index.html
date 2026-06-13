@@ -183,18 +183,16 @@ function Home({ cabins, loading, go }) {
   return (
     <div>
       {/* HERO */}
-      <section className="relative overflow-hidden flex items-end h-screen min-h-[600px]" style={{ height:"100svh" }}>
+      <section className="relative overflow-hidden flex items-center h-[58vh] min-h-[440px]" style={{ height:"58svh" }}>
         <div className="absolute inset-0 kb" style={{ backgroundImage:`url(${HERO_IMG})`, backgroundSize:"cover", backgroundPosition:"center" }}></div>
-        <div className="absolute inset-0" style={{ background:"linear-gradient(180deg,rgba(20,24,20,0.34) 0%,rgba(20,24,20,0) 32%,rgba(20,24,20,0.12) 64%,rgba(18,22,18,0.74) 100%)" }}></div>
-        <div className="relative z-10 max-w-6xl mx-auto w-full px-5 sm:px-6 pb-32 sm:pb-40 text-white">
-          <p className="rise ff-body text-[12px] uppercase tracking-[0.3em] font-semibold text-white/85">Hospedaje · Gastronomía · Actividades</p>
-          <h1 className="rise ff-display text-[44px] sm:text-7xl lg:text-[88px] leading-[1.02] mt-5 max-w-[16ch]" style={{ fontWeight:300, letterSpacing:"-0.02em", animationDelay:".08s" }}>Descubrí Tandil, <span className="italic">sin apuro.</span></h1>
-          <p className="rise ff-body text-white/90 max-w-[44ch] mt-6 text-[16px] sm:text-[19px]" style={{ animationDelay:".16s" }}>Los lugares más lindos para dormir, comer y perderte entre las sierras — elegidos uno por uno.</p>
-          <div className="rise flex flex-wrap items-center gap-x-7 gap-y-4 mt-9" style={{ animationDelay:".24s" }}>
+        <div className="absolute inset-0" style={{ background:"linear-gradient(180deg,rgba(20,24,20,0.34) 0%,rgba(20,24,20,0) 34%,rgba(20,24,20,0.18) 66%,rgba(18,22,18,0.72) 100%)" }}></div>
+        <div className="relative z-10 max-w-6xl mx-auto w-full px-5 sm:px-6 pb-8 text-white">
+          <h1 className="rise ff-display text-[40px] sm:text-6xl lg:text-7xl leading-[1.03] max-w-[16ch]" style={{ fontWeight:300, letterSpacing:"-0.02em" }}>Descubrí Tandil, <span className="italic">sin apuro.</span></h1>
+          <p className="rise ff-body text-white/90 max-w-[44ch] mt-5 text-[16px] sm:text-[18px]" style={{ animationDelay:".1s" }}>Los lugares más lindos para dormir, comer y perderte entre las sierras — elegidos uno por uno.</p>
+          <div className="rise flex flex-wrap items-center gap-x-7 gap-y-4 mt-7" style={{ animationDelay:".18s" }}>
             <button onClick={goAloj} className="inline-flex items-center gap-2.5 rounded-full px-7 py-[15px] ff-body font-semibold text-[15px] transition-transform duration-500 hover:-translate-y-0.5" style={{ background:C.cream, color:C.ink }}>Empezá a explorar</button>
             <a href="consulta.html" className="navlink ff-body text-[15px] text-white/90">¿No sabés cuál elegir? →</a>
           </div>
-          <div className="rise mt-12" style={{ animationDelay:".32s" }}><Horizon color="#fff" /></div>
         </div>
       </section>
 
@@ -219,14 +217,8 @@ function Home({ cabins, loading, go }) {
         </div>
       </section>
 
-      {/* INTRO */}
-      <section className="reveal text-center px-5 sm:px-6 py-28" style={{ background: C.paper }}>
-        <p className="ff-body text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: C.sage }}>Una idea de Brote</p>
-        <p className="ff-display max-w-[20ch] mx-auto mt-6 text-3xl sm:text-[40px] leading-[1.3]" style={{ color: C.ink, fontWeight:300 }}>Creemos en los viajes que invitan a frenar. Por eso elegimos a mano cada lugar: los que tienen <span className="italic" style={{ color: C.moss }}>alma</span> y vista a las sierras.</p>
-      </section>
-
       {/* CATEGORÍAS */}
-      <section className="reveal max-w-6xl mx-auto px-5 sm:px-6" style={{ background: C.paper }}>
+      <section className="reveal max-w-6xl mx-auto px-5 sm:px-6 pt-24 sm:pt-28" style={{ background: C.paper }}>
         <div className="grid md:grid-cols-3 gap-4">
           <CatTile kicker="Dónde dormir" title="Hospedajes" img="photo-1449158743715-0a90ebb6d2d8" onClick={goAloj} />
           <CatTile kicker="Dónde comer" title="Gastronomía" img="photo-1414235077428-338989a2e8c0" onClick={()=>go("gastro")} />
@@ -249,17 +241,6 @@ function Home({ cabins, loading, go }) {
         : cabins.length === 0 ? <p className="ff-body text-stone-500 py-12 text-center">Pronto vas a ver los alojamientos acá.</p>
         : show.length === 0 ? <p className="ff-body text-stone-500 py-12 text-center">No hay alojamientos con esos filtros. Probá aflojar alguno.</p>
         : <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">{show.map((c, i) => <CabinCard key={i} c={c} />)}</div>}
-      </section>
-
-      {/* SUNSET */}
-      <section className="relative overflow-hidden flex items-center justify-center text-center mt-24 h-[70vh] min-h-[440px]">
-        <div className="absolute inset-0" style={{ backgroundImage:`url(${SUNSET_IMG})`, backgroundSize:"cover", backgroundPosition:"center" }}></div>
-        <div className="absolute inset-0" style={{ background:"linear-gradient(180deg,rgba(30,22,16,0.38),rgba(30,22,16,0.52))" }}></div>
-        <div className="reveal relative z-10 px-6 text-white">
-          <p className="ff-body text-[12px] uppercase tracking-[0.3em] text-white/85">Atardeceres de sierra</p>
-          <p className="ff-display italic text-2xl sm:text-[44px] leading-[1.18] mt-5 max-w-[18ch] mx-auto" style={{ fontWeight:300 }}>Dicen que los atardeceres de Tandil se quedan con uno.</p>
-          <div className="mt-8 flex justify-center"><Horizon color="#fff" /></div>
-        </div>
       </section>
 
       {/* CONSULTA */}
