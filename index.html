@@ -207,7 +207,9 @@ function Home({ cabins, loading }) {
           <h1 className="ff-display text-[44px] sm:text-7xl leading-[0.95]" style={{ color: C.ink }}>Respirá hondo,<br /><span className="italic" style={{ color: C.moss }}>llegaste a las sierras</span></h1>
           <p className="ff-body text-stone-500 max-w-md mx-auto mt-5 text-[15px] leading-relaxed">Cabañas con alma serrana para desconectar de verdad. Encontrá tu refugio entre cerros, silencio y cielo abierto.</p>
           <div className="max-w-3xl mx-auto mt-9"><SearchCard guests={guests} setGuests={setGuests} onSearch={onSearch} /></div>
-          <div className="mt-4"><a href="consulta.html" className="ff-body text-sm font-semibold no-underline" style={{ color: C.clay }}>✉️ ¿No sabés cuál elegir? Consultá a varias cabañas a la vez →</a></div>
+          <div className="mt-5 flex justify-center">
+            <a href="consulta.html" className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 ff-body text-sm font-semibold no-underline shadow-sm transition hover:opacity-90" style={{ background: C.sun, color: C.ink }}>✉️ ¿No sabés cuál elegir? Consultá a varias a la vez</a>
+          </div>
           <div className="flex flex-wrap gap-2 mt-5 justify-center">
             {AMEN.map(([k, l]) => <button key={k} onClick={() => toggleAmen(k)} className="rounded-full px-4 py-2 ff-body text-sm border transition" style={amen.includes(k) ? { background: C.moss, color: "white", borderColor: C.moss } : { borderColor: "rgba(62,79,63,0.25)", color: C.moss }}>{l}</button>)}
           </div>
