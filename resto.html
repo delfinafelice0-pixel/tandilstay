@@ -25,8 +25,12 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
-.ff-display{font-family:'Fraunces',serif}.ff-body{font-family:'Hanken Grotesk',sans-serif}body{margin:0}
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Hanken+Grotesk:wght@300;400;500;600;700&display=swap');
+.ff-display{font-family:'Fraunces',serif;font-weight:400}.ff-body{font-family:'Hanken Grotesk',sans-serif}
+.kick{font-size:11px;font-weight:600;letter-spacing:.28em;text-transform:uppercase}
+.horizon{display:flex;align-items:center;width:100%;max-width:300px}.horizon .ln{height:1px;flex:1;background:currentColor;opacity:.45}.horizon .sn{width:9px;height:9px;border-radius:50%;background:#E2A94E;flex:none;margin:0 2px;box-shadow:0 0 0 6px rgba(226,169,78,.16)}
+.imgzoom{transition:transform 1s cubic-bezier(.2,.8,.2,1)}.group:hover .imgzoom{transform:scale(1.05)}
+.navlink{position:relative}.navlink::after{content:"";position:absolute;left:0;bottom:-3px;height:1px;width:0;background:currentColor;transition:width .35s}.navlink:hover::after{width:100%}body{margin:0}
 
 html{scroll-behavior:smooth}
 .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
@@ -42,8 +46,8 @@ const { useState, useEffect } = React;
 const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const C = { paper:"#F3EEE2", ink:"#2C2A24", moss:"#3E4F3F", clay:"#BE6A4A" };
-const A = C.clay;
+const C = { paper:"#F3EEE2", cream:"#FBF7EF", mist:"#E7E1D3", ink:"#24221C", moss:"#3E4F3F", mossdeep:"#2C3A2C", sage:"#7C8F6F", clay:"#BE6A4A", sun:"#E2A94E" };
+const A = C.moss;
 const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=1200&q=80`));
 const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
 const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano, reserva:r.reserva, comoReservar:r.como_reservar||"", menuUrl:r.menu_url||"", videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], menu:r.menu||[] });
@@ -52,14 +56,14 @@ const ytEmbed = (url) => { const m=(url||"").match(/(?:youtu\.be\/|youtube\.com\
 function SiteHeader() {
   const N = [["home","Hospedajes"],["qhacer","Actividades"],["gastro","Gastronomía"],["conoce","Conocé Tandil"]];
   return (
-    <header className="relative z-30 border-b border-black/5" style={{background:C.paper}}>
-      <div className="max-w-6xl mx-auto px-5 sm:px-6 h-[58px] flex items-center justify-between gap-3">
-        <a href="index.html" className="flex items-center gap-2 shrink-0">
-          <div className="w-9 h-9 rounded-2xl grid place-items-center" style={{background:C.moss}}><svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="#E2A94E" strokeWidth="2" strokeLinejoin="round"><circle cx="17" cy="7" r="2.4" /><path d="M2 19 L9 9 L13 15 L16.5 11 L22 19 Z" /></svg></div>
-          <span className="ff-display text-lg tracking-tight" style={{color:C.ink}}>TandilStay</span>
+    <header className="sticky top-0 z-30" style={{background:"rgba(251,247,239,0.9)", backdropFilter:"blur(12px)", WebkitBackdropFilter:"blur(12px)", boxShadow:"0 1px 0 rgba(36,34,28,0.06)"}}>
+      <div className="max-w-6xl mx-auto px-5 sm:px-6 h-[64px] flex items-center justify-between gap-3">
+        <a href="index.html" className="flex items-center gap-2.5 shrink-0" style={{color:C.ink}}>
+          <span className="w-2 h-2 rounded-full" style={{background:C.sun}}></span>
+          <span className="ff-display text-[20px] tracking-tight">TandilStay</span>
         </a>
-        <nav className="flex items-center gap-3 sm:gap-5 ff-body text-[13px] sm:text-[15px] overflow-x-auto" style={{color:C.ink}}>
-          {N.map(([k,l])=><a key={k} href={"index.html?view="+k} className="hover:opacity-60 whitespace-nowrap">{l}</a>)}
+        <nav className="flex items-center gap-4 sm:gap-7 ff-body text-[13px] sm:text-[14px] font-medium overflow-x-auto" style={{color:"rgba(36,34,28,0.66)"}}>
+          {N.map(([k,l])=><a key={k} href={"index.html?view="+k} className="navlink whitespace-nowrap">{l}</a>)}
         </nav>
       </div>
     </header>
@@ -70,12 +74,12 @@ function Nearby({ acts=[], food=[], cabins=[] }) {
   const IMGc = (x) => IMG(x.banner || (x.photos && x.photos[0]));
   const Strip = ({ kicker, title, items, href, sub }) => (items && items.length>0) ? (
     <div className="mb-9">
-      <p className="ff-body text-[11px] uppercase tracking-[0.25em] font-semibold mb-1" style={{color:C.clay}}>{kicker}</p>
+      <p className="kick mb-1.5" style={{color:C.sage}}>{kicker}</p>
       <h3 className="ff-display text-2xl mb-4" style={{color:C.ink}}>{title}</h3>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {items.slice(0,4).map((x,i)=>(
-          <a key={i} href={href(x)} className="lift block bg-white rounded-2xl border border-black/5 overflow-hidden hover:shadow-md transition">
-            <div className="aspect-[16/11] bg-stone-200"><img src={IMGc(x)} className="w-full h-full object-cover" /></div>
+          <a key={i} href={href(x)} className="group block bg-white rounded-lg border border-black/5 overflow-hidden lift">
+            <div className="aspect-[16/11] bg-stone-200 overflow-hidden"><img src={IMGc(x)} className="w-full h-full object-cover imgzoom" /></div>
             <div className="p-3"><h4 className="ff-display text-base leading-tight" style={{color:C.ink}}>{x.name}</h4>{sub(x) && <p className="ff-body text-xs text-stone-500 mt-0.5">{sub(x)}</p>}</div>
           </a>
         ))}
@@ -103,13 +107,13 @@ function Resto({ c, cabins=[], acts=[] }) {
   return (
     <div style={{background:C.paper}} className="ff-body">
       <SiteHeader />
-      <div className="relative h-[52vh] min-h-[380px] overflow-hidden">
+      <div className="relative h-[54vh] min-h-[420px] overflow-hidden">
         <img src={IMG(cover)} className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/30" />
-        <a href="index.html" className="absolute top-6 left-6 ff-body text-white/80 text-sm">‹ TandilStay</a>
-        <div className="relative h-full max-w-5xl mx-auto px-6 flex flex-col justify-end pb-10">
-          {c.zone && <div className="text-white/85 ff-body text-sm mb-2">📍 {c.zone}</div>}
-          <h1 className="ff-display text-4xl sm:text-6xl text-white leading-[0.95]">{c.name}</h1>
+        <div className="absolute inset-0" style={{background:"linear-gradient(180deg,rgba(20,24,20,0.36) 0%,rgba(20,24,20,0) 38%,rgba(18,22,18,0.72) 100%)"}} />
+        <a href="index.html" className="absolute top-5 left-5 sm:left-6 ff-body text-white/85 text-sm navlink">‹ Volver</a>
+        <div className="relative h-full max-w-6xl mx-auto px-5 sm:px-6 flex flex-col justify-end pb-12">
+          {c.zone && <div className="kick text-white/85 mb-3">📍 {c.zone}</div>}
+          <h1 className="ff-display text-4xl sm:text-6xl text-white leading-[1.02]" style={{fontWeight:300, letterSpacing:"-0.01em"}}>{c.name}</h1>
           <div className="flex items-center gap-2 mt-3 flex-wrap">
             {c.sinTacc && <span className="bg-white/90 rounded-full px-3 py-1 ff-body text-sm font-semibold" style={{color:C.moss}}>🌾 Sin TACC</span>}
             {c.vegetariano && <span className="bg-white/90 rounded-full px-3 py-1 ff-body text-sm font-semibold" style={{color:C.moss}}>🥗 Vegetariano</span>}
@@ -164,7 +168,12 @@ function Resto({ c, cabins=[], acts=[] }) {
         </div>
       </div>
       <Nearby cabins={cabins} acts={acts} />
-      <footer className="py-8 text-center ff-body text-sm" style={{background:C.moss,color:"rgba(255,255,255,0.7)"}}>{c.name} · vía TandilStay · Creado por Brote 🌱</footer>
+      <footer className="text-center ff-body text-sm" style={{background:C.mossdeep,color:"rgba(255,255,255,0.6)"}}>
+        <div className="max-w-6xl mx-auto px-6 py-10">
+          <div className="ff-display text-xl text-white mb-2">TandilStay</div>
+          <div>{c.name} · Creado por Brote 🌱</div>
+        </div>
+      </footer>
     </div>
   );
 }
