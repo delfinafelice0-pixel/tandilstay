@@ -3,22 +3,22 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>TandilStay · Tandil</title>
-<meta name="description" content="Hospedajes, gastronomía y actividades en Tandil, en un solo lugar." />
+<title>TandilStay · Hospedajes, gastronomía y actividades en Tandil</title>
+<meta name="description" content="Descubrí Tandil en un solo lugar: dónde dormir, dónde comer y qué hacer entre las sierras." />
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Crect%20width%3D%2724%27%20height%3D%2724%27%20rx%3D%276%27%20fill%3D%27%233E4F3F%27/%3E%3Ccircle%20cx%3D%2717%27%20cy%3D%277.5%27%20r%3D%272.2%27%20fill%3D%27%23E2A94E%27/%3E%3Cpath%20d%3D%27M3%2018%20L8.5%209%20L12%2013.5%20L15%2010%20L21%2018%20Z%27%20fill%3D%27none%27%20stroke%3D%27%23E2A94E%27%20stroke-width%3D%271.8%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TandilStay" />
 <meta property="og:locale" content="es_AR" />
-<meta property="og:title" content="TandilStay · Tandil" />
-<meta property="og:description" content="Hospedajes, gastronomía y actividades en Tandil, en un solo lugar." />
-<meta property="og:url" content="https://delfinafelice0-pixel.github.io/tandilstay/operador.html" />
+<meta property="og:title" content="TandilStay · Hospedajes, gastronomía y actividades en Tandil" />
+<meta property="og:description" content="Descubrí Tandil en un solo lugar: dónde dormir, dónde comer y qué hacer entre las sierras." />
+<meta property="og:url" content="https://delfinafelice0-pixel.github.io/tandilstay/" />
 <meta property="og:image" content="https://delfinafelice0-pixel.github.io/tandilstay/og.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="TandilStay" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="TandilStay · Tandil" />
-<meta name="twitter:description" content="Hospedajes, gastronomía y actividades en Tandil, en un solo lugar." />
+<meta name="twitter:title" content="TandilStay · Hospedajes, gastronomía y actividades en Tandil" />
+<meta name="twitter:description" content="Descubrí Tandil en un solo lugar: dónde dormir, dónde comer y qué hacer entre las sierras." />
 <meta name="twitter:image" content="https://delfinafelice0-pixel.github.io/tandilstay/og.png" />
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -26,14 +26,28 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Hanken+Grotesk:wght@300;400;500;600;700&display=swap');
 .ff-display{font-family:'Fraunces',serif}
 .ff-body{font-family:'Hanken Grotesk',sans-serif}
-@keyframes fadeSlide{0%{opacity:0;transform:translateY(6px)}12%{opacity:1}88%{opacity:1}100%{opacity:0;transform:translateY(-6px)}}
 @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.rise{animation:rise .7s cubic-bezier(.2,.7,.2,1) both}
+.rise{animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
+@keyframes kb{from{transform:scale(1.04)}to{transform:scale(1.16)}}
+.kb{animation:kb 22s ease-out forwards}
 body{margin:0}
+html{scroll-behavior:smooth}
 .clamp2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity 1s cubic-bezier(.2,.7,.2,1),transform 1s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.horizon{display:flex;align-items:center;width:100%;max-width:320px}
+.horizon .ln{height:1px;flex:1;background:currentColor;opacity:.45}
+.horizon .sn{width:10px;height:10px;border-radius:50%;background:#E2A94E;flex:none;box-shadow:0 0 0 6px rgba(226,169,78,.18);margin:0 2px}
+.navlink{position:relative}
+.navlink::after{content:"";position:absolute;left:0;bottom:-3px;height:1px;width:0;background:currentColor;transition:width .35s}
+.navlink:hover::after{width:100%}
+.imgzoom{transition:transform 1.05s cubic-bezier(.2,.8,.2,1)}
+.group:hover .imgzoom{transform:scale(1.06)}
+:focus-visible{outline:2px solid #E2A94E;outline-offset:3px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}.reveal{opacity:1!important;transform:none!important;transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
@@ -46,13 +60,15 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const WHATSAPP = "5492494000000";
 const wa = `https://wa.me/${WHATSAPP}`;
-const C = { paper:"#F3EEE2", ink:"#2C2A24", moss:"#3E4F3F", sage:"#7C8F6F", clay:"#BE6A4A", sun:"#E2A94E" };
-const PHRASES = ["Tandil es un lugar soñado","Donde el aire huele a sierra","Vení a desconectar entre cerros"];
+const C = { paper:"#F3EEE2", cream:"#FBF7EF", mist:"#E7E1D3", ink:"#24221C", moss:"#3E4F3F", mossdeep:"#2C3A2C", sage:"#7C8F6F", clay:"#BE6A4A", sun:"#E2A94E" };
+const HERO_IMG = "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=2000&q=80";
+const SUNSET_IMG = "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=2000&q=80";
+
 const NAV = [
-  { key:"home", label:"Hospedajes", e:"⛰️" },
-  { key:"qhacer", label:"Actividades", e:"🧭" },
-  { key:"gastro", label:"Gastronomía", e:"🍴" },
-  { key:"conoce", label:"Conocé Tandil", e:"🌿" },
+  { key:"home", label:"Hospedajes" },
+  { key:"qhacer", label:"Actividades" },
+  { key:"gastro", label:"Gastronomía" },
+  { key:"conoce", label:"Conocé Tandil" },
 ];
 const IMG = (p) => (!p ? "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=900&q=80" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=900&q=80`));
 const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
@@ -65,55 +81,29 @@ const FACTS = [
   { e:"🚌", text:"Tandil está a menos de 4 horas de CABA, ideal para un finde largo." },
 ];
 
-function Band({ text }) {
-  return (
-    <div className="w-full text-center" style={{ background: C.moss }}>
-      <div className="max-w-6xl mx-auto px-5 py-3 flex items-center justify-center gap-2">
-        <span style={{ color: C.sun }}>✦</span>
-        <span className="ff-body text-sm tracking-wide text-white/90">{text}</span>
-        <span style={{ color: C.sun }}>✦</span>
-      </div>
-    </div>
-  );
+function Horizon({ color }) {
+  return <div className="horizon" style={{ color }}><span className="ln"></span><span className="sn"></span><span className="ln"></span></div>;
 }
 
-function PreHeader() {
-  const [i, setI] = useState(0);
-  useEffect(() => { const t = setInterval(() => setI((p) => (p + 1) % PHRASES.length), 3800); return () => clearInterval(t); }, []);
+function Header({ view, go, onOpen, solid }) {
+  const fg = solid ? C.ink : "#fff";
   return (
-    <div className="w-full text-center" style={{ background: C.moss }}>
-      <div className="max-w-6xl mx-auto px-5 py-2 flex items-center justify-center gap-2 overflow-hidden">
-        <span style={{ color: C.sun }}>✦</span>
-        <span key={i} className="ff-body text-[13px] tracking-wide text-white/90" style={{ animation: "fadeSlide 3.8s ease-in-out" }}>{PHRASES[i]}</span>
-        <span style={{ color: C.sun }}>✦</span>
-      </div>
-    </div>
-  );
-}
-
-function Header({ view, go, onOpen }) {
-  return (
-    <header className="relative z-20" style={{ background: C.paper }}>
-      <div className="max-w-6xl mx-auto px-5 sm:px-6 h-[68px] flex items-center justify-between">
-        <button onClick={() => go("home")} className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-2xl grid place-items-center" style={{ background: C.moss }}>
-            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke={C.sun} strokeWidth="2" strokeLinejoin="round"><circle cx="17" cy="7" r="2.4" /><path d="M2 19 L9 9 L13 15 L16.5 11 L22 19 Z" /></svg>
-          </div>
-          <span className="ff-display text-xl tracking-tight" style={{ color: C.ink }}>TandilStay</span>
+    <header className="fixed top-0 inset-x-0 z-40 transition-all duration-500" style={solid ? { background:"rgba(251,247,239,0.9)", backdropFilter:"blur(12px)", WebkitBackdropFilter:"blur(12px)", boxShadow:"0 1px 0 rgba(36,34,28,0.06)" } : { background:"transparent" }}>
+      <div className="max-w-6xl mx-auto px-5 sm:px-6 h-[72px] flex items-center justify-between">
+        <button onClick={() => go("home")} className="flex items-center gap-2.5 transition-colors duration-500" style={{ color: fg }}>
+          <span className="w-2 h-2 rounded-full" style={{ background: C.sun }}></span>
+          <span className="ff-display text-[21px] tracking-tight" style={{ fontWeight:400 }}>TandilStay</span>
         </button>
-        <nav className="hidden md:flex items-center gap-7 ff-body text-[15px]" style={{ color: C.ink }}>
+        <nav className="hidden md:flex items-center gap-8 ff-body text-[14px] font-medium transition-colors duration-500" style={{ color: solid ? "rgba(36,34,28,0.66)" : "rgba(255,255,255,0.85)" }}>
           {NAV.map((n) => (
-            <button key={n.key} onClick={() => go(n.key)} className="hover:opacity-60 transition relative">
-              {n.label}
-              {view === n.key && <span className="absolute -bottom-2 left-0 right-0 h-[2px] rounded-full" style={{ background: C.clay }} />}
-            </button>
+            <button key={n.key} onClick={() => go(n.key)} className="navlink py-1">{n.label}</button>
           ))}
         </nav>
-        <div className="hidden md:flex items-center gap-3">
-          <button onClick={() => go("owners")} className="ff-body text-[15px] hover:opacity-60" style={{ color: C.clay }}>Sumá tu alojamiento</button>
-          <button onClick={() => go("contacto")} className="rounded-full px-4 py-2 ff-body text-sm font-semibold text-white" style={{ background: C.moss }}>💬 Contacto</button>
+        <div className="hidden md:flex items-center gap-4">
+          <button onClick={() => go("owners")} className="ff-body text-[14px] font-medium navlink transition-colors duration-500" style={{ color: fg }}>Soy operador</button>
+          <button onClick={() => go("contacto")} className="rounded-full px-5 py-2 ff-body text-[13px] font-semibold transition-all duration-500" style={solid ? { background:C.ink, color:C.cream } : { border:"1px solid rgba(255,255,255,0.5)", color:"#fff" }}>Contacto</button>
         </div>
-        <button onClick={onOpen} className="md:hidden p-2 -mr-2 text-2xl leading-none" style={{ color: C.ink }} aria-label="Menú">☰</button>
+        <button onClick={onOpen} className="md:hidden p-2 -mr-2 text-2xl leading-none transition-colors duration-500" style={{ color: fg }} aria-label="Menú">☰</button>
       </div>
     </header>
   );
@@ -121,20 +111,18 @@ function Header({ view, go, onOpen }) {
 
 function MobileMenu({ open, go, onClose }) {
   if (!open) return null;
-  const items = [...NAV, { key:"owners", label:"Sumá tu alojamiento", e:"♥" }, { key:"contacto", label:"Contacto", e:"💬" }];
+  const items = [...NAV, { key:"owners", label:"Soy operador" }, { key:"contacto", label:"Contacto" }];
   return (
     <div className="fixed inset-0 z-50 md:hidden">
       <div className="absolute inset-0 bg-black/30" onClick={onClose}></div>
-      <div className="absolute top-0 right-0 h-full w-[82%] max-w-xs p-6 rise" style={{ background: C.paper }}>
+      <div className="absolute top-0 right-0 h-full w-[82%] max-w-xs p-7 rise" style={{ background: C.cream }}>
         <div className="flex items-center justify-between mb-8">
-          <span className="ff-display text-lg" style={{ color: C.ink }}>Menú</span>
+          <span className="ff-display text-xl" style={{ color: C.ink, fontWeight:400 }}>Menú</span>
           <button onClick={onClose} className="text-2xl leading-none" style={{ color: C.ink }}>✕</button>
         </div>
         <nav className="flex flex-col">
           {items.map((n) => (
-            <button key={n.key} onClick={() => { go(n.key); onClose(); }} className="flex items-center gap-3 py-3.5 border-b ff-body text-lg text-left" style={{ color: n.key === "owners" ? C.clay : C.ink, borderColor: "rgba(0,0,0,0.08)" }}>
-              <span>{n.e}</span>{n.label}
-            </button>
+            <button key={n.key} onClick={() => { go(n.key); onClose(); }} className="py-4 border-b ff-body text-lg text-left" style={{ color: C.ink, borderColor: "rgba(36,34,28,0.1)" }}>{n.label}</button>
           ))}
         </nav>
       </div>
@@ -142,93 +130,125 @@ function MobileMenu({ open, go, onClose }) {
   );
 }
 
-function SearchCard({ guests, setGuests, onSearch }) {
-  return (
-    <div className="bg-white rounded-[26px] shadow-[0_20px_50px_-20px_rgba(62,79,63,0.45)] border border-black/5 p-2.5 flex flex-col sm:flex-row gap-1.5">
-      <div className="flex-1 flex items-center gap-3 px-4 py-3"><span>📍</span><div><div className="ff-body text-[10px] uppercase tracking-widest text-stone-400 font-semibold">Destino</div><div className="ff-body text-sm" style={{ color: C.ink }}>Tandil, Buenos Aires</div></div></div>
-      <div className="hidden sm:block w-px bg-stone-200 my-2.5"></div>
-      <div className="flex-1 flex items-center gap-3 px-4 py-3"><span>📅</span><div><div className="ff-body text-[10px] uppercase tracking-widest text-stone-400 font-semibold">Fechas</div><div className="ff-body text-sm" style={{ color: C.ink }}>Elegí en cada alojamiento</div></div></div>
-      <div className="hidden sm:block w-px bg-stone-200 my-2.5"></div>
-      <div className="flex items-center gap-3 px-4 py-3"><span>👥</span><div><div className="ff-body text-[10px] uppercase tracking-widest text-stone-400 font-semibold">Huéspedes</div><select value={guests} onChange={e=>setGuests(e.target.value)} className="ff-body text-sm bg-transparent outline-none cursor-pointer" style={{ color: C.ink }}><option value="">Para todos</option><option value="2">1–2 personas</option><option value="4">3–4 personas</option><option value="6">5–6 personas</option><option value="8">7 o más</option></select></div></div>
-      <button onClick={onSearch} className="rounded-[20px] px-6 py-3.5 flex items-center justify-center gap-2 ff-body font-semibold text-sm text-white" style={{ background: C.clay }}>🔍 Buscar</button>
-    </div>
-  );
-}
-
 function CabinCard({ c }) {
   const cover = c.banner || (c.photos && c.photos[0]);
-  const tag = c.promo_text ? "Promo" : (c.pet_friendly ? "Pet friendly" : null);
   return (
-    <a href={"cabana.html?slug=" + c.slug} className="rise group cursor-pointer block">
-      <div className="relative aspect-[5/6] rounded-[26px] overflow-hidden">
-        <img src={IMG(cover)} alt={c.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent"></div>
-        {tag && <span className="absolute top-3.5 left-3.5 rounded-full px-3 py-1 ff-body text-[12px] font-semibold backdrop-blur" style={{ background: "rgba(255,255,255,0.85)", color: C.moss }}>{tag}</span>}
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          <h3 className="ff-display text-xl leading-tight">{c.name}</h3>
-          <p className="ff-body text-sm text-white/80">{c.zone}{capRange(c) ? " · " + capRange(c) : ""}</p>
-        </div>
+    <a href={"cabana.html?slug=" + c.slug} className="group block">
+      <div className="aspect-[5/6] rounded-md overflow-hidden" style={{ background: C.mist }}>
+        <img src={IMG(cover)} alt={c.name} className="w-full h-full object-cover imgzoom" />
       </div>
-      <p className="ff-body text-sm mt-3" style={{ color: C.ink }}><span className="font-bold">desde {money(c.price)}</span><span className="text-stone-500"> / noche</span></p>
+      <div className="flex items-baseline justify-between gap-3 mt-4">
+        <h4 className="ff-display text-xl" style={{ color: C.ink, fontWeight:400 }}>{c.name}</h4>
+        <span className="ff-body text-[13px] text-stone-500 whitespace-nowrap">{money(c.price)} / noche</span>
+      </div>
+      <div className="ff-body text-[13px] text-stone-500 mt-0.5">{c.zone}{capRange(c) ? " · " + capRange(c) : ""}</div>
     </a>
   );
 }
 
-function Home({ cabins, loading }) {
-  const [amen, setAmen] = useState([]);
+function CatTile({ kicker, title, img, onClick }) {
+  return (
+    <button onClick={onClick} className="group relative h-[440px] rounded-lg overflow-hidden text-left w-full block">
+      <img src={IMG(img)} alt={title} className="absolute inset-0 w-full h-full object-cover imgzoom" />
+      <div className="absolute inset-0" style={{ background:"linear-gradient(180deg,rgba(0,0,0,0) 38%,rgba(20,22,18,0.66) 100%)" }}></div>
+      <div className="absolute left-6 right-6 bottom-6 text-white">
+        <div className="ff-body text-[11px] uppercase tracking-[0.28em] text-white/80">{kicker}</div>
+        <h3 className="ff-display text-[26px] mt-1.5 flex items-center justify-between" style={{ fontWeight:400 }}>{title}<span className="text-xl transition-transform duration-500 group-hover:translate-x-1.5">→</span></h3>
+      </div>
+    </button>
+  );
+}
+
+function Home({ cabins, loading, go }) {
   const [zona, setZona] = useState("");
   const [guests, setGuests] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [order, setOrder] = useState("");
-  const AMEN = [["pet","🐾 Pet friendly"],["pileta","🏊 Pileta"],["parrilla","🔥 Parrilla"],["wifi","📶 WiFi"]];
   const zonas = [...new Set(cabins.map(c=>c.zone).filter(Boolean))].sort();
   const capOf = (c) => { const caps=(c.units||[]).map(u=>u.capacity).filter(Boolean); return caps.length?Math.max(...caps):(c.capacity||0); };
-  const toggleAmen = (k) => setAmen(a => a.includes(k) ? a.filter(x=>x!==k) : [...a, k]);
   const match = (c) => {
     if (zona && c.zone !== zona) return false;
     if (guests && capOf(c) < parseInt(guests,10)) return false;
     if (maxPrice && (c.price||0) > parseInt(maxPrice,10)) return false;
-    for (const k of amen) { if (k==="pet") { if(!c.pet_friendly) return false; } else if (!(c.amenities||[]).includes(k)) return false; }
     return true;
   };
   let show = cabins.filter(match);
   if (order==="asc") show = [...show].sort((a,b)=>(a.price||0)-(b.price||0));
   else if (order==="desc") show = [...show].sort((a,b)=>(b.price||0)-(a.price||0));
-  const activeCount = amen.length + (zona?1:0) + (guests?1:0) + (maxPrice?1:0) + (order?1:0);
-  const clear = () => { setAmen([]); setZona(""); setGuests(""); setMaxPrice(""); setOrder(""); };
-  const onSearch = () => { const el=document.getElementById("aloj"); if(el) el.scrollIntoView({behavior:"smooth"}); };
-  const selCls = "ff-body text-sm rounded-full border bg-white px-3.5 py-2 cursor-pointer";
-  const selStyle = { borderColor:"rgba(62,79,63,0.25)", color:C.moss };
+  const activeCount = (zona?1:0) + (guests?1:0) + (maxPrice?1:0) + (order?1:0);
+  const clear = () => { setZona(""); setGuests(""); setMaxPrice(""); setOrder(""); };
+  const goAloj = () => { const el=document.getElementById("aloj"); if(el) el.scrollIntoView({behavior:"smooth"}); };
+  const selCls = "ff-body text-[13px] rounded-full border bg-transparent px-4 py-2 cursor-pointer";
+  const selStyle = { borderColor:"rgba(36,34,28,0.18)", color:C.moss };
   return (
     <div>
-      <section className="relative" style={{ background: C.paper }}>
-        <div className="max-w-6xl mx-auto px-5 sm:px-6 pt-12 sm:pt-16 pb-16 text-center">
-          <p className="ff-body text-[12px] uppercase tracking-[0.25em] font-semibold mb-4" style={{ color: C.sage }}>Sierras de Tandil · Buenos Aires</p>
-          <h1 className="ff-display text-[44px] sm:text-7xl leading-[0.95]" style={{ color: C.ink }}>Respirá hondo,<br /><span className="italic" style={{ color: C.moss }}>llegaste a las sierras</span></h1>
-          <p className="ff-body text-stone-500 max-w-md mx-auto mt-5 text-[15px] leading-relaxed">Cabañas con alma serrana para desconectar de verdad. Encontrá tu refugio entre cerros, silencio y cielo abierto.</p>
-          <div className="max-w-3xl mx-auto mt-9"><SearchCard guests={guests} setGuests={setGuests} onSearch={onSearch} /></div>
-          <div className="flex flex-wrap gap-2 mt-5 justify-center">
-            {AMEN.map(([k, l]) => <button key={k} onClick={() => toggleAmen(k)} className="rounded-full px-4 py-2 ff-body text-sm border transition" style={amen.includes(k) ? { background: C.moss, color: "white", borderColor: C.moss } : { borderColor: "rgba(62,79,63,0.25)", color: C.moss }}>{l}</button>)}
+      {/* HERO */}
+      <section className="relative overflow-hidden flex items-center h-[58vh] min-h-[440px]" style={{ height:"58svh" }}>
+        <div className="absolute inset-0 kb" style={{ backgroundImage:`url(${HERO_IMG})`, backgroundSize:"cover", backgroundPosition:"center" }}></div>
+        <div className="absolute inset-0" style={{ background:"linear-gradient(180deg,rgba(20,24,20,0.34) 0%,rgba(20,24,20,0) 34%,rgba(20,24,20,0.18) 66%,rgba(18,22,18,0.72) 100%)" }}></div>
+        <div className="relative z-10 max-w-6xl mx-auto w-full px-5 sm:px-6 pb-8 text-white">
+          <h1 className="rise ff-display text-[40px] sm:text-6xl lg:text-7xl leading-[1.03] max-w-[16ch]" style={{ fontWeight:300, letterSpacing:"-0.02em" }}>Descubrí Tandil, <span className="italic">sin apuro.</span></h1>
+          <p className="rise ff-body text-white/90 max-w-[44ch] mt-5 text-[16px] sm:text-[18px]" style={{ animationDelay:".1s" }}>Los lugares más lindos para dormir, comer y perderte entre las sierras — elegidos uno por uno.</p>
+          <div className="rise flex flex-wrap items-center gap-x-7 gap-y-4 mt-7" style={{ animationDelay:".18s" }}>
+            <button onClick={goAloj} className="inline-flex items-center gap-2.5 rounded-full px-7 py-[15px] ff-body font-semibold text-[15px] transition-transform duration-500 hover:-translate-y-0.5" style={{ background:C.cream, color:C.ink }}>Empezá a explorar</button>
+            <a href="consulta.html" className="navlink ff-body text-[15px] text-white/90">¿No sabés cuál elegir? →</a>
           </div>
         </div>
       </section>
-      <Band text="Elegí tu refugio entre las sierras" />
-      <section id="aloj" className="pb-16" style={{ background: C.paper }}>
-        <div className="max-w-6xl mx-auto px-5 sm:px-6 pt-10">
-          <div className="mb-5"><h2 className="ff-display text-3xl" style={{ color: C.ink }}>Alojamientos elegidos</h2><p className="ff-body text-stone-500 text-[15px] mt-1">Una selección para empezar a soñar tu escapada.</p></div>
-          <div className="flex flex-wrap items-center gap-2 mb-7">
-            <select value={zona} onChange={e=>setZona(e.target.value)} className={selCls} style={selStyle}><option value="">📍 Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}</select>
-            <select value={guests} onChange={e=>setGuests(e.target.value)} className={selCls} style={selStyle}><option value="">👥 Huéspedes</option><option value="2">1–2</option><option value="4">3–4</option><option value="6">5–6</option><option value="8">7+</option></select>
-            <select value={maxPrice} onChange={e=>setMaxPrice(e.target.value)} className={selCls} style={selStyle}><option value="">💲 Precio</option><option value="80000">Hasta $80.000</option><option value="120000">Hasta $120.000</option><option value="180000">Hasta $180.000</option></select>
-            <select value={order} onChange={e=>setOrder(e.target.value)} className={selCls} style={selStyle}><option value="">↕ Orden</option><option value="asc">Precio: menor a mayor</option><option value="desc">Precio: mayor a menor</option></select>
-            {activeCount>0 && <button onClick={clear} className="ff-body text-sm rounded-full px-3.5 py-2 border" style={{borderColor:"rgba(190,106,74,0.45)", color:C.clay}}>Limpiar ✕</button>}
-            <span className="ff-body text-sm text-stone-400 ml-auto">{show.length} {show.length===1?"lugar":"lugares"}</span>
+
+      {/* BUSCADOR */}
+      <section className="px-5 sm:px-6 relative z-20 -mt-20 sm:-mt-16" style={{ background:"transparent" }}>
+        <div className="reveal max-w-4xl mx-auto bg-white rounded-[26px] border border-black/5 p-2.5 flex flex-col sm:flex-row items-stretch gap-1" style={{ boxShadow:"0 36px 80px -44px rgba(62,79,63,0.6)" }}>
+          <div className="flex-1 px-5 py-3">
+            <div className="ff-body text-[10px] uppercase tracking-[0.22em] text-stone-400 font-semibold mb-1">Zona</div>
+            <select value={zona} onChange={e=>setZona(e.target.value)} className="w-full ff-body text-[15px] bg-transparent outline-none cursor-pointer" style={{ color:C.ink }}><option value="">Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}</select>
           </div>
-          {loading ? <p className="ff-body text-stone-500 py-10 text-center">Cargando alojamientos…</p>
-          : cabins.length === 0 ? <p className="ff-body text-stone-500 py-10 text-center">Pronto vas a ver los alojamientos acá.</p>
-          : show.length === 0 ? <p className="ff-body text-stone-500 py-10 text-center">No hay alojamientos con esos filtros. Probá aflojar alguno.</p>
-          : <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{show.map((c, i) => <CabinCard key={i} c={c} />)}</div>}
+          <div className="hidden sm:block w-px bg-stone-200 my-3"></div>
+          <div className="flex-1 px-5 py-3">
+            <div className="ff-body text-[10px] uppercase tracking-[0.22em] text-stone-400 font-semibold mb-1">Huéspedes</div>
+            <select value={guests} onChange={e=>setGuests(e.target.value)} className="w-full ff-body text-[15px] bg-transparent outline-none cursor-pointer" style={{ color:C.ink }}><option value="">Para todos</option><option value="2">1–2 personas</option><option value="4">3–4 personas</option><option value="6">5–6 personas</option><option value="8">7 o más</option></select>
+          </div>
+          <div className="hidden sm:block w-px bg-stone-200 my-3"></div>
+          <div className="flex-1 px-5 py-3">
+            <div className="ff-body text-[10px] uppercase tracking-[0.22em] text-stone-400 font-semibold mb-1">Precio</div>
+            <select value={maxPrice} onChange={e=>setMaxPrice(e.target.value)} className="w-full ff-body text-[15px] bg-transparent outline-none cursor-pointer" style={{ color:C.ink }}><option value="">Cualquiera</option><option value="80000">Hasta $80.000</option><option value="120000">Hasta $120.000</option><option value="180000">Hasta $180.000</option></select>
+          </div>
+          <button onClick={goAloj} className="rounded-[20px] px-7 py-4 flex items-center justify-center gap-2 ff-body font-semibold text-[15px] text-white transition-transform duration-500 hover:-translate-y-0.5" style={{ background:C.moss }}>🔍 Buscar</button>
         </div>
+      </section>
+
+      {/* CATEGORÍAS */}
+      <section className="reveal max-w-6xl mx-auto px-5 sm:px-6 pt-24 sm:pt-28" style={{ background: C.paper }}>
+        <div className="grid md:grid-cols-3 gap-4">
+          <CatTile kicker="Dónde dormir" title="Hospedajes" img="photo-1449158743715-0a90ebb6d2d8" onClick={goAloj} />
+          <CatTile kicker="Dónde comer" title="Gastronomía" img="photo-1414235077428-338989a2e8c0" onClick={()=>go("gastro")} />
+          <CatTile kicker="Qué hacer" title="Actividades" img="photo-1551632811-561732d1e306" onClick={()=>go("qhacer")} />
+        </div>
+      </section>
+
+      {/* ELEGIDOS */}
+      <section id="aloj" className="max-w-6xl mx-auto px-5 sm:px-6 pt-28 pb-10" style={{ background: C.paper, scrollMarginTop:"80px" }}>
+        <div className="reveal mb-10">
+          <p className="ff-body text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: C.sage }}>Elegidos a mano</p>
+          <h2 className="ff-display text-3xl sm:text-5xl mt-3 leading-[1.04]" style={{ color: C.ink, fontWeight:300 }}>Lugares para quedarte<br className="hidden sm:block" /> con ganas de volver.</h2>
+        </div>
+        <div className="reveal flex flex-wrap items-center gap-2 mb-9">
+          <select value={order} onChange={e=>setOrder(e.target.value)} className={selCls} style={selStyle}><option value="">Ordenar</option><option value="asc">Precio: menor a mayor</option><option value="desc">Precio: mayor a menor</option></select>
+          {activeCount>0 && <button onClick={clear} className="ff-body text-[13px] rounded-full px-4 py-2 border" style={{ borderColor:"rgba(190,106,74,0.4)", color:C.clay }}>Limpiar filtros ✕</button>}
+          <span className="ff-body text-[13px] text-stone-400 ml-auto">{show.length} {show.length===1?"lugar":"lugares"}</span>
+        </div>
+        {loading ? <p className="ff-body text-stone-500 py-12 text-center">Cargando alojamientos…</p>
+        : cabins.length === 0 ? <p className="ff-body text-stone-500 py-12 text-center">Pronto vas a ver los alojamientos acá.</p>
+        : show.length === 0 ? <p className="ff-body text-stone-500 py-12 text-center">No hay alojamientos con esos filtros. Probá aflojar alguno.</p>
+        : <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">{show.map((c, i) => <CabinCard key={i} c={c} />)}</div>}
+      </section>
+
+      {/* CONSULTA */}
+      <section className="reveal text-center px-5 sm:px-6 py-28" style={{ background: C.paper }}>
+        <p className="ff-body text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: C.sage }}>¿No sabés por dónde empezar?</p>
+        <h2 className="ff-display text-3xl sm:text-5xl mt-3 max-w-[16ch] mx-auto leading-[1.05]" style={{ color: C.ink, fontWeight:300 }}>Contanos qué buscás y lo encontramos por vos.</h2>
+        <p className="ff-body text-stone-500 max-w-[42ch] mx-auto mt-5 text-[17px]">Decinos las fechas, cuántos son y qué te gustaría. Nos encargamos del resto.</p>
+        <a href="consulta.html" className="inline-flex items-center gap-2.5 rounded-full px-8 py-4 ff-body font-semibold text-[16px] mt-9 text-white transition-transform duration-500 hover:-translate-y-0.5" style={{ background: C.moss }}>Hacer una consulta →</a>
       </section>
     </div>
   );
@@ -236,27 +256,46 @@ function Home({ cabins, loading }) {
 
 function PageTitle({ kicker, title, sub }) {
   return (
-    <div style={{ background: C.moss }}>
-      <div className="max-w-6xl mx-auto px-5 sm:px-6 py-12 sm:py-16 text-center">
-        <p className="ff-body text-[12px] uppercase tracking-[0.25em] font-semibold mb-3" style={{ color: C.sun }}>{kicker}</p>
-        <h1 className="ff-display text-4xl sm:text-5xl text-white leading-tight">{title}</h1>
-        {sub && <p className="ff-body text-white/75 max-w-lg mx-auto mt-4">{sub}</p>}
+    <div style={{ background: C.paper }}>
+      <div className="reveal max-w-6xl mx-auto px-5 sm:px-6 pt-32 pb-14 text-center">
+        <p className="ff-body text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: C.sage }}>{kicker}</p>
+        <h1 className="ff-display text-4xl sm:text-6xl mt-4 leading-[1.04]" style={{ color: C.ink, fontWeight:300, letterSpacing:"-0.02em" }}>{title}</h1>
+        {sub && <p className="ff-body text-stone-500 max-w-xl mx-auto mt-5 text-[17px]">{sub}</p>}
+        <div className="mt-8 flex justify-center"><Horizon color={C.ink} /></div>
       </div>
     </div>
   );
 }
 
 function ActivitiesPage({ acts, loading }) {
+  const [zona, setZona] = useState("");
+  const [cat, setCat] = useState("");
+  const zonas = [...new Set(acts.map(a=>a.zone).filter(Boolean))].sort();
+  const cats = [...new Set(acts.map(a=>a.category).filter(Boolean))].sort();
+  const show = acts.filter(a => (!zona || a.zone===zona) && (!cat || a.category===cat));
+  const active = (zona?1:0)+(cat?1:0);
+  const clear = () => { setZona(""); setCat(""); };
+  const selCls = "ff-body text-[13px] rounded-full border bg-transparent px-4 py-2 cursor-pointer";
+  const selStyle = { borderColor:"rgba(36,34,28,0.18)", color:C.moss };
   return (
-    <div>
+    <div style={{ background: C.paper }}>
       <PageTitle kicker="Paseos & aventura" title="Qué hacer en Tandil" sub="Cerros, agua, historia y aire puro. Estos son los imperdibles para tu estadía." />
-      <section className="max-w-6xl mx-auto px-5 sm:px-6 py-12">
+      <section className="max-w-6xl mx-auto px-5 sm:px-6 pb-24">
+        {!loading && acts.length>0 && (
+          <div className="reveal flex flex-wrap items-center gap-2 mb-9">
+            <select value={cat} onChange={e=>setCat(e.target.value)} className={selCls} style={selStyle}><option value="">Todas las categorías</option>{cats.map(z=><option key={z} value={z}>{z}</option>)}</select>
+            <select value={zona} onChange={e=>setZona(e.target.value)} className={selCls} style={selStyle}><option value="">Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}</select>
+            {active>0 && <button onClick={clear} className="ff-body text-[13px] rounded-full px-4 py-2 border" style={{ borderColor:"rgba(190,106,74,0.4)", color:C.clay }}>Limpiar ✕</button>}
+            <span className="ff-body text-[13px] text-stone-400 ml-auto">{show.length} {show.length===1?"actividad":"actividades"}</span>
+          </div>
+        )}
         {loading ? <p className="ff-body text-stone-500 text-center py-10">Cargando…</p>
         : acts.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">Pronto vas a ver las actividades acá.</p>
-        : <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{acts.map((a, i) => (
-            <a key={i} href={"actividad.html?slug=" + a.slug} className="rise rounded-[24px] overflow-hidden bg-white border border-black/5 block">
-              <div className="aspect-[16/11] overflow-hidden bg-stone-200"><img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} className="w-full h-full object-cover hover:scale-105 transition duration-700" /></div>
-              <div className="p-5">{a.category && <span className="ff-body text-[11px] uppercase tracking-widest font-semibold" style={{ color: C.sage }}>{a.category}</span>}<h3 className="ff-display text-xl mt-0.5" style={{ color: C.ink }}>{a.name}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed clamp2">{a.blurb}</p>{a.duration && <p className="ff-body text-sm text-stone-400 mt-2">⏱ {a.duration}</p>}</div>
+        : show.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">No hay actividades con esos filtros. Probá aflojar alguno.</p>
+        : <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">{show.map((a, i) => (
+            <a key={i} href={"actividad.html?slug=" + a.slug} className="group block">
+              <div className="aspect-[4/3] rounded-md overflow-hidden" style={{ background: C.mist }}><img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} className="w-full h-full object-cover imgzoom" /></div>
+              <div className="mt-4">{a.category && <div className="ff-body text-[11px] uppercase tracking-[0.24em] font-semibold" style={{ color: C.sage }}>{a.category}</div>}<h3 className="ff-display text-xl mt-1" style={{ color: C.ink, fontWeight:400 }}>{a.name}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed clamp2">{a.blurb}</p>{a.duration && <p className="ff-body text-[13px] text-stone-400 mt-2">⏱ {a.duration}</p>}</div>
             </a>
           ))}</div>}
       </section>
@@ -265,16 +304,33 @@ function ActivitiesPage({ acts, loading }) {
 }
 
 function FoodPage({ food, loading }) {
+  const [zona, setZona] = useState("");
+  const [diet, setDiet] = useState("");
+  const zonas = [...new Set(food.map(f=>f.zone).filter(Boolean))].sort();
+  const show = food.filter(a => (!zona || a.zone===zona) && (diet!=="sintacc" || a.sin_tacc) && (diet!=="veggie" || a.vegetariano));
+  const active = (zona?1:0)+(diet?1:0);
+  const clear = () => { setZona(""); setDiet(""); };
+  const selCls = "ff-body text-[13px] rounded-full border bg-transparent px-4 py-2 cursor-pointer";
+  const selStyle = { borderColor:"rgba(36,34,28,0.18)", color:C.moss };
   return (
-    <div>
+    <div style={{ background: C.paper }}>
       <PageTitle kicker="Sabores serranos" title="Dónde comer en Tandil" sub="De las picadas con salame con Denominación de Origen a la cervecería artesanal: comé como un local." />
-      <section className="max-w-6xl mx-auto px-5 sm:px-6 py-12">
+      <section className="max-w-6xl mx-auto px-5 sm:px-6 pb-24">
+        {!loading && food.length>0 && (
+          <div className="reveal flex flex-wrap items-center gap-2 mb-9">
+            <select value={zona} onChange={e=>setZona(e.target.value)} className={selCls} style={selStyle}><option value="">Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}</select>
+            <select value={diet} onChange={e=>setDiet(e.target.value)} className={selCls} style={selStyle}><option value="">Toda la cocina</option><option value="sintacc">Sin TACC</option><option value="veggie">Vegetariano</option></select>
+            {active>0 && <button onClick={clear} className="ff-body text-[13px] rounded-full px-4 py-2 border" style={{ borderColor:"rgba(190,106,74,0.4)", color:C.clay }}>Limpiar ✕</button>}
+            <span className="ff-body text-[13px] text-stone-400 ml-auto">{show.length} {show.length===1?"lugar":"lugares"}</span>
+          </div>
+        )}
         {loading ? <p className="ff-body text-stone-500 text-center py-10">Cargando…</p>
         : food.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">Pronto vas a ver los lugares acá.</p>
-        : <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{food.map((a, i) => (
-            <a key={i} href={"resto.html?slug=" + a.slug} className="rise rounded-[24px] overflow-hidden bg-white border border-black/5 block">
-              <div className="aspect-[16/11] overflow-hidden bg-stone-200"><img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} className="w-full h-full object-cover hover:scale-105 transition duration-700" /></div>
-              <div className="p-5"><div className="flex gap-1.5 mb-1">{a.sin_tacc && <span className="ff-body text-[11px] rounded-full px-2 py-0.5" style={{ background:"#eef2e8", color:C.moss }}>Sin TACC</span>}{a.vegetariano && <span className="ff-body text-[11px] rounded-full px-2 py-0.5" style={{ background:"#eef2e8", color:C.moss }}>Veggie</span>}</div><h3 className="ff-display text-xl" style={{ color: C.ink }}>{a.name}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed clamp2">{a.blurb}</p></div>
+        : show.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">No hay lugares con esos filtros. Probá aflojar alguno.</p>
+        : <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">{show.map((a, i) => (
+            <a key={i} href={"resto.html?slug=" + a.slug} className="group block">
+              <div className="aspect-[4/3] rounded-md overflow-hidden" style={{ background: C.mist }}><img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} className="w-full h-full object-cover imgzoom" /></div>
+              <div className="mt-4"><div className="flex gap-1.5 mb-1">{a.sin_tacc && <span className="ff-body text-[11px] rounded-full px-2 py-0.5" style={{ background:"#eef2e8", color:C.moss }}>Sin TACC</span>}{a.vegetariano && <span className="ff-body text-[11px] rounded-full px-2 py-0.5" style={{ background:"#eef2e8", color:C.moss }}>Veggie</span>}</div><h3 className="ff-display text-xl" style={{ color: C.ink, fontWeight:400 }}>{a.name}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed clamp2">{a.blurb}</p></div>
             </a>
           ))}</div>}
       </section>
@@ -284,14 +340,14 @@ function FoodPage({ food, loading }) {
 
 function AboutPage() {
   return (
-    <div>
+    <div style={{ background: C.paper }}>
       <PageTitle kicker="La ciudad" title="Conocé Tandil" />
-      <section className="max-w-4xl mx-auto px-5 sm:px-6 py-12">
-        <div className="rounded-[26px] overflow-hidden mb-8"><img src={IMG("photo-1500534314209-a25ddb2bd429")} className="w-full aspect-[16/8] object-cover bg-stone-200" /></div>
+      <section className="max-w-4xl mx-auto px-5 sm:px-6 pb-24">
+        <div className="rounded-lg overflow-hidden mb-10"><img src={IMG("photo-1500534314209-a25ddb2bd429")} className="w-full aspect-[16/8] object-cover" style={{ background:C.mist }} /></div>
         <p className="ff-body text-lg text-stone-600 leading-relaxed mb-4">Tandil es una ciudad serrana del centro de la provincia de Buenos Aires, rodeada de cerros milenarios, arroyos y aire limpio. Combina la calma del campo con la comodidad de una ciudad completa.</p>
-        <p className="ff-body text-lg text-stone-600 leading-relaxed mb-10">Es famosa por sus embutidos y quesos artesanales, su turismo religioso en Semana Santa y sus paisajes de sierras suaves, perfectas para caminar, andar en bici o simplemente desconectar.</p>
-        <h2 className="ff-display text-2xl mb-5" style={{ color: C.ink }}>✨ Datos curiosos</h2>
-        <div className="grid sm:grid-cols-2 gap-4">{FACTS.map((f, i) => <div key={i} className="flex gap-3 bg-white border border-black/5 rounded-[20px] p-4"><span className="text-2xl">{f.e}</span><p className="ff-body text-sm text-stone-600 leading-relaxed">{f.text}</p></div>)}</div>
+        <p className="ff-body text-lg text-stone-600 leading-relaxed mb-12">Es famosa por sus embutidos y quesos artesanales, su turismo religioso en Semana Santa y sus paisajes de sierras suaves, perfectas para caminar, andar en bici o simplemente desconectar.</p>
+        <h2 className="ff-display text-2xl mb-5" style={{ color: C.ink, fontWeight:400 }}>Datos curiosos</h2>
+        <div className="grid sm:grid-cols-2 gap-4">{FACTS.map((f, i) => <div key={i} className="flex gap-3 bg-white border border-black/5 rounded-lg p-5"><span className="text-2xl">{f.e}</span><p className="ff-body text-sm text-stone-600 leading-relaxed">{f.text}</p></div>)}</div>
       </section>
     </div>
   );
@@ -304,14 +360,14 @@ function OwnersPage() {
     { t:"Más visibilidad", s:"Aparecés ante todos los que buscan dónde quedarse en Tandil." },
   ];
   return (
-    <div>
+    <div style={{ background: C.paper }}>
       <PageTitle kicker="Para anfitriones" title="Sumá tu alojamiento" sub="Mostrá tu cabaña ante miles de viajeros que buscan Tandil. Simple, sin comisiones abusivas." />
-      <section className="max-w-5xl mx-auto px-5 sm:px-6 py-12">
-        <div className="grid sm:grid-cols-3 gap-5 mb-10">{benefits.map((b, i) => <div key={i} className="rounded-[22px] p-6 bg-white border border-black/5"><div className="w-10 h-10 rounded-full grid place-items-center mb-3 text-white" style={{ background: C.sage }}>✓</div><h3 className="ff-display text-xl" style={{ color: C.ink }}>{b.t}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed">{b.s}</p></div>)}</div>
-        <div className="rounded-[26px] p-8 text-center" style={{ background: C.moss }}>
-          <h2 className="ff-display text-3xl text-white mb-3">¿Listos para empezar?</h2>
-          <p className="ff-body text-white/75 max-w-md mx-auto mb-6">Escribinos y en minutos tu cabaña está publicada en TandilStay.</p>
-          <a href={wa} target="_blank" rel="noreferrer" className="inline-block bg-white rounded-full px-7 py-3 ff-body font-semibold" style={{ color: C.moss }}>💬 Quiero sumarme</a>
+      <section className="max-w-5xl mx-auto px-5 sm:px-6 pb-24">
+        <div className="grid sm:grid-cols-3 gap-5 mb-12">{benefits.map((b, i) => <div key={i} className="rounded-lg p-6 bg-white border border-black/5"><div className="w-9 h-9 rounded-full grid place-items-center mb-3 text-white" style={{ background: C.sage }}>✓</div><h3 className="ff-display text-xl" style={{ color: C.ink, fontWeight:400 }}>{b.t}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed">{b.s}</p></div>)}</div>
+        <div className="rounded-lg p-10 text-center" style={{ background: C.moss }}>
+          <h2 className="ff-display text-3xl text-white mb-3" style={{ fontWeight:300 }}>¿Listos para empezar?</h2>
+          <p className="ff-body text-white/75 max-w-md mx-auto mb-7">Escribinos y en minutos tu cabaña está publicada en TandilStay.</p>
+          <a href={wa} target="_blank" rel="noreferrer" className="inline-block bg-white rounded-full px-7 py-3 ff-body font-semibold" style={{ color: C.moss }}>Quiero sumarme</a>
         </div>
       </section>
     </div>
@@ -320,17 +376,47 @@ function OwnersPage() {
 
 function ContactPage() {
   return (
-    <div>
+    <div style={{ background: C.paper }}>
       <PageTitle kicker="Hablemos" title="Contacto" sub="Estamos para ayudarte a encontrar tu lugar en las sierras." />
-      <section className="max-w-3xl mx-auto px-5 sm:px-6 py-12">
+      <section className="max-w-3xl mx-auto px-5 sm:px-6 pb-24">
         <div className="grid sm:grid-cols-3 gap-4 mb-8">
-          {[{ e:"💬", t:"WhatsApp", s:"+54 9 249 ..." },{ e:"✉️", t:"Email", s:"hola@tandilstay.com" },{ e:"📷", t:"Instagram", s:"@tandilstay" }].map((x, i) => (
-            <div key={i} className="rounded-[22px] p-6 bg-white border border-black/5 text-center"><div className="text-2xl">{x.e}</div><div className="ff-display text-lg mt-2" style={{ color: C.ink }}>{x.t}</div><div className="ff-body text-sm text-stone-500">{x.s}</div></div>
+          {[{ t:"WhatsApp", s:"+54 9 249 ..." },{ t:"Email", s:"hola@tandilstay.com" },{ t:"Instagram", s:"@tandilstay" }].map((x, i) => (
+            <div key={i} className="rounded-lg p-6 bg-white border border-black/5 text-center"><div className="ff-display text-lg" style={{ color: C.ink, fontWeight:400 }}>{x.t}</div><div className="ff-body text-sm text-stone-500 mt-1">{x.s}</div></div>
           ))}
         </div>
-        <a href={wa} target="_blank" rel="noreferrer" className="block text-center w-full rounded-full py-4 ff-body font-semibold text-white" style={{ background: C.moss }}>💬 Escribinos por WhatsApp</a>
+        <a href={wa} target="_blank" rel="noreferrer" className="block text-center w-full rounded-full py-4 ff-body font-semibold text-white" style={{ background: C.moss }}>Escribinos por WhatsApp</a>
       </section>
     </div>
+  );
+}
+
+function Footer({ go }) {
+  return (
+    <footer style={{ background: C.mossdeep, color:"rgba(255,255,255,0.72)" }}>
+      <div className="max-w-6xl mx-auto px-5 sm:px-6 py-16">
+        <div className="flex flex-wrap justify-between gap-10">
+          <div className="max-w-[30ch]">
+            <div className="ff-display text-2xl text-white" style={{ fontWeight:400 }}>TandilStay</div>
+            <p className="ff-body text-sm mt-4" style={{ color:"rgba(255,255,255,0.7)" }}>Lo mejor de Tandil para dormir, comer y descubrir — en un solo lugar. Hecho con cariño en Tandil por Brote 🌱</p>
+          </div>
+          <div>
+            <h5 className="ff-body text-[11px] uppercase tracking-[0.26em] mb-3.5" style={{ color:"rgba(255,255,255,0.5)" }}>Explorar</h5>
+            <button onClick={()=>go("home")} className="block ff-body text-sm mb-2 hover:text-white">Hospedajes</button>
+            <button onClick={()=>go("gastro")} className="block ff-body text-sm mb-2 hover:text-white">Gastronomía</button>
+            <button onClick={()=>go("qhacer")} className="block ff-body text-sm mb-2 hover:text-white">Actividades</button>
+          </div>
+          <div>
+            <h5 className="ff-body text-[11px] uppercase tracking-[0.26em] mb-3.5" style={{ color:"rgba(255,255,255,0.5)" }}>Contacto</h5>
+            <a href={wa} target="_blank" rel="noreferrer" className="block ff-body text-sm mb-2 hover:text-white">WhatsApp</a>
+            <a href="#" className="block ff-body text-sm mb-2 hover:text-white">Instagram</a>
+            <button onClick={()=>go("owners")} className="block ff-body text-sm mb-2 hover:text-white">Soy operador</button>
+          </div>
+        </div>
+        <div className="mt-14 pt-6 flex justify-between flex-wrap gap-2 ff-body text-[13px]" style={{ borderTop:"1px solid rgba(255,255,255,0.12)", color:"rgba(255,255,255,0.5)" }}>
+          <span>© 2026 TandilStay · Creado por Brote 🌱</span><span>Tandil, Buenos Aires</span>
+        </div>
+      </div>
+    </footer>
   );
 }
 
@@ -342,7 +428,8 @@ function App() {
   const navedRef = React.useRef(false);
   const [menu, setMenu] = useState(false);
   const [view, setView] = useState(TAB[rubroParam] || "home");
-  const [data, setData] = useState({ loading: true, missing: !op, cabins: [], acts: [], food: [], rubro: "hospedaje" });
+  const [scrolled, setScrolled] = useState(false);
+  const [data, setData] = useState({ loading: true, missing: !op, cabins: [], acts: [], food: [] });
   useEffect(() => {
     if (op) document.title = op + " · TandilStay";
     if (!op) { setData(d => ({ ...d, loading: false, missing: true })); return; }
@@ -355,7 +442,6 @@ function App() {
       const allCabins = a.data || [], allActs = b.data || [], allFood = c.data || [];
       const mine = (x) => String(x.operator || "").trim().toLowerCase() === op.toLowerCase();
       const ownCabins = allCabins.filter(mine), ownActs = allActs.filter(mine), ownFood = allFood.filter(mine);
-      // Rubro del operador: explícito por ?rubro=, si no se detecta por dónde tiene publicaciones, si no hospedaje.
       let rubro = rubroParam;
       if (!["hospedaje", "actividad", "gastronomia"].includes(rubro)) {
         if (ownCabins.length) rubro = "hospedaje";
@@ -363,41 +449,46 @@ function App() {
         else if (ownFood.length) rubro = "gastronomia";
         else rubro = "hospedaje";
       }
-      // Solo el rubro propio se filtra al operador; los otros dos se traen de la home maestra.
       setData({
-        loading: false, missing: false, rubro,
+        loading: false, missing: false,
         cabins: rubro === "hospedaje" ? ownCabins : allCabins,
         acts:   rubro === "actividad" ? ownActs   : allActs,
         food:   rubro === "gastronomia" ? ownFood : allFood,
       });
-      // Si no vino ?rubro= y la persona no tocó nada, abrimos en la pestaña del rubro propio.
       if (!navedRef.current && !rubroParam) setView(TAB[rubro] || "home");
     })();
   }, []);
   const go = (v) => { navedRef.current = true; setView(v); setMenu(false); window.scrollTo({ top: 0 }); };
   useEffect(() => { window.scrollTo({ top: 0 }); }, [view]);
-
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > window.innerHeight * 0.7);
+    onScroll(); window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll(".reveal:not(.in)"));
+    if (!("IntersectionObserver" in window)) { els.forEach(e => e.classList.add("in")); return; }
+    const io = new IntersectionObserver((ents) => { ents.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }); }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
+    els.forEach(e => io.observe(e));
+    return () => io.disconnect();
+  }, [view, data]);
+  const solid = view !== "home" || scrolled;
   if (data.missing) return (
     <div className="min-h-screen grid place-items-center ff-body p-6 text-center" style={{ background: C.paper, color: C.ink }}>
       Falta indicar el operador en la dirección (?op=...).
     </div>
   );
-
   return (
     <div className="min-h-screen ff-body" style={{ background: C.paper }}>
-      <PreHeader />
-      <Header view={view} go={go} onOpen={() => setMenu(true)} />
+      <Header view={view} go={go} onOpen={() => setMenu(true)} solid={solid} />
       <MobileMenu open={menu} go={go} onClose={() => setMenu(false)} />
-      {view === "home" && <Home cabins={data.cabins} loading={data.loading} />}
+      {view === "home" && <Home cabins={data.cabins} loading={data.loading} go={go} />}
       {view === "qhacer" && <ActivitiesPage acts={data.acts} loading={data.loading} />}
       {view === "gastro" && <FoodPage food={data.food} loading={data.loading} />}
       {view === "conoce" && <AboutPage />}
       {view === "owners" && <OwnersPage />}
       {view === "contacto" && <ContactPage />}
-      <footer className="py-10 text-center ff-body text-sm" style={{ background: C.moss, color: "rgba(255,255,255,0.7)" }}>
-        <div>TandilStay · hecho con calma en las sierras de Tandil</div>
-        <div className="mt-1 text-white/50">Creado por Brote 🌱</div>
-      </footer>
+      <Footer go={go} />
     </div>
   );
 }

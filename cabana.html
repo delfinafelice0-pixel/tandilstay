@@ -219,7 +219,7 @@ function Landing({ c, acts=[], food=[] }) {
               <iframe title="mapa" loading="lazy" className="w-full h-72 rounded-2xl border border-black/5" src={"https://www.google.com/maps?q="+encodeURIComponent(c.zone)+"&output=embed"}></iframe>
             </div>
           )}
-          <div>
+          <div id="calendario" style={{scrollMarginTop:"84px"}}>
             <h2 className="ff-display text-2xl mb-1" style={{color:C.ink}}>Disponibilidad y precios</h2>
             <p className="ff-body text-sm text-stone-500 mb-3">Cada día muestra su tarifa. Tocá entrada y salida.</p>
             <div className="border border-black/10 rounded-2xl p-4 max-w-sm bg-white"><Calendar cursor={cursor} setCursor={setCursor} blocked={c.blocked} ci={q.ci} co={q.co} priceOf={(d)=>nightlyPrice(c,d)} onDay={pick} /></div>
@@ -229,7 +229,7 @@ function Landing({ c, acts=[], food=[] }) {
           <div className="sticky top-4 bg-white border border-black/10 rounded-2xl p-5 shadow-lg">
             <div className="ff-display text-2xl mb-1" style={{color:C.ink}}>desde {money(c.price)} <span className="ff-body text-stone-500 text-sm">/ noche</span></div>
             {c.weekendPrice && <p className="ff-body text-xs text-stone-500 mb-3">Finde: {money(c.weekendPrice)} / noche</p>}
-            <div className="grid grid-cols-2 rounded-xl border border-stone-300 overflow-hidden mb-3 ff-body text-sm">
+            <div onClick={()=>{const el=document.getElementById("calendario"); if(el) el.scrollIntoView({behavior:"smooth"});}} title="Elegí las fechas en el calendario" className="grid grid-cols-2 rounded-xl border border-stone-300 overflow-hidden mb-3 ff-body text-sm cursor-pointer hover:border-stone-400 transition">
               <div className="p-3 border-r border-stone-300"><div className="text-[10px] uppercase text-stone-400 font-semibold">Entrada</div><div style={{color:C.ink}}>{q.ci||"—"}</div></div>
               <div className="p-3"><div className="text-[10px] uppercase text-stone-400 font-semibold">Salida</div><div style={{color:C.ink}}>{q.co||"—"}</div></div>
             </div>
