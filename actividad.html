@@ -46,6 +46,9 @@ const { useState, useEffect } = React;
 const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const OP = (new URLSearchParams(location.search).get("op")||"").trim();
+const homeHref = OP ? ("operador.html?op="+encodeURIComponent(OP)) : "index.html";
+const navHref = (k) => OP ? ("operador.html?op="+encodeURIComponent(OP)+"&view="+k) : ("index.html?view="+k);
 const C = { paper:"#F3EEE2", cream:"#FBF7EF", mist:"#E7E1D3", ink:"#24221C", moss:"#3E4F3F", mossdeep:"#2C3A2C", sage:"#7C8F6F", clay:"#BE6A4A", sun:"#E2A94E" };
 const A = C.moss;
 const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=1200&q=80`));
@@ -58,12 +61,12 @@ function SiteHeader() {
   return (
     <header className="sticky top-0 z-30" style={{background:"rgba(251,247,239,0.9)", backdropFilter:"blur(12px)", WebkitBackdropFilter:"blur(12px)", boxShadow:"0 1px 0 rgba(36,34,28,0.06)"}}>
       <div className="max-w-6xl mx-auto px-5 sm:px-6 h-[64px] flex items-center justify-between gap-3">
-        <a href="index.html" className="flex items-center gap-2.5 shrink-0" style={{color:C.ink}}>
+        <a href={homeHref} className="flex items-center gap-2.5 shrink-0" style={{color:C.ink}}>
           <span className="w-2 h-2 rounded-full" style={{background:C.sun}}></span>
           <span className="ff-display text-[20px] tracking-tight">TandilStay</span>
         </a>
         <nav className="flex items-center gap-4 sm:gap-7 ff-body text-[13px] sm:text-[14px] font-medium overflow-x-auto" style={{color:"rgba(36,34,28,0.66)"}}>
-          {N.map(([k,l])=><a key={k} href={"index.html?view="+k} className="navlink whitespace-nowrap">{l}</a>)}
+          {N.map(([k,l])=><a key={k} href={navHref(k)} className="navlink whitespace-nowrap">{l}</a>)}
         </nav>
       </div>
     </header>
@@ -92,9 +95,9 @@ function Nearby({ acts=[], food=[], cabins=[] }) {
       <div className="reveal max-w-5xl mx-auto px-5 sm:px-6 py-12 border-t border-black/5">
         <h2 className="ff-display text-3xl mb-1" style={{color:C.ink}}>Para tu escapada en Tandil</h2>
         <p className="ff-body text-stone-500 mb-8">Lo mejor de la zona para completar tu día.</p>
-        <Strip kicker="Dónde quedarte" title="Hospedajes" items={cabins} href={x=>"cabana.html?slug="+x.slug} sub={x=>x.zone||""} />
-        <Strip kicker="Qué hacer" title="Actividades" items={acts} href={x=>"actividad.html?slug="+x.slug} sub={x=>[x.category,x.duration].filter(Boolean).join(" · ")} />
-        <Strip kicker="Dónde comer" title="Gastronomía" items={food} href={x=>"resto.html?slug="+x.slug} sub={x=>x.zone||""} />
+        <Strip kicker="Dónde quedarte" title="Hospedajes" items={cabins} href={x=>"cabana.html?slug="+x.slug+(OP?"&op="+encodeURIComponent(OP):"")} sub={x=>x.zone||""} />
+        <Strip kicker="Qué hacer" title="Actividades" items={acts} href={x=>"actividad.html?slug="+x.slug+(OP?"&op="+encodeURIComponent(OP):"")} sub={x=>[x.category,x.duration].filter(Boolean).join(" · ")} />
+        <Strip kicker="Dónde comer" title="Gastronomía" items={food} href={x=>"resto.html?slug="+x.slug+(OP?"&op="+encodeURIComponent(OP):"")} sub={x=>x.zone||""} />
       </div>
     </section>
   );
@@ -109,7 +112,7 @@ function Act({ c, cabins=[], food=[] }) {
       <div className="relative h-[54vh] min-h-[420px] overflow-hidden">
         <img src={IMG(cover)} className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0" style={{background:"linear-gradient(180deg,rgba(20,24,20,0.36) 0%,rgba(20,24,20,0) 38%,rgba(18,22,18,0.72) 100%)"}} />
-        <a href="index.html" className="absolute top-5 left-5 sm:left-6 ff-body text-white/85 text-sm navlink">‹ Volver</a>
+        <a href={homeHref} className="absolute top-5 left-5 sm:left-6 ff-body text-white/85 text-sm navlink">‹ Volver</a>
         <div className="relative h-full max-w-6xl mx-auto px-5 sm:px-6 flex flex-col justify-end pb-12">
           {c.category && <span className="kick mb-3" style={{color:C.sun}}>{c.category}</span>}
           <h1 className="ff-display text-4xl sm:text-6xl text-white leading-[1.02]" style={{fontWeight:300, letterSpacing:"-0.01em"}}>{c.name}</h1>
@@ -151,7 +154,7 @@ function Act({ c, cabins=[], food=[] }) {
           {c.phone && <a href={"tel:"+c.phone} className="rounded-full px-6 py-3 ff-body font-semibold border" style={{borderColor:C.moss,color:C.moss}}>📞 {c.phone}</a>}
         </div>
       </div>
-      <Nearby cabins={cabins} food={food} />
+      <Nearby cabins={OP?[]:cabins} food={food} />
       <footer className="text-center ff-body text-sm" style={{background:C.mossdeep,color:"rgba(255,255,255,0.6)"}}>
         <div className="max-w-6xl mx-auto px-6 py-10">
           <div className="ff-display text-xl text-white mb-2">TandilStay</div>

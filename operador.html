@@ -57,6 +57,8 @@ const { useState, useEffect } = React;
 const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const OP = (new URLSearchParams(location.search).get("op")||"").trim();
+const opSuffix = OP ? ("&op="+encodeURIComponent(OP)) : "";
 
 const WHATSAPP = "5492494000000";
 const wa = `https://wa.me/${WHATSAPP}`;
@@ -133,7 +135,7 @@ function MobileMenu({ open, go, onClose }) {
 function CabinCard({ c }) {
   const cover = c.banner || (c.photos && c.photos[0]);
   return (
-    <a href={"cabana.html?slug=" + c.slug} className="group block">
+    <a href={"cabana.html?slug=" + c.slug + opSuffix} className="group block">
       <div className="aspect-[5/6] rounded-md overflow-hidden" style={{ background: C.mist }}>
         <img src={IMG(cover)} alt={c.name} className="w-full h-full object-cover imgzoom" />
       </div>
@@ -293,7 +295,7 @@ function ActivitiesPage({ acts, loading }) {
         : acts.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">Pronto vas a ver las actividades acá.</p>
         : show.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">No hay actividades con esos filtros. Probá aflojar alguno.</p>
         : <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">{show.map((a, i) => (
-            <a key={i} href={"actividad.html?slug=" + a.slug} className="group block">
+            <a key={i} href={"actividad.html?slug=" + a.slug + opSuffix} className="group block">
               <div className="aspect-[4/3] rounded-md overflow-hidden" style={{ background: C.mist }}><img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} className="w-full h-full object-cover imgzoom" /></div>
               <div className="mt-4">{a.category && <div className="ff-body text-[11px] uppercase tracking-[0.24em] font-semibold" style={{ color: C.sage }}>{a.category}</div>}<h3 className="ff-display text-xl mt-1" style={{ color: C.ink, fontWeight:400 }}>{a.name}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed clamp2">{a.blurb}</p>{a.duration && <p className="ff-body text-[13px] text-stone-400 mt-2">⏱ {a.duration}</p>}</div>
             </a>
@@ -328,7 +330,7 @@ function FoodPage({ food, loading }) {
         : food.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">Pronto vas a ver los lugares acá.</p>
         : show.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">No hay lugares con esos filtros. Probá aflojar alguno.</p>
         : <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">{show.map((a, i) => (
-            <a key={i} href={"resto.html?slug=" + a.slug} className="group block">
+            <a key={i} href={"resto.html?slug=" + a.slug + opSuffix} className="group block">
               <div className="aspect-[4/3] rounded-md overflow-hidden" style={{ background: C.mist }}><img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} className="w-full h-full object-cover imgzoom" /></div>
               <div className="mt-4"><div className="flex gap-1.5 mb-1">{a.sin_tacc && <span className="ff-body text-[11px] rounded-full px-2 py-0.5" style={{ background:"#eef2e8", color:C.moss }}>Sin TACC</span>}{a.vegetariano && <span className="ff-body text-[11px] rounded-full px-2 py-0.5" style={{ background:"#eef2e8", color:C.moss }}>Veggie</span>}</div><h3 className="ff-display text-xl" style={{ color: C.ink, fontWeight:400 }}>{a.name}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed clamp2">{a.blurb}</p></div>
             </a>
@@ -424,10 +426,12 @@ function App() {
   const params = new URLSearchParams(location.search);
   const op = (params.get("op") || "").trim();
   const rubroParam = (params.get("rubro") || "").trim().toLowerCase();
+  const viewParam = (params.get("view") || "").trim();
+  const VALID_VIEWS = ["home","qhacer","gastro","conoce","owners","contacto"];
   const TAB = { hospedaje: "home", actividad: "qhacer", gastronomia: "gastro" };
   const navedRef = React.useRef(false);
   const [menu, setMenu] = useState(false);
-  const [view, setView] = useState(TAB[rubroParam] || "home");
+  const [view, setView] = useState(VALID_VIEWS.includes(viewParam) ? viewParam : (TAB[rubroParam] || "home"));
   const [scrolled, setScrolled] = useState(false);
   const [data, setData] = useState({ loading: true, missing: !op, cabins: [], acts: [], food: [] });
   useEffect(() => {
@@ -455,7 +459,7 @@ function App() {
         acts:   rubro === "actividad" ? ownActs   : allActs,
         food:   rubro === "gastronomia" ? ownFood : allFood,
       });
-      if (!navedRef.current && !rubroParam) setView(TAB[rubro] || "home");
+      if (!navedRef.current && !rubroParam && !viewParam) setView(TAB[rubro] || "home");
     })();
   }, []);
   const go = (v) => { navedRef.current = true; setView(v); setMenu(false); window.scrollTo({ top: 0 }); };
