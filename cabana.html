@@ -57,6 +57,7 @@ const C = { paper:"#F3EEE2", cream:"#FBF7EF", mist:"#E7E1D3", ink:"#24221C", mos
 const A = C.moss;
 const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=1200&q=80`));
 const ytEmbed = (url) => { const m=(url||"").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/); return m?`https://www.youtube.com/embed/${m[1]}`:null; };
+const igEmbed = (url) => { const m=(url||"").match(/instagram\.com\/(reel|reels|p|tv)\/([\w-]+)/); return m?`https://www.instagram.com/${m[1]==="reels"?"reel":m[1]}/${m[2]}/`:null; };
 const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
 const kFmt = (n) => (n >= 1000 ? Math.round(n/1000)+"k" : ""+n);
 const pad = (n) => String(n).padStart(2,"0");
@@ -198,17 +199,25 @@ function Landing({ c, acts=[], food=[] }) {
         <div className="md:col-span-2 space-y-8">
           {c.blurb && <div><h2 className="ff-display text-2xl mb-2" style={{color:C.ink}}>Sobre el lugar</h2><p className="ff-body text-stone-600 leading-relaxed">{c.blurb}</p></div>}
           {c.photos.length>0 && <div><h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Galería</h2><div className="grid grid-cols-2 sm:grid-cols-3 gap-2">{c.photos.map((p,i)=><img key={i} src={IMG(p)} className="lb-img cursor-zoom-in w-full aspect-square object-cover rounded-xl bg-stone-200" />)}</div></div>}
-          {(c.videos||[]).filter(Boolean).length>0 && <div><h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Videos</h2><div className="grid sm:grid-cols-2 gap-4">{c.videos.filter(Boolean).map((v,i)=>{ const yt=ytEmbed(v); return yt ? <iframe key={i} title={"v"+i} className="w-full aspect-video rounded-2xl border border-black/5" src={yt} allowFullScreen></iframe> : <a key={i} href={v} target="_blank" rel="noreferrer" className="rounded-2xl border border-black/5 bg-white p-4 ff-body" style={{color:C.ink}}>▶ Ver video</a>; })}</div></div>}
+          {(c.videos||[]).filter(Boolean).length>0 && <div><h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Videos</h2><div className="grid sm:grid-cols-2 gap-4">{c.videos.filter(Boolean).map((v,i)=>{ const yt=ytEmbed(v); if(yt) return <iframe key={i} title={"v"+i} className="w-full aspect-video rounded-2xl border border-black/5" src={yt} allowFullScreen></iframe>; const ig=igEmbed(v); if(ig) return <blockquote key={i} className="instagram-media" data-instgrm-permalink={ig} data-instgrm-version="14" style={{margin:0,width:"100%",minWidth:0,background:"#fff",borderRadius:16}}></blockquote>; return <a key={i} href={v} target="_blank" rel="noreferrer" className="rounded-2xl border border-black/5 bg-white p-4 ff-body" style={{color:C.ink}}>▶ Ver video</a>; })}</div></div>}
           {(c.units||[]).length>0 && (
             <div>
               <h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Nuestras cabañas</h2>
               <div className="grid sm:grid-cols-2 gap-3">
-                {c.units.map((u,i)=>(
-                  <div key={i} className="flex items-center justify-between bg-white border border-black/5 rounded-xl px-4 py-3">
-                    <span className="ff-body font-semibold" style={{color:C.ink}}>{u.name||("Cabaña "+(i+1))}</span>
-                    <span className="ff-body text-sm text-stone-500">👥 hasta {u.capacity}</span>
+                {c.units.map((u,i)=>{ const uyt=ytEmbed(u.video); const uig=igEmbed(u.video); return (
+                  <div key={i} className="bg-white border border-black/5 rounded-xl overflow-hidden">
+                    {u.photo && <img src={IMG(u.photo)} className="lb-img cursor-zoom-in w-full aspect-video object-cover bg-stone-200" />}
+                    {u.video && (uyt
+                      ? <iframe title={"uv"+i} className="w-full aspect-video border-0" src={uyt} allowFullScreen></iframe>
+                      : uig
+                        ? <blockquote className="instagram-media" data-instgrm-permalink={uig} data-instgrm-version="14" style={{margin:0,width:"100%",minWidth:0}}></blockquote>
+                        : <a href={u.video} target="_blank" rel="noreferrer" className="block px-4 py-2 ff-body text-sm" style={{color:C.clay}}>▶ Ver video</a>)}
+                    <div className="flex items-center justify-between px-4 py-3">
+                      <span className="ff-body font-semibold" style={{color:C.ink}}>{u.name||("Cabaña "+(i+1))}</span>
+                      <span className="ff-body text-sm text-stone-500">👥 hasta {u.capacity}</span>
+                    </div>
                   </div>
-                ))}
+                ); })}
               </div>
             </div>
           )}
@@ -349,6 +358,14 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
     else if(t.id==='lb-next') go(1);
   });
   document.addEventListener('keydown', function(e){ if(!ov||ov.style.display==='none') return; if(e.key==='Escape') close(); else if(e.key==='ArrowLeft') go(-1); else if(e.key==='ArrowRight') go(1); });
+})();
+</script>
+<script>
+/* Carga el embebido de Instagram y lo procesa cuando React dibuja un reel. process() es idempotente. */
+(function(){
+  var s=document.createElement('script'); s.async=true; s.src='https://www.instagram.com/embed.js';
+  document.body.appendChild(s);
+  setInterval(function(){ try{ if(window.instgrm && window.instgrm.Embeds && document.querySelector('.instagram-media:not([data-instgrm-rendered])')) window.instgrm.Embeds.process(); }catch(e){} }, 1500);
 })();
 </script>
 </body>
