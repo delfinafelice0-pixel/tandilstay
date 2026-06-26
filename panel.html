@@ -368,16 +368,6 @@ function Editor({ c, set }) {
           </div>
         )}
       </div>
-      <div className="bg-white rounded-2xl border border-black/5 p-5">
-        <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>🔄 Sincronizar con Booking / Airbnb</h3>
-        <p className="ff-body text-sm text-stone-500 mb-3">Pegá el link de "exportar calendario" (iCal / .ics) de Booking y/o Airbnb, uno por línea. Las fechas reservadas allá van a aparecer ocupadas acá solas.</p>
-        <textarea value={(c.ical_urls||[]).join("\n")} onChange={e=>set({...c, ical_urls: e.target.value.split("\n").map(s=>s.trim()).filter(Boolean)})} rows={3} placeholder="Pegá acá los links .ics (uno por línea)" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-xs resize-none" />
-        <div className="flex items-center justify-between gap-2 mt-3 flex-wrap">
-          <span className="ff-body text-xs text-stone-400">{c.ical_synced_at ? ("Última: "+fmtSync(c.ical_synced_at)+" · "+((c.ical_blocked||[]).length)+" fechas") : "Todavía sin sincronizar"}</span>
-          <button onClick={syncIcal} disabled={syncing} className="rounded-xl px-4 py-2 ff-body text-sm font-semibold text-white disabled:opacity-50" style={{background:C.moss}}>{syncing?"Sincronizando…":"🔄 Sincronizar ahora"}</button>
-        </div>
-        {syncMsg && <p className="ff-body text-xs mt-2" style={{color:C.clay}}>{syncMsg}</p>}
-      </div>
     </div>
     </div>
   );
