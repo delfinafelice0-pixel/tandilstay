@@ -164,7 +164,7 @@ function CatTile({ kicker, title, img, onClick }) {
   );
 }
 
-function Home({ cabins, loading, go }) {
+function Home({ cabins, acts, food, loading, go }) {
   const [zona, setZona] = useState("");
   const [guests, setGuests] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
@@ -264,6 +264,46 @@ function Home({ cabins, loading, go }) {
         : show.length === 0 ? <p className="ff-body text-stone-500 py-12 text-center">No hay alojamientos con esos filtros. Probá aflojar alguno.</p>
         : <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">{show.map((c, i) => <CabinCard key={i} c={c} />)}</div>}
       </section>
+
+      {!loading && food.length>0 && (
+      <section className="px-5 sm:px-6 py-20" style={{ background: C.cream }}>
+        <div className="max-w-6xl mx-auto">
+          <div className="reveal flex items-end justify-between gap-4 mb-10">
+            <div>
+              <p className="ff-body text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: C.sage }}>Sabores serranos</p>
+              <h2 className="ff-display text-3xl sm:text-5xl mt-3 leading-[1.04]" style={{ color: C.ink, fontWeight:300 }}>Dónde comer en Tandil</h2>
+            </div>
+            <button onClick={()=>go("gastro")} className="ff-body text-[14px] font-semibold navlink shrink-0 whitespace-nowrap" style={{ color: C.clay }}>Ver todo →</button>
+          </div>
+          <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">{food.slice(0,6).map((a, i) => (
+            <a key={i} href={"resto.html?slug=" + a.slug + opSuffix} className="group block">
+              <div className="aspect-[4/3] rounded-md overflow-hidden" style={{ background: C.mist }}><img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} className="w-full h-full object-cover imgzoom" /></div>
+              <div className="mt-4"><div className="flex gap-1.5 mb-1">{a.sin_tacc && <span className="ff-body text-[11px] rounded-full px-2 py-0.5" style={{ background:"#eef2e8", color:C.moss }}>Sin TACC</span>}{a.vegetariano && <span className="ff-body text-[11px] rounded-full px-2 py-0.5" style={{ background:"#eef2e8", color:C.moss }}>Veggie</span>}</div><h3 className="ff-display text-xl" style={{ color: C.ink, fontWeight:400 }}>{a.name}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed clamp2">{a.blurb}</p></div>
+            </a>
+          ))}</div>
+        </div>
+      </section>
+      )}
+
+      {!loading && acts.length>0 && (
+      <section className="px-5 sm:px-6 py-20" style={{ background: C.paper }}>
+        <div className="max-w-6xl mx-auto">
+          <div className="reveal flex items-end justify-between gap-4 mb-10">
+            <div>
+              <p className="ff-body text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: C.sage }}>Paseos & aventura</p>
+              <h2 className="ff-display text-3xl sm:text-5xl mt-3 leading-[1.04]" style={{ color: C.ink, fontWeight:300 }}>Qué hacer en Tandil</h2>
+            </div>
+            <button onClick={()=>go("qhacer")} className="ff-body text-[14px] font-semibold navlink shrink-0 whitespace-nowrap" style={{ color: C.clay }}>Ver todo →</button>
+          </div>
+          <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">{acts.slice(0,6).map((a, i) => (
+            <a key={i} href={"actividad.html?slug=" + a.slug + opSuffix} className="group block">
+              <div className="aspect-[4/3] rounded-md overflow-hidden" style={{ background: C.mist }}><img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} className="w-full h-full object-cover imgzoom" /></div>
+              <div className="mt-4">{a.category && <div className="ff-body text-[11px] uppercase tracking-[0.24em] font-semibold" style={{ color: C.sage }}>{a.category}</div>}<h3 className="ff-display text-xl mt-1" style={{ color: C.ink, fontWeight:400 }}>{a.name}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed clamp2">{a.blurb}</p>{a.duration && <p className="ff-body text-[13px] text-stone-400 mt-2">⏱ {a.duration}</p>}</div>
+            </a>
+          ))}</div>
+        </div>
+      </section>
+      )}
 
       {/* CONSULTA */}
       <section className="reveal text-center px-5 sm:px-6 py-28" style={{ background: C.paper }}>
@@ -482,7 +522,7 @@ function App() {
     <div className="min-h-screen ff-body" style={{ background: C.paper }}>
       <Header view={view} go={go} onOpen={() => setMenu(true)} solid={solid} />
       <MobileMenu open={menu} go={go} onClose={() => setMenu(false)} />
-      {view === "home" && <Home cabins={data.cabins} loading={data.loading} go={go} />}
+      {view === "home" && <Home cabins={data.cabins} acts={data.acts} food={data.food} loading={data.loading} go={go} />}
       {view === "qhacer" && <ActivitiesPage acts={data.acts} loading={data.loading} />}
       {view === "gastro" && <FoodPage food={data.food} loading={data.loading} />}
       {view === "conoce" && <AboutPage />}
