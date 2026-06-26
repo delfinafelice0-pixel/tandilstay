@@ -63,6 +63,7 @@ const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
 const kFmt = (n) => (n >= 1000 ? Math.round(n/1000)+"k" : ""+n);
 const pad = (n) => String(n).padStart(2,"0");
 const iso = (dt) => `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+const fmtDMY = (s) => { const d=parseD(s); return d?`${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`:(s||""); };
 const parseD = (s) => (s ? new Date(s+"T00:00:00") : null);
 const addDay = (dt,n=1) => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()+n);
 const isWeekend = (d) => { const w = parseD(d).getDay(); return w===5||w===6; };
@@ -166,10 +167,16 @@ function Landing({ c, acts=[], food=[] }) {
   const [main,setMain]=useState(0);
   const [cursor,setCursor]=useState(new Date(2026,5,1));
   const [openUnit,setOpenUnit]=useState(null);
-  const stay=computeStay(c,q.ci,q.co);
-  const avail=isAvail(c,q.ci,q.co);
+  const units=c.units||[];
+  const multi=units.length>1;
+  const [selUnit,setSelUnit]=useState(units.length===1?0:null);
+  const su = (selUnit!=null && units[selUnit]) ? units[selUnit] : null;
+  const cv = su ? { price:(su.price!=null&&su.price!=="")?+su.price:c.price, weekendPrice:(su.weekendPrice!=null&&su.weekendPrice!=="")?+su.weekendPrice:c.weekendPrice, overrides:su.overrides||{}, blocked:su.blocked||[], promos:c.promos, promoText:c.promoText } : c;
+  const ready = !multi || selUnit!=null;
+  const stay=computeStay(cv,q.ci,q.co);
+  const avail=isAvail(cv,q.ci,q.co);
   const pick=(day,info)=>{ if(info.past||info.isBlocked) return; if(!q.ci||(q.ci&&q.co)){setQ({ci:day,co:""});return;} if(day<=q.ci){setQ({ci:day,co:""});return;} let d=parseD(q.ci),ok=true; while(d<parseD(day)){if(c.blocked.includes(iso(d))){ok=false;break;}d=addDay(d);} setQ(ok?{ci:q.ci,co:day}:{ci:day,co:""}); };
-  let msg=`Hola! Quiero consultar por ${c.name}.`; if(q.ci&&q.co) msg+=` Del ${q.ci} al ${q.co}.`; if(stay&&avail) msg+=` Total estimado ${money(stay.total)}.`;
+  let msg=`Hola! Quiero consultar por ${c.name}${su?(" - "+(su.name||("Cabaña "+(selUnit+1)))):""}.`; if(q.ci&&q.co) msg+=` Del ${fmtDMY(q.ci)} al ${fmtDMY(q.co)}.`; if(stay&&avail) msg+=` Total estimado ${money(stay.total)}.`;
   const wa=`https://wa.me/${c.whatsapp}?text=${encodeURIComponent(msg)}`;
   const photos = c.photos.length ? c.photos : ["photo-1518780664697-55e3ad937233"];
   const cover = c.banner || photos[0];
@@ -249,8 +256,18 @@ function Landing({ c, acts=[], food=[] }) {
           )}
           <div id="calendario" style={{scrollMarginTop:"84px"}}>
             <h2 className="ff-display text-2xl mb-1" style={{color:C.ink}}>Disponibilidad y precios</h2>
-            <p className="ff-body text-sm text-stone-500 mb-3">Cada día muestra su tarifa. Tocá entrada y salida.</p>
-            <div className="border border-black/10 rounded-2xl p-4 max-w-sm bg-white"><Calendar cursor={cursor} setCursor={setCursor} blocked={c.blocked} ci={q.ci} co={q.co} priceOf={(d)=>nightlyPrice(c,d)} onDay={pick} /></div>
+            {multi && (
+              <div className="mb-3">
+                <p className="ff-body text-sm text-stone-500 mb-2">Elegí tu cabaña:</p>
+                <div className="flex flex-wrap gap-2">{units.map((u,ui)=>{const on=selUnit===ui;return <button key={ui} onClick={()=>setSelUnit(ui)} className={"rounded-full px-4 py-2 ff-body text-sm border transition "+(on?"text-white":"text-stone-600 border-stone-300 hover:border-stone-400")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{u.name||("Cabaña "+(ui+1))}</button>;})}</div>
+              </div>
+            )}
+            {ready ? (<>
+              <p className="ff-body text-sm text-stone-500 mb-3">Cada día muestra la tarifa de {su?(su.name||("Cabaña "+(selUnit+1))):"esta cabaña"}. Tocá entrada y salida.</p>
+              <div className="border border-black/10 rounded-2xl p-4 max-w-sm bg-white"><Calendar cursor={cursor} setCursor={setCursor} blocked={cv.blocked} ci={q.ci} co={q.co} priceOf={(d)=>nightlyPrice(cv,d)} onDay={pick} /></div>
+            </>) : (
+              <p className="ff-body text-sm text-stone-500 border border-black/10 rounded-2xl p-4 max-w-sm bg-white">👆 Elegí una cabaña para ver su disponibilidad y precios.</p>
+            )}
           </div>
           {(c.amenities.length>0 || c.petFriendly || (c.minNights>1) || c.type) && (
             <div><h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Comodidades</h2><div className="grid grid-cols-2 gap-3">
@@ -270,8 +287,16 @@ function Landing({ c, acts=[], food=[] }) {
         </div>
         <div className="md:col-span-1">
           <div className="sticky top-4 bg-white border border-black/10 rounded-2xl p-5 shadow-lg">
-            <div className="ff-display text-2xl mb-1" style={{color:C.ink}}>desde {money(c.price)} <span className="ff-body text-stone-500 text-sm">/ noche</span></div>
-            {c.weekendPrice && <p className="ff-body text-xs text-stone-500 mb-3">Finde: {money(c.weekendPrice)} / noche</p>}
+            {(multi && selUnit==null) ? (
+              <div>
+                <div className="ff-display text-2xl mb-1" style={{color:C.ink}}>Elegí tu cabaña</div>
+                <p className="ff-body text-sm text-stone-500 mb-3">Este hospedaje tiene {units.length} cabañas. Elegí una para ver precio, disponibilidad y reservar.</p>
+                <div className="flex flex-wrap gap-2">{units.map((u,ui)=><button key={ui} onClick={()=>setSelUnit(ui)} className="rounded-full px-4 py-2 ff-body text-sm border text-stone-600 border-stone-300 hover:border-stone-400 transition">{u.name||("Cabaña "+(ui+1))}</button>)}</div>
+              </div>
+            ) : (<>
+            <div className="ff-display text-2xl mb-1" style={{color:C.ink}}>desde {money(cv.price)} <span className="ff-body text-stone-500 text-sm">/ noche</span></div>
+            {su && <p className="ff-body text-xs font-semibold mb-2" style={{color:C.moss}}>{su.name||("Cabaña "+(selUnit+1))}{multi && <button onClick={()=>setSelUnit(null)} className="text-stone-400 underline ml-2 font-normal">cambiar</button>}</p>}
+            {cv.weekendPrice && <p className="ff-body text-xs text-stone-500 mb-3">Finde: {money(cv.weekendPrice)} / noche</p>}
             <div onClick={()=>{const el=document.getElementById("calendario"); if(el) el.scrollIntoView({behavior:"smooth"});}} title="Elegí las fechas en el calendario" className="grid grid-cols-2 rounded-xl border border-stone-300 overflow-hidden mb-3 ff-body text-sm cursor-pointer hover:border-stone-400 transition">
               <div className="p-3 border-r border-stone-300"><div className="text-[10px] uppercase text-stone-400 font-semibold">Entrada</div><div style={{color:C.ink}}>{q.ci||"—"}</div></div>
               <div className="p-3"><div className="text-[10px] uppercase text-stone-400 font-semibold">Salida</div><div style={{color:C.ink}}>{q.co||"—"}</div></div>
@@ -287,6 +312,8 @@ function Landing({ c, acts=[], food=[] }) {
             ) : <div className="bg-rose-50 text-rose-700 ff-body text-sm rounded-xl p-3 mb-4">No disponible en esas fechas.</div>)
             : <p className="ff-body text-sm text-stone-400 mb-4">Elegí fechas en el calendario.</p>}
             <a href={wa} target="_blank" rel="noreferrer" className="block text-center w-full text-white rounded-xl py-3 ff-body font-semibold" style={{background:A}}>💬 Reservar por WhatsApp</a>
+            {su && su.bookingUrl && <a href={su.bookingUrl} target="_blank" rel="noreferrer" className="block text-center w-full rounded-xl py-3 ff-body font-semibold mt-2 border" style={{borderColor:C.moss,color:C.moss}}>Reservar en Booking / Airbnb →</a>}
+            </>)}
           </div>
         </div>
       </div>

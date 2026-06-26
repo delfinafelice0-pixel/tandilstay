@@ -119,6 +119,7 @@ function Editor({ c, set }) {
   const [cursor,setCursor]=useState(new Date(2026,5,1));
   const [mode,setMode]=useState("block");
   const [selDay,setSelDay]=useState(null);
+  const [calUnit,setCalUnit]=useState(0);
   const [priceInput,setPriceInput]=useState("");
   const [uploading,setUploading]=useState(false);
   const [syncing,setSyncing]=useState(false);
@@ -180,8 +181,10 @@ function Editor({ c, set }) {
     set({...c, units:c.units.map((x,j)=>{ if(j!==idx) return x; const base=(x.photos&&x.photos.length)?x.photos:(x.photo?[x.photo]:[]); return {...x, photo:"", photos:[...base, ...urls]}; })});
     setUploading(false); e.target.value="";
   };
-  const toggleBlock = (day) => set({ ...c, blocked: c.blocked.includes(day) ? c.blocked.filter(x=>x!==day) : [...c.blocked, day] });
-  const setOverride = (val) => { const o={...(c.overrides||{})}; if(val) o[selDay]=+val; else delete o[selDay]; set({...c, overrides:o}); };
+  const calIdx = () => Math.max(0, Math.min(calUnit, (c.units||[]).length-1));
+  const unitPrice = (u) => ({ price:(u&&u.price!=null&&u.price!=="")?+u.price:c.price, weekendPrice:(u&&u.weekendPrice!=null&&u.weekendPrice!=="")?+u.weekendPrice:c.weekendPrice, overrides:(u&&u.overrides)||{} });
+  const toggleBlock = (day) => { const k=calIdx(); set({...c, units:c.units.map((x,j)=>{ if(j!==k) return x; const bl=x.blocked||[]; return {...x, blocked: bl.includes(day)?bl.filter(d=>d!==day):[...bl,day]}; })}); };
+  const setOverride = (val) => { const k=calIdx(); set({...c, units:c.units.map((x,j)=>{ if(j!==k) return x; const o={...(x.overrides||{})}; if(val) o[selDay]=+val; else delete o[selDay]; return {...x, overrides:o}; })}); };
   return (
     <div className="grid md:grid-cols-2 gap-6">
       <div className="space-y-5">
@@ -344,29 +347,41 @@ function Editor({ c, set }) {
 
       <div className="space-y-5 h-fit">
       <div className="bg-white rounded-2xl border border-black/5 p-5">
-        <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Calendario</h3>
-        <div className="flex gap-2 mb-4">
-          <button onClick={()=>{setMode("block");setSelDay(null);}} className={"flex-1 rounded-xl py-2 ff-body text-sm border "+(mode==="block"?"border-rose-300 text-rose-700 bg-rose-50":"border-stone-300 text-stone-600")}>🚫 Bloquear</button>
-          <button onClick={()=>{setMode("price");setSelDay(null);}} className={"flex-1 rounded-xl py-2 ff-body text-sm border "+(mode==="price"?"border-amber-300 text-amber-700 bg-amber-50":"border-stone-300 text-stone-600")}>🏷️ Precio por día</button>
-        </div>
-        {mode==="block" ? (
-          <div><p className="ff-body text-sm text-stone-500 mb-3">Tocá un día para ocuparlo o liberarlo.</p><Calendar cursor={cursor} setCursor={setCursor} blocked={c.blocked} onDay={(day,info)=>{if(!info.past) toggleBlock(day);}} /></div>
-        ) : (
-          <div>
-            <p className="ff-body text-sm text-stone-500 mb-3">Tocá un día para ponerle precio especial.</p>
-            <Calendar cursor={cursor} setCursor={setCursor} blocked={c.blocked} selectedDay={selDay} priceOf={(d)=>nightlyPrice(c,d)} onDay={(day,info)=>{if(info.past)return;setSelDay(day);setPriceInput(c.overrides[day]!=null?String(c.overrides[day]):"");}} />
-            {selDay && (
-              <div className="mt-4 bg-stone-50 rounded-xl p-3">
-                <div className="ff-body text-sm text-stone-700 mb-2">Precio para <strong>{selDay}</strong></div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center border border-stone-300 rounded-lg px-2 bg-white flex-1"><span className="text-stone-400 text-sm">$</span><input type="number" value={priceInput} onChange={e=>setPriceInput(e.target.value)} placeholder={String(nightlyPrice(c,selDay))} className="w-full py-2 ff-body text-sm outline-none" /></div>
-                  <button onClick={()=>setOverride(priceInput)} className="text-white rounded-lg px-3 py-2 ff-body text-sm font-semibold" style={{background:C.moss}}>Aplicar</button>
-                  <button onClick={()=>{setOverride("");setPriceInput("");}} className="border border-stone-300 rounded-lg px-3 py-2 ff-body text-sm text-stone-600">Quitar</button>
-                </div>
-              </div>
-            )}
+        <h3 className="ff-display text-lg mb-1" style={{color:C.ink}}>Disponibilidad y precios por cabaña</h3>
+        <p className="ff-body text-xs text-stone-500 mb-3">Elegí una cabaña y cargá su precio y los días ocupados. Cada cabaña tiene su propio calendario.</p>
+        {(c.units||[]).length===0 ? (
+          <p className="ff-body text-sm text-stone-500 bg-stone-50 rounded-xl p-3">Primero agregá al menos una cabaña arriba.</p>
+        ) : (()=>{ const k=Math.max(0,Math.min(calUnit,c.units.length-1)); const cu=c.units[k]; const setCU=(patch)=>set({...c,units:c.units.map((x,j)=>j===k?{...x,...patch}:x)}); const up=unitPrice(cu); return (
+        <div>
+          <div className="flex flex-wrap gap-2 mb-4">{c.units.map((u,ui)=>{const on=k===ui;return <button key={ui} onClick={()=>{setCalUnit(ui);setSelDay(null);}} className={"rounded-full px-3 py-1.5 ff-body text-sm border "+(on?"text-white":"text-stone-600 border-stone-300")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{u.name||("Cabaña "+(ui+1))}</button>;})}</div>
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <Field label="Precio noche"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="text-stone-400 text-sm">$</span><input type="number" value={cu.price==null?"":cu.price} onChange={e=>setCU({price:e.target.value===""?null:+e.target.value})} placeholder={String(c.price||0)} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
+            <Field label="Precio finde"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="text-stone-400 text-sm">$</span><input type="number" value={cu.weekendPrice==null?"":cu.weekendPrice} onChange={e=>setCU({weekendPrice:e.target.value===""?null:+e.target.value})} placeholder="igual" className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
           </div>
-        )}
+          <div className="flex gap-2 mb-4">
+            <button onClick={()=>{setMode("block");setSelDay(null);}} className={"flex-1 rounded-xl py-2 ff-body text-sm border "+(mode==="block"?"border-rose-300 text-rose-700 bg-rose-50":"border-stone-300 text-stone-600")}>🚫 Bloquear</button>
+            <button onClick={()=>{setMode("price");setSelDay(null);}} className={"flex-1 rounded-xl py-2 ff-body text-sm border "+(mode==="price"?"border-amber-300 text-amber-700 bg-amber-50":"border-stone-300 text-stone-600")}>🏷️ Precio por día</button>
+          </div>
+          {mode==="block" ? (
+            <div><p className="ff-body text-sm text-stone-500 mb-3">Tocá un día para ocuparlo o liberarlo.</p><Calendar cursor={cursor} setCursor={setCursor} blocked={cu.blocked||[]} onDay={(day,info)=>{if(!info.past) toggleBlock(day);}} /></div>
+          ) : (
+            <div>
+              <p className="ff-body text-sm text-stone-500 mb-3">Tocá un día para ponerle precio especial.</p>
+              <Calendar cursor={cursor} setCursor={setCursor} blocked={cu.blocked||[]} selectedDay={selDay} priceOf={(d)=>nightlyPrice(up,d)} onDay={(day,info)=>{if(info.past)return;setSelDay(day);setPriceInput((cu.overrides&&cu.overrides[day]!=null)?String(cu.overrides[day]):"");}} />
+              {selDay && (
+                <div className="mt-4 bg-stone-50 rounded-xl p-3">
+                  <div className="ff-body text-sm text-stone-700 mb-2">Precio para <strong>{selDay}</strong></div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center border border-stone-300 rounded-lg px-2 bg-white flex-1"><span className="text-stone-400 text-sm">$</span><input type="number" value={priceInput} onChange={e=>setPriceInput(e.target.value)} placeholder={String(nightlyPrice(up,selDay))} className="w-full py-2 ff-body text-sm outline-none" /></div>
+                    <button onClick={()=>setOverride(priceInput)} className="text-white rounded-lg px-3 py-2 ff-body text-sm font-semibold" style={{background:C.moss}}>Aplicar</button>
+                    <button onClick={()=>{setOverride("");setPriceInput("");}} className="border border-stone-300 rounded-lg px-3 py-2 ff-body text-sm text-stone-600">Quitar</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        ); })()}
       </div>
     </div>
     </div>
