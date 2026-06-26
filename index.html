@@ -3,22 +3,22 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Descubrí Tandil · Hospedajes, gastronomía y actividades en Tandil</title>
-<meta name="description" content="Descubrí Tandil en un solo lugar: dónde dormir, dónde comer y qué hacer entre las sierras." />
+<title>Visitando Tandil · Hospedajes, gastronomía y actividades en Tandil</title>
+<meta name="description" content="Visitando Tandil en un solo lugar: dónde dormir, dónde comer y qué hacer entre las sierras." />
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Crect%20width%3D%2724%27%20height%3D%2724%27%20rx%3D%276%27%20fill%3D%27%233E4F3F%27/%3E%3Ccircle%20cx%3D%2717%27%20cy%3D%277.5%27%20r%3D%272.2%27%20fill%3D%27%23E2A94E%27/%3E%3Cpath%20d%3D%27M3%2018%20L8.5%209%20L12%2013.5%20L15%2010%20L21%2018%20Z%27%20fill%3D%27none%27%20stroke%3D%27%23E2A94E%27%20stroke-width%3D%271.8%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E" />
 <meta property="og:type" content="website" />
-<meta property="og:site_name" content="Descubrí Tandil" />
+<meta property="og:site_name" content="Visitando Tandil" />
 <meta property="og:locale" content="es_AR" />
-<meta property="og:title" content="Descubrí Tandil · Hospedajes, gastronomía y actividades en Tandil" />
-<meta property="og:description" content="Descubrí Tandil en un solo lugar: dónde dormir, dónde comer y qué hacer entre las sierras." />
+<meta property="og:title" content="Visitando Tandil · Hospedajes, gastronomía y actividades en Tandil" />
+<meta property="og:description" content="Visitando Tandil en un solo lugar: dónde dormir, dónde comer y qué hacer entre las sierras." />
 <meta property="og:url" content="https://delfinafelice0-pixel.github.io/tandilstay/" />
 <meta property="og:image" content="https://delfinafelice0-pixel.github.io/tandilstay/og.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Descubrí Tandil" />
+<meta property="og:image:alt" content="Visitando Tandil" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Descubrí Tandil · Hospedajes, gastronomía y actividades en Tandil" />
-<meta name="twitter:description" content="Descubrí Tandil en un solo lugar: dónde dormir, dónde comer y qué hacer entre las sierras." />
+<meta name="twitter:title" content="Visitando Tandil · Hospedajes, gastronomía y actividades en Tandil" />
+<meta name="twitter:description" content="Visitando Tandil en un solo lugar: dónde dormir, dónde comer y qué hacer entre las sierras." />
 <meta name="twitter:image" content="https://delfinafelice0-pixel.github.io/tandilstay/og.png" />
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -94,7 +94,7 @@ function Header({ view, go, onOpen, solid }) {
       <div className="max-w-6xl mx-auto px-5 sm:px-6 h-[72px] flex items-center justify-between">
         <button onClick={() => go("home")} className="flex items-center gap-2.5 transition-colors duration-500" style={{ color: fg }}>
           <span className="w-2 h-2 rounded-full" style={{ background: C.sun }}></span>
-          <span className="ff-display text-[21px] tracking-tight" style={{ fontWeight:400 }}>Descubrí Tandil</span>
+          <span className="ff-display text-[21px] tracking-tight" style={{ fontWeight:400 }}>Visitando Tandil</span>
         </button>
         <nav className="hidden md:flex items-center gap-8 ff-body text-[14px] font-medium transition-colors duration-500" style={{ color: solid ? "rgba(36,34,28,0.66)" : "rgba(255,255,255,0.85)" }}>
           {NAV.map((n) => (
@@ -189,7 +189,7 @@ function Home({ cabins, loading, go }) {
         <div className="absolute inset-0 kb" style={{ backgroundImage:`url(${HERO_IMG})`, backgroundSize:"cover", backgroundPosition:"center" }}></div>
         <div className="absolute inset-0" style={{ background:"linear-gradient(180deg,rgba(20,24,20,0.34) 0%,rgba(20,24,20,0) 34%,rgba(20,24,20,0.18) 66%,rgba(18,22,18,0.72) 100%)" }}></div>
         <div className="relative z-10 max-w-6xl mx-auto w-full px-5 sm:px-6 pb-8 text-white">
-          <h1 className="rise ff-display text-[40px] sm:text-6xl lg:text-7xl leading-[1.03] max-w-[16ch]" style={{ fontWeight:300, letterSpacing:"-0.02em" }}>Descubrí Tandil, <span className="italic">sin apuro.</span></h1>
+          <h1 className="rise ff-display text-[40px] sm:text-6xl lg:text-7xl leading-[1.03] max-w-[16ch]" style={{ fontWeight:300, letterSpacing:"-0.02em" }}>Visitando Tandil, <span className="italic">sin apuro.</span></h1>
           <p className="rise ff-body text-white/90 max-w-[44ch] mt-5 text-[16px] sm:text-[18px]" style={{ animationDelay:".1s" }}>Los lugares más lindos para dormir, comer y perderte entre las sierras — elegidos uno por uno.</p>
           <div className="rise flex flex-wrap items-center gap-x-7 gap-y-4 mt-7" style={{ animationDelay:".18s" }}>
             <button onClick={goAloj} className="inline-flex items-center gap-2.5 rounded-full px-7 py-[15px] ff-body font-semibold text-[15px] transition-transform duration-500 hover:-translate-y-0.5" style={{ background:C.cream, color:C.ink }}>Empezá a explorar</button>
@@ -368,7 +368,7 @@ function OwnersPage() {
         <div className="grid sm:grid-cols-3 gap-5 mb-12">{benefits.map((b, i) => <div key={i} className="rounded-lg p-6 bg-white border border-black/5"><div className="w-9 h-9 rounded-full grid place-items-center mb-3 text-white" style={{ background: C.sage }}>✓</div><h3 className="ff-display text-xl" style={{ color: C.ink, fontWeight:400 }}>{b.t}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed">{b.s}</p></div>)}</div>
         <div className="rounded-lg p-10 text-center" style={{ background: C.moss }}>
           <h2 className="ff-display text-3xl text-white mb-3" style={{ fontWeight:300 }}>¿Listos para empezar?</h2>
-          <p className="ff-body text-white/75 max-w-md mx-auto mb-7">Escribinos y en minutos tu cabaña está publicada en Descubrí Tandil.</p>
+          <p className="ff-body text-white/75 max-w-md mx-auto mb-7">Escribinos y en minutos tu cabaña está publicada en Visitando Tandil.</p>
           <a href={wa} target="_blank" rel="noreferrer" className="inline-block bg-white rounded-full px-7 py-3 ff-body font-semibold" style={{ color: C.moss }}>Quiero sumarme</a>
         </div>
       </section>
@@ -404,7 +404,7 @@ function Footer({ go }) {
       <div className="max-w-6xl mx-auto px-5 sm:px-6 py-16">
         <div className="flex flex-wrap justify-between gap-10">
           <div className="max-w-[30ch]">
-            <div className="ff-display text-2xl text-white" style={{ fontWeight:400 }}>Descubrí Tandil</div>
+            <div className="ff-display text-2xl text-white" style={{ fontWeight:400 }}>Visitando Tandil</div>
             <p className="ff-body text-sm mt-4" style={{ color:"rgba(255,255,255,0.7)" }}>Lo mejor de Tandil para dormir, comer y descubrir — en un solo lugar. Hecho con cariño en Tandil por Brote 🌱</p>
           </div>
           <div>
@@ -421,7 +421,7 @@ function Footer({ go }) {
           </div>
         </div>
         <div className="mt-14 pt-6 flex justify-between flex-wrap gap-2 ff-body text-[13px]" style={{ borderTop:"1px solid rgba(255,255,255,0.12)", color:"rgba(255,255,255,0.5)" }}>
-          <span>© 2026 Descubrí Tandil · Creado por Brote 🌱</span><span>Tandil, Buenos Aires</span>
+          <span>© 2026 Visitando Tandil · Creado por Brote 🌱</span><span>Tandil, Buenos Aires</span>
         </div>
       </div>
     </footer>

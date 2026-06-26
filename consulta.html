@@ -3,21 +3,21 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Consultá a varias cabañas · Descubrí Tandil</title>
+<title>Consultá a varias cabañas · Visitando Tandil</title>
 <meta name="description" content="Contanos qué buscás y mandá una sola consulta a todas las cabañas de Tandil que coinciden." />
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Crect%20width%3D%2724%27%20height%3D%2724%27%20rx%3D%276%27%20fill%3D%27%233E4F3F%27/%3E%3Ccircle%20cx%3D%2717%27%20cy%3D%277.5%27%20r%3D%272.2%27%20fill%3D%27%23E2A94E%27/%3E%3Cpath%20d%3D%27M3%2018%20L8.5%209%20L12%2013.5%20L15%2010%20L21%2018%20Z%27%20fill%3D%27none%27%20stroke%3D%27%23E2A94E%27%20stroke-width%3D%271.8%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E" />
 <meta property="og:type" content="website" />
-<meta property="og:site_name" content="Descubrí Tandil" />
+<meta property="og:site_name" content="Visitando Tandil" />
 <meta property="og:locale" content="es_AR" />
-<meta property="og:title" content="Consultá a varias cabañas · Descubrí Tandil" />
+<meta property="og:title" content="Consultá a varias cabañas · Visitando Tandil" />
 <meta property="og:description" content="Contanos qué buscás y mandá una sola consulta a todas las cabañas de Tandil que coinciden." />
 <meta property="og:url" content="https://delfinafelice0-pixel.github.io/tandilstay/consulta.html" />
 <meta property="og:image" content="https://delfinafelice0-pixel.github.io/tandilstay/og.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Descubrí Tandil" />
+<meta property="og:image:alt" content="Visitando Tandil" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Consultá a varias cabañas · Descubrí Tandil" />
+<meta name="twitter:title" content="Consultá a varias cabañas · Visitando Tandil" />
 <meta name="twitter:description" content="Contanos qué buscás y mandá una sola consulta a todas las cabañas de Tandil que coinciden." />
 <meta name="twitter:image" content="https://delfinafelice0-pixel.github.io/tandilstay/og.png" />
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -62,7 +62,7 @@ function Logo(){ return (
     <span className="w-9 h-9 rounded-xl grid place-items-center" style={{background:C.moss}}>
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#E2A94E" strokeWidth="2" strokeLinejoin="round"><circle cx="17" cy="7" r="2.4"/><path d="M2 19 L9 9 L13 15 L16.5 11 L22 19 Z"/></svg>
     </span>
-    <span><span className="ff-display text-lg leading-none block" style={{color:C.ink}}>Descubrí Tandil</span><span className="ff-body text-[11px] text-stone-500">Tandil</span></span>
+    <span><span className="ff-display text-lg leading-none block" style={{color:C.ink}}>Visitando Tandil</span><span className="ff-body text-[11px] text-stone-500">Tandil</span></span>
   </a>
 ); }
 
@@ -107,7 +107,7 @@ function App(){
   const conMail = results ? results.filter(c=>c.email) : [];
   const conWa = results ? results.filter(c=>c.whatsapp) : [];
   const mailtoUrl = () => `mailto:?bcc=${encodeURIComponent(conMail.map(c=>c.email).join(","))}&subject=${encodeURIComponent("Consulta de disponibilidad — Tandil")}&body=${encodeURIComponent(cuerpo())}`;
-  const waText = (c) => encodeURIComponent(`¡Hola! Vi ${c.name} en Descubrí Tandil y quería consultar disponibilidad.` + (ci&&co?` Fechas: ${ci} al ${co}.`:"") + (huesp?` Para ${huesp} personas.`:"") + (msg?` ${msg}`:"") + (nombre?` Soy ${nombre}.`:""));
+  const waText = (c) => encodeURIComponent(`¡Hola! Vi ${c.name} en Visitando Tandil y quería consultar disponibilidad.` + (ci&&co?` Fechas: ${ci} al ${co}.`:"") + (huesp?` Para ${huesp} personas.`:"") + (msg?` ${msg}`:"") + (nombre?` Soy ${nombre}.`:""));
 
   const Field = ({label, children}) => (<label className="block"><span className="ff-body text-xs font-semibold tracking-wide uppercase text-stone-500">{label}</span><div className="mt-1">{children}</div></label>);
   const inputC = "w-full border border-stone-300 rounded-xl px-3 py-2.5 ff-body text-sm bg-white";
@@ -188,7 +188,7 @@ function App(){
           </div>
         )}
 
-        <p className="ff-body text-xs text-stone-400 text-center mt-10">Descubrí Tandil · Creado por Brote 🌱</p>
+        <p className="ff-body text-xs text-stone-400 text-center mt-10">Visitando Tandil · Creado por Brote 🌱</p>
       </div>
     </div>
   );
