@@ -168,12 +168,16 @@ function Editor({ c, set }) {
     setUploading(false); e.target.value="";
   };
   const uploadUnitPhoto = async (e, idx) => {
-    const f0 = (e.target.files||[])[0]; if(!f0) return;
+    const files = Array.from(e.target.files||[]); if(!files.length) return;
     setUploading(true);
-    const f = await compressToWebp(f0, 1280, 0.82);
-    const path = "u-"+Date.now()+"-"+Math.random().toString(36).slice(2)+"-"+f.name.replace(/[^a-zA-Z0-9.]/g,"_");
-    const { error } = await db.storage.from("fotos").upload(path, f);
-    if(!error){ const { data } = db.storage.from("fotos").getPublicUrl(path); const oldU=(c.units[idx]||{}).photo; if(oldU) delFromStorage(oldU); set({...c, units:c.units.map((x,j)=>j===idx?{...x,photo:data.publicUrl}:x)}); }
+    const urls=[];
+    for(const raw of files){
+      const f = await compressToWebp(raw, 1280, 0.82);
+      const path = "u-"+Date.now()+"-"+Math.random().toString(36).slice(2)+"-"+f.name.replace(/[^a-zA-Z0-9.]/g,"_");
+      const { error } = await db.storage.from("fotos").upload(path, f);
+      if(!error){ const { data } = db.storage.from("fotos").getPublicUrl(path); urls.push(data.publicUrl); }
+    }
+    set({...c, units:c.units.map((x,j)=>{ if(j!==idx) return x; const base=(x.photos&&x.photos.length)?x.photos:(x.photo?[x.photo]:[]); return {...x, photo:"", photos:[...base, ...urls]}; })});
     setUploading(false); e.target.value="";
   };
   const toggleBlock = (day) => set({ ...c, blocked: c.blocked.includes(day) ? c.blocked.filter(x=>x!==day) : [...c.blocked, day] });
@@ -212,17 +216,34 @@ function Editor({ c, set }) {
                   </div>
                   <button onClick={()=>set({...c,units:c.units.filter((_,j)=>j!==i)})} className="text-rose-500">🗑️</button>
                 </div>
-                <div className="flex items-center gap-2">
-                  {u.photo ? (
-                    <div className="relative shrink-0">
-                      <img src={IMG(u.photo)} className="w-16 h-16 rounded-lg object-cover bg-stone-200" />
-                      <button onClick={()=>{ delFromStorage(u.photo); set({...c,units:c.units.map((x,j)=>j===i?{...x,photo:""}:x)}); }} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-white text-xs grid place-items-center">✕</button>
-                    </div>
-                  ) : (
-                    <label className="shrink-0"><span className="inline-flex items-center cursor-pointer rounded-lg px-3 py-2 ff-body text-xs font-semibold text-white" style={{background:C.moss, opacity:uploading?0.6:1}}>📷 Foto</span><input type="file" accept="image/*" onChange={e=>uploadUnitPhoto(e,i)} disabled={uploading} className="hidden" /></label>
-                  )}
-                  <input value={u.video||""} onChange={e=>set({...c,units:c.units.map((x,j)=>j===i?{...x,video:e.target.value}:x)})} placeholder="Link de video (YouTube/Instagram)" className="flex-1 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                {(()=>{ const ph=(u.photos&&u.photos.length)?u.photos:(u.photo?[u.photo]:[]); const vids=(u.videos&&u.videos.length)?u.videos:(u.video?[u.video]:[]); const setU=(patch)=>set({...c,units:c.units.map((x,j)=>j===i?{...x,...patch}:x)}); return (<>
+                <div>
+                  <span className="ff-body text-[11px] font-semibold text-stone-500 uppercase tracking-wide">Fotos de esta cabaña</span>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {ph.map((p,pi)=>(
+                      <div key={pi} className="relative">
+                        <img src={IMG(p)} className="w-16 h-16 rounded-lg object-cover bg-stone-200" />
+                        <button onClick={()=>{ delFromStorage(p); setU({photo:"", photos:ph.filter((_,k)=>k!==pi)}); }} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-white text-xs grid place-items-center">✕</button>
+                      </div>
+                    ))}
+                    <label className="shrink-0 grid place-items-center w-16 h-16 rounded-lg border border-dashed border-stone-300 cursor-pointer ff-body text-lg text-stone-500" style={{opacity:uploading?0.6:1}}>📷<input type="file" accept="image/*" multiple onChange={e=>uploadUnitPhoto(e,i)} disabled={uploading} className="hidden" /></label>
+                  </div>
                 </div>
+                <div>
+                  <span className="ff-body text-[11px] font-semibold text-stone-500 uppercase tracking-wide">Videos (YouTube/Instagram)</span>
+                  {vids.map((v,vi)=>(
+                    <div key={vi} className="flex items-center gap-2 mt-1">
+                      <input value={v} onChange={e=>setU({video:"", videos:vids.map((y,k)=>k===vi?e.target.value:y)})} placeholder="Link de video" className="flex-1 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                      <button onClick={()=>setU({video:"", videos:vids.filter((_,k)=>k!==vi)})} className="text-rose-500">🗑️</button>
+                    </div>
+                  ))}
+                  <button onClick={()=>setU({video:"", videos:[...vids,""]})} className="mt-1 ff-body text-xs font-semibold" style={{color:C.clay}}>+ Agregar video</button>
+                </div>
+                <div>
+                  <span className="ff-body text-[11px] font-semibold text-stone-500 uppercase tracking-wide">Link de reserva (Booking / Airbnb)</span>
+                  <input value={u.bookingUrl||""} onChange={e=>setU({bookingUrl:e.target.value})} placeholder="https://www.booking.com/… o https://airbnb.com/…" className="w-full border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm mt-1" />
+                </div>
+                </>); })()}
               </div>
             ))}
           </div>

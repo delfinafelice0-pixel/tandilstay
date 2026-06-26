@@ -75,6 +75,8 @@ const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", wh
 const nightlyPrice = (c,d) => (c.overrides && c.overrides[d]!=null ? c.overrides[d] : (isWeekend(d) && c.weekendPrice ? c.weekendPrice : c.price));
 function computeStay(c,ci,co){ if(!ci||!co) return null; let d=parseD(ci); const e=parseD(co); let sub=0,n=0; while(d<e){ sub+=nightlyPrice(c,iso(d)); n++; d=addDay(d); } let pct=0; (c.promos||[]).forEach(p=>{if(n>=p.min&&p.pct>pct)pct=p.pct;}); const disc=Math.round(sub*pct/100); return {n,sub,pct,disc,total:sub-disc}; }
 const isAvail = (c,ci,co) => { if(!ci||!co) return true; let d=parseD(ci); const e=parseD(co); while(d<e){ if(c.blocked.includes(iso(d))) return false; d=addDay(d); } return true; };
+const uPhotos = (u) => (u.photos && u.photos.length) ? u.photos : (u.photo ? [u.photo] : []);
+const uVideos = (u) => (u.videos && u.videos.length) ? u.videos : (u.video ? [u.video] : []);
 const capLabel = (c) => { const caps=(c.units||[]).map(u=>u.capacity).filter(Boolean); if(!caps.length) return `hasta ${c.capacity} huéspedes`; const mn=Math.min(...caps), mx=Math.max(...caps); return mn===mx?`hasta ${mx} huéspedes`:`${mn} a ${mx} huéspedes`; };
 
 function Calendar({ cursor, setCursor, blocked, ci, co, onDay, priceOf }) {
@@ -206,13 +208,13 @@ function Landing({ c, acts=[], food=[] }) {
             <div>
               <h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Nuestras cabañas</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {c.units.map((u,i)=>{ const yid=ytId(u.video); const poster = u.photo ? IMG(u.photo) : (yid ? ("https://img.youtube.com/vi/"+yid+"/hqdefault.jpg") : null); return (
+                {c.units.map((u,i)=>{ const ph=uPhotos(u); const vids=uVideos(u); const yid=vids[0]?ytId(vids[0]):null; const poster = ph[0] ? IMG(ph[0]) : (yid ? ("https://img.youtube.com/vi/"+yid+"/hqdefault.jpg") : null); return (
                   <button key={i} onClick={()=>setOpenUnit(i)} className="text-left bg-white border border-black/5 rounded-2xl overflow-hidden hover:border-black/20 transition">
                     <div className="relative aspect-[4/3] bg-stone-200">
                       {poster
                         ? <img src={poster} alt={u.name||("Cabaña "+(i+1))} className="w-full h-full object-cover" />
                         : <div className="w-full h-full grid place-items-center text-stone-400 text-2xl">🏡</div>}
-                      {u.video && <span className="absolute inset-0 grid place-items-center"><span className="w-11 h-11 rounded-full bg-black/55 text-white grid place-items-center text-lg">▶</span></span>}
+                      {vids.length>0 && <span className="absolute inset-0 grid place-items-center"><span className="w-11 h-11 rounded-full bg-black/55 text-white grid place-items-center text-lg">▶</span></span>}
                     </div>
                     <div className="flex items-center justify-between px-3 py-2.5">
                       <span className="ff-body font-semibold text-sm" style={{color:C.ink}}>{u.name||("Cabaña "+(i+1))}</span>
@@ -231,13 +233,16 @@ function Landing({ c, acts=[], food=[] }) {
                   <button onClick={()=>setOpenUnit(null)} aria-label="Cerrar" className="text-stone-400 hover:text-stone-700 text-2xl leading-none">✕</button>
                 </div>
                 <div className="p-4 space-y-3">
-                  {c.units[openUnit].photo && <img src={IMG(c.units[openUnit].photo)} alt="" className="w-full rounded-xl object-cover bg-stone-200" />}
-                  {(()=>{ const u=c.units[openUnit]; if(!u.video) return null; const uyt=ytEmbed(u.video); const uig=igEmbed(u.video); return uyt
-                    ? <iframe title="uvid" className="w-full aspect-video rounded-xl border-0" src={uyt} allowFullScreen></iframe>
-                    : uig
-                      ? <blockquote className="instagram-media" data-instgrm-permalink={uig} data-instgrm-version="14" style={{margin:0,width:"100%",minWidth:0}}></blockquote>
-                      : <a href={u.video} target="_blank" rel="noreferrer" className="block text-center py-2 ff-body" style={{color:C.clay}}>▶ Ver video</a>; })()}
-                  <div className="ff-body text-sm text-stone-500">👥 hasta {c.units[openUnit].capacity}</div>
+                  {(()=>{ const u=c.units[openUnit]; const ph=uPhotos(u); const vids=uVideos(u); return (<>
+                    {ph.map((p,k)=><img key={k} src={IMG(p)} alt="" className="w-full rounded-xl object-cover bg-stone-200" />)}
+                    {vids.map((v,k)=>{ const uyt=ytEmbed(v); const uig=igEmbed(v); return uyt
+                      ? <iframe key={k} title={"uvid"+k} className="w-full aspect-video rounded-xl border-0" src={uyt} allowFullScreen></iframe>
+                      : uig
+                        ? <blockquote key={k} className="instagram-media" data-instgrm-permalink={uig} data-instgrm-version="14" style={{margin:0,width:"100%",minWidth:0}}></blockquote>
+                        : <a key={k} href={v} target="_blank" rel="noreferrer" className="block text-center py-2 ff-body" style={{color:C.clay}}>▶ Ver video</a>; })}
+                    <div className="ff-body text-sm text-stone-500">👥 hasta {u.capacity}</div>
+                    {u.bookingUrl && <a href={u.bookingUrl} target="_blank" rel="noreferrer" className="block text-center rounded-xl px-4 py-3 ff-body font-semibold text-white" style={{background:C.moss}}>Reservar esta cabaña →</a>}
+                  </>); })()}
                 </div>
               </div>
             </div>

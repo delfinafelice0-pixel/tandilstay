@@ -172,6 +172,7 @@ function Home({ cabins, loading, go }) {
   const [tipo, setTipo] = useState("");
   const [amen, setAmen] = useState([]);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [pet, setPet] = useState(false);
   const zonas = [...new Set(cabins.map(c=>c.zone).filter(Boolean))].sort();
   const capOf = (c) => { const caps=(c.units||[]).map(u=>u.capacity).filter(Boolean); return caps.length?Math.max(...caps):(c.capacity||0); };
   const match = (c) => {
@@ -180,13 +181,14 @@ function Home({ cabins, loading, go }) {
     if (maxPrice && (c.price||0) > parseInt(maxPrice,10)) return false;
     if (tipo && c.type !== tipo) return false;
     if (amen.length && !amen.every(a=>(c.amenities||[]).includes(a))) return false;
+    if (pet && !c.pet_friendly) return false;
     return true;
   };
   let show = cabins.filter(match);
   if (order==="asc") show = [...show].sort((a,b)=>(a.price||0)-(b.price||0));
   else if (order==="desc") show = [...show].sort((a,b)=>(b.price||0)-(a.price||0));
-  const activeCount = (zona?1:0) + (guests?1:0) + (maxPrice?1:0) + (order?1:0) + (tipo?1:0) + amen.length;
-  const clear = () => { setZona(""); setGuests(""); setMaxPrice(""); setOrder(""); setTipo(""); setAmen([]); };
+  const activeCount = (zona?1:0) + (guests?1:0) + (maxPrice?1:0) + (order?1:0) + (tipo?1:0) + amen.length + (pet?1:0);
+  const clear = () => { setZona(""); setGuests(""); setMaxPrice(""); setOrder(""); setTipo(""); setAmen([]); setPet(false); };
   const goAloj = () => { const el=document.getElementById("aloj"); if(el) el.scrollIntoView({behavior:"smooth"}); };
   const selCls = "ff-body text-[13px] rounded-full border bg-transparent px-4 py-2 cursor-pointer";
   const selStyle = { borderColor:"rgba(36,34,28,0.18)", color:C.moss };
@@ -247,6 +249,7 @@ function Home({ cabins, loading, go }) {
             <select value={tipo} onChange={e=>setTipo(e.target.value)} className={selCls} style={selStyle}><option value="">Todos los tipos</option>{TYPES.map(t=><option key={t} value={t}>{t}</option>)}</select>
             <select value={order} onChange={e=>setOrder(e.target.value)} className={selCls} style={selStyle}><option value="">Ordenar</option><option value="asc">Precio: menor a mayor</option><option value="desc">Precio: mayor a menor</option></select>
             <button onClick={()=>setMoreOpen(o=>!o)} className={selCls} style={selStyle}>Comodidades{amen.length?(" ("+amen.length+")"):""} {moreOpen?"▲":"▼"}</button>
+            <button onClick={()=>setPet(p=>!p)} className={selCls} style={pet?{borderColor:C.moss,background:C.moss,color:"#fff"}:selStyle}>🐾 Pet friendly{pet?" ✓":""}</button>
             {activeCount>0 && <button onClick={clear} className="ff-body text-[13px] rounded-full px-4 py-2 border" style={{ borderColor:"rgba(190,106,74,0.4)", color:C.clay }}>Limpiar filtros ✕</button>}
             <span className="ff-body text-[13px] text-stone-400 ml-auto">{show.length} {show.length===1?"lugar":"lugares"}</span>
           </div>
