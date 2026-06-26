@@ -76,6 +76,9 @@ const IMG = (p) => (!p ? "https://images.unsplash.com/photo-1518780664697-55e3ad
 const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
 const capRange = (r) => { const caps=(r.units||[]).map(u=>u.capacity).filter(Boolean); if(!caps.length) return r.capacity?("hasta "+r.capacity):""; const mn=Math.min(...caps),mx=Math.max(...caps); return mn===mx?("hasta "+mx):(mn+" a "+mx); };
 
+const AMEN = { wifi:"📶 Wifi", aire:"❄️ Aire acondicionado", calefaccion:"♨️ Calefacción", cocina:"🍳 Cocina", heladera:"🧊 Heladera", horno:"🔥 Horno", microondas:"📻 Microondas", tostadora:"🍞 Tostadora", pava:"🫖 Pava eléctrica", utensilios:"🍴 Utensilios básicos de cocina", ollas:"🧂 Ollas, sartenes, aceite, sal y pimienta", tv:"📺 Televisión", parrilla:"🔥 Parrilla", patio:"🌿 Patio", muebles_ext:"🪑 Muebles de exterior", reposeras:"🏖️ Reposeras", estacionamiento:"🅿️ Estacionamiento gratis en la propiedad", monoplanta:"🛗 Alojamiento de un solo piso", bide:"🚿 Bidé", blackout:"🌙 Persianas o cortinas oscuras", limpieza:"🧴 Productos de limpieza", ropa_cama:"🛏️ Ropa de cama", pileta:"🏊 Pileta", cochera:"🚗 Cochera", desayuno:"☕ Desayuno" };
+const TYPES = ["Departamento","Cabaña","Quinta","Casa"];
+
 const FACTS = [
   { e:"🧀", text:"El salame de Tandil tiene Denominación de Origen: el único del país con ese sello." },
   { e:"🪨", text:"Las sierras de Tandil están entre las más antiguas del planeta: más de 2.000 millones de años." },
@@ -166,19 +169,24 @@ function Home({ cabins, loading, go }) {
   const [guests, setGuests] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [order, setOrder] = useState("");
+  const [tipo, setTipo] = useState("");
+  const [amen, setAmen] = useState([]);
+  const [moreOpen, setMoreOpen] = useState(false);
   const zonas = [...new Set(cabins.map(c=>c.zone).filter(Boolean))].sort();
   const capOf = (c) => { const caps=(c.units||[]).map(u=>u.capacity).filter(Boolean); return caps.length?Math.max(...caps):(c.capacity||0); };
   const match = (c) => {
     if (zona && c.zone !== zona) return false;
     if (guests && capOf(c) < parseInt(guests,10)) return false;
     if (maxPrice && (c.price||0) > parseInt(maxPrice,10)) return false;
+    if (tipo && c.type !== tipo) return false;
+    if (amen.length && !amen.every(a=>(c.amenities||[]).includes(a))) return false;
     return true;
   };
   let show = cabins.filter(match);
   if (order==="asc") show = [...show].sort((a,b)=>(a.price||0)-(b.price||0));
   else if (order==="desc") show = [...show].sort((a,b)=>(b.price||0)-(a.price||0));
-  const activeCount = (zona?1:0) + (guests?1:0) + (maxPrice?1:0) + (order?1:0);
-  const clear = () => { setZona(""); setGuests(""); setMaxPrice(""); setOrder(""); };
+  const activeCount = (zona?1:0) + (guests?1:0) + (maxPrice?1:0) + (order?1:0) + (tipo?1:0) + amen.length;
+  const clear = () => { setZona(""); setGuests(""); setMaxPrice(""); setOrder(""); setTipo(""); setAmen([]); };
   const goAloj = () => { const el=document.getElementById("aloj"); if(el) el.scrollIntoView({behavior:"smooth"}); };
   const selCls = "ff-body text-[13px] rounded-full border bg-transparent px-4 py-2 cursor-pointer";
   const selStyle = { borderColor:"rgba(36,34,28,0.18)", color:C.moss };
@@ -234,10 +242,19 @@ function Home({ cabins, loading, go }) {
           <p className="ff-body text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: C.sage }}>Elegidos a mano</p>
           <h2 className="ff-display text-3xl sm:text-5xl mt-3 leading-[1.04]" style={{ color: C.ink, fontWeight:300 }}>Lugares para quedarte<br className="hidden sm:block" /> con ganas de volver.</h2>
         </div>
-        <div className="reveal flex flex-wrap items-center gap-2 mb-9">
-          <select value={order} onChange={e=>setOrder(e.target.value)} className={selCls} style={selStyle}><option value="">Ordenar</option><option value="asc">Precio: menor a mayor</option><option value="desc">Precio: mayor a menor</option></select>
-          {activeCount>0 && <button onClick={clear} className="ff-body text-[13px] rounded-full px-4 py-2 border" style={{ borderColor:"rgba(190,106,74,0.4)", color:C.clay }}>Limpiar filtros ✕</button>}
-          <span className="ff-body text-[13px] text-stone-400 ml-auto">{show.length} {show.length===1?"lugar":"lugares"}</span>
+        <div className="reveal mb-9">
+          <div className="flex flex-wrap items-center gap-2">
+            <select value={tipo} onChange={e=>setTipo(e.target.value)} className={selCls} style={selStyle}><option value="">Todos los tipos</option>{TYPES.map(t=><option key={t} value={t}>{t}</option>)}</select>
+            <select value={order} onChange={e=>setOrder(e.target.value)} className={selCls} style={selStyle}><option value="">Ordenar</option><option value="asc">Precio: menor a mayor</option><option value="desc">Precio: mayor a menor</option></select>
+            <button onClick={()=>setMoreOpen(o=>!o)} className={selCls} style={selStyle}>Comodidades{amen.length?(" ("+amen.length+")"):""} {moreOpen?"▲":"▼"}</button>
+            {activeCount>0 && <button onClick={clear} className="ff-body text-[13px] rounded-full px-4 py-2 border" style={{ borderColor:"rgba(190,106,74,0.4)", color:C.clay }}>Limpiar filtros ✕</button>}
+            <span className="ff-body text-[13px] text-stone-400 ml-auto">{show.length} {show.length===1?"lugar":"lugares"}</span>
+          </div>
+          {moreOpen && (
+            <div className="mt-4 p-4 rounded-2xl border border-black/5 bg-white flex flex-wrap gap-2">
+              {Object.keys(AMEN).map(k=>{const on=amen.includes(k);return <button key={k} onClick={()=>setAmen(on?amen.filter(a=>a!==k):[...amen,k])} className={"rounded-full px-3 py-1.5 ff-body text-[13px] border "+(on?"text-white":"text-stone-600 border-stone-300")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{AMEN[k]}{on?" ✓":""}</button>;})}
+            </div>
+          )}
         </div>
         {loading ? <p className="ff-body text-stone-500 py-12 text-center">Cargando alojamientos…</p>
         : cabins.length === 0 ? <p className="ff-body text-stone-500 py-12 text-center">Pronto vas a ver los alojamientos acá.</p>

@@ -35,7 +35,8 @@ const parseD = (s) => (s ? new Date(s+"T00:00:00") : null);
 const addDay = (dt,n=1) => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()+n);
 const isWeekend = (d) => { const w = parseD(d).getDay(); return w===5||w===6; };
 const TODAY = new Date(); TODAY.setHours(0,0,0,0);
-const AMEN = { wifi:"📶 WiFi", parrilla:"🔥 Parrilla", pileta:"🏊 Pileta", cochera:"🚗 Cochera", desayuno:"☕ Desayuno" };
+const AMEN = { wifi:"📶 Wifi", aire:"❄️ Aire acondicionado", calefaccion:"♨️ Calefacción", cocina:"🍳 Cocina", heladera:"🧊 Heladera", horno:"🔥 Horno", microondas:"📻 Microondas", tostadora:"🍞 Tostadora", pava:"🫖 Pava eléctrica", utensilios:"🍴 Utensilios básicos de cocina", ollas:"🧂 Ollas, sartenes, aceite, sal y pimienta", tv:"📺 Televisión", parrilla:"🔥 Parrilla", patio:"🌿 Patio", muebles_ext:"🪑 Muebles de exterior", reposeras:"🏖️ Reposeras", estacionamiento:"🅿️ Estacionamiento gratis en la propiedad", monoplanta:"🛗 Alojamiento de un solo piso", bide:"🚿 Bidé", blackout:"🌙 Persianas o cortinas oscuras", limpieza:"🧴 Productos de limpieza", ropa_cama:"🛏️ Ropa de cama", pileta:"🏊 Pileta", cochera:"🚗 Cochera", desayuno:"☕ Desayuno" };
+const TYPES = ["Departamento","Cabaña","Quinta","Casa"];
 const DOW = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
 const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const slugify = (s) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
@@ -66,10 +67,10 @@ const compressToWebp = async (file, maxDim=1600, quality=0.82) => {
 // Borra el archivo del bucket "fotos" a partir de su URL pública. Best-effort: si falla, no rompe nada.
 const delFromStorage = async (url) => { try { const m=String(url||"").match(/\/storage\/v1\/object\/public\/fotos\/(.+)$/); if(m) await db.storage.from("fotos").remove([decodeURIComponent(m[1])]); } catch(_){} };
 
-const EMPTY = { name:"", operator:"", zone:"", whatsapp:"", blurb:"", capacity:2, bedrooms:1, bathrooms:1, price:0, weekendPrice:null, amenities:[], petFriendly:false, promoText:"", promos:[], blocked:[], overrides:{}, units:[], videos:[], banner:"", photos:[], ical_urls:[], email:"" };
+const EMPTY = { name:"", operator:"", zone:"", whatsapp:"", blurb:"", capacity:2, bedrooms:1, bathrooms:1, price:0, weekendPrice:null, amenities:[], petFriendly:false, promoText:"", promos:[], blocked:[], overrides:{}, units:[], videos:[], banner:"", photos:[], ical_urls:[], email:"", minNights:1, type:"" };
 
-const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, promoText:r.promo_text||"", promos:r.promos||[], blocked:r.blocked||[], overrides:r.overrides||{}, units:r.units||[], videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], ical_urls:r.ical_urls||[], ical_blocked:r.ical_blocked||[], ical_synced_at:r.ical_synced_at||null, email:r.email||"" });
-const toRow = (c) => { const r = { slug: c.slug || slugify(c.name), name:c.name, operator:c.operator, zone:c.zone, whatsapp:c.whatsapp, blurb:c.blurb, capacity:c.capacity, bedrooms:c.bedrooms, bathrooms:c.bathrooms, price:c.price, weekend_price:c.weekendPrice, amenities:c.amenities, pet_friendly:c.petFriendly, promo_text:c.promoText, promos:c.promos, blocked:c.blocked, overrides:c.overrides, units:c.units, videos:c.videos, banner:c.banner, photos:c.photos, ical_urls:c.ical_urls||[], email:c.email }; if (c.id) r.id = c.id; return r; };
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, promoText:r.promo_text||"", promos:r.promos||[], blocked:r.blocked||[], overrides:r.overrides||{}, units:r.units||[], videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], ical_urls:r.ical_urls||[], ical_blocked:r.ical_blocked||[], ical_synced_at:r.ical_synced_at||null, email:r.email||"", minNights:r.min_nights||1, type:r.type||"" });
+const toRow = (c) => { const r = { slug: c.slug || slugify(c.name), name:c.name, operator:c.operator, zone:c.zone, whatsapp:c.whatsapp, blurb:c.blurb, capacity:c.capacity, bedrooms:c.bedrooms, bathrooms:c.bathrooms, price:c.price, weekend_price:c.weekendPrice, amenities:c.amenities, pet_friendly:c.petFriendly, promo_text:c.promoText, promos:c.promos, blocked:c.blocked, overrides:c.overrides, units:c.units, videos:c.videos, banner:c.banner, photos:c.photos, ical_urls:c.ical_urls||[], email:c.email, min_nights:c.minNights||1, type:c.type||null }; if (c.id) r.id = c.id; return r; };
 
 const nightlyPrice = (c,d) => (c.overrides && c.overrides[d]!=null ? c.overrides[d] : (isWeekend(d) && c.weekendPrice ? c.weekendPrice : c.price));
 
@@ -229,6 +230,12 @@ function Editor({ c, set }) {
         </div>
 
         <div className="bg-white rounded-2xl border border-black/5 p-5">
+          <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Tipo y estadía</h3>
+          <Field label="Tipo de propiedad"><div className="flex flex-wrap gap-2">{TYPES.map(t=>{const on=c.type===t;return <button key={t} onClick={()=>set({...c,type:on?"":t})} className={"rounded-full px-3 py-1.5 ff-body text-sm border "+(on?"text-white":"text-stone-600 border-stone-300")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{t}{on?" ✓":""}</button>;})}</div></Field>
+          <Field label="Mínimo de noches"><div className="flex items-center gap-2"><button onClick={()=>set({...c,minNights:Math.max(1,(c.minNights||1)-1)})} className="px-3 py-1.5 border border-stone-300 rounded-lg">−</button><span className="ff-body text-sm w-20 text-center">{(c.minNights||1)+" "+((c.minNights||1)===1?"noche":"noches")}</span><button onClick={()=>set({...c,minNights:(c.minNights||1)+1})} className="px-3 py-1.5 border border-stone-300 rounded-lg">+</button></div></Field>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-black/5 p-5">
           <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Precios</h3>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Precio noche"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="text-stone-400 text-sm">$</span><input type="number" value={c.price} onChange={e=>set({...c,price:+e.target.value})} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
@@ -270,13 +277,18 @@ function Editor({ c, set }) {
               <label className="block"><span className="inline-flex items-center gap-2 cursor-pointer rounded-xl px-4 py-2.5 ff-body text-sm font-semibold text-white" style={{background:C.clay, opacity:uploading?0.6:1}}>{uploading?"Subiendo…":"🖼️ Subir banner"}</span><input type="file" accept="image/*" onChange={uploadBanner} disabled={uploading} className="hidden" /></label>
             )}
           </div>
-          <span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">Galería (resto de las fotos)</span>
+          <span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">Galería (resto de las fotos)</span><p className="ff-body text-xs text-stone-400 mt-1 mb-1">Usá ◀ ▶ para ordenarlas. La nº1 se muestra primero.</p>
           {c.photos.length>0 && (
             <div className="grid grid-cols-3 gap-2 my-2">
               {c.photos.map((p,i)=>(
                 <div key={i} className="relative">
                   <img src={IMG(p)} className="w-full h-20 rounded-lg object-cover bg-stone-200" />
+                  <span className="absolute top-1 left-1 px-1.5 rounded bg-black/55 text-white text-[10px] ff-body">{i+1}</span>
                   <button onClick={()=>{ delFromStorage(p); set({...c,photos:c.photos.filter((_,j)=>j!==i)}); }} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-white text-xs grid place-items-center">✕</button>
+                  <div className="absolute bottom-1 inset-x-1 flex justify-between">
+                    <button disabled={i===0} onClick={()=>{ const a=[...c.photos]; const t=a[i-1]; a[i-1]=a[i]; a[i]=t; set({...c,photos:a}); }} className="w-6 h-6 rounded-full bg-black/55 text-white text-xs grid place-items-center disabled:opacity-30">◀</button>
+                    <button disabled={i===c.photos.length-1} onClick={()=>{ const a=[...c.photos]; const t=a[i+1]; a[i+1]=a[i]; a[i]=t; set({...c,photos:a}); }} className="w-6 h-6 rounded-full bg-black/55 text-white text-xs grid place-items-center disabled:opacity-30">▶</button>
+                  </div>
                 </div>
               ))}
             </div>

@@ -67,11 +67,11 @@ const parseD = (s) => (s ? new Date(s+"T00:00:00") : null);
 const addDay = (dt,n=1) => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()+n);
 const isWeekend = (d) => { const w = parseD(d).getDay(); return w===5||w===6; };
 const TODAY = new Date(); TODAY.setHours(0,0,0,0);
-const AMEN = { wifi:"📶 WiFi", parrilla:"🔥 Parrilla", pileta:"🏊 Pileta", cochera:"🚗 Cochera", desayuno:"☕ Desayuno" };
+const AMEN = { wifi:"📶 Wifi", aire:"❄️ Aire acondicionado", calefaccion:"♨️ Calefacción", cocina:"🍳 Cocina", heladera:"🧊 Heladera", horno:"🔥 Horno", microondas:"📻 Microondas", tostadora:"🍞 Tostadora", pava:"🫖 Pava eléctrica", utensilios:"🍴 Utensilios básicos de cocina", ollas:"🧂 Ollas, sartenes, aceite, sal y pimienta", tv:"📺 Televisión", parrilla:"🔥 Parrilla", patio:"🌿 Patio", muebles_ext:"🪑 Muebles de exterior", reposeras:"🏖️ Reposeras", estacionamiento:"🅿️ Estacionamiento gratis en la propiedad", monoplanta:"🛗 Alojamiento de un solo piso", bide:"🚿 Bidé", blackout:"🌙 Persianas o cortinas oscuras", limpieza:"🧴 Productos de limpieza", ropa_cama:"🛏️ Ropa de cama", pileta:"🏊 Pileta", cochera:"🚗 Cochera", desayuno:"☕ Desayuno" };
 const DOW = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
 const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
-const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, promoText:r.promo_text||"", promos:r.promos||[], blocked:[...new Set([...(r.blocked||[]), ...(r.ical_blocked||[])])], overrides:r.overrides||{}, units:r.units||[], videos:r.videos||[], banner:r.banner||"", photos:r.photos||[] });
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, promoText:r.promo_text||"", promos:r.promos||[], blocked:[...new Set([...(r.blocked||[]), ...(r.ical_blocked||[])])], overrides:r.overrides||{}, units:r.units||[], videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], minNights:r.min_nights||1, type:r.type||"" });
 const nightlyPrice = (c,d) => (c.overrides && c.overrides[d]!=null ? c.overrides[d] : (isWeekend(d) && c.weekendPrice ? c.weekendPrice : c.price));
 function computeStay(c,ci,co){ if(!ci||!co) return null; let d=parseD(ci); const e=parseD(co); let sub=0,n=0; while(d<e){ sub+=nightlyPrice(c,iso(d)); n++; d=addDay(d); } let pct=0; (c.promos||[]).forEach(p=>{if(n>=p.min&&p.pct>pct)pct=p.pct;}); const disc=Math.round(sub*pct/100); return {n,sub,pct,disc,total:sub-disc}; }
 const isAvail = (c,ci,co) => { if(!ci||!co) return true; let d=parseD(ci); const e=parseD(co); while(d<e){ if(c.blocked.includes(iso(d))) return false; d=addDay(d); } return true; };
@@ -242,8 +242,13 @@ function Landing({ c, acts=[], food=[] }) {
               </div>
             </div>
           )}
-          {c.amenities.length>0 && (
-            <div><h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Comodidades</h2><div className="grid grid-cols-2 gap-3">{c.amenities.map(a=><div key={a} className="ff-body text-stone-700">{AMEN[a]}</div>)}</div></div>
+          {(c.amenities.length>0 || c.petFriendly || (c.minNights>1) || c.type) && (
+            <div><h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Comodidades</h2><div className="grid grid-cols-2 gap-3">
+              {c.type && <div className="ff-body text-stone-700">🏠 {c.type}</div>}
+              {c.minNights>1 && <div className="ff-body text-stone-700">🌙 Mínimo {c.minNights} noches</div>}
+              {c.petFriendly && <div className="ff-body text-stone-700">🐾 Pet friendly</div>}
+              {c.amenities.map(a=><div key={a} className="ff-body text-stone-700">{AMEN[a]}</div>)}
+            </div></div>
           )}
           {c.zone && (
             <div>
