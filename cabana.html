@@ -173,6 +173,7 @@ function Landing({ c, acts=[], food=[] }) {
   const su = (selUnit!=null && units[selUnit]) ? units[selUnit] : null;
   const cv = su ? { price:(su.price!=null&&su.price!=="")?+su.price:c.price, weekendPrice:(su.weekendPrice!=null&&su.weekendPrice!=="")?+su.weekendPrice:c.weekendPrice, overrides:su.overrides||{}, blocked:su.blocked||[], promos:c.promos, promoText:c.promoText } : c;
   const ready = !multi || selUnit!=null;
+  const pv = ready ? cv : (units[0] ? { price:(units[0].price!=null&&units[0].price!=="")?+units[0].price:c.price, weekendPrice:(units[0].weekendPrice!=null&&units[0].weekendPrice!=="")?+units[0].weekendPrice:c.weekendPrice, overrides:units[0].overrides||{} } : c);
   const stay=computeStay(cv,q.ci,q.co);
   const avail=isAvail(cv,q.ci,q.co);
   const pick=(day,info)=>{ if(info.past||info.isBlocked) return; if(!q.ci||(q.ci&&q.co)){setQ({ci:day,co:""});return;} if(day<=q.ci){setQ({ci:day,co:""});return;} let d=parseD(q.ci),ok=true; while(d<parseD(day)){if(c.blocked.includes(iso(d))){ok=false;break;}d=addDay(d);} setQ(ok?{ci:q.ci,co:day}:{ci:day,co:""}); };
@@ -262,12 +263,13 @@ function Landing({ c, acts=[], food=[] }) {
                 <div className="flex flex-wrap gap-2">{units.map((u,ui)=>{const on=selUnit===ui;return <button key={ui} onClick={()=>setSelUnit(ui)} className={"rounded-full px-4 py-2 ff-body text-sm border transition "+(on?"text-white":"text-stone-600 border-stone-300 hover:border-stone-400")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{u.name||("Cabaña "+(ui+1))}</button>;})}</div>
               </div>
             )}
-            {ready ? (<>
-              <p className="ff-body text-sm text-stone-500 mb-3">Cada día muestra la tarifa de {su?(su.name||("Cabaña "+(selUnit+1))):"esta cabaña"}. Tocá entrada y salida.</p>
-              <div className="border border-black/10 rounded-2xl p-4 max-w-sm bg-white"><Calendar cursor={cursor} setCursor={setCursor} blocked={cv.blocked} ci={q.ci} co={q.co} priceOf={(d)=>nightlyPrice(cv,d)} onDay={pick} /></div>
-            </>) : (
-              <p className="ff-body text-sm text-stone-500 border border-black/10 rounded-2xl p-4 max-w-sm bg-white">👆 Elegí una cabaña para ver su disponibilidad y precios.</p>
+            {(multi && selUnit==null) && (
+              <div className="mb-3 rounded-xl px-4 py-3 ff-body text-sm font-semibold" style={{background:"#eef2e8", color:C.moss}}>👆 Elegí tu cabaña arriba para ver su disponibilidad real y reservar.</div>
             )}
+            <p className="ff-body text-sm text-stone-500 mb-3">{su?("Cada día muestra la tarifa de "+(su.name||("Cabaña "+(selUnit+1)))+". Tocá entrada y salida."):"Así se ve la disponibilidad de nuestras cabañas — elegí una arriba para reservar."}</p>
+            <div className={"border border-black/10 rounded-2xl p-4 max-w-sm bg-white"+(ready?"":" opacity-60 pointer-events-none")}>
+              <Calendar cursor={cursor} setCursor={setCursor} blocked={ready?cv.blocked:[]} ci={q.ci} co={q.co} priceOf={(d)=>nightlyPrice(pv,d)} onDay={ready?pick:(()=>{})} />
+            </div>
           </div>
           {(c.amenities.length>0 || c.petFriendly || (c.minNights>1) || c.type) && (
             <div><h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Comodidades</h2><div className="grid grid-cols-2 gap-3">
