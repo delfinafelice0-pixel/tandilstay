@@ -64,6 +64,7 @@ const kFmt = (n) => (n >= 1000 ? Math.round(n/1000)+"k" : ""+n);
 const pad = (n) => String(n).padStart(2,"0");
 const iso = (dt) => `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
 const fmtDMY = (s) => { const d=parseD(s); return d?`${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`:(s||""); };
+const validBooking = (u) => { const url=((u&&u.bookingUrl)||"").trim().toLowerCase(); return url.startsWith("http") && !url.includes(".ics"); };
 const parseD = (s) => (s ? new Date(s+"T00:00:00") : null);
 const addDay = (dt,n=1) => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()+n);
 const isWeekend = (d) => { const w = parseD(d).getDay(); return w===5||w===6; };
@@ -207,8 +208,8 @@ function Landing({ c, acts=[], food=[] }) {
         </div>
       )}
 
-      <div className="max-w-5xl mx-auto px-6 py-10 grid md:grid-cols-3 gap-8">
-        <div className="md:col-span-2 space-y-8">
+      <div className="max-w-5xl mx-auto px-6 py-10 grid md:grid-cols-3 gap-8 md:items-start">
+        <div className="md:col-span-2 space-y-8 md:order-1">
           {c.blurb && <div><h2 className="ff-display text-2xl mb-2" style={{color:C.ink}}>Sobre el lugar</h2><p className="ff-body text-stone-600 leading-relaxed">{c.blurb}</p></div>}
           {c.photos.length>0 && <div><h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Galería</h2><div className="grid grid-cols-2 sm:grid-cols-3 gap-2">{c.photos.map((p,i)=><img key={i} src={IMG(p)} className="lb-img cursor-zoom-in w-full aspect-square object-cover rounded-xl bg-stone-200" />)}</div></div>}
           {(c.videos||[]).filter(Boolean).length>0 && <div><h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Videos</h2><div className="grid sm:grid-cols-2 gap-4">{c.videos.filter(Boolean).map((v,i)=>{ const yt=ytEmbed(v); if(yt) return <iframe key={i} title={"v"+i} className="w-full aspect-video rounded-2xl border border-black/5" src={yt} allowFullScreen></iframe>; const ig=igEmbed(v); if(ig) return <blockquote key={i} className="instagram-media" data-instgrm-permalink={ig} data-instgrm-version="14" style={{margin:0,width:"100%",minWidth:0,background:"#fff",borderRadius:16}}></blockquote>; return <a key={i} href={v} target="_blank" rel="noreferrer" className="rounded-2xl border border-black/5 bg-white p-4 ff-body" style={{color:C.ink}}>▶ Ver video</a>; })}</div></div>}
@@ -221,7 +222,7 @@ function Landing({ c, acts=[], food=[] }) {
                     <div className="relative aspect-[4/3] bg-stone-200">
                       {poster
                         ? <img src={poster} alt={u.name||("Cabaña "+(i+1))} className="w-full h-full object-cover" />
-                        : <div className="w-full h-full grid place-items-center text-stone-400 text-2xl">🏡</div>}
+                        : <div className="w-full h-full grid place-items-center" style={{background:"linear-gradient(135deg, #e9e5d8 0%, #d7d3c4 100%)"}}><svg viewBox="0 0 520 200" width="66" height="26" fill="none" stroke="#a7a892" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round"><circle cx="64" cy="150" r="9" fill="#a7a892" stroke="none"></circle><path d="M108,150 C150,148 154,142 186,116 C196,108 207,110 211,123 c -8,2 -10,12 1,13 c 9,1 9,-11 -1,-12 L248,128 L248,92 Q248,82 258,82 L306,82 Q316,82 316,92 L316,128 L316,141 C352,151 410,156 462,154 C470,153 475,151 480,150"></path></svg></div>}
                       {vids.length>0 && <span className="absolute inset-0 grid place-items-center"><span className="w-11 h-11 rounded-full bg-black/55 text-white grid place-items-center text-lg">▶</span></span>}
                     </div>
                     <div className="flex items-center justify-between px-3 py-2.5">
@@ -249,7 +250,8 @@ function Landing({ c, acts=[], food=[] }) {
                         ? <blockquote key={k} className="instagram-media" data-instgrm-permalink={uig} data-instgrm-version="14" style={{margin:0,width:"100%",minWidth:0}}></blockquote>
                         : <a key={k} href={v} target="_blank" rel="noreferrer" className="block text-center py-2 ff-body" style={{color:C.clay}}>▶ Ver video</a>; })}
                     <div className="ff-body text-sm text-stone-500">👥 hasta {u.capacity}</div>
-                    {u.bookingUrl && <a href={u.bookingUrl} target="_blank" rel="noreferrer" className="block text-center rounded-xl px-4 py-3 ff-body font-semibold text-white" style={{background:C.moss}}>Reservar esta cabaña →</a>}
+                    <button onClick={()=>{ setSelUnit(openUnit); setOpenUnit(null); setTimeout(()=>{const el=document.getElementById("calendario"); if(el) el.scrollIntoView({behavior:"smooth"});}, 60); }} className="block w-full text-center rounded-xl px-4 py-3 ff-body font-semibold text-white" style={{background:C.moss}}>Reservar esta cabaña →</button>
+                    {validBooking(u) && <a href={u.bookingUrl} target="_blank" rel="noreferrer" className="block w-full text-center rounded-xl px-4 py-3 ff-body font-semibold mt-2 border" style={{borderColor:C.moss,color:C.moss}}>Ver en Booking / Airbnb →</a>}
                   </>); })()}
                 </div>
               </div>
@@ -271,23 +273,8 @@ function Landing({ c, acts=[], food=[] }) {
               <Calendar cursor={cursor} setCursor={setCursor} blocked={ready?cv.blocked:[]} ci={q.ci} co={q.co} priceOf={(d)=>nightlyPrice(pv,d)} onDay={ready?pick:(()=>{})} />
             </div>
           </div>
-          {(c.amenities.length>0 || c.petFriendly || (c.minNights>1) || c.type) && (
-            <div><h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Comodidades</h2><div className="grid grid-cols-2 gap-3">
-              {c.type && <div className="ff-body text-stone-700">🏠 {c.type}</div>}
-              {c.minNights>1 && <div className="ff-body text-stone-700">🌙 Mínimo {c.minNights} noches</div>}
-              {c.petFriendly && <div className="ff-body text-stone-700">🐾 Pet friendly</div>}
-              {c.amenities.map(a=><div key={a} className="ff-body text-stone-700">{AMEN[a]}</div>)}
-            </div></div>
-          )}
-          {c.zone && (
-            <div>
-              <h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Cómo llegar</h2>
-              <p className="ff-body text-stone-600 mb-3">📍 {c.zone}</p>
-              <iframe title="mapa" loading="lazy" className="w-full h-72 rounded-2xl border border-black/5" src={"https://www.google.com/maps?q="+encodeURIComponent(c.zone)+"&output=embed"}></iframe>
-            </div>
-          )}
         </div>
-        <div className="md:col-span-1">
+        <div className="md:col-span-1 md:order-2 md:row-span-2">
           <div className="sticky top-4 bg-white border border-black/10 rounded-2xl p-5 shadow-lg">
             {(multi && selUnit==null) ? (
               <div>
@@ -314,9 +301,26 @@ function Landing({ c, acts=[], food=[] }) {
             ) : <div className="bg-rose-50 text-rose-700 ff-body text-sm rounded-xl p-3 mb-4">No disponible en esas fechas.</div>)
             : <p className="ff-body text-sm text-stone-400 mb-4">Elegí fechas en el calendario.</p>}
             <a href={wa} target="_blank" rel="noreferrer" className="block text-center w-full text-white rounded-xl py-3 ff-body font-semibold" style={{background:A}}>💬 Reservar por WhatsApp</a>
-            {su && su.bookingUrl && <a href={su.bookingUrl} target="_blank" rel="noreferrer" className="block text-center w-full rounded-xl py-3 ff-body font-semibold mt-2 border" style={{borderColor:C.moss,color:C.moss}}>Reservar en Booking / Airbnb →</a>}
+            {su && validBooking(su) && <a href={su.bookingUrl} target="_blank" rel="noreferrer" className="block text-center w-full rounded-xl py-3 ff-body font-semibold mt-2 border" style={{borderColor:C.moss,color:C.moss}}>Reservar en Booking / Airbnb →</a>}
             </>)}
           </div>
+        </div>
+        <div className="md:col-span-2 md:order-3 space-y-12">
+          {(c.amenities.length>0 || c.petFriendly || (c.minNights>1) || c.type) && (
+            <div><h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Comodidades</h2><div className="grid grid-cols-2 gap-3">
+              {c.type && <div className="ff-body text-stone-700">🏠 {c.type}</div>}
+              {c.minNights>1 && <div className="ff-body text-stone-700">🌙 Mínimo {c.minNights} noches</div>}
+              {c.petFriendly && <div className="ff-body text-stone-700">🐾 Pet friendly</div>}
+              {c.amenities.map(a=><div key={a} className="ff-body text-stone-700">{AMEN[a]}</div>)}
+            </div></div>
+          )}
+          {c.zone && (
+            <div>
+              <h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Cómo llegar</h2>
+              <p className="ff-body text-stone-600 mb-3">📍 {c.zone}</p>
+              <iframe title="mapa" loading="lazy" className="w-full h-72 rounded-2xl border border-black/5" src={"https://www.google.com/maps?q="+encodeURIComponent(c.zone)+"&output=embed"}></iframe>
+            </div>
+          )}
         </div>
       </div>
       <Nearby acts={acts} food={food} />
