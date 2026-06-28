@@ -67,7 +67,7 @@ const HERO_IMG = "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?a
 const SUNSET_IMG = "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=2000&q=80";
 
 const NAV = [
-  { key:"home", label:"Hospedajes" },
+  { key:"aloj", label:"Hospedajes" },
   { key:"qhacer", label:"Actividades" },
   { key:"gastro", label:"Gastronomía" },
   { key:"conoce", label:"Conocé Tandil" },
@@ -227,7 +227,7 @@ function Home({ cabins, acts, food, loading, go }) {
       {/* CATEGORÍAS */}
       <section className="reveal max-w-6xl mx-auto px-5 sm:px-6 pt-24 sm:pt-28" style={{ background: C.paper }}>
         <div className="grid md:grid-cols-3 gap-4">
-          <CatTile kicker="Dónde dormir" title="Hospedajes" img="photo-1449158743715-0a90ebb6d2d8" onClick={goAloj} />
+          <CatTile kicker="Dónde dormir" title="Hospedajes" img="photo-1449158743715-0a90ebb6d2d8" onClick={()=>go("aloj")} />
           <CatTile kicker="Dónde comer" title="Gastronomía" img="photo-1414235077428-338989a2e8c0" onClick={()=>go("gastro")} />
           <CatTile kicker="Qué hacer" title="Actividades" img="photo-1551632811-561732d1e306" onClick={()=>go("qhacer")} />
         </div>
@@ -395,6 +395,62 @@ function FoodPage({ food, loading }) {
   );
 }
 
+function LodgingPage({ cabins, loading }) {
+  const [guests, setGuests] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [tipo, setTipo] = useState("");
+  const [order, setOrder] = useState("");
+  const [amen, setAmen] = useState([]);
+  const [pet, setPet] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const capOf = (c) => { const caps=(c.units||[]).map(u=>u.capacity).filter(Boolean); return caps.length?Math.max(...caps):(c.capacity||0); };
+  const match = (c) => {
+    if (guests && capOf(c) < parseInt(guests,10)) return false;
+    if (maxPrice) { const p=(c.price||0); if (maxPrice.endsWith("+")) { if (p <= parseInt(maxPrice,10)) return false; } else if (p > parseInt(maxPrice,10)) return false; }
+    if (tipo && c.type !== tipo) return false;
+    if (amen.length && !amen.every(a=>(c.amenities||[]).includes(a))) return false;
+    if (pet && !c.pet_friendly) return false;
+    return true;
+  };
+  let show = cabins.filter(match);
+  if (order==="asc") show = [...show].sort((a,b)=>(a.price||0)-(b.price||0));
+  else if (order==="desc") show = [...show].sort((a,b)=>(b.price||0)-(a.price||0));
+  const activeCount = (guests?1:0)+(maxPrice?1:0)+(tipo?1:0)+(order?1:0)+amen.length+(pet?1:0);
+  const clear = () => { setGuests(""); setMaxPrice(""); setTipo(""); setOrder(""); setAmen([]); setPet(false); };
+  const selCls = "ff-body text-[13px] rounded-full border bg-transparent px-4 py-2 cursor-pointer";
+  const selStyle = { borderColor:"rgba(36,34,28,0.18)", color:C.moss };
+  return (
+    <div style={{ background: C.paper }}>
+      <PageTitle kicker="Dónde dormir" title="Hospedajes en Tandil" sub="Cabañas, departamentos y casas de campo elegidos uno por uno. Encontrá el tuyo." />
+      <section className="max-w-6xl mx-auto px-5 sm:px-6 pb-24">
+        {!loading && cabins.length>0 && (
+          <div className="reveal mb-9">
+            <div className="flex flex-wrap items-center gap-2">
+              <select value={guests} onChange={e=>setGuests(e.target.value)} className={selCls} style={selStyle}><option value="">Para todos</option><option value="1">Para 1</option><option value="2">Para 2</option><option value="3">Para 3</option><option value="4">Para 4</option><option value="5">Para 5</option><option value="6">Para 6</option><option value="7">Para 7</option><option value="8">Para 8</option></select>
+              <select value={maxPrice} onChange={e=>setMaxPrice(e.target.value)} className={selCls} style={selStyle}><option value="">Cualquier precio</option><option value="120000">Hasta $120.000</option><option value="250000">Hasta $250.000</option><option value="250000+">Más de $250.000</option></select>
+              <select value={tipo} onChange={e=>setTipo(e.target.value)} className={selCls} style={selStyle}><option value="">Todos los tipos</option>{TYPES.map(t=><option key={t} value={t}>{t}</option>)}</select>
+              <select value={order} onChange={e=>setOrder(e.target.value)} className={selCls} style={selStyle}><option value="">Ordenar</option><option value="asc">Precio: menor a mayor</option><option value="desc">Precio: mayor a menor</option></select>
+              <button onClick={()=>setMoreOpen(o=>!o)} className={selCls} style={selStyle}>Comodidades{amen.length?(" ("+amen.length+")"):""} {moreOpen?"▲":"▼"}</button>
+              <button onClick={()=>setPet(p=>!p)} className={selCls} style={pet?{borderColor:C.moss,background:C.moss,color:"#fff"}:selStyle}>🐾 Pet friendly{pet?" ✓":""}</button>
+              {activeCount>0 && <button onClick={clear} className="ff-body text-[13px] rounded-full px-4 py-2 border" style={{ borderColor:"rgba(190,106,74,0.4)", color:C.clay }}>Limpiar filtros ✕</button>}
+              <span className="ff-body text-[13px] text-stone-400 ml-auto">{show.length} {show.length===1?"lugar":"lugares"}</span>
+            </div>
+            {moreOpen && (
+              <div className="mt-4 p-4 rounded-2xl border border-black/5 bg-white flex flex-wrap gap-2">
+                {Object.keys(AMEN).map(k=>{const on=amen.includes(k);return <button key={k} onClick={()=>setAmen(on?amen.filter(a=>a!==k):[...amen,k])} className={"rounded-full px-3 py-1.5 ff-body text-[13px] border "+(on?"text-white":"text-stone-600 border-stone-300")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{AMEN[k]}{on?" ✓":""}</button>;})}
+              </div>
+            )}
+          </div>
+        )}
+        {loading ? <p className="ff-body text-stone-500 text-center py-10">Cargando alojamientos…</p>
+        : cabins.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">Pronto vas a ver los alojamientos acá.</p>
+        : show.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">No hay alojamientos con esos filtros. Probá aflojar alguno.</p>
+        : <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">{show.map((c, i) => <CabinCard key={i} c={c} />)}</div>}
+      </section>
+    </div>
+  );
+}
+
 function AboutPage() {
   return (
     <div style={{ background: C.paper }}>
@@ -464,7 +520,7 @@ function Footer({ go }) {
           </div>
           <div>
             <h5 className="ff-body text-[11px] uppercase tracking-[0.26em] mb-3.5" style={{ color:"rgba(255,255,255,0.5)" }}>Explorar</h5>
-            <button onClick={()=>go("home")} className="block ff-body text-sm mb-2 hover:text-white">Hospedajes</button>
+            <button onClick={()=>go("aloj")} className="block ff-body text-sm mb-2 hover:text-white">Hospedajes</button>
             <button onClick={()=>go("gastro")} className="block ff-body text-sm mb-2 hover:text-white">Gastronomía</button>
             <button onClick={()=>go("qhacer")} className="block ff-body text-sm mb-2 hover:text-white">Actividades</button>
           </div>
@@ -518,6 +574,7 @@ function App() {
       <Header view={view} go={go} onOpen={() => setMenu(true)} solid={solid} />
       <MobileMenu open={menu} go={go} onClose={() => setMenu(false)} />
       {view === "home" && <Home cabins={data.cabins} acts={data.acts} food={data.food} loading={data.loading} go={go} />}
+      {view === "aloj" && <LodgingPage cabins={data.cabins} loading={data.loading} />}
       {view === "qhacer" && <ActivitiesPage acts={data.acts} loading={data.loading} />}
       {view === "gastro" && <FoodPage food={data.food} loading={data.loading} />}
       {view === "conoce" && <AboutPage />}
