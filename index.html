@@ -178,7 +178,7 @@ function Home({ cabins, acts, food, loading, go }) {
   const match = (c) => {
     if (zona && c.zone !== zona) return false;
     if (guests && capOf(c) < parseInt(guests,10)) return false;
-    if (maxPrice && (c.price||0) > parseInt(maxPrice,10)) return false;
+    if (maxPrice) { const p=(c.price||0); if (maxPrice.endsWith("+")) { if (p <= parseInt(maxPrice,10)) return false; } else if (p > parseInt(maxPrice,10)) return false; }
     if (tipo && c.type !== tipo) return false;
     if (amen.length && !amen.every(a=>(c.amenities||[]).includes(a))) return false;
     if (pet && !c.pet_friendly) return false;
@@ -218,7 +218,7 @@ function Home({ cabins, acts, food, loading, go }) {
           <div className="hidden sm:block w-px bg-stone-200 my-3"></div>
           <div className="flex-1 px-5 py-3">
             <div className="ff-body text-[10px] uppercase tracking-[0.22em] text-stone-400 font-semibold mb-1">Precio</div>
-            <select value={maxPrice} onChange={e=>setMaxPrice(e.target.value)} className="w-full ff-body text-[15px] bg-transparent outline-none cursor-pointer" style={{ color:C.ink }}><option value="">Cualquiera</option><option value="80000">Hasta $80.000</option><option value="120000">Hasta $120.000</option><option value="180000">Hasta $180.000</option></select>
+            <select value={maxPrice} onChange={e=>setMaxPrice(e.target.value)} className="w-full ff-body text-[15px] bg-transparent outline-none cursor-pointer" style={{ color:C.ink }}><option value="">Cualquiera</option><option value="120000">Hasta $120.000</option><option value="250000">Hasta $250.000</option><option value="250000+">Más de $250.000</option></select>
           </div>
           <button onClick={goAloj} className="rounded-[20px] px-7 py-4 flex items-center justify-center gap-2 ff-body font-semibold text-[15px] text-white transition-transform duration-500 hover:-translate-y-0.5" style={{ background:C.moss }}>🔍 Buscar</button>
         </div>
