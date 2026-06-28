@@ -212,13 +212,8 @@ function Home({ cabins, acts, food, loading, go }) {
       <section className="px-5 sm:px-6 relative z-20 -mt-20 sm:-mt-16" style={{ background:"transparent" }}>
         <div className="reveal max-w-4xl mx-auto bg-white rounded-[26px] border border-black/5 p-2.5 flex flex-col sm:flex-row items-stretch gap-1" style={{ boxShadow:"0 36px 80px -44px rgba(62,79,63,0.6)" }}>
           <div className="flex-1 px-5 py-3">
-            <div className="ff-body text-[10px] uppercase tracking-[0.22em] text-stone-400 font-semibold mb-1">Zona</div>
-            <select value={zona} onChange={e=>setZona(e.target.value)} className="w-full ff-body text-[15px] bg-transparent outline-none cursor-pointer" style={{ color:C.ink }}><option value="">Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}</select>
-          </div>
-          <div className="hidden sm:block w-px bg-stone-200 my-3"></div>
-          <div className="flex-1 px-5 py-3">
             <div className="ff-body text-[10px] uppercase tracking-[0.22em] text-stone-400 font-semibold mb-1">Huéspedes</div>
-            <select value={guests} onChange={e=>setGuests(e.target.value)} className="w-full ff-body text-[15px] bg-transparent outline-none cursor-pointer" style={{ color:C.ink }}><option value="">Para todos</option><option value="2">1–2 personas</option><option value="4">3–4 personas</option><option value="6">5–6 personas</option><option value="8">7 o más</option></select>
+            <select value={guests} onChange={e=>setGuests(e.target.value)} className="w-full ff-body text-[15px] bg-transparent outline-none cursor-pointer" style={{ color:C.ink }}><option value="">Para todos</option><option value="1">Para 1</option><option value="2">Para 2</option><option value="3">Para 3</option><option value="4">Para 4</option><option value="5">Para 5</option><option value="6">Para 6</option><option value="7">Para 7</option><option value="8">Para 8</option></select>
           </div>
           <div className="hidden sm:block w-px bg-stone-200 my-3"></div>
           <div className="flex-1 px-5 py-3">
