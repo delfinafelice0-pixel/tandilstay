@@ -192,10 +192,8 @@ function Landing({ c, acts=[], food=[] }) {
         <div className="relative h-full max-w-6xl mx-auto px-5 sm:px-6 flex flex-col justify-end pb-12">
           {c.zone && <div className="kick text-white/85 mb-3">📍 {c.zone}</div>}
           <h1 className="ff-display text-4xl sm:text-6xl text-white leading-[1.02]" style={{fontWeight:300, letterSpacing:"-0.01em"}}>{c.name}</h1>
-          <div className="flex items-center gap-4 mt-5 flex-wrap">
-            <a href={wa} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full px-7 py-3 ff-body font-semibold transition-transform duration-500 hover:-translate-y-0.5" style={{background:C.cream, color:C.ink}}>Reservar por WhatsApp</a>
-            <span className="ff-body text-white/85 text-sm">{capLabel(c)}{c.petFriendly?" · 🐾 pet friendly":""}</span>
-          </div>
+          <p className="ff-body text-white/85 text-[15px] mt-3">{capLabel(c)}{c.petFriendly?" · 🐾 pet friendly":""}</p>
+          {wa && <a href={wa} target="_blank" rel="noreferrer" className="md:hidden inline-flex items-center gap-2 rounded-full px-7 py-3 ff-body font-semibold mt-5" style={{background:C.cream, color:C.ink}}>💬 Reservar por WhatsApp</a>}
         </div>
       </div>
 
