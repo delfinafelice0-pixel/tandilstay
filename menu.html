@@ -43,7 +43,7 @@ const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
 const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano, menu:r.menu||[], banner:r.banner||"", photos:r.photos||[] });
 const slugId = (s) => "cat-" + String(s).replace(/[^a-zA-Z0-9]+/g,"-");
 
-function DishCard({ it, waItem }) {
+function DishCard({ it, qty, onAdd, onDec }) {
   const initial = (it.name||"·").trim().charAt(0).toUpperCase();
   return (
     <div className="bg-white border border-black/5 rounded-2xl overflow-hidden flex flex-col">
@@ -51,6 +51,7 @@ function DishCard({ it, waItem }) {
         {it.photo
           ? <img src={IMG(it.photo)} alt={it.name} className="w-full h-full object-cover" />
           : <div className="w-full h-full grid place-items-center"><span className="ff-display" style={{fontSize:"40px",color:"rgba(62,79,63,0.35)"}}>{initial}</span></div>}
+        {qty>0 && <span className="absolute top-2 right-2 min-w-[24px] h-6 px-1.5 rounded-full grid place-items-center ff-body text-[12px] font-bold text-white" style={{background:C.clay}}>{qty}</span>}
       </div>
       <div className="p-3 flex-1 flex flex-col">
         <h3 className="ff-display text-[16px] leading-tight" style={{color:C.ink}}>{it.name}</h3>
@@ -59,7 +60,13 @@ function DishCard({ it, waItem }) {
           {it.price>0
             ? <span className="ff-display text-[15px]" style={{color:C.ink}}>{money(it.price)}</span>
             : <span className="ff-body text-[12px] text-stone-400">Consultar</span>}
-          {waItem && <a href={waItem(it)} target="_blank" rel="noreferrer" aria-label={"Pedir "+it.name+" por WhatsApp"} className="shrink-0 w-8 h-8 rounded-full grid place-items-center text-white text-xl leading-none" style={{background:C.moss}}>+</a>}
+          {onAdd && (qty>0
+            ? <div className="flex items-center gap-1.5 shrink-0">
+                <button onClick={onDec} aria-label="Quitar uno" className="w-7 h-7 rounded-full grid place-items-center text-white text-lg leading-none" style={{background:C.sage}}>−</button>
+                <span className="ff-body text-sm font-bold text-center" style={{color:C.ink, minWidth:"16px"}}>{qty}</span>
+                <button onClick={onAdd} aria-label="Agregar uno" className="w-7 h-7 rounded-full grid place-items-center text-white text-lg leading-none" style={{background:C.moss}}>+</button>
+              </div>
+            : <button onClick={onAdd} aria-label={"Agregar "+it.name} className="shrink-0 w-8 h-8 rounded-full grid place-items-center text-white text-xl leading-none" style={{background:C.moss}}>+</button>)}
         </div>
       </div>
     </div>
@@ -69,11 +76,26 @@ function DishCard({ it, waItem }) {
 function Menu({ c }) {
   const cats = [...new Set(c.menu.map(i=>i.category||"Menú"))];
   const [active, setActive] = useState(cats[0]||"");
-  const wa = c.whatsapp ? `https://wa.me/${c.whatsapp}?text=`+encodeURIComponent(`Hola! Quiero consultar / reservar en ${c.name}.`) : null;
-  const waItem = c.whatsapp ? (it) => `https://wa.me/${c.whatsapp}?text=`+encodeURIComponent(`Hola! Quiero pedir ${it.name} en ${c.name}.`) : null;
+  const [cart, setCart] = useState({});   // índice del plato -> cantidad
+  const [sheet, setSheet] = useState(false);
+  const cartOn = !!c.whatsapp;
+  const wa = c.whatsapp ? `https://wa.me/${c.whatsapp}?text=`+encodeURIComponent(`Hola! Quiero hacer una consulta sobre ${c.name}.`) : null;
   const tags = [c.sinTacc && "Sin TACC", c.vegetariano && "Opciones veggie"].filter(Boolean);
   const go = (cat) => { setActive(cat); const el=document.getElementById(slugId(cat)); if(el){ const y=el.getBoundingClientRect().top+window.scrollY-92; window.scrollTo({top:y,behavior:"smooth"}); } };
   const hasBanner = !!c.banner;
+
+  const add = (idx) => setCart(p => ({ ...p, [idx]: (p[idx]||0)+1 }));
+  const dec = (idx) => setCart(p => { const q=(p[idx]||0)-1; const n={...p}; if(q<=0) delete n[idx]; else n[idx]=q; return n; });
+  const entries = Object.entries(cart).map(([k,q]) => [Number(k), q]).filter(([i,q]) => q>0 && c.menu[i]);
+  const count = entries.reduce((s,[,q]) => s+q, 0);
+  const total = entries.reduce((s,[i,q]) => s + ((c.menu[i].price>0 ? c.menu[i].price : 0) * q), 0);
+  const orderUrl = (() => {
+    if (!c.whatsapp || count===0) return null;
+    const lines = entries.map(([i,q]) => { const it=c.menu[i]; return `• ${q}x ${it.name}` + (it.price>0 ? ` — ${money(it.price*q)}` : " — (a confirmar)"); });
+    const msg = `Hola! Quiero hacer este pedido en ${c.name}:\n\n${lines.join("\n")}\n\nTotal: ${money(total)}`;
+    return `https://wa.me/${c.whatsapp}?text=`+encodeURIComponent(msg);
+  })();
+
   return (
     <div className="ff-body" style={{background:C.paper, minHeight:"100vh"}}>
 
@@ -91,7 +113,7 @@ function Menu({ c }) {
           <h1 className="ff-display text-4xl sm:text-5xl leading-[1.05]" style={{color:hasBanner?"#fff":C.ink}}>{c.name}</h1>
           {c.zone && <p className={"ff-body text-sm mt-2 "+(hasBanner?"text-white/85":"text-stone-500")}>📍 {c.zone}</p>}
           {tags.length>0 && <div className="flex flex-wrap gap-2 mt-4">{tags.map((t,i)=><span key={i} className="rounded-full px-3 py-1 ff-body text-xs font-semibold" style={{background:hasBanner?"rgba(255,255,255,.94)":"#fff",color:C.moss}}>{t}</span>)}</div>}
-          {wa && <a href={wa} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full mt-6 px-6 py-3 ff-body font-semibold text-[15px]" style={hasBanner?{background:"#fff",color:C.moss}:{background:C.clay,color:"#fff"}}>💬 Pedir por WhatsApp</a>}
+          {wa && <a href={wa} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full mt-6 px-6 py-3 ff-body font-semibold text-[15px]" style={hasBanner?{background:"#fff",color:C.moss}:{background:C.clay,color:"#fff"}}>💬 Consultar por WhatsApp</a>}
         </div>
       </header>
 
@@ -105,15 +127,15 @@ function Menu({ c }) {
       )}
 
       {/* CARTA en tarjetas */}
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8" style={{paddingBottom: count>0 ? "120px" : "32px"}}>
         {c.menu.length===0 ? <p className="ff-body text-stone-500 text-center py-16">La carta todavía no está cargada.</p> :
           cats.map((cat,ci)=>(
             <section key={ci} id={slugId(cat)} className="mb-9" style={{scrollMarginTop:"96px"}}>
               <h2 className="ff-display text-2xl mb-1" style={{color:C.ink}}>{cat}</h2>
               <div className="h-px w-12 mb-5" style={{background:C.clay}} />
               <div className="grid grid-cols-2 gap-3">
-                {c.menu.filter(i=>(i.category||"Menú")===cat).map((it,i)=>(
-                  <DishCard key={i} it={it} waItem={waItem} />
+                {c.menu.map((it,idx)=>({it,idx})).filter(x=>(x.it.category||"Menú")===cat).map(({it,idx})=>(
+                  <DishCard key={idx} it={it} qty={cart[idx]||0} onAdd={cartOn?(()=>add(idx)):null} onDec={cartOn?(()=>dec(idx)):null} />
                 ))}
               </div>
             </section>
@@ -121,12 +143,69 @@ function Menu({ c }) {
         }
       </main>
 
+      {/* enlace de consulta al pie */}
       {wa && (
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 pb-8">
-          <a href={wa} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 rounded-full py-4 ff-body font-semibold text-white" style={{background:C.clay}}>💬 Reservar / consultar por WhatsApp</a>
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 pb-8 text-center">
+          <a href={wa} target="_blank" rel="noreferrer" className="ff-body text-sm font-semibold" style={{color:C.clay}}>¿Dudas? Consultá por WhatsApp →</a>
         </div>
       )}
       <footer className="py-8 text-center ff-body text-sm" style={{background:C.moss,color:"rgba(255,255,255,0.7)"}}>{c.name} · carta vía Visitando Tandil · Brote 🌱</footer>
+
+      {/* BARRA FIJA DEL PEDIDO */}
+      {cartOn && count>0 && !sheet && (
+        <div className="fixed bottom-0 left-0 right-0 z-30 px-4 pb-4 pt-3" style={{background:"linear-gradient(transparent, rgba(243,238,226,.95) 32%)"}}>
+          <div className="max-w-2xl mx-auto">
+            <button onClick={()=>setSheet(true)} className="w-full flex items-center justify-between rounded-2xl px-5 py-4 text-white shadow-lg" style={{background:C.moss}}>
+              <span className="flex items-center gap-2.5 ff-body font-semibold">
+                <span className="min-w-[26px] h-[26px] px-1.5 rounded-full grid place-items-center text-[13px] font-bold" style={{background:"#fff",color:C.moss}}>{count}</span>
+                Ver mi pedido
+              </span>
+              <span className="ff-display text-[17px]">{money(total)}</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* HOJA DEL PEDIDO */}
+      {cartOn && sheet && (
+        <div className="fixed inset-0 z-40 flex items-end justify-center" style={{background:"rgba(28,27,23,.5)"}} onClick={()=>setSheet(false)}>
+          <div onClick={e=>e.stopPropagation()} className="w-full max-w-2xl rounded-t-3xl flex flex-col" style={{background:C.paper, maxHeight:"86vh"}}>
+            <div className="flex items-center justify-between px-5 pt-5 pb-3">
+              <h3 className="ff-display text-2xl" style={{color:C.ink}}>Tu pedido</h3>
+              <button onClick={()=>setSheet(false)} aria-label="Cerrar" className="text-stone-400 hover:text-stone-700 text-2xl leading-none">✕</button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-5 no-scrollbar">
+              {entries.length===0 ? <p className="ff-body text-stone-500 text-center py-10">Tu pedido está vacío.</p> :
+                entries.map(([i,q])=>{ const it=c.menu[i]; return (
+                  <div key={i} className="flex items-center gap-3 py-3 border-b border-black/5">
+                    <div className="flex-1 min-w-0">
+                      <div className="ff-body font-semibold text-[15px] truncate" style={{color:C.ink}}>{it.name}</div>
+                      <div className="ff-body text-[13px] text-stone-500">{it.price>0 ? money(it.price)+" c/u" : "A confirmar"}</div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button onClick={()=>dec(i)} aria-label="Quitar uno" className="w-7 h-7 rounded-full grid place-items-center text-white text-lg leading-none" style={{background:C.sage}}>−</button>
+                      <span className="ff-body text-sm font-bold text-center" style={{minWidth:"18px"}}>{q}</span>
+                      <button onClick={()=>add(i)} aria-label="Agregar uno" className="w-7 h-7 rounded-full grid place-items-center text-white text-lg leading-none" style={{background:C.moss}}>+</button>
+                    </div>
+                    {it.price>0 && <div className="ff-display text-[15px] text-right shrink-0" style={{color:C.ink, minWidth:"72px"}}>{money(it.price*q)}</div>}
+                  </div>
+                ); })
+              }
+            </div>
+            <div className="px-5 pt-4 pb-6" style={{borderTop:"1px solid rgba(0,0,0,.06)"}}>
+              <div className="flex justify-between items-baseline mb-4">
+                <span className="ff-body font-semibold" style={{color:C.ink}}>Total estimado</span>
+                <span className="ff-display text-2xl" style={{color:C.ink}}>{money(total)}</span>
+              </div>
+              {orderUrl
+                ? <a href={orderUrl} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 rounded-full py-4 ff-body font-semibold text-white" style={{background:C.clay}}>💬 Enviar pedido por WhatsApp</a>
+                : <div className="text-center ff-body text-sm text-stone-500 py-3">Agregá algún plato para enviar el pedido.</div>}
+              {entries.length>0 && <button onClick={()=>setCart({})} className="w-full text-center mt-3 ff-body text-sm text-stone-400">Vaciar pedido</button>}
+              <p className="ff-body text-[12px] text-stone-400 text-center mt-3 leading-snug">El total es estimado. El local te confirma disponibilidad, formas de pago y envío por WhatsApp.</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
