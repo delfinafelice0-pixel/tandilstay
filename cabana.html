@@ -216,9 +216,9 @@ function Landing({ c, acts=[], food=[] }) {
           {(c.units||[]).length>0 && (
             <div>
               <h2 className="ff-display text-2xl mb-3" style={{color:C.ink}}>Nuestras cabañas</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="flex flex-wrap gap-3">
                 {c.units.map((u,i)=>{ const ph=uPhotos(u); const vids=uVideos(u); const yid=vids[0]?ytId(vids[0]):null; const poster = ph[0] ? IMG(ph[0]) : (yid ? ("https://img.youtube.com/vi/"+yid+"/hqdefault.jpg") : null); return (
-                  <button key={i} onClick={()=>setOpenUnit(i)} className="text-left bg-white border border-black/5 rounded-2xl overflow-hidden hover:border-black/20 transition">
+                  <button key={i} onClick={()=>setOpenUnit(i)} className="text-left w-[calc(50%-6px)] sm:w-48 bg-white border border-black/5 rounded-2xl overflow-hidden hover:border-black/20 transition">
                     <div className="relative aspect-[4/3] bg-stone-200">
                       {poster
                         ? <img src={poster} alt={u.name||("Cabaña "+(i+1))} className="w-full h-full object-cover" />
@@ -262,7 +262,7 @@ function Landing({ c, acts=[], food=[] }) {
             {multi && (
               <div className="mb-3">
                 <p className="ff-body text-sm text-stone-500 mb-2">Elegí tu cabaña:</p>
-                <div className="flex flex-wrap gap-2">{units.map((u,ui)=>{const on=selUnit===ui;return <button key={ui} onClick={()=>setSelUnit(ui)} className={"rounded-full px-4 py-2 ff-body text-sm border transition "+(on?"text-white":"text-stone-600 border-stone-300 hover:border-stone-400")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{u.name||("Cabaña "+(ui+1))}</button>;})}</div>
+                <div className="flex flex-wrap gap-2">{units.map((u,ui)=>{const on=selUnit===ui;return <button key={ui} onClick={()=>setSelUnit(ui)} className={"rounded-full px-4 py-2 ff-body text-sm border transition "+(on?"text-white":"text-stone-600 border-stone-300 hover:border-stone-400")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{u.name||("Cabaña "+(ui+1))}{u.capacity?(" · 👥 "+u.capacity):""}</button>;})}</div>
               </div>
             )}
             {(multi && selUnit==null) && (
@@ -280,7 +280,7 @@ function Landing({ c, acts=[], food=[] }) {
               <div>
                 <div className="ff-display text-2xl mb-1" style={{color:C.ink}}>Elegí tu cabaña</div>
                 <p className="ff-body text-sm text-stone-500 mb-3">Este hospedaje tiene {units.length} cabañas. Elegí una para ver precio, disponibilidad y reservar.</p>
-                <div className="flex flex-wrap gap-2">{units.map((u,ui)=><button key={ui} onClick={()=>setSelUnit(ui)} className="rounded-full px-4 py-2 ff-body text-sm border text-stone-600 border-stone-300 hover:border-stone-400 transition">{u.name||("Cabaña "+(ui+1))}</button>)}</div>
+                <div className="flex flex-wrap gap-2">{units.map((u,ui)=><button key={ui} onClick={()=>setSelUnit(ui)} className="rounded-full px-4 py-2 ff-body text-sm border text-stone-600 border-stone-300 hover:border-stone-400 transition">{u.name||("Cabaña "+(ui+1))}{u.capacity?(" · 👥 "+u.capacity):""}</button>)}</div>
               </div>
             ) : (<>
             <div className="ff-display text-2xl mb-1" style={{color:C.ink}}>desde {money(cv.price)} <span className="ff-body text-stone-500 text-sm">/ noche</span></div>
