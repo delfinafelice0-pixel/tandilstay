@@ -124,14 +124,14 @@ const ITINERARIES = [
     { d:"Mañana", stops:["Plaza Independencia","Parroquia Santísimo Sacramento","Palacio Municipal"] },
     { d:"Tarde", stops:["Parque Independencia y Castillo Morisco","Lago del Fuerte","Monumento a Don Quijote"] },
   ]},
-  { days:"2 días", sub:"Centro + sierras y monumentos", plan:[
-    { d:"Día 1 · El centro", stops:["Plaza Independencia","Parroquia Santísimo Sacramento","Parque Independencia y Castillo Morisco","Lago del Fuerte"] },
-    { d:"Día 2 · Las sierras", stops:["Monte Calvario","Cristo de las Sierras","Cerro El Centinela","Cerro del Libertador"] },
+  { days:"2 días", sub:"Un día tranqui y uno activo", plan:[
+    { d:"Día tranqui · el centro", stops:["Plaza Independencia","Parroquia Santísimo Sacramento","Parque Independencia y Castillo Morisco","Lago del Fuerte"] },
+    { d:"Día activo · las sierras", stops:["Monte Calvario","Cristo de las Sierras","Cerro El Centinela","Cerro del Libertador"] },
   ]},
-  { days:"3 días", sub:"Lo mejor de la ciudad y la naturaleza", plan:[
-    { d:"Día 1 · El centro", stops:["Plaza Independencia","Parroquia Santísimo Sacramento","Palacio Municipal","Lago del Fuerte"] },
-    { d:"Día 2 · Monumentos serranos", stops:["Monte Calvario","Cristo de las Sierras","Parque Independencia y Castillo Morisco","Cerro del Libertador"] },
-    { d:"Día 3 · Naturaleza pura", stops:["Sendero de las Ánimas","Camino Misterioso","Paseo de los Pioneros","Parque del Origen (de los Dinosaurios)"] },
+  { days:"3 días", sub:"Para verlo con calma", plan:[
+    { d:"Día tranqui · el centro", stops:["Plaza Independencia","Parroquia Santísimo Sacramento","Palacio Municipal","Lago del Fuerte"] },
+    { d:"Día activo · monumentos serranos", stops:["Monte Calvario","Cristo de las Sierras","Parque Independencia y Castillo Morisco","Cerro del Libertador"] },
+    { d:"Día aventura · naturaleza", stops:["Sendero de las Ánimas","Camino Misterioso","Paseo de los Pioneros","Parque del Origen (de los Dinosaurios)"] },
   ]},
 ];
 
@@ -202,12 +202,12 @@ function CabinCard({ c }) {
 
 function CatTile({ kicker, title, img, onClick }) {
   return (
-    <button onClick={onClick} className="group relative h-[440px] rounded-lg overflow-hidden text-left w-full block">
+    <button onClick={onClick} className="group relative h-[200px] sm:h-[360px] lg:h-[440px] rounded-lg overflow-hidden text-left w-full block">
       <img src={IMG(img)} alt={title} className="absolute inset-0 w-full h-full object-cover imgzoom" />
       <div className="absolute inset-0" style={{ background:"linear-gradient(180deg,rgba(0,0,0,0) 38%,rgba(20,22,18,0.66) 100%)" }}></div>
-      <div className="absolute left-6 right-6 bottom-6 text-white">
-        <div className="ff-body text-[11px] uppercase tracking-[0.28em] text-white/80">{kicker}</div>
-        <h3 className="ff-display text-[26px] mt-1.5 flex items-center justify-between" style={{ fontWeight:400 }}>{title}<span className="text-xl transition-transform duration-500 group-hover:translate-x-1.5">→</span></h3>
+      <div className="absolute left-2.5 right-2.5 bottom-3 sm:left-6 sm:right-6 sm:bottom-6 text-white">
+        <div className="ff-body text-[8px] sm:text-[11px] uppercase tracking-[0.1em] sm:tracking-[0.28em] text-white/80">{kicker}</div>
+        <h3 className="ff-display text-[15px] sm:text-[22px] lg:text-[26px] leading-tight mt-1 sm:mt-1.5 flex items-center justify-between gap-1" style={{ fontWeight:400 }}>{title}<span className="hidden sm:inline text-xl transition-transform duration-500 group-hover:translate-x-1.5">→</span></h3>
       </div>
     </button>
   );
@@ -261,34 +261,9 @@ function Home({ cabins, acts, food, loading, go }) {
         </div>
       </section>
 
-      {/* BUSCADOR */}
-      <section className="px-5 sm:px-6 relative z-20 -mt-20 sm:-mt-16" style={{ background:"transparent" }}>
-        <div className="reveal max-w-4xl mx-auto bg-white rounded-[26px] border border-black/5 p-2.5 flex flex-col sm:flex-row items-stretch gap-1" style={{ boxShadow:"0 36px 80px -44px rgba(62,79,63,0.6)" }}>
-          <div className="flex-1 px-5 py-3">
-            <div className="ff-body text-[10px] uppercase tracking-[0.22em] text-stone-400 font-semibold mb-1">Huéspedes</div>
-            <select value={guests} onChange={e=>setGuests(e.target.value)} className="w-full ff-body text-[15px] bg-transparent outline-none cursor-pointer" style={{ color:C.ink }}><option value="">Para todos</option><option value="1">Para 1</option><option value="2">Para 2</option><option value="3">Para 3</option><option value="4">Para 4</option><option value="5">Para 5</option><option value="6">Para 6</option><option value="7">Para 7</option><option value="8">Para 8</option></select>
-          </div>
-          <div className="hidden sm:block w-px bg-stone-200 my-3"></div>
-          <div className="flex-1 px-5 py-3">
-            <div className="ff-body text-[10px] uppercase tracking-[0.22em] text-stone-400 font-semibold mb-1">Tipo</div>
-            <select value={tipo} onChange={e=>setTipo(e.target.value)} className="w-full ff-body text-[15px] bg-transparent outline-none cursor-pointer" style={{ color:C.ink }}><option value="">Cualquiera</option>{TYPES.map(t=><option key={t} value={t}>{t}</option>)}</select>
-          </div>
-          <div className="hidden sm:block w-px bg-stone-200 my-3"></div>
-          <div className="flex-1 px-5 py-3">
-            <div className="ff-body text-[10px] uppercase tracking-[0.22em] text-stone-400 font-semibold mb-1">Fechas</div>
-            <div className="flex items-center gap-2">
-              <input type="date" value={ci} min={today} onChange={e=>{ setCi(e.target.value); if(co && e.target.value && co<=e.target.value) setCo(""); }} className="ff-body text-[14px] bg-transparent outline-none cursor-pointer w-full" style={{ color: ci?C.ink:"#9ca3af" }} />
-              <span className="text-stone-300">→</span>
-              <input type="date" value={co} min={ci||today} onChange={e=>setCo(e.target.value)} className="ff-body text-[14px] bg-transparent outline-none cursor-pointer w-full" style={{ color: co?C.ink:"#9ca3af" }} />
-            </div>
-          </div>
-          <button onClick={goAloj} className="rounded-[20px] px-7 py-4 flex items-center justify-center gap-2 ff-body font-semibold text-[15px] text-white transition-transform duration-500 hover:-translate-y-0.5" style={{ background:C.moss }}>🔍 Buscar</button>
-        </div>
-      </section>
-
       {/* CATEGORÍAS */}
-      <section className="reveal max-w-6xl mx-auto px-5 sm:px-6 pt-24 sm:pt-28" style={{ background: C.paper }}>
-        <div className="grid md:grid-cols-3 gap-4">
+      <section className="reveal max-w-6xl mx-auto px-5 sm:px-6 pt-12 sm:pt-20" style={{ background: C.paper }}>
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
           <CatTile kicker="Dónde dormir" title="Hospedajes" img="photo-1449158743715-0a90ebb6d2d8" onClick={()=>go("aloj")} />
           <CatTile kicker="Dónde comer" title="Gastronomía" img="photo-1414235077428-338989a2e8c0" onClick={()=>go("gastro")} />
           <CatTile kicker="Qué hacer" title="Actividades" img="photo-1551632811-561732d1e306" onClick={()=>go("qhacer")} />
