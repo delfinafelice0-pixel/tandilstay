@@ -78,6 +78,17 @@ const capRange = (r) => { const caps=(r.units||[]).map(u=>u.capacity).filter(Boo
 
 const AMEN = { wifi:"📶 Wifi", aire:"❄️ Aire acondicionado", calefaccion:"♨️ Calefacción", cocina:"🍳 Cocina", heladera:"🧊 Heladera", horno:"🔥 Horno", microondas:"📻 Microondas", tostadora:"🍞 Tostadora", pava:"🫖 Pava eléctrica", utensilios:"🍴 Utensilios básicos de cocina", ollas:"🧂 Ollas, sartenes, aceite, sal y pimienta", tv:"📺 Televisión", parrilla:"🔥 Parrilla", patio:"🌿 Patio", muebles_ext:"🪑 Muebles de exterior", reposeras:"🏖️ Reposeras", estacionamiento:"🅿️ Estacionamiento gratis en la propiedad", monoplanta:"🛗 Alojamiento de un solo piso", bide:"🚿 Bidé", blackout:"🌙 Persianas o cortinas oscuras", limpieza:"🧴 Productos de limpieza", ropa_cama:"🛏️ Ropa de cama", pileta:"🏊 Pileta", cochera:"🚗 Cochera", desayuno:"☕ Desayuno" };
 const TYPES = ["Departamento","Cabaña","Quinta","Casa"];
+const _parseD = (s) => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
+const _iso = (d) => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const cabinAvail = (c, ci, co) => {
+  if (!ci || !co) return true;
+  const nights = []; let d = _parseD(ci); const e = _parseD(co);
+  while (d < e) { nights.push(_iso(d)); d = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1); }
+  const units = c.units || [];
+  if (units.length > 1) return units.some(u => { const b=u.blocked||[]; return !nights.some(n=>b.includes(n)); });
+  const b = [...(c.blocked||[]), ...(c.ical_blocked||[])];
+  return !nights.some(n => b.includes(n));
+};
 
 const FACTS = [
   { e:"🧀", text:"El salame de Tandil tiene Denominación de Origen: el único del país con ese sello." },
@@ -208,6 +219,9 @@ function Home({ cabins, acts, food, loading, go }) {
   const [maxPrice, setMaxPrice] = useState("");
   const [order, setOrder] = useState("");
   const [tipo, setTipo] = useState("");
+  const [ci, setCi] = useState("");
+  const [co, setCo] = useState("");
+  const today = _iso(new Date());
   const [amen, setAmen] = useState([]);
   const [moreOpen, setMoreOpen] = useState(false);
   const [pet, setPet] = useState(false);
@@ -218,6 +232,7 @@ function Home({ cabins, acts, food, loading, go }) {
     if (guests && capOf(c) < parseInt(guests,10)) return false;
     if (maxPrice) { const p=(c.price||0); if (maxPrice.endsWith("+")) { if (p <= parseInt(maxPrice,10)) return false; } else if (p > parseInt(maxPrice,10)) return false; }
     if (tipo && c.type !== tipo) return false;
+    if (ci && co && !cabinAvail(c, ci, co)) return false;
     if (amen.length && !amen.every(a=>(c.amenities||[]).includes(a))) return false;
     if (pet && !c.pet_friendly) return false;
     return true;
@@ -225,8 +240,8 @@ function Home({ cabins, acts, food, loading, go }) {
   let show = cabins.filter(match);
   if (order==="asc") show = [...show].sort((a,b)=>(a.price||0)-(b.price||0));
   else if (order==="desc") show = [...show].sort((a,b)=>(b.price||0)-(a.price||0));
-  const activeCount = (zona?1:0) + (guests?1:0) + (maxPrice?1:0) + (order?1:0) + (tipo?1:0) + amen.length + (pet?1:0);
-  const clear = () => { setZona(""); setGuests(""); setMaxPrice(""); setOrder(""); setTipo(""); setAmen([]); setPet(false); };
+  const activeCount = (zona?1:0) + (guests?1:0) + (tipo?1:0) + ((ci&&co)?1:0) + (order?1:0) + amen.length + (pet?1:0);
+  const clear = () => { setZona(""); setGuests(""); setMaxPrice(""); setOrder(""); setTipo(""); setCi(""); setCo(""); setAmen([]); setPet(false); };
   const goAloj = () => { const el=document.getElementById("aloj"); if(el) el.scrollIntoView({behavior:"smooth"}); };
   const selCls = "ff-body text-[13px] rounded-full border bg-transparent px-4 py-2 cursor-pointer";
   const selStyle = { borderColor:"rgba(36,34,28,0.18)", color:C.moss };
@@ -255,8 +270,17 @@ function Home({ cabins, acts, food, loading, go }) {
           </div>
           <div className="hidden sm:block w-px bg-stone-200 my-3"></div>
           <div className="flex-1 px-5 py-3">
-            <div className="ff-body text-[10px] uppercase tracking-[0.22em] text-stone-400 font-semibold mb-1">Precio</div>
-            <select value={maxPrice} onChange={e=>setMaxPrice(e.target.value)} className="w-full ff-body text-[15px] bg-transparent outline-none cursor-pointer" style={{ color:C.ink }}><option value="">Cualquiera</option><option value="120000">Hasta $120.000</option><option value="250000">Hasta $250.000</option><option value="250000+">Más de $250.000</option></select>
+            <div className="ff-body text-[10px] uppercase tracking-[0.22em] text-stone-400 font-semibold mb-1">Tipo</div>
+            <select value={tipo} onChange={e=>setTipo(e.target.value)} className="w-full ff-body text-[15px] bg-transparent outline-none cursor-pointer" style={{ color:C.ink }}><option value="">Cualquiera</option>{TYPES.map(t=><option key={t} value={t}>{t}</option>)}</select>
+          </div>
+          <div className="hidden sm:block w-px bg-stone-200 my-3"></div>
+          <div className="flex-1 px-5 py-3">
+            <div className="ff-body text-[10px] uppercase tracking-[0.22em] text-stone-400 font-semibold mb-1">Fechas</div>
+            <div className="flex items-center gap-2">
+              <input type="date" value={ci} min={today} onChange={e=>{ setCi(e.target.value); if(co && e.target.value && co<=e.target.value) setCo(""); }} className="ff-body text-[14px] bg-transparent outline-none cursor-pointer w-full" style={{ color: ci?C.ink:"#9ca3af" }} />
+              <span className="text-stone-300">→</span>
+              <input type="date" value={co} min={ci||today} onChange={e=>setCo(e.target.value)} className="ff-body text-[14px] bg-transparent outline-none cursor-pointer w-full" style={{ color: co?C.ink:"#9ca3af" }} />
+            </div>
           </div>
           <button onClick={goAloj} className="rounded-[20px] px-7 py-4 flex items-center justify-center gap-2 ff-body font-semibold text-[15px] text-white transition-transform duration-500 hover:-translate-y-0.5" style={{ background:C.moss }}>🔍 Buscar</button>
         </div>
