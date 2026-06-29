@@ -186,6 +186,11 @@ function Menu({ c }) {
                 entries.map(([i,q])=>{ const it=c.menu[i]; return (
                   <div key={i} className="py-3 border-b border-black/5">
                     <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0" style={{background:"linear-gradient(135deg,"+C.mist+",#d7d1c0)"}}>
+                        {it.photo
+                          ? <img src={IMG(it.photo)} alt={it.name} className="w-full h-full object-cover" />
+                          : <div className="w-full h-full grid place-items-center ff-display" style={{color:"rgba(62,79,63,0.4)", fontSize:"20px"}}>{(it.name||"·").trim().charAt(0).toUpperCase()}</div>}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <div className="ff-body font-semibold text-[15px] truncate" style={{color:C.ink}}>{it.name}</div>
                         <div className="ff-body text-[13px] text-stone-500">{it.price>0 ? money(it.price)+" c/u" : "A confirmar"}</div>
