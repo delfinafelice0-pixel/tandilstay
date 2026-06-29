@@ -24,9 +24,10 @@ const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://image
 const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
 const slugify = (s) => (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 
-const EMPTY = { name:"", operator:"", zone:"", whatsapp:"", phone:"", blurb:"", sinTacc:false, vegetariano:false, reserva:false, comoReservar:"", menuUrl:"", videos:[], banner:"", photos:[], menu:[] };
-const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano, reserva:r.reserva, comoReservar:r.como_reservar||"", menuUrl:r.menu_url||"", videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], menu:r.menu||[] });
-const toRow = (c) => { const r = { slug:c.slug||slugify(c.name), name:c.name, operator:c.operator, zone:c.zone, whatsapp:c.whatsapp, phone:c.phone, blurb:c.blurb, sin_tacc:c.sinTacc, vegetariano:c.vegetariano, reserva:c.reserva, como_reservar:c.comoReservar, menu_url:c.menuUrl, videos:c.videos, banner:c.banner, photos:c.photos, menu:c.menu }; if(c.id) r.id=c.id; return r; };
+const DAYS = [["mon","Lunes"],["tue","Martes"],["wed","Miércoles"],["thu","Jueves"],["fri","Viernes"],["sat","Sábado"],["sun","Domingo"]];
+const EMPTY = { name:"", operator:"", zone:"", whatsapp:"", phone:"", blurb:"", sinTacc:false, vegetariano:false, reserva:false, comoReservar:"", menuUrl:"", videos:[], banner:"", photos:[], menu:[], hours:null };
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano, reserva:r.reserva, comoReservar:r.como_reservar||"", menuUrl:r.menu_url||"", videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], menu:r.menu||[], hours:r.hours||null });
+const toRow = (c) => { const r = { slug:c.slug||slugify(c.name), name:c.name, operator:c.operator, zone:c.zone, whatsapp:c.whatsapp, phone:c.phone, blurb:c.blurb, sin_tacc:c.sinTacc, vegetariano:c.vegetariano, reserva:c.reserva, como_reservar:c.comoReservar, menu_url:c.menuUrl, videos:c.videos, banner:c.banner, photos:c.photos, menu:c.menu, hours:c.hours||null }; if(c.id) r.id=c.id; return r; };
 
 const Field = ({ label, children }) => (<label className="block mb-3"><span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">{label}</span><div className="mt-1">{children}</div></label>);
 
@@ -87,6 +88,37 @@ function Editor({ c, set }) {
           <button onClick={()=>set({...c,reserva:!c.reserva})} className={"rounded-xl px-4 py-2.5 ff-body text-sm border w-full text-left mb-2 "+(c.reserva?"border-amber-300 text-amber-700 bg-amber-50":"border-stone-300 text-stone-600")}>{c.reserva?"📅 Con reserva":"🚶 Sin reserva (llegás y listo)"}</button>
           {c.reserva && <Field label="Cómo hacer la reserva"><textarea value={c.comoReservar} onChange={e=>set({...c,comoReservar:e.target.value})} rows={2} placeholder="Ej: Reservá por WhatsApp o por Instagram con 1 día de anticipación" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm resize-none" /></Field>}
           <Field label="Menú digital (link, opcional)"><input value={c.menuUrl} onChange={e=>set({...c,menuUrl:e.target.value})} placeholder="https://..." className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-black/5 p-5">
+          <h3 className="ff-display text-lg mb-1" style={{color:C.ink}}>Horarios</h3>
+          <p className="ff-body text-xs text-stone-500 mb-3">Marcá los días abiertos y su horario. Podés agregar un segundo turno (ej. mediodía y noche).</p>
+          <div className="space-y-2.5">
+            {DAYS.map(([k,lbl])=>{
+              const h=(c.hours&&c.hours[k]) || { open:false, r:[["",""]] };
+              const setDay=(obj)=>set({...c, hours:{...(c.hours||{}), [k]:obj}});
+              const ranges=(h.r&&h.r.length)?h.r:[["",""]];
+              const setRange=(ri,idx,val)=>setDay({...h, open:true, r:ranges.map((x,j)=>j===ri?(idx===0?[val,x[1]]:[x[0],val]):x)});
+              return (
+                <div key={k} className="flex items-start gap-2 flex-wrap">
+                  <button onClick={()=>setDay({...h, open:!h.open, r:ranges})} className={"shrink-0 rounded-full px-3 py-1.5 ff-body text-xs font-semibold border w-[120px] text-left "+(h.open?"text-white":"text-stone-500 border-stone-300")} style={h.open?{background:C.moss,borderColor:C.moss}:{}}>{lbl}{h.open?" · abierto":" · cerrado"}</button>
+                  {h.open ? (
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {ranges.map((rg,ri)=>(
+                        <span key={ri} className="flex items-center gap-1">
+                          <input type="time" value={rg[0]||""} onChange={e=>setRange(ri,0,e.target.value)} className="border border-stone-300 rounded-lg px-2 py-1 ff-body text-xs" />
+                          <span className="text-stone-400 text-xs">a</span>
+                          <input type="time" value={rg[1]||""} onChange={e=>setRange(ri,1,e.target.value)} className="border border-stone-300 rounded-lg px-2 py-1 ff-body text-xs" />
+                          {ri>0 && <button onClick={()=>setDay({...h, r:ranges.filter((_,j)=>j!==ri)})} className="text-rose-500 text-xs">✕</button>}
+                        </span>
+                      ))}
+                      {ranges.length<2 && <button onClick={()=>setDay({...h, open:true, r:[...ranges,["",""]]})} className="ff-body text-xs font-semibold" style={{color:C.clay}}>+ turno</button>}
+                    </div>
+                  ) : <span className="ff-body text-xs text-stone-400 self-center">Cerrado</span>}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         <div className="bg-white rounded-2xl border border-black/5 p-5">

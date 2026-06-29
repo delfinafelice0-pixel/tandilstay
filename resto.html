@@ -53,7 +53,30 @@ const C = { paper:"#F3EEE2", cream:"#FBF7EF", mist:"#E7E1D3", ink:"#24221C", mos
 const A = C.moss;
 const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=1200&q=80`));
 const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
-const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano, reserva:r.reserva, comoReservar:r.como_reservar||"", menuUrl:r.menu_url||"", videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], menu:r.menu||[] });
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano, reserva:r.reserva, comoReservar:r.como_reservar||"", menuUrl:r.menu_url||"", videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], menu:r.menu||[], hours:r.hours||null });
+
+const DAYS_R = [["mon","Lunes"],["tue","Martes"],["wed","Miércoles"],["thu","Jueves"],["fri","Viernes"],["sat","Sábado"],["sun","Domingo"]];
+const _toMin = (s) => { if(!s || !/^\d{1,2}:\d{2}$/.test(s)) return null; const [h,m]=s.split(":").map(Number); return h*60+m; };
+function arNow(){
+  const parts = new Intl.DateTimeFormat("en-US",{timeZone:"America/Argentina/Buenos_Aires", weekday:"short", hour:"2-digit", minute:"2-digit", hour12:false}).formatToParts(new Date());
+  const wd = parts.find(p=>p.type==="weekday").value;
+  let hh = parts.find(p=>p.type==="hour").value; if(hh==="24") hh="00";
+  const mm = parts.find(p=>p.type==="minute").value;
+  const map = {Sun:"sun",Mon:"mon",Tue:"tue",Wed:"wed",Thu:"thu",Fri:"fri",Sat:"sat"};
+  return { dayKey: map[wd], mins: parseInt(hh,10)*60+parseInt(mm,10) };
+}
+function hoursStatus(hours){
+  if(!hours) return null;
+  const { dayKey, mins } = arNow();
+  const order = ["mon","tue","wed","thu","fri","sat","sun"];
+  const prev = order[(order.indexOf(dayKey)+6)%7];
+  const today = hours[dayKey];
+  if(today && today.open) for(const rg of (today.r||[])){ const f=_toMin(rg[0]); let t=_toMin(rg[1]); if(f==null||t==null) continue; if(t<=f) t+=1440; if(mins>=f && mins<t) return { open:true, until:rg[1], dayKey }; }
+  const py = hours[prev];
+  if(py && py.open) for(const rg of (py.r||[])){ const f=_toMin(rg[0]); const t=_toMin(rg[1]); if(f==null||t==null) continue; if(t<=f && mins<t) return { open:true, until:rg[1], dayKey }; }
+  return { open:false, dayKey };
+}
+const fmtDay = (h) => { if(!h || !h.open) return "Cerrado"; const rs=(h.r||[]).filter(r=>r[0]&&r[1]).map(r=>r[0]+" a "+r[1]); return rs.length ? rs.join(" · ") : "Abierto"; };
 const ytEmbed = (url) => { const m=(url||"").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/); return m?`https://www.youtube.com/embed/${m[1]}`:null; };
 
 function SiteHeader() {
@@ -106,6 +129,7 @@ function Nearby({ acts=[], food=[], cabins=[] }) {
 function Resto({ c, cabins=[], acts=[] }) {
   const cover = c.banner || c.photos[0] || "photo-1517248135467-4c7edcad34c4";
   const cats = [...new Set(c.menu.map(i=>i.category||"Menú"))];
+  const st = hoursStatus(c.hours);
   const wa = c.whatsapp ? `https://wa.me/${c.whatsapp}?text=`+encodeURIComponent(`Hola! Quiero consultar / reservar en ${c.name}.`) : null;
   return (
     <div style={{background:C.paper}} className="ff-body">
@@ -118,6 +142,7 @@ function Resto({ c, cabins=[], acts=[] }) {
           {c.zone && <div className="kick text-white/85 mb-3">📍 {c.zone}</div>}
           <h1 className="ff-display text-4xl sm:text-6xl text-white leading-[1.02]" style={{fontWeight:300, letterSpacing:"-0.01em"}}>{c.name}</h1>
           <div className="flex items-center gap-2 mt-3 flex-wrap">
+            {st && <span className="rounded-full px-3 py-1 ff-body text-sm font-bold" style={st.open?{background:"#dbefd4",color:"#2f6b2f"}:{background:"#f6dcdc",color:"#a23b3b"}}>{st.open?"🟢 Abierto ahora":"🔴 Cerrado ahora"}</span>}
             {c.sinTacc && <span className="bg-white/90 rounded-full px-3 py-1 ff-body text-sm font-semibold" style={{color:C.moss}}>🌾 Sin TACC</span>}
             {c.vegetariano && <span className="bg-white/90 rounded-full px-3 py-1 ff-body text-sm font-semibold" style={{color:C.moss}}>🥗 Vegetariano</span>}
             <span className="bg-white/90 rounded-full px-3 py-1 ff-body text-sm font-semibold" style={{color:C.moss}}>{c.reserva?"📅 Con reserva":"🚶 Sin reserva"}</span>
@@ -131,6 +156,23 @@ function Resto({ c, cabins=[], acts=[] }) {
         {c.reserva && c.comoReservar && (
           <div className="rounded-2xl px-5 py-4 flex items-start gap-3" style={{background:"#fff", border:"1px solid rgba(0,0,0,0.06)"}}>
             <span className="text-xl">📅</span><div><div className="ff-display text-lg" style={{color:C.ink}}>Cómo reservar</div><p className="ff-body text-stone-600 text-sm mt-0.5">{c.comoReservar}</p></div>
+          </div>
+        )}
+
+        {c.hours && Object.values(c.hours).some(h=>h&&h.open) && (
+          <div className="rounded-2xl bg-white p-5 max-w-md" style={{border:"1px solid rgba(0,0,0,0.06)"}}>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="ff-display text-xl" style={{color:C.ink}}>Horarios</h2>
+              {st && <span className="ff-body text-xs font-bold rounded-full px-2.5 py-1" style={st.open?{background:"#dbefd4",color:"#2f6b2f"}:{background:"#f6dcdc",color:"#a23b3b"}}>{st.open?(st.until?"Abierto · cierra "+st.until:"Abierto ahora"):"Cerrado ahora"}</span>}
+            </div>
+            <div className="space-y-1.5">
+              {DAYS_R.map(([k,lbl])=>{ const isToday=st&&st.dayKey===k; const h=c.hours[k]; return (
+                <div key={k} className={"flex justify-between ff-body text-sm "+(isToday?"font-bold":"")} style={{color:isToday?C.ink:"#6a655a"}}>
+                  <span>{lbl}{isToday?" · hoy":""}</span>
+                  <span>{fmtDay(h)}</span>
+                </div>
+              );})}
+            </div>
           </div>
         )}
 
