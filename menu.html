@@ -11,14 +11,14 @@
 <meta property="og:title" content="Carta · Visitando Tandil" />
 <meta property="og:description" content="La carta de este lugar en Tandil. Mirá los platos y pedí por WhatsApp." />
 <meta property="og:url" content="https://delfinafelice0-pixel.github.io/tandilstay/menu.html" />
-<meta property="og:image" content="https://delfinafelice0-pixel.github.io/tandilstay/og.png" />
+<meta property="og:image" content="https://delfinafelice0-pixel.github.io/tandilstay/og.png?v=3" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="Visitando Tandil" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Carta · Visitando Tandil" />
 <meta name="twitter:description" content="La carta de este lugar en Tandil. Mirá los platos y pedí por WhatsApp." />
-<meta name="twitter:image" content="https://delfinafelice0-pixel.github.io/tandilstay/og.png" />
+<meta name="twitter:image" content="https://delfinafelice0-pixel.github.io/tandilstay/og.png?v=3" />
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.7/babel.min.js"></script>
@@ -77,6 +77,9 @@ function Menu({ c }) {
   const cats = [...new Set(c.menu.map(i=>i.category||"Menú"))];
   const [active, setActive] = useState(cats[0]||"");
   const [cart, setCart] = useState({});   // índice del plato -> cantidad
+  const [notes, setNotes] = useState({});  // índice del plato -> aclaración
+  const [name, setName] = useState("");
+  const [addr, setAddr] = useState("");
   const [sheet, setSheet] = useState(false);
   const cartOn = !!c.whatsapp;
   const wa = c.whatsapp ? `https://wa.me/${c.whatsapp}?text=`+encodeURIComponent(`Hola! Quiero hacer una consulta sobre ${c.name}.`) : null;
@@ -86,13 +89,17 @@ function Menu({ c }) {
 
   const add = (idx) => setCart(p => ({ ...p, [idx]: (p[idx]||0)+1 }));
   const dec = (idx) => setCart(p => { const q=(p[idx]||0)-1; const n={...p}; if(q<=0) delete n[idx]; else n[idx]=q; return n; });
+  const setNote = (idx, v) => setNotes(p => ({ ...p, [idx]: v }));
   const entries = Object.entries(cart).map(([k,q]) => [Number(k), q]).filter(([i,q]) => q>0 && c.menu[i]);
   const count = entries.reduce((s,[,q]) => s+q, 0);
   const total = entries.reduce((s,[i,q]) => s + ((c.menu[i].price>0 ? c.menu[i].price : 0) * q), 0);
   const orderUrl = (() => {
     if (!c.whatsapp || count===0) return null;
-    const lines = entries.map(([i,q]) => { const it=c.menu[i]; return `• ${q}x ${it.name}` + (it.price>0 ? ` — ${money(it.price*q)}` : " — (a confirmar)"); });
-    const msg = `Hola! Quiero hacer este pedido en ${c.name}:\n\n${lines.join("\n")}\n\nTotal: ${money(total)}`;
+    const lines = entries.map(([i,q]) => { const it=c.menu[i]; const nt=(notes[i]||"").trim(); return `• ${q}x ${it.name}` + (it.price>0 ? ` — ${money(it.price*q)}` : " — (a confirmar)") + (nt ? `\n   ↳ ${nt}` : ""); });
+    let msg = `Hola!`;
+    if (name.trim()) msg += ` Soy ${name.trim()}.`;
+    msg += ` Quiero hacer este pedido en ${c.name}:\n\n${lines.join("\n")}\n\nTotal estimado: ${money(total)}`;
+    if (addr.trim()) msg += `\n\nDirección de entrega: ${addr.trim()}`;
     return `https://wa.me/${c.whatsapp}?text=`+encodeURIComponent(msg);
   })();
 
@@ -177,22 +184,31 @@ function Menu({ c }) {
             <div className="flex-1 overflow-y-auto px-5 no-scrollbar">
               {entries.length===0 ? <p className="ff-body text-stone-500 text-center py-10">Tu pedido está vacío.</p> :
                 entries.map(([i,q])=>{ const it=c.menu[i]; return (
-                  <div key={i} className="flex items-center gap-3 py-3 border-b border-black/5">
-                    <div className="flex-1 min-w-0">
-                      <div className="ff-body font-semibold text-[15px] truncate" style={{color:C.ink}}>{it.name}</div>
-                      <div className="ff-body text-[13px] text-stone-500">{it.price>0 ? money(it.price)+" c/u" : "A confirmar"}</div>
+                  <div key={i} className="py-3 border-b border-black/5">
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="ff-body font-semibold text-[15px] truncate" style={{color:C.ink}}>{it.name}</div>
+                        <div className="ff-body text-[13px] text-stone-500">{it.price>0 ? money(it.price)+" c/u" : "A confirmar"}</div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button onClick={()=>dec(i)} aria-label="Quitar uno" className="w-7 h-7 rounded-full grid place-items-center text-white text-lg leading-none" style={{background:C.sage}}>−</button>
+                        <span className="ff-body text-sm font-bold text-center" style={{minWidth:"18px"}}>{q}</span>
+                        <button onClick={()=>add(i)} aria-label="Agregar uno" className="w-7 h-7 rounded-full grid place-items-center text-white text-lg leading-none" style={{background:C.moss}}>+</button>
+                      </div>
+                      {it.price>0 && <div className="ff-display text-[15px] text-right shrink-0" style={{color:C.ink, minWidth:"72px"}}>{money(it.price*q)}</div>}
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button onClick={()=>dec(i)} aria-label="Quitar uno" className="w-7 h-7 rounded-full grid place-items-center text-white text-lg leading-none" style={{background:C.sage}}>−</button>
-                      <span className="ff-body text-sm font-bold text-center" style={{minWidth:"18px"}}>{q}</span>
-                      <button onClick={()=>add(i)} aria-label="Agregar uno" className="w-7 h-7 rounded-full grid place-items-center text-white text-lg leading-none" style={{background:C.moss}}>+</button>
-                    </div>
-                    {it.price>0 && <div className="ff-display text-[15px] text-right shrink-0" style={{color:C.ink, minWidth:"72px"}}>{money(it.price*q)}</div>}
+                    <input value={notes[i]||""} onChange={e=>setNote(i, e.target.value)} placeholder="Aclaración (ej: sin sal, para llevar)" className="w-full mt-2 ff-body text-[13px] rounded-lg px-3 py-2 outline-none" style={{background:"#fff", border:"1px solid rgba(0,0,0,.08)", color:C.ink}} />
                   </div>
                 ); })
               }
             </div>
             <div className="px-5 pt-4 pb-6" style={{borderTop:"1px solid rgba(0,0,0,.06)"}}>
+              {entries.length>0 && (
+                <div className="space-y-2 mb-4">
+                  <input value={name} onChange={e=>setName(e.target.value)} placeholder="Tu nombre" className="w-full ff-body text-[14px] rounded-xl px-3.5 py-3 outline-none" style={{background:"#fff", border:"1px solid rgba(0,0,0,.08)", color:C.ink}} />
+                  <input value={addr} onChange={e=>setAddr(e.target.value)} placeholder="Dirección de entrega (o 'retiro en el local')" className="w-full ff-body text-[14px] rounded-xl px-3.5 py-3 outline-none" style={{background:"#fff", border:"1px solid rgba(0,0,0,.08)", color:C.ink}} />
+                </div>
+              )}
               <div className="flex justify-between items-baseline mb-4">
                 <span className="ff-body font-semibold" style={{color:C.ink}}>Total estimado</span>
                 <span className="ff-display text-2xl" style={{color:C.ink}}>{money(total)}</span>
@@ -200,7 +216,7 @@ function Menu({ c }) {
               {orderUrl
                 ? <a href={orderUrl} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 rounded-full py-4 ff-body font-semibold text-white" style={{background:C.clay}}>💬 Enviar pedido por WhatsApp</a>
                 : <div className="text-center ff-body text-sm text-stone-500 py-3">Agregá algún plato para enviar el pedido.</div>}
-              {entries.length>0 && <button onClick={()=>setCart({})} className="w-full text-center mt-3 ff-body text-sm text-stone-400">Vaciar pedido</button>}
+              {entries.length>0 && <button onClick={()=>{ setCart({}); setNotes({}); }} className="w-full text-center mt-3 ff-body text-sm text-stone-400">Vaciar pedido</button>}
               <p className="ff-body text-[12px] text-stone-400 text-center mt-3 leading-snug">El total es estimado. El local te confirma disponibilidad, formas de pago y envío por WhatsApp.</p>
             </div>
           </div>
