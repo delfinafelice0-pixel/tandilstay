@@ -270,6 +270,13 @@ function Landing({ c, acts=[], food=[] }) {
             <div className={"border border-black/10 rounded-2xl p-4 max-w-sm bg-white"+(ready?"":" opacity-60 pointer-events-none")}>
               <Calendar cursor={cursor} setCursor={setCursor} blocked={ready?cv.blocked:[]} ci={q.ci} co={q.co} priceOf={(d)=>nightlyPrice(pv,d)} onDay={ready?pick:(()=>{})} />
             </div>
+            {ready && (
+              <div className="max-w-sm mt-4">
+                {stay && !avail && <div className="bg-rose-50 text-rose-700 ff-body text-sm rounded-xl p-3 mb-2">No disponible en esas fechas.</div>}
+                <a href={wa} target="_blank" rel="noreferrer" className="block text-center w-full text-white rounded-xl py-3.5 ff-body font-semibold" style={{background:A}}>💬 Reservar por WhatsApp</a>
+                {su && validBooking(su) && <a href={su.bookingUrl} target="_blank" rel="noreferrer" className="block text-center w-full rounded-xl py-3 ff-body font-semibold mt-2 border" style={{borderColor:C.moss,color:C.moss}}>Reservar en Booking / Airbnb →</a>}
+              </div>
+            )}
           </div>
         </div>
         <div className="md:col-span-1 md:order-2 md:row-span-2">
@@ -297,9 +304,8 @@ function Landing({ c, acts=[], food=[] }) {
                 <div className="flex justify-between ff-body font-bold border-t border-stone-200 pt-3 mb-4" style={{color:C.ink}}><span>Total</span><span>{money(stay.total)}</span></div>
               </div>
             ) : <div className="bg-rose-50 text-rose-700 ff-body text-sm rounded-xl p-3 mb-4">No disponible en esas fechas.</div>)
-            : <p className="ff-body text-sm text-stone-400 mb-4">Elegí fechas en el calendario.</p>}
-            <a href={wa} target="_blank" rel="noreferrer" className="block text-center w-full text-white rounded-xl py-3 ff-body font-semibold" style={{background:A}}>💬 Reservar por WhatsApp</a>
-            {su && validBooking(su) && <a href={su.bookingUrl} target="_blank" rel="noreferrer" className="block text-center w-full rounded-xl py-3 ff-body font-semibold mt-2 border" style={{borderColor:C.moss,color:C.moss}}>Reservar en Booking / Airbnb →</a>}
+            : <p className="ff-body text-sm text-stone-400 mb-2">Elegí fechas en el calendario.</p>}
+            <p className="ff-body text-[13px] text-stone-400 text-center mt-1">Reservá abajo del calendario ↓</p>
             </>)}
           </div>
         </div>
