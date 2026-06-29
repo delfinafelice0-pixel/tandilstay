@@ -12,14 +12,14 @@
 <meta property="og:title" content="Visitando Tandil · Hospedajes, gastronomía y actividades en Tandil" />
 <meta property="og:description" content="Visitando Tandil en un solo lugar: dónde dormir, dónde comer y qué hacer entre las sierras." />
 <meta property="og:url" content="https://delfinafelice0-pixel.github.io/tandilstay/" />
-<meta property="og:image" content="https://delfinafelice0-pixel.github.io/tandilstay/og.png" />
+<meta property="og:image" content="https://delfinafelice0-pixel.github.io/tandilstay/og.png?v=2" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="Visitando Tandil" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Visitando Tandil · Hospedajes, gastronomía y actividades en Tandil" />
 <meta name="twitter:description" content="Visitando Tandil en un solo lugar: dónde dormir, dónde comer y qué hacer entre las sierras." />
-<meta name="twitter:image" content="https://delfinafelice0-pixel.github.io/tandilstay/og.png" />
+<meta name="twitter:image" content="https://delfinafelice0-pixel.github.io/tandilstay/og.png?v=2" />
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.7/babel.min.js"></script>
@@ -84,6 +84,44 @@ const FACTS = [
   { e:"🪨", text:"Las sierras de Tandil están entre las más antiguas del planeta: más de 2.000 millones de años." },
   { e:"⛰️", text:"La Piedra Movediza original se desplomó en 1912; la actual es una réplica de 2007." },
   { e:"🚌", text:"Tandil está a menos de 4 horas de CABA, ideal para un finde largo." },
+];
+
+const PLACES = [
+  { n:"Plaza Independencia", cat:"Centro", b:"El corazón de la ciudad: diseño simétrico, mucha arboleda y la parroquia enfrente." },
+  { n:"Parroquia Santísimo Sacramento", cat:"Centro", b:"El principal templo católico de Tandil, frente a la plaza." },
+  { n:"Palacio Municipal", cat:"Centro", b:"Edificio cívico de 1920, una joya de la arquitectura local." },
+  { n:"Parque Independencia", cat:"Sierras", b:"Mirador público con el Castillo Morisco en la cima y vistas a toda la ciudad." },
+  { n:"Castillo Morisco", cat:"Sierras", b:"Uno de los íconos de Tandil, donado por la comunidad española." },
+  { n:"Lago del Fuerte", cat:"Lago", b:"Espejo de agua y paseo central, ideal para caminar al atardecer." },
+  { n:"Monumento a Don Quijote de la Mancha", cat:"Lago", b:"Conjunto escultórico de hierro en un balcón natural sobre el lago." },
+  { n:"Monte Calvario", cat:"Sierras", b:"Complejo religioso de 1943 que recrea el Vía Crucis al aire libre." },
+  { n:"Cristo de las Sierras", cat:"Sierras", b:"Escultura de 10 metros con vistas panorámicas de las sierras." },
+  { n:"Cerro El Centinela", cat:"Sierras", b:"La famosa roca en equilibrio. Verlo desde abajo es gratis." },
+  { n:"Cerro del Libertador (El Cerrito)", cat:"Sierras", b:"Mirador con el Monumento al General Belgrano." },
+  { n:"Sendero de las Ánimas", cat:"Naturaleza", b:"Sendero serrano contemplativo, en una de las zonas más altas." },
+  { n:"Camino Misterioso", cat:"Naturaleza", b:"El tramo donde el auto parece subir solo: una ilusión óptica imperdible." },
+  { n:"Paseo de los Pioneros", cat:"Naturaleza", b:"3,4 km de camino serrano en homenaje a los picapedreros." },
+  { n:"Paseo de los Españoles", cat:"Lago", b:"Densa arboleda en el sector sur del Lago del Fuerte." },
+  { n:"Parque del Origen (de los Dinosaurios)", cat:"Familia", b:"Parque temático de la prehistoria junto a un arroyo. Ideal con chicos." },
+  { n:"Arroyo escondido — Parque del Origen", cat:"Naturaleza", b:"Un rincón con agua que muy poca gente conoce." },
+  { n:"Arroyo en la Escollera Oeste", cat:"Naturaleza", b:"Un rincón tranquilo y poco transitado en el dique." },
+];
+const mapsLink = (n) => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(n + ", Tandil, Buenos Aires");
+
+const ITINERARIES = [
+  { days:"1 día", sub:"El centro histórico a pie", plan:[
+    { d:"Mañana", stops:["Plaza Independencia","Parroquia Santísimo Sacramento","Palacio Municipal"] },
+    { d:"Tarde", stops:["Parque Independencia y Castillo Morisco","Lago del Fuerte","Monumento a Don Quijote"] },
+  ]},
+  { days:"2 días", sub:"Centro + sierras y monumentos", plan:[
+    { d:"Día 1 · El centro", stops:["Plaza Independencia","Parroquia Santísimo Sacramento","Parque Independencia y Castillo Morisco","Lago del Fuerte"] },
+    { d:"Día 2 · Las sierras", stops:["Monte Calvario","Cristo de las Sierras","Cerro El Centinela","Cerro del Libertador"] },
+  ]},
+  { days:"3 días", sub:"Lo mejor de la ciudad y la naturaleza", plan:[
+    { d:"Día 1 · El centro", stops:["Plaza Independencia","Parroquia Santísimo Sacramento","Palacio Municipal","Lago del Fuerte"] },
+    { d:"Día 2 · Monumentos serranos", stops:["Monte Calvario","Cristo de las Sierras","Parque Independencia y Castillo Morisco","Cerro del Libertador"] },
+    { d:"Día 3 · Naturaleza pura", stops:["Sendero de las Ánimas","Camino Misterioso","Paseo de los Pioneros","Parque del Origen (de los Dinosaurios)"] },
+  ]},
 ];
 
 function Horizon({ color }) {
@@ -452,15 +490,73 @@ function LodgingPage({ cabins, loading }) {
 }
 
 function AboutPage() {
+  const [it, setIt] = useState(2);
+  const sel = ITINERARIES[it];
+  const catColor = { Centro:C.clay, Sierras:C.moss, Lago:C.sage, Naturaleza:"#5e7a4f", Familia:C.sun };
   return (
     <div style={{ background: C.paper }}>
       <PageTitle kicker="La ciudad" title="Conocé Tandil" />
-      <section className="max-w-4xl mx-auto px-5 sm:px-6 pb-24">
+      <section className="max-w-4xl mx-auto px-5 sm:px-6 pb-16">
         <div className="rounded-lg overflow-hidden mb-10"><img src={IMG("photo-1500534314209-a25ddb2bd429")} className="w-full aspect-[16/8] object-cover" style={{ background:C.mist }} /></div>
         <p className="ff-body text-lg text-stone-600 leading-relaxed mb-4">Tandil es una ciudad serrana del centro de la provincia de Buenos Aires, rodeada de cerros milenarios, arroyos y aire limpio. Combina la calma del campo con la comodidad de una ciudad completa.</p>
         <p className="ff-body text-lg text-stone-600 leading-relaxed mb-12">Es famosa por sus embutidos y quesos artesanales, su turismo religioso en Semana Santa y sus paisajes de sierras suaves, perfectas para caminar, andar en bici o simplemente desconectar.</p>
         <h2 className="ff-display text-2xl mb-5" style={{ color: C.ink, fontWeight:400 }}>Datos curiosos</h2>
         <div className="grid sm:grid-cols-2 gap-4">{FACTS.map((f, i) => <div key={i} className="flex gap-3 bg-white border border-black/5 rounded-lg p-5"><span className="text-2xl">{f.e}</span><p className="ff-body text-sm text-stone-600 leading-relaxed">{f.text}</p></div>)}</div>
+      </section>
+
+      {/* ITINERARIOS */}
+      <section className="max-w-4xl mx-auto px-5 sm:px-6 pb-16">
+        <p className="ff-body text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: C.sage }}>Armá tu viaje</p>
+        <h2 className="ff-display text-3xl sm:text-4xl mt-3 mb-2 leading-[1.05]" style={{ color: C.ink, fontWeight:300 }}>Itinerarios sugeridos</h2>
+        <p className="ff-body text-stone-500 mb-6 text-[17px]">¿Cuántos días te quedás? Te armamos un recorrido con los mejores lugares — todos gratis.</p>
+        <div className="flex gap-2 mb-8">
+          {ITINERARIES.map((p, i) => (
+            <button key={i} onClick={()=>setIt(i)} className="rounded-full px-5 py-2 ff-body text-sm font-semibold border transition" style={it===i ? { background:C.moss, borderColor:C.moss, color:"#fff" } : { borderColor:"rgba(36,34,28,0.18)", color:C.moss }}>{p.days}</button>
+          ))}
+        </div>
+        <p className="ff-body text-sm text-stone-400 mb-6 -mt-3">{sel.sub}</p>
+        <div className="space-y-6">
+          {sel.plan.map((day, di) => (
+            <div key={di} className="bg-white border border-black/5 rounded-2xl p-6">
+              <div className="ff-display text-xl mb-4" style={{ color: C.ink, fontWeight:400 }}>{day.d}</div>
+              <ol className="space-y-3">
+                {day.stops.map((s, si) => (
+                  <li key={si} className="flex items-start gap-3">
+                    <span className="shrink-0 w-6 h-6 rounded-full grid place-items-center ff-body text-[12px] font-semibold text-white mt-0.5" style={{ background:C.sage }}>{si+1}</span>
+                    <div className="flex-1 flex items-center justify-between gap-3">
+                      <span className="ff-body text-[15px]" style={{ color:C.ink }}>{s}</span>
+                      <a href={mapsLink(s)} target="_blank" rel="noreferrer" className="ff-body text-[13px] font-semibold whitespace-nowrap navlink" style={{ color:C.clay }}>Mapa →</a>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* LUGARES GRATIS */}
+      <section className="max-w-6xl mx-auto px-5 sm:px-6 pb-24">
+        <div className="flex items-end justify-between gap-4 mb-6">
+          <div>
+            <p className="ff-body text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: C.sage }}>Entrada libre</p>
+            <h2 className="ff-display text-3xl sm:text-4xl mt-3 leading-[1.05]" style={{ color: C.ink, fontWeight:300 }}>Lugares para visitar, gratis</h2>
+          </div>
+          <span className="ff-body text-[13px] text-stone-400 whitespace-nowrap">{PLACES.length} lugares</span>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {PLACES.map((p, i) => (
+            <div key={i} className="bg-white border border-black/5 rounded-2xl p-5 flex flex-col">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="ff-body text-[11px] uppercase tracking-[0.16em] font-semibold rounded-full px-2.5 py-1" style={{ background:"#eef2e8", color: catColor[p.cat]||C.moss }}>{p.cat}</span>
+                <span className="ff-body text-[11px] font-semibold rounded-full px-2.5 py-1" style={{ background:"rgba(126,143,111,0.16)", color:C.moss }}>✦ Gratis</span>
+              </div>
+              <h3 className="ff-display text-xl leading-snug" style={{ color: C.ink, fontWeight:400 }}>{p.n}</h3>
+              <p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed flex-1">{p.b}</p>
+              <a href={mapsLink(p.n)} target="_blank" rel="noreferrer" className="ff-body text-[13px] font-semibold mt-4 navlink self-start" style={{ color:C.clay }}>Ver en el mapa →</a>
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );
