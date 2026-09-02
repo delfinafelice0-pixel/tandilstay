@@ -667,6 +667,15 @@ html{ scroll-padding-top:calc(var(--topH,108px) + 12px) }
   .apertura{ margin:0 20px !important; border-radius:16px !important; overflow:hidden }
   .titular, .cuerpo, .listado{ padding-left:0 !important; padding-right:0 !important }
 }
+
+/* la franja verde arranca pegada a los filtros, sin el escalón de papel */
+.sabana, .cards{ margin-top:0 !important }
+.filtrosbar{ padding-bottom:0 !important }
+.filters, .filtros{ padding-bottom:16px !important; margin-bottom:0 !important }
+@media(max-width:760px){
+  /* en celular sí necesita un respiro, porque la franja es una tarjeta redondeada */
+  .sabana, .cards{ margin-top:14px !important }
+}
 </style>
 </head>
 <body>
