@@ -448,7 +448,6 @@ body{background:#1B1E14}
   background:linear-gradient(90deg,rgba(70,60,40,0) 0%,rgba(70,60,40,.10) 42%,rgba(255,255,255,.26) 50%,rgba(70,60,40,.10) 58%,rgba(70,60,40,0) 100%)}
 #root > div::after{content:"";position:absolute;inset:0;z-index:7;pointer-events:none;
   box-shadow:inset 0 0 100px rgba(60,50,30,.26), inset 0 0 18px rgba(60,50,30,.16)}
-#root > div > *{position:relative;z-index:2}
 /* dentro de la hoja el encabezado no puede quedar fijo */
 header{position:relative !important;top:auto !important}
 @media(max-width:1240px){
@@ -477,6 +476,146 @@ body{background:var(--crudo) !important}
 header,header.vt{position:sticky !important;top:0 !important}
 /* la franja verde es la única capa distinta, y va de borde a borde */
 .cards,.sabana{box-shadow:0 0 0 100vmax var(--monte) !important;clip-path:inset(0 -100vmax)}
+
+/* ═══════════════ AJUSTES GENERALES ═══════════════ */
+:root{ --r:14px; --rs:10px; --rx:22px; }
+
+/* encabezado siempre opaco y por encima de todo */
+header, header.vt{ background:var(--crudo) !important; z-index:70 !important; }
+.pre{ position:relative; z-index:71; }
+
+/* ── esquinas redondeadas ── */
+.card, .card .ph, .card .ph img, .pA .ph, .pA .ph img, .etiqueta, .card .body,
+.mini .ph, .mini .ph img, .tile, .spread img, .par img, .tercias img, .galeria img,
+.unidad .ph, .unidad .ph img, .videos iframe, .mapa, .modalbox, .popbox,
+.form, .calbox, .amenbox, .plan, .momentos, .datos, .igrid blockquote,
+.sheet, .card figure, .card figure img{ border-radius:var(--r) !important; overflow:hidden }
+.solid, .ghost, .sel, .pill, .send, .chip, .filas .v, .joinform, .joinform input,
+.joinform button, .popform, .popform input, .popform button, .field input,
+.field select, .field textarea, form, form input, form select, form button,
+.estado, .aviso, .nodisp, .reservar, .carta, .carta .btn, .mail, .wsp, .ver,
+.strip button, .mom, .day, .dia{ border-radius:var(--rs) !important }
+.chips .chip{ border-radius:999px !important }
+.sabana, .cards, .band, .join, .cerca, .ig{ border-radius:0 !important }
+.apertura, .apertura img, .hero, .hero .bg{ border-radius:0 !important }
+.dia{ border-radius:var(--rs) !important }
+
+/* ── aire: que nada quede pegado ── */
+section{ padding-top:72px; padding-bottom:72px }
+.sabana{ margin:26px 0 0 }
+.cards{ margin-top:6px }
+.shead, .marco .titulo{ margin-top:0 }
+.consulta{ margin-bottom:8px }
+.form{ margin-bottom:26px }
+.band + section, .sabana + section{ padding-top:64px }
+.strip + section{ padding-top:64px }
+.mosaic{ gap:14px; padding:0 }
+.momentos{ overflow:hidden }
+
+/* ── Instagram sin el bloque blanco ── */
+.igrid blockquote{ background:transparent !important; border:0 !important; box-shadow:none !important }
+.instagram-media:not([data-instgrm-rendered]){ display:none !important }
+.igrid{ align-items:start }
+
+/* ══════════ CELULAR ══════════ */
+@media(max-width:760px){
+  section{ padding-top:52px; padding-bottom:52px }
+
+  /* la franja verde deja de ir pegada a los bordes */
+  .sabana, .cards{ margin-left:20px; margin-right:20px; border-radius:var(--rx) !important;
+    box-shadow:none !important; clip-path:none !important; padding:22px 16px 26px }
+  .band{ margin:0 20px; border-radius:var(--rx) !important }
+  .ig, .join, .cerca{ padding-left:0; padding-right:0 }
+
+  /* el mosaico de lugares, pensado para el dedo */
+  .mosaic{ grid-template-columns:1fr 1fr !important; grid-auto-rows:auto !important;
+    gap:12px; margin:0 20px }
+  .mosaic .tile{ border-radius:var(--r) !important; padding:16px 14px 18px;
+    min-height:150px; justify-content:flex-end }
+  .mosaic .wide{ grid-column:span 2 !important; min-height:180px }
+  .tile h4{ font-size:16px; line-height:1.15 }
+  .tile em{ margin-top:5px }
+
+  /* separaciones que faltaban */
+  .form{ margin-bottom:8px }
+  .heroctas{ gap:10px }
+  .shead{ margin-bottom:22px }
+  .filtros{ padding-bottom:20px }
+  .datos{ margin-top:24px }
+  .indice{ padding-top:24px }
+  .titular{ padding-bottom:4px }
+}
+
+/* la home después de sacar la banda */
+.consulta{ padding-bottom:10px }
+#dormir{ padding-bottom:78px }
+@media(max-width:760px){
+  #dormir{ padding-bottom:44px }
+  .hero .bg{ border-radius:0 !important }
+  .sheet{ border-radius:0 !important }
+  .strip button{ border-radius:0 !important }
+}
+
+/* ═══════════ CALLES, SÁBANA ANCHA Y BARRAS FIJAS ═══════════ */
+
+/* el mosaico de lugares respeta el ancho del sitio */
+.mosaic{ max-width:1080px; margin:0 auto; padding:0 40px }
+
+/* la sábana: foto más ancha y menos aire perdido a los costados */
+.card .ph, .pA .ph{ aspect-ratio:3/2 !important }
+.cards, .gA{ gap:22px }
+.cards{ padding:34px 28px 40px }
+.sabana{ padding:34px 28px 40px }
+@media(min-width:1500px){
+  .cards, .gA{ grid-template-columns:repeat(4,1fr) }
+}
+
+/* Instagram: se ve siempre, sin el recuadro blanco */
+.instagram-media{ background:var(--papel) !important; border:1px solid var(--linea) !important;
+  border-radius:var(--r) !important; min-height:300px }
+.instagram-media:not([data-instgrm-rendered]){ display:block !important }
+.igrid{ min-height:300px }
+
+/* ── el pre-header y el header, siempre a la vista ── */
+.pre{ position:sticky; top:0; z-index:72 }
+header, header.vt{ position:sticky !important; top:var(--preH,38px) !important; z-index:70 !important }
+html{ scroll-padding-top:calc(var(--topH,108px) + 12px) }
+
+/* ── los filtros quedan pegados abajo de la barra ── */
+.filtros, .filters{
+  position:sticky; top:var(--topH,108px); z-index:45;
+  background:var(--crudo); margin-top:0; padding-top:16px;
+  box-shadow:0 10px 18px -14px rgba(30,26,14,.4);
+}
+
+@media(max-width:760px){
+  .mosaic{ padding:0 20px }
+  .cards, .sabana{ padding:22px 16px 26px }
+  .card .ph, .pA .ph{ aspect-ratio:4/3 !important }
+  .filtros, .filters{ padding-top:12px }
+}
+
+/* la sección de Instagram no puede quedar vacía nunca */
+.ig .igrid{ display:grid }
+.ig blockquote{ width:100% !important; margin:0 !important; min-width:0 !important }
+/* el mosaico va dentro del ancho del sitio, con su aire */
+.mosaic{ margin-top:6px; margin-bottom:26px }
+
+/* la hojita deja pasar algo de la foto */
+.etiqueta, .card .body{
+  background:rgba(251,247,232,.90) !important;
+  -webkit-backdrop-filter:blur(7px) saturate(1.1);
+  backdrop-filter:blur(7px) saturate(1.1);
+}
+.pA:hover .etiqueta, .card:hover .body{ background:rgba(251,247,232,.96) !important }
+
+/* el mosaico respeta el ancho del sitio, sin excepciones */
+.mosaic{ box-sizing:border-box !important; width:100% !important; max-width:1080px !important;
+  margin-left:auto !important; margin-right:auto !important;
+  padding-left:40px !important; padding-right:40px !important }
+@media(max-width:760px){
+  .mosaic{ padding-left:20px !important; padding-right:20px !important }
+}
 </style>
 </head>
 <body>
@@ -813,7 +952,6 @@ function Home({ go }) {
               <li>La consulta sale solo a los lugares que entran en eso.</li>
               <li>Te contestan directo a vos, con su precio y su disponibilidad.</li>
             </ol>
-            <p className="mano" style={{fontSize:"20px",marginTop:"16px"}}>no cobramos comisión, elegís vos</p>
           </div>
           <div className="form worn">
             <div className="f2">
@@ -834,17 +972,6 @@ function Home({ go }) {
           </div>
         </div>
       </section>
-
-      {/* BANDA */}
-      <div className="band worn dark">
-        <div className="in">
-          <div>
-            <p className="mano">Doce lugares. Ni uno más.</p>
-            <small>Elegidos a mano, no ordenados por quién paga</small>
-          </div>
-          <span className="num">12</span>
-        </div>
-      </div>
 
       {/* 02 · PLANES */}
       <section className="in reveal">
@@ -1332,6 +1459,23 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
   setInterval(function(){
     try{ if(window.instgrm && window.instgrm.Embeds && document.querySelector('.instagram-media:not([data-instgrm-rendered])')) window.instgrm.Embeds.process(); }catch(e){}
   }, 1500);
+})();
+</script>
+
+<script>
+/* mide el alto real de la barra para que los filtros se peguen justo abajo */
+(function(){
+  function calc(){
+    var pre=document.querySelector('.pre'), hd=document.querySelector('header');
+    if(!hd) return;
+    var p = pre ? pre.offsetHeight : 0;
+    document.documentElement.style.setProperty('--preH', p+'px');
+    document.documentElement.style.setProperty('--topH', (p+hd.offsetHeight)+'px');
+  }
+  window.addEventListener('load',calc);
+  window.addEventListener('resize',calc);
+  document.addEventListener('DOMContentLoaded',calc);
+  setInterval(calc,1200);
 })();
 </script>
 </body>

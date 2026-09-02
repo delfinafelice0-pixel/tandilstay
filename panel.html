@@ -39,6 +39,15 @@ input,select,textarea,button{font-family:'Familjen Grotesk',system-ui,sans-serif
 input,select,textarea{background:#FDFAF1 !important}
 .kick{letter-spacing:.24em !important;text-transform:uppercase}
 </style>
+
+<style>
+:root{ --r:14px; --rs:10px }
+[class*="rounded"]{ border-radius:var(--rs) !important }
+img, iframe, video{ border-radius:var(--r) }
+.rounded-full, [class*="rounded-full"]{ border-radius:999px !important }
+button, input, select, textarea, a[class*="px-"]{ border-radius:var(--rs) !important }
+.card, .bg-white{ border-radius:var(--r) !important }
+</style>
 </head>
 <body>
 <div id="root"></div>

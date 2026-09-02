@@ -67,6 +67,15 @@ h1{line-height:1.02}
   h1{font-size:clamp(30px,9vw,40px) !important}
 }
 </style>
+
+<style>
+:root{ --r:14px; --rs:10px }
+[class*="rounded"]{ border-radius:var(--rs) !important }
+img, iframe, video{ border-radius:var(--r) }
+.rounded-full, [class*="rounded-full"]{ border-radius:999px !important }
+button, input, select, textarea, a[class*="px-"]{ border-radius:var(--rs) !important }
+.card, .bg-white{ border-radius:var(--r) !important }
+</style>
 </head>
 <body><div id="root"></div>
 <script type="text/babel">
