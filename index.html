@@ -616,6 +616,57 @@ html{ scroll-padding-top:calc(var(--topH,108px) + 12px) }
 @media(max-width:760px){
   .mosaic{ padding-left:20px !important; padding-right:20px !important }
 }
+
+/* ═══════════════ AJUSTE FINAL · va último, manda sobre todo ═══════════════ */
+
+/* la hojita: más salida y más transparente */
+.etiqueta, .card .body{
+  background:rgba(251,247,232,.82) !important;
+  -webkit-backdrop-filter:blur(9px) saturate(1.15);
+  backdrop-filter:blur(9px) saturate(1.15);
+  bottom:-20px !important; left:16px !important; right:34px !important;
+  box-shadow:0 16px 34px rgba(8,10,5,.34) !important;
+}
+.pA, .card{ padding-bottom:60px !important }
+.pA:hover .etiqueta, .card:hover .body{ background:rgba(251,247,232,.93) !important }
+
+/* los filtros, pegados de verdad */
+.filterwrap{ display:contents }
+.filters, .filtros{
+  position:sticky !important; top:var(--topH,108px) !important; z-index:45 !important;
+  background:var(--crudo) !important; padding-top:14px !important; padding-bottom:12px !important;
+  box-shadow:0 12px 18px -16px rgba(30,26,14,.5) !important;
+}
+
+/* ══════════ CELULAR ══════════ */
+@media(max-width:1020px){
+  .cards, .gA{ grid-template-columns:repeat(2,1fr) !important }
+}
+@media(max-width:760px){
+  /* márgenes en todo el sitio, sin excepción */
+  .in{ padding-left:20px !important; padding-right:20px !important }
+  .cards, .gA{ grid-template-columns:1fr !important; gap:20px !important }
+  .sabana, .cards{ margin-left:20px !important; margin-right:20px !important;
+    padding:20px 14px 26px !important; border-radius:22px !important;
+    box-shadow:none !important; clip-path:none !important }
+  .etiqueta, .card .body{ left:14px !important; right:22px !important; bottom:-18px !important }
+  .pA, .card{ padding-bottom:54px !important }
+
+  /* la portada, con la hoja apoyada sobre la foto como en escritorio */
+  .hero{ min-height:0 !important; display:block !important; position:relative !important }
+  .hero .bg{ position:absolute !important; inset:0 !important; height:auto !important;
+    border-radius:0 !important }
+  .hero .bg img, .hero .bg video, .hero .bg svg{ height:100% !important; object-fit:cover !important }
+  .hgrid{ padding:70px 0 44px !important; display:block !important }
+  .sheet{ margin:0 !important; width:auto !important; border-radius:16px !important;
+    background:rgba(251,247,232,.93) !important;
+    -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+    box-shadow:0 20px 44px rgba(12,16,8,.42) !important; padding:28px 22px 26px !important }
+
+  /* la apertura de las fichas, con su margen */
+  .apertura{ margin:0 20px !important; border-radius:16px !important; overflow:hidden }
+  .titular, .cuerpo, .listado{ padding-left:0 !important; padding-right:0 !important }
+}
 </style>
 </head>
 <body>
@@ -1087,7 +1138,7 @@ function LodgingPage({ cabins, loading }) {
       <PageTitle kicker="Dónde dormir" title="Hospedajes en Tandil" sub="Cabañas, departamentos y casas de campo elegidos uno por uno. Encontrá el tuyo." />
       <section className="in">
         {!loading && cabins.length>0 && (
-          <div>
+          <div className="filterwrap">
             <div className="filters">
               <select className="sel" value={guests} onChange={e=>setGuests(e.target.value)}>
                 <option value="">Para todos</option>
