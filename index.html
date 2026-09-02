@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Visitando Tandil · Hospedajes, gastronomía y actividades en Tandil</title>
 <meta name="description" content="Visitando Tandil en un solo lugar: dónde dormir, dónde comer y qué hacer entre las sierras." />
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Ccircle%20cx%3D%275%27%20cy%3D%279.5%27%20r%3D%271.5%27%20fill%3D%27%23E2A94E%27%2F%3E%3Cpath%20d%3D%27M2%2017%20Q6%2013%2010%2015%20L13%2015%20L13%208%20Q13%207%2014%207%20L16%207%20Q17%207%2017%208%20L17%2015%20L20%2016%20Q21%2016%2022%2017%27%20fill%3D%27none%27%20stroke%3D%27%233E4F3F%27%20stroke-width%3D%271.7%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%2F%3E%3C%2Fsvg%3E" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Crect%20width%3D%2724%27%20height%3D%2724%27%20fill%3D%27%232E3521%27%2F%3E%3Ccircle%20cx%3D%275%27%20cy%3D%2716%27%20r%3D%271.3%27%20fill%3D%27%23DFCCAE%27%2F%3E%3Cpath%20d%3D%27M7.5%2016%20Q10%2015.6%2011.5%2013.6%20L13%2013.6%20L13%208.6%20Q13%208%2013.7%208%20L15.6%208%20Q16.2%208%2016.2%208.6%20L16.2%2014.4%20Q18.6%2015.4%2021%2015.6%27%20fill%3D%27none%27%20stroke%3D%27%23DFCCAE%27%20stroke-width%3D%271.5%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%2F%3E%3C%2Fsvg%3E" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Visitando Tandil" />
 <meta property="og:locale" content="es_AR" />
@@ -20,37 +20,467 @@
 <meta name="twitter:title" content="Visitando Tandil · Hospedajes, gastronomía y actividades en Tandil" />
 <meta name="twitter:description" content="Visitando Tandil en un solo lugar: dónde dormir, dónde comer y qué hacer entre las sierras." />
 <meta name="twitter:image" content="https://visitandotandil.com/og.png?v=4" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.7/babel.min.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Hanken+Grotesk:wght@300;400;500;600;700&display=swap');
-.ff-display{font-family:'Fraunces',serif}
-.ff-body{font-family:'Hanken Grotesk',sans-serif}
-@keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.rise{animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
-@keyframes kb{from{transform:scale(1.04)}to{transform:scale(1.16)}}
-.kb{animation:kb 22s ease-out forwards}
-body{margin:0}
+:root{
+  --monte:#2E3521; --liquen:#63653F; --arena:#DFCCAE;
+  --ladrillo:#9C5634; --crudo:#FBF7E8; --papel:#F4EEDC; --tinta:#23261A;
+  --suave:#5F5945; --linea:rgba(70,62,42,.24); --punt:rgba(70,62,42,.4);
+  --display:'Young Serif',Georgia,serif;
+  --sans:'Familjen Grotesk',system-ui,sans-serif;
+  --mano:'Nothing You Could Do',cursive;
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  --mottle:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='420' height='420' filter='url(%23m)'/%3E%3C/svg%3E");
+}
+*{box-sizing:border-box}
 html{scroll-behavior:smooth}
-.clamp2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.reveal{opacity:0;transform:translateY(30px);transition:opacity 1s cubic-bezier(.2,.7,.2,1),transform 1s cubic-bezier(.2,.7,.2,1)}
+body{margin:0;background:var(--crudo);color:var(--tinta);font-family:var(--sans);
+  font-size:15.5px;line-height:1.65;-webkit-font-smoothing:antialiased}
+body.lock{overflow:hidden}
+img,svg,video{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+.disp{font-family:var(--display);font-weight:400}
+.mano{font-family:var(--mano);color:var(--ladrillo)}
+.rot{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase}
+.in{max-width:1080px;margin:0 auto;padding:0 40px}
+
+.worn{position:relative;isolation:isolate}
+.worn::before{content:"";position:absolute;inset:0;background-image:var(--mottle);background-size:420px;
+  mix-blend-mode:multiply;opacity:.12;z-index:1;pointer-events:none}
+.worn::after{content:"";position:absolute;inset:0;background-image:var(--grain);background-size:180px;
+  mix-blend-mode:multiply;opacity:.18;z-index:2;pointer-events:none}
+.worn > *{position:relative;z-index:3}
+.dark::before{mix-blend-mode:screen;opacity:.20}
+.dark::after{mix-blend-mode:screen;opacity:.12}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
 .reveal.in{opacity:1;transform:none}
-.horizon{display:flex;align-items:center;width:100%;max-width:320px}
-.horizon .ln{height:1px;flex:1;background:currentColor;opacity:.45}
-.horizon .sn{width:10px;height:10px;border-radius:50%;background:#E2A94E;flex:none;box-shadow:0 0 0 6px rgba(226,169,78,.18);margin:0 2px}
-.navlink{position:relative}
-.navlink::after{content:"";position:absolute;left:0;bottom:-3px;height:1px;width:0;background:currentColor;transition:width .35s}
-.navlink:hover::after{width:100%}
-.imgzoom{transition:transform 1.05s cubic-bezier(.2,.8,.2,1)}
-.group:hover .imgzoom{transform:scale(1.06)}
-:focus-visible{outline:2px solid #E2A94E;outline-offset:3px}
+:focus-visible{outline:2px solid var(--ladrillo);outline-offset:3px}
 @media (prefers-reduced-motion: reduce){*{animation:none!important}.reveal{opacity:1!important;transform:none!important;transition:none!important}html{scroll-behavior:auto}}
+
+/* pre-header */
+.pre{background:var(--monte);color:#C7BC9C;font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.pre .in{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:38px}
+.pre a{color:#E0D5B8}
+.pre a:hover{color:#fff}
+.pre .mid{display:flex;align-items:center;gap:9px;color:#E0D5B8}
+.pdot{width:5px;height:5px;background:var(--ladrillo);border-radius:50%;flex:none}
+.pre .right{display:flex;gap:22px}
+
+/* header */
+header{position:sticky;top:0;z-index:60;background:var(--crudo);border-bottom:1px solid var(--linea)}
+.hbar{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:14px 0}
+.lockup{display:flex;align-items:center;gap:12px;background:none;border:0;padding:0;cursor:pointer;flex:none}
+.wm{font-family:var(--display);text-transform:uppercase;letter-spacing:.15em;line-height:1;margin:0;font-size:15px;text-align:left}
+.wm .sub{display:block;font-family:var(--sans);font-size:7.5px;letter-spacing:.4em;
+  margin-top:6px;color:var(--suave);text-indent:.4em}
+.nav{display:flex;gap:24px;font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+.nav button{background:none;border:0;padding:4px 0;cursor:pointer;color:var(--suave);
+  border-bottom:1px solid transparent;font-size:inherit;letter-spacing:inherit;text-transform:inherit}
+.nav button:hover,.nav button.on{color:var(--tinta);border-color:var(--ladrillo)}
+.acts{display:flex;align-items:center;gap:12px;flex:none}
+.solid{background:var(--ladrillo);color:#F7EEE0;border:1px solid var(--ladrillo);
+  font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;padding:10px 18px;cursor:pointer;display:inline-block}
+.solid:hover{background:#89482a;border-color:#89482a}
+.ghost{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;border:1px solid var(--linea);
+  padding:10px 16px;color:var(--suave);background:transparent;cursor:pointer;display:inline-block}
+.ghost:hover{border-color:var(--tinta);color:var(--tinta)}
+.burger{display:none;background:transparent;border:1px solid var(--linea);width:42px;height:38px;
+  cursor:pointer;align-items:center;justify-content:center;flex-direction:column;gap:4px}
+.burger i{display:block;width:17px;height:1.5px;background:var(--tinta)}
+.panel{position:fixed;inset:0;z-index:90;background:var(--crudo);display:flex;
+  flex-direction:column;padding:22px 24px 34px;overflow-y:auto}
+.ptop{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.pclose{background:transparent;border:1px solid var(--linea);width:42px;height:38px;
+  font-size:19px;line-height:1;cursor:pointer;color:var(--tinta)}
+.panel nav{display:flex;flex-direction:column;border-top:1px solid var(--linea)}
+.panel nav button{background:none;border:0;border-bottom:1px solid var(--linea);text-align:left;
+  padding:16px 2px;font-family:var(--display);font-size:22px;cursor:pointer;color:var(--tinta)}
+.panel .solid{margin-top:24px;text-align:center;padding:15px}
+.panel .mano{margin-top:22px;font-size:19px}
+
+/* portada */
+.hero{position:relative;min-height:600px;display:flex;align-items:center;overflow:hidden}
+.hero .bg{position:absolute;inset:0;z-index:0}
+.hero .bg img,.hero .bg video{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.hero .bg::after{content:"";position:absolute;inset:0;z-index:2;
+  background:linear-gradient(100deg,rgba(22,26,14,.70) 0%,rgba(22,26,14,.30) 55%,rgba(22,26,14,.55) 100%)}
+.hgrid{position:relative;z-index:5;width:100%;display:grid;grid-template-columns:minmax(0,590px) 1fr;
+  align-items:center;gap:40px;padding:74px 0}
+.sheet{background:var(--crudo);padding:44px 42px 38px;box-shadow:0 26px 64px rgba(18,22,10,.5)}
+.kicker{display:flex;align-items:center;gap:10px;color:var(--ladrillo);margin:0 0 18px}
+.kicker span{height:1px;background:var(--punt);flex:1;max-width:60px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(34px,5vw,56px);line-height:1.04;margin:0}
+.lede{color:var(--suave);max-width:42ch;margin:18px 0 0;font-size:16px}
+.heroctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px;align-items:center}
+.rail{justify-self:end;text-align:right;color:#E4DAC0}
+.rail p{margin:0}
+.rail .n{font-family:var(--display);font-size:58px;line-height:.9;opacity:.9}
+.rail .l{font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;opacity:.8;margin-top:10px}
+.rail .m{font-family:var(--mano);color:#E7C79E;font-size:19px;margin-top:20px;max-width:15ch;
+  display:inline-block;text-align:left}
+
+/* tres puertas */
+.strip{background:var(--papel);border-bottom:1px solid var(--linea)}
+.strip .in{display:grid;grid-template-columns:repeat(3,1fr)}
+.strip button{background:none;border:0;border-right:1px solid var(--linea);cursor:pointer;
+  padding:22px 20px;display:flex;flex-direction:column;gap:3px;text-align:left}
+.strip button:first-child{border-left:1px solid var(--linea)}
+.strip b{font-family:var(--display);font-weight:400;font-size:19px}
+.strip small{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--suave)}
+.strip button:hover{background:#EDE5CE}
+
+/* secciones */
+section{padding:80px 0}
+.shead{display:grid;grid-template-columns:auto 1fr auto;align-items:end;gap:22px;
+  border-bottom:1px solid var(--tinta);padding-bottom:12px;margin-bottom:30px}
+.shead .idx{font-family:var(--display);font-size:13px;letter-spacing:.1em;color:var(--ladrillo)}
+h2{font-family:var(--display);font-weight:400;font-size:clamp(25px,3.3vw,37px);margin:0;line-height:1.02}
+.shead .aside{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--suave);white-space:nowrap}
+
+/* consulta */
+.consulta{display:grid;grid-template-columns:.85fr 1.15fr;gap:46px;align-items:start}
+.cnote p{color:var(--suave);max-width:38ch}
+.steps{list-style:none;margin:20px 0 0;padding:0;counter-reset:c}
+.steps li{counter-increment:c;display:flex;gap:13px;padding:11px 0;border-bottom:1px dotted var(--punt);
+  font-size:14px;color:var(--suave)}
+.steps li::before{content:counter(c,decimal-leading-zero);font-family:var(--display);
+  font-size:12.5px;color:var(--ladrillo);flex:none;padding-top:1px}
+.form{background:var(--papel);border:1px solid var(--linea);padding:28px 30px 32px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:17px 20px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:span 2}
+.field label{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--suave)}
+.field input,.field select{font-family:var(--sans);font-size:15px;color:var(--tinta);
+  background:#FDFAF1;border:1px solid var(--linea);padding:12px 14px;outline:0;width:100%}
+.field input:focus,.field select:focus{border-color:var(--ladrillo)}
+.send{grid-column:span 2;margin-top:4px;border:0;background:var(--monte);color:#EDE4CD;
+  font-size:12px;letter-spacing:.22em;text-transform:uppercase;padding:17px;cursor:pointer;width:100%}
+.send:hover{background:#232817}
+.fine{grid-column:span 2;font-size:12px;color:var(--suave);margin:0}
+
+/* banda */
+.band{background:var(--ladrillo);color:#F8F0E4;padding:60px 0}
+.band .in{display:grid;grid-template-columns:1fr auto;align-items:center;gap:34px}
+.band .mano{font-size:33px;color:#F8F0E4;line-height:1.2;margin:0;max-width:18ch}
+.band small{display:block;font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;opacity:.8;margin-top:12px}
+.band .num{font-family:var(--display);font-size:72px;line-height:.9;opacity:.5}
+
+/* itinerarios */
+.tabs{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}
+.tabs button{background:transparent;border:1px solid var(--linea);padding:9px 17px;cursor:pointer;
+  font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--suave)}
+.tabs button.on{background:var(--monte);border-color:var(--monte);color:#EDE4CD}
+.plan{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));border:1px solid var(--linea)}
+.day{padding:28px 30px;border-right:1px solid var(--linea)}
+.day:last-child{border-right:0}
+.day h4{font-family:var(--display);font-weight:400;font-size:20px;margin:0 0 14px}
+.stops{list-style:none;margin:0;padding:0;counter-reset:s}
+.stops li{counter-increment:s;display:flex;gap:14px;align-items:baseline;padding:11px 0;
+  border-bottom:1px dotted var(--punt)}
+.stops li::before{content:counter(s,decimal-leading-zero);font-family:var(--display);font-size:12.5px;
+  color:var(--ladrillo);flex:none}
+.stops .nm{flex:1;font-size:14.5px}
+.stops .mp{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ladrillo);white-space:nowrap}
+
+/* mosaico */
+.mosaic{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:215px}
+.tile{padding:22px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden}
+.tile .kick{font-size:9px;letter-spacing:.26em;text-transform:uppercase;opacity:.75;margin-bottom:auto}
+.tile h4{font-family:var(--display);font-weight:400;font-size:19px;margin:0;line-height:1.14}
+.tile em{font-style:normal;font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.85;margin-top:7px}
+.t-monte{background:var(--monte);color:#E3D6BB}
+.t-liq{background:var(--liquen);color:#EDE4CE}
+.t-arena{background:var(--arena);color:#4A4331}
+.t-ladr{background:var(--ladrillo);color:#F5E7D8}
+.t-photo{color:#F3EBDA}
+.t-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.t-photo .veil{position:absolute;inset:0;z-index:1;
+  background:linear-gradient(180deg,rgba(28,32,20,.12),rgba(28,32,20,.8))}
+.t-photo > *:not(img):not(.veil){position:relative;z-index:2}
+.wide{grid-column:span 2}
+
+/* momentos de comer */
+.momentos{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--linea)}
+.mom{padding:26px 22px 24px;border-right:1px solid var(--linea);background:none;border-top:0;
+  border-bottom:0;border-left:0;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:6px}
+.mom:last-child{border-right:0}
+.mom:hover{background:var(--papel)}
+.mom b{font-family:var(--display);font-weight:400;font-size:19px;line-height:1.12}
+.mom small{font-size:12.5px;color:var(--suave)}
+.mom em{font-style:normal;font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--ladrillo);margin-top:8px}
+
+/* fichas */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.card{background:var(--papel);border:1px solid var(--linea);display:flex;flex-direction:column}
+.card:hover{border-color:var(--tinta)}
+.card .ph{height:210px;overflow:hidden;background:#E7E1D0}
+.card .ph img{width:100%;height:100%;object-fit:cover;transition:transform 1s cubic-bezier(.2,.8,.2,1)}
+.card:hover .ph img{transform:scale(1.05)}
+.card .body{padding:17px 19px 20px;display:flex;flex-direction:column;flex:1}
+.card h3{font-family:var(--display);font-weight:400;font-size:19px;margin:0 0 3px;line-height:1.15}
+.meta{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--suave)}
+.card p{font-size:13.5px;color:var(--suave);margin:9px 0 0}
+.price{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  margin-top:auto;padding-top:13px;border-top:1px dotted var(--punt)}
+.price b{font-family:var(--display);font-weight:400;font-size:18px}
+.price em{font-style:normal;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ladrillo)}
+.chip{display:inline-block;font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  border:1px solid var(--linea);padding:3px 8px;color:var(--suave);margin:0 6px 8px 0}
+
+/* filtros */
+.filters{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:26px}
+.sel{font-family:var(--sans);font-size:12px;letter-spacing:.1em;background:transparent;
+  border:1px solid var(--linea);padding:9px 13px;color:var(--suave);cursor:pointer}
+.sel:hover{border-color:var(--tinta);color:var(--tinta)}
+.sel.on{background:var(--monte);border-color:var(--monte);color:#EDE4CD}
+.count{margin-left:auto;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--suave)}
+.amenbox{border:1px solid var(--linea);background:var(--papel);padding:16px;display:flex;
+  flex-wrap:wrap;gap:7px;margin-top:14px}
+.vacio{text-align:center;color:var(--suave);padding:50px 0}
+
+/* cabecera de página interna */
+.ptitle{border-bottom:1px solid var(--linea);padding:52px 0 34px}
+.ptitle h1{font-size:clamp(30px,4.4vw,50px)}
+.ptitle p{color:var(--suave);max-width:52ch;margin:16px 0 0}
+
+/* conocé */
+.facts{display:grid;grid-template-columns:repeat(2,1fr);gap:0 34px}
+.fact{display:flex;gap:12px;padding:15px 0;border-bottom:1px dotted var(--punt);font-size:14px;color:var(--suave)}
+.fact span{font-size:18px;flex:none}
+.places{display:grid;grid-template-columns:repeat(3,1fr);gap:0 34px}
+.place{padding:17px 0;border-bottom:1px dotted var(--punt)}
+.place h3{font-family:var(--display);font-weight:400;font-size:17px;margin:0 0 2px}
+.place p{font-size:13px;color:var(--suave);margin:0 0 6px}
+.place .l{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.place .cat{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--suave)}
+.place .mp{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ladrillo)}
+
+/* sumate */
+.join{background:var(--monte);color:#E0D5B8;padding:72px 0}
+.join .in{display:grid;grid-template-columns:1.1fr .9fr;gap:50px;align-items:center}
+.join h2{color:#F2E9D2}
+.join p{color:#B4AA8C;max-width:44ch}
+.join .benef{list-style:none;margin:18px 0 0;padding:0}
+.join .benef li{padding:11px 0;border-bottom:1px dotted rgba(224,213,184,.28);font-size:14px}
+.join .benef b{font-family:var(--display);font-weight:400;font-size:16px;display:block;color:#EDE4CD}
+
+/* pie */
+footer{background:var(--papel);padding:66px 0 32px;border-top:1px solid var(--linea)}
+.fgrid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:38px;align-items:start}
+footer h5{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--suave);margin:0 0 14px}
+footer ul{list-style:none;margin:0;padding:0;font-size:14px;line-height:2.1}
+footer button{background:none;border:0;padding:0;cursor:pointer;font-size:14px;color:var(--tinta);text-align:left}
+footer a:hover,footer button:hover{color:var(--ladrillo)}
+.next{margin-top:20px;padding-top:15px;border-top:1px dotted var(--punt);font-size:13px;color:var(--suave)}
+.fnote{margin-top:42px;padding-top:18px;border-top:1px solid var(--linea);display:flex;
+  justify-content:space-between;gap:18px;flex-wrap:wrap;font-size:10.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--suave)}
+.fnote a{text-decoration:underline}
+
+@media(max-width:1020px){
+  .nav{display:none}
+  .burger{display:flex}
+  .hgrid{grid-template-columns:1fr}
+  .rail{display:none}
+  .consulta{grid-template-columns:1fr;gap:32px}
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .places{grid-template-columns:repeat(2,1fr)}
+  .fgrid{grid-template-columns:1fr 1fr}
+  .momentos{grid-template-columns:1fr 1fr}
+  .mom:nth-child(2){border-right:0}
+  .mom:nth-child(1),.mom:nth-child(2){border-bottom:1px solid var(--linea)}
+}
+@media(max-width:760px){
+  body{font-size:15px}
+  .in{padding:0 20px}
+  .pre{font-size:9.5px;letter-spacing:.1em}
+  .pre .in{justify-content:center;padding-top:9px;padding-bottom:9px}
+  .pre .right,.pre .loc{display:none}
+  .hbar{padding:11px 0}
+  .acts .solid{display:none}
+  .hero{min-height:0;flex-direction:column;align-items:stretch}
+  .hero .bg{position:relative;height:290px}
+  .hero .bg::after{background:linear-gradient(180deg,rgba(22,26,14,.28),rgba(22,26,14,.55))}
+  .hgrid{padding:0}
+  .sheet{padding:32px 20px 28px;box-shadow:none;margin:0 -20px;width:calc(100% + 40px)}
+  h1{font-size:33px}
+  .heroctas{flex-direction:column;align-items:stretch}
+  .heroctas .solid,.heroctas .ghost{text-align:center;padding:14px}
+  .strip .in{grid-template-columns:1fr}
+  .strip button{border-left:1px solid var(--linea);border-bottom:1px solid var(--linea);
+    flex-direction:row;align-items:baseline;justify-content:space-between;gap:12px;padding:16px 18px}
+  .strip button:first-child{border-top:1px solid var(--linea)}
+  section{padding:50px 0}
+  .shead{grid-template-columns:auto 1fr;gap:12px}
+  .shead .aside{display:none}
+  .form{padding:20px 18px 24px}
+  .f2{grid-template-columns:1fr;gap:14px}
+  .field.full,.send,.fine{grid-column:span 1}
+  .day{border-right:0;border-bottom:1px solid var(--linea);padding:22px 20px}
+  .mosaic{grid-template-columns:1fr 1fr;grid-auto-rows:158px}
+  .tile{padding:16px}
+  .tile h4{font-size:16px}
+  .momentos,.cards,.places,.facts{grid-template-columns:1fr}
+  .mom{border-right:0;border-bottom:1px solid var(--linea)}
+  .mom:last-child{border-bottom:0}
+  .band{padding:42px 0}
+  .band .in{grid-template-columns:1fr}
+  .band .mano{font-size:26px}
+  .band .num{display:none}
+  .join{padding:50px 0}
+  .join .in{grid-template-columns:1fr;gap:26px}
+  .fgrid{grid-template-columns:1fr;gap:26px}
+  .fnote{flex-direction:column;gap:8px}
+  .ptitle{padding:36px 0 26px}
+}
+
+/* ═════ sábana verde con etiqueta de papel ═════ */
+.cards{grid-template-columns:repeat(3,1fr);gap:26px;background:var(--monte);
+  padding:38px 34px 46px;}
+.card{background:transparent;border:0;position:relative;padding-bottom:46px}
+.card:hover{border-color:transparent}
+.card .ph{height:auto;aspect-ratio:4/5;background:#3C4430}
+.card .body{position:absolute;left:14px;right:40px;bottom:0;background:var(--crudo);
+  padding:14px 16px 15px;box-shadow:0 14px 34px rgba(8,10,5,.44);
+  transition:transform .55s cubic-bezier(.2,.8,.2,1)}
+.card:hover .body{transform:translateY(-6px)}
+.card .body p:not(.meta){display:none}
+.card h3{font-size:18px}
+.card .price{margin-top:11px;padding-top:9px}
+.card .price b{font-size:17px}
+.card .chip{font-size:8.5px;padding:3px 7px;margin:0 5px 7px 0}
+.filters{padding-bottom:2px}
+
+/* ═════ Instagram ═════ */
+.ig{background:var(--papel);border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  padding:72px 0 78px}
+.ighead{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;
+  border-bottom:1px solid var(--tinta);padding-bottom:12px;margin-bottom:30px}
+.ighead h2{margin:0}
+.ighead .ar{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ladrillo)}
+.igrid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;align-items:start}
+.igrid blockquote{margin:0 !important;width:100% !important;min-width:0 !important;
+  border:1px solid var(--linea) !important;background:#fff}
+.igpie{display:flex;justify-content:space-between;gap:16px;margin-top:22px;flex-wrap:wrap;
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--suave)}
+
+/* ═════ pop-up del newsletter ═════ */
+.pop{position:fixed;inset:0;z-index:120;background:rgba(20,24,14,.7);display:flex;
+  align-items:center;justify-content:center;padding:22px;animation:fundido .5s both}
+@keyframes fundido{from{opacity:0}to{opacity:1}}
+.popbox{background:var(--crudo);max-width:820px;width:100%;display:grid;grid-template-columns:.85fr 1.15fr;
+  box-shadow:0 30px 80px rgba(8,10,5,.6);animation:sube .6s cubic-bezier(.2,.8,.2,1) both;position:relative}
+@keyframes sube{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+.popfoto{position:relative;background:#3C4430;overflow:hidden;min-height:280px}
+.popfoto img{width:100%;height:100%;object-fit:cover}
+.popfoto::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(24,28,16,.2),rgba(24,28,16,.6))}
+.popfoto span{position:absolute;left:20px;bottom:18px;z-index:2;color:#F3EBDA;font-size:10px;
+  letter-spacing:.24em;text-transform:uppercase}
+.popcuerpo{padding:34px 34px 32px}
+.popcuerpo h3{font-family:var(--display);font-weight:400;font-size:clamp(24px,3vw,32px);
+  line-height:1.06;margin:14px 0 0}
+.popcuerpo p{color:var(--suave);margin:14px 0 0;max-width:38ch}
+.popform{display:flex;border:1px solid var(--tinta);margin-top:22px}
+.popform input{flex:1;min-width:0;border:0;outline:0;background:#FDFAF1;font-family:var(--sans);
+  font-size:15px;padding:14px 16px;color:var(--tinta)}
+.popform button{border:0;background:var(--ladrillo);color:#F7EEE0;font-family:var(--sans);font-size:11px;
+  letter-spacing:.2em;text-transform:uppercase;padding:0 22px;cursor:pointer}
+.popform button:hover{background:#89482a}
+.popfine{font-size:12px;color:var(--suave);margin-top:12px}
+.popx{position:absolute;top:12px;right:14px;z-index:5;background:none;border:0;font-size:22px;
+  line-height:1;cursor:pointer;color:var(--crudo);text-shadow:0 1px 6px rgba(0,0,0,.5)}
+.popok{font-family:var(--mano);color:var(--ladrillo);font-size:22px;margin-top:18px}
+
+/* ═════ animaciones ═════ */
+.hero .bg img,.hero .bg video,.hero .bg svg{will-change:transform}
+.cards.reveal.in .card{animation:sube .8s cubic-bezier(.2,.8,.2,1) both}
+.cards.reveal.in .card:nth-child(2){animation-delay:.08s}
+.cards.reveal.in .card:nth-child(3){animation-delay:.16s}
+.cards.reveal.in .card:nth-child(4){animation-delay:.24s}
+.cards.reveal.in .card:nth-child(5){animation-delay:.32s}
+.cards.reveal.in .card:nth-child(6){animation-delay:.4s}
+.mosaic .tile{transition:background .5s}
+.tile h4{transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.tile:hover h4{transform:translateX(6px)}
+.mom b{transition:transform .6s cubic-bezier(.2,.8,.2,1);display:inline-block}
+.mom:hover b{transform:translateX(5px)}
+.strip button b{transition:transform .55s cubic-bezier(.2,.8,.2,1);display:inline-block}
+.strip button:hover b{transform:translateX(5px)}
+.solid,.ghost{transition:background .35s,color .35s,border-color .35s,transform .35s}
+.solid:hover,.ghost:hover{transform:translateY(-2px)}
+
+@media(max-width:1020px){ .igrid{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:760px){
+  .cards{padding:24px 18px 30px;gap:20px}
+  .card .body{right:26px;left:12px}
+  .igrid{grid-template-columns:1fr}
+  .ig{padding:48px 0 54px}
+  .popbox{grid-template-columns:1fr;max-height:88vh;overflow-y:auto}
+  .popfoto{min-height:150px}
+  .popcuerpo{padding:24px 20px 26px}
+  .popform{flex-direction:column}
+  .popform button{padding:14px}
+}
+@media (prefers-reduced-motion: reduce){
+  .cards.reveal.in .card{animation:none}
+  .popbox,.pop{animation:none}
+}
+
+/* ═════ la página como hoja apoyada sobre una foto ═════ */
+.fondo{position:fixed;inset:-30px;z-index:-2;background:url('tandil-hero.jpg') center/cover no-repeat;
+  filter:blur(7px) brightness(.34) saturate(.72)}
+.fondo::after{content:"";position:absolute;inset:0;
+  background:radial-gradient(120% 90% at 50% 30%,rgba(18,20,12,.25) 0%,rgba(18,20,12,.78) 100%)}
+body{background:#1B1E14}
+#root > div{position:relative;isolation:isolate;max-width:1180px;margin:30px auto;background:var(--crudo);
+  box-shadow:0 34px 90px rgba(8,10,5,.62);overflow:hidden}
+#root > div::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:30px;transform:translateX(-50%);
+  z-index:7;pointer-events:none;
+  background:linear-gradient(90deg,rgba(70,60,40,0) 0%,rgba(70,60,40,.10) 42%,rgba(255,255,255,.26) 50%,rgba(70,60,40,.10) 58%,rgba(70,60,40,0) 100%)}
+#root > div::after{content:"";position:absolute;inset:0;z-index:7;pointer-events:none;
+  box-shadow:inset 0 0 100px rgba(60,50,30,.26), inset 0 0 18px rgba(60,50,30,.16)}
+#root > div > *{position:relative;z-index:2}
+/* dentro de la hoja el encabezado no puede quedar fijo */
+header{position:relative !important;top:auto !important}
+@media(max-width:1240px){
+  #root > div{margin:0;max-width:none;box-shadow:none;overflow:visible}
+  #root > div::before{display:none}
+  .fondo{display:none}
+  body{background:var(--crudo)}
+  header{position:sticky !important;top:0 !important}
+}
+
+/* etiquetas blancas encima de la foto, como en la maqueta */
+.card .ph{position:relative}
+.card .chips{position:absolute;top:14px;left:14px;z-index:4;display:flex;flex-direction:column;
+  gap:6px;align-items:flex-start}
+.card .chips .chip{background:rgba(251,247,232,.94);color:var(--tinta);font-size:8.5px;
+  letter-spacing:.2em;text-transform:uppercase;padding:6px 11px;border:0;margin:0}
+/* la zona en un solo renglón: si es larga, se corta con puntos suspensivos */
+.card .body .meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ═════ una sola superficie: el papel es la página ═════ */
+.fondo{display:none !important}
+body{background:var(--crudo) !important}
+#root > div{max-width:none !important;margin:0 !important;box-shadow:none !important;overflow:visible !important}
+#root > div::before,#root > div::after{display:none !important}
+.rail{display:none !important}
+header,header.vt{position:sticky !important;top:0 !important}
+/* la franja verde es la única capa distinta, y va de borde a borde */
+.cards,.sabana{box-shadow:0 0 0 100vmax var(--monte) !important;clip-path:inset(0 -100vmax)}
 </style>
 </head>
 <body>
+<div class="fondo"></div>
 <div id="root"></div>
 <script type="text/babel">
 const { useState, useEffect } = React;
@@ -62,21 +492,19 @@ const opSuffix = OP ? ("&op="+encodeURIComponent(OP)) : "";
 
 const WHATSAPP = "5492494000000";
 const wa = `https://wa.me/${WHATSAPP}`;
-const C = { paper:"#F3EEE2", cream:"#FBF7EF", mist:"#E7E1D3", ink:"#24221C", moss:"#3E4F3F", mossdeep:"#2C3A2C", sage:"#7C8F6F", clay:"#BE6A4A", sun:"#E2A94E" };
-const HERO_IMG = "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=2000&q=80";
-const SUNSET_IMG = "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=2000&q=80";
 
 const NAV = [
-  { key:"aloj", label:"Hospedajes" },
-  { key:"qhacer", label:"Actividades" },
-  { key:"gastro", label:"Gastronomía" },
+  { key:"aloj", label:"Para dormir" },
+  { key:"gastro", label:"Para comer" },
+  { key:"qhacer", label:"Para pasear" },
   { key:"conoce", label:"Conocé Tandil" },
 ];
+
 const IMG = (p) => (!p ? "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=900&q=80" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=900&q=80`));
 const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
 const capRange = (r) => { const caps=(r.units||[]).map(u=>u.capacity).filter(Boolean); if(!caps.length) return r.capacity?("hasta "+r.capacity):""; const mn=Math.min(...caps),mx=Math.max(...caps); return mn===mx?("hasta "+mx):(mn+" a "+mx); };
 
-const AMEN = { wifi:"📶 Wifi", aire:"❄️ Aire acondicionado", calefaccion:"♨️ Calefacción", cocina:"🍳 Cocina", heladera:"🧊 Heladera", horno:"🔥 Horno", microondas:"📻 Microondas", tostadora:"🍞 Tostadora", pava:"🫖 Pava eléctrica", utensilios:"🍴 Utensilios básicos de cocina", ollas:"🧂 Ollas, sartenes, aceite, sal y pimienta", tv:"📺 Televisión", parrilla:"🔥 Parrilla", patio:"🌿 Patio", muebles_ext:"🪑 Muebles de exterior", reposeras:"🏖️ Reposeras", estacionamiento:"🅿️ Estacionamiento gratis en la propiedad", monoplanta:"🛗 Alojamiento de un solo piso", bide:"🚿 Bidé", blackout:"🌙 Persianas o cortinas oscuras", limpieza:"🧴 Productos de limpieza", ropa_cama:"🛏️ Ropa de cama", pileta:"🏊 Pileta", cochera:"🚗 Cochera", desayuno:"☕ Desayuno" };
+const AMEN = { wifi:"Wifi", aire:"Aire acondicionado", calefaccion:"Calefacción", cocina:"Cocina", heladera:"Heladera", horno:"Horno", microondas:"Microondas", tostadora:"Tostadora", pava:"Pava eléctrica", utensilios:"Utensilios de cocina", ollas:"Ollas y sartenes", tv:"Televisión", parrilla:"Parrilla", patio:"Patio", muebles_ext:"Muebles de exterior", reposeras:"Reposeras", estacionamiento:"Estacionamiento", monoplanta:"Un solo piso", bide:"Bidé", blackout:"Cortinas oscuras", limpieza:"Productos de limpieza", ropa_cama:"Ropa de cama", pileta:"Pileta", cochera:"Cochera", desayuno:"Desayuno" };
 const TYPES = ["Departamento","Cabaña","Quinta","Casa"];
 
 const FACTS = [
@@ -124,220 +552,384 @@ const ITINERARIES = [
   ]},
 ];
 
-function Horizon({ color }) {
-  return <div className="horizon" style={{ color }}><span className="ln"></span><span className="sn"></span><span className="ln"></span></div>;
+const MOMENTOS = [
+  { t:"Desayuno y merienda", s:"Cafés, panaderías y casas de té." },
+  { t:"Almuerzo", s:"Parrillas, pastas y cocina de todos los días." },
+  { t:"Cena", s:"Para sentarse tranquilo y quedarse un rato." },
+  { t:"Cervecerías", s:"Birra artesanal y picada para compartir." },
+];
+
+function Marca({ color }) {
+  return (
+    <svg width="86" viewBox="0 0 520 200" fill="none" stroke={color||"#23261A"} strokeWidth="9"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="64" cy="150" r="7" fill={color||"#23261A"} stroke="none"></circle>
+      <path d="M108,150 C150,148 154,142 186,116 C196,108 207,110 211,123 c -8,2 -10,12 1,13 c 9,1 9,-11 -1,-12 L248,128 L248,92 Q248,82 258,82 L306,82 Q316,82 316,92 L316,128 L316,141 C352,151 410,156 462,154 C470,153 475,151 480,150"></path>
+    </svg>
+  );
+}
+function Wordmark({ color, sub }) {
+  return (
+    <p className="wm" style={color?{color:color}:{}}>Visitando Tandil
+      <span className="sub" style={sub?{color:sub}:{}}>Visitando Ando</span>
+    </p>
+  );
 }
 
-function Header({ view, go, onOpen, solid }) {
-  const fg = solid ? C.ink : "#fff";
+
+const IG_POSTS = [
+  "https://www.instagram.com/p/DZbDrcckem4/",
+  "https://www.instagram.com/reel/DabTsuhB8Dr/",
+  "https://www.instagram.com/p/DaTule0ESXb/",
+  "https://www.instagram.com/reel/DYial5rRIpK/",
+];
+const IG_USER = "https://www.instagram.com/visitandotandil/";
+
+function Instagram() {
   return (
-    <header className="fixed top-0 inset-x-0 z-40 transition-all duration-500" style={solid ? { background:"rgba(251,247,239,0.9)", backdropFilter:"blur(12px)", WebkitBackdropFilter:"blur(12px)", boxShadow:"0 1px 0 rgba(36,34,28,0.06)" } : { background:"transparent" }}>
-      <div className="max-w-6xl mx-auto px-5 sm:px-6 h-[72px] flex items-center justify-between">
-        <button onClick={() => go("home")} className="flex items-center gap-2.5 transition-colors duration-500" style={{ color: fg }}>
-          <svg viewBox="0 0 520 200" height="26" fill="none" stroke="currentColor" strokeWidth="13" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{display:"block"}}><circle cx="64" cy="150" r="9" fill="currentColor" stroke="none"></circle><path d="M108,150 C150,148 154,142 186,116 C196,108 207,110 211,123 c -8,2 -10,12 1,13 c 9,1 9,-11 -1,-12 L248,128 L248,92 Q248,82 258,82 L306,82 Q316,82 316,92 L316,128 L316,141 C352,151 410,156 462,154 C470,153 475,151 480,150"></path></svg>
-          <span className="ff-display text-[21px] tracking-tight" style={{ fontWeight:400 }}>Visitando Tandil</span>
+    <section className="ig">
+      <div className="in reveal">
+        <div className="ighead">
+          <div>
+            <p className="kicker rot"><span></span>@visitandotandil</p>
+            <h2>Lo que estamos mirando</h2>
+          </div>
+          <a className="ar" href={IG_USER} target="_blank" rel="noreferrer">Seguinos en Instagram →</a>
+        </div>
+        <div className="igrid">
+          {IG_POSTS.map((u,i)=>(
+            <blockquote key={i} className="instagram-media" data-instgrm-permalink={u}
+              data-instgrm-version="14"></blockquote>
+          ))}
+        </div>
+        <div className="igpie">
+          <span>Tandil todos los días</span>
+          <a href={IG_USER} target="_blank" rel="noreferrer" style={{color:"var(--ladrillo)"}}>@visitandotandil</a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Newsletter() {
+  const [abierto,setAbierto]=useState(false);
+  const [mail,setMail]=useState("");
+  const [listo,setListo]=useState(false);
+  const [error,setError]=useState("");
+  useEffect(()=>{
+    let ya=false;
+    try{ ya = localStorage.getItem("vt_news")==="1"; }catch(e){}
+    if(ya) return;
+    const t=setTimeout(()=>setAbierto(true), 8000);
+    return ()=>clearTimeout(t);
+  },[]);
+  const cerrar=()=>{ setAbierto(false); try{ localStorage.setItem("vt_news","1"); }catch(e){} };
+  const enviar=async()=>{
+    const v=mail.trim();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){ setError("Revisá el correo, parece incompleto."); return; }
+    setError("");
+    try{ await db.from("subscribers").insert({ email:v, source:"popup" }); }catch(e){}
+    setListo(true);
+    try{ localStorage.setItem("vt_news","1"); }catch(e){}
+    setTimeout(()=>setAbierto(false), 2600);
+  };
+  if(!abierto) return null;
+  return (
+    <div className="pop" onClick={cerrar}>
+      <div className="popbox worn" onClick={e=>e.stopPropagation()}>
+        <button className="popx" onClick={cerrar} aria-label="Cerrar">✕</button>
+        <div className="popfoto">
+          <img src="tandil-hero.jpg" alt="" onError={e=>e.target.remove()} />
+          <span>Tandil, Buenos Aires</span>
+        </div>
+        <div className="popcuerpo">
+          <p className="kicker rot"><span></span>Antes que en ningún lado</p>
+          {listo ? (
+            <div>
+              <h3>Listo, quedaste anotada</h3>
+              <p>Te vamos a escribir cuando haya algo que valga la pena. Ni un mail de más.</p>
+              <p className="popok">gracias, nos vemos en las sierras</p>
+            </div>
+          ) : (
+            <div>
+              <h3>Te avisamos cuando un lugar baja de precio</h3>
+              <p>Y cuando queda lugar en un fin de semana largo, que es cuando todo se llena. Un mail cada tanto, nada más.</p>
+              <div className="popform">
+                <input type="email" placeholder="tu@correo.com" value={mail}
+                  onChange={e=>setMail(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")enviar();}}
+                  aria-label="Tu correo" />
+                <button onClick={enviar}>Anotarme</button>
+              </div>
+              {error && <p className="popfine" style={{color:"var(--ladrillo)"}}>{error}</p>}
+              <p className="popfine">Podés darte de baja cuando quieras. No compartimos tu correo con nadie.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PreHeader({ go }) {
+  return (
+    <div className="pre">
+      <div className="in">
+        <span className="loc">Tandil · Buenos Aires · a 350 km de la Capital</span>
+        <span className="mid"><i className="pdot"></i>Una sola consulta le llega a todos los hospedajes</span>
+        <span className="right">
+          <button onClick={()=>go("owners")} style={{background:"none",border:0,color:"#E0D5B8",cursor:"pointer",font:"inherit",letterSpacing:"inherit",textTransform:"inherit"}}>Sumá tu lugar</button>
+          <a href="https://www.instagram.com/co.makers_/" target="_blank" rel="noreferrer">Instagram</a>
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function Header({ view, go, onOpen }) {
+  return (
+    <header className="worn">
+      <div className="in hbar">
+        <button className="lockup" onClick={()=>go("home")} aria-label="Ir al inicio">
+          <Marca />
+          <Wordmark />
         </button>
-        <nav className="hidden md:flex items-center gap-8 ff-body text-[14px] font-medium transition-colors duration-500" style={{ color: solid ? "rgba(36,34,28,0.66)" : "rgba(255,255,255,0.85)" }}>
-          {NAV.map((n) => (
-            <button key={n.key} onClick={() => go(n.key)} className="navlink py-1">{n.label}</button>
+        <nav className="nav">
+          {NAV.map(n => (
+            <button key={n.key} className={view===n.key?"on":""} onClick={()=>go(n.key)}>{n.label}</button>
           ))}
         </nav>
-        <div className="hidden md:flex items-center gap-4">
-          <button onClick={() => go("owners")} className="ff-body text-[14px] font-medium navlink transition-colors duration-500" style={{ color: fg }}>Soy operador</button>
-          <button onClick={() => go("contacto")} className="rounded-full px-5 py-2 ff-body text-[13px] font-semibold transition-all duration-500" style={solid ? { background:C.ink, color:C.cream } : { border:"1px solid rgba(255,255,255,0.5)", color:"#fff" }}>Contacto</button>
+        <div className="acts">
+          <a className="solid" href={"consulta.html" + (OP?("?op="+encodeURIComponent(OP)):"")}>Consultar</a>
+          <button className="burger" onClick={onOpen} aria-label="Abrir el menú"><i></i><i></i><i></i></button>
         </div>
-        <button onClick={onOpen} className="md:hidden p-2 -mr-2 text-2xl leading-none transition-colors duration-500" style={{ color: fg }} aria-label="Menú">☰</button>
       </div>
     </header>
   );
 }
 
 function MobileMenu({ open, go, onClose }) {
+  useEffect(()=>{
+    document.body.classList.toggle("lock", open);
+    return ()=>document.body.classList.remove("lock");
+  },[open]);
   if (!open) return null;
-  const items = [...NAV, { key:"owners", label:"Soy operador" }, { key:"contacto", label:"Contacto" }];
+  const items = [...NAV, { key:"owners", label:"Sumá tu lugar" }, { key:"contacto", label:"Contacto" }];
   return (
-    <div className="fixed inset-0 z-50 md:hidden">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose}></div>
-      <div className="absolute top-0 right-0 h-full w-[82%] max-w-xs p-7 rise" style={{ background: C.cream }}>
-        <div className="flex items-center justify-between mb-8">
-          <span className="ff-display text-xl" style={{ color: C.ink, fontWeight:400 }}>Menú</span>
-          <button onClick={onClose} className="text-2xl leading-none" style={{ color: C.ink }}>✕</button>
-        </div>
-        <nav className="flex flex-col">
-          {items.map((n) => (
-            <button key={n.key} onClick={() => { go(n.key); onClose(); }} className="py-4 border-b ff-body text-lg text-left" style={{ color: C.ink, borderColor: "rgba(36,34,28,0.1)" }}>{n.label}</button>
-          ))}
-        </nav>
+    <div className="panel">
+      <div className="ptop">
+        <Wordmark />
+        <button className="pclose" onClick={onClose} aria-label="Cerrar el menú">✕</button>
       </div>
+      <nav>
+        {items.map(n => <button key={n.key} onClick={()=>{ go(n.key); onClose(); }}>{n.label}</button>)}
+      </nav>
+      <a className="solid" href={"consulta.html" + (OP?("?op="+encodeURIComponent(OP)):"")}>Hacer una consulta</a>
+      <p className="mano">y si podés, quedate hasta el domingo</p>
     </div>
   );
 }
 
-function CabinCard({ c }) {
-  const cover = c.banner || (c.photos && c.photos[0]);
+function SHead({ idx, title, aside }) {
   return (
-    <a href={"cabana.html?slug=" + c.slug + opSuffix} className="group block">
-      <div className="aspect-[5/6] rounded-md overflow-hidden" style={{ background: C.mist }}>
-        <img src={IMG(cover)} alt={c.name} className="w-full h-full object-cover imgzoom" />
-      </div>
-      <div className="flex items-baseline justify-between gap-3 mt-4">
-        <h4 className="ff-display text-xl" style={{ color: C.ink, fontWeight:400 }}>{c.name}</h4>
-        <span className="ff-body text-[13px] text-stone-500 whitespace-nowrap">{money(c.price)} / noche</span>
-      </div>
-      <div className="ff-body text-[13px] text-stone-500 mt-0.5">{c.zone}{capRange(c) ? " · " + capRange(c) : ""}</div>
-    </a>
-  );
-}
-
-function CatTile({ kicker, title, img, src, onClick }) {
-  return (
-    <button onClick={onClick} className="group relative h-[200px] sm:h-[360px] lg:h-[440px] rounded-lg overflow-hidden text-left w-full block">
-      <img src={src || IMG(img)} alt={title} onError={src ? (e)=>{ e.currentTarget.onerror=null; e.currentTarget.src=IMG(img); } : undefined} className="absolute inset-0 w-full h-full object-cover imgzoom" />
-      <div className="absolute inset-0" style={{ background:"linear-gradient(180deg,rgba(0,0,0,0) 38%,rgba(20,22,18,0.66) 100%)" }}></div>
-      <div className="absolute left-2.5 right-2.5 bottom-3 sm:left-6 sm:right-6 sm:bottom-6 text-white">
-        <div className="ff-body text-[8px] sm:text-[11px] uppercase tracking-[0.1em] sm:tracking-[0.28em] text-white/80">{kicker}</div>
-        <h3 className="ff-display text-[15px] sm:text-[22px] lg:text-[26px] leading-tight mt-1 sm:mt-1.5 flex items-center justify-between gap-1" style={{ fontWeight:400 }}>{title}<span className="hidden sm:inline text-xl transition-transform duration-500 group-hover:translate-x-1.5">→</span></h3>
-      </div>
-    </button>
-  );
-}
-
-function Home({ go }) {
-  return (
-    <div>
-      {/* HERO */}
-      <section className="relative overflow-hidden flex items-center h-[58vh] min-h-[440px]" style={{ height:"58svh" }}>
-        <video className="absolute inset-0 w-full h-full object-cover" autoPlay muted loop playsInline preload="auto" poster={HERO_IMG}>
-          <source src="tandil-hero.mp4" type="video/mp4" />
-        </video>
-        <div className="absolute inset-0" style={{ background:"linear-gradient(180deg,rgba(20,24,20,0.34) 0%,rgba(20,24,20,0) 34%,rgba(20,24,20,0.18) 66%,rgba(18,22,18,0.72) 100%)" }}></div>
-        <div className="relative z-10 max-w-6xl mx-auto w-full px-5 sm:px-6 pb-8 text-white">
-          <h1 className="rise ff-display text-[40px] sm:text-6xl lg:text-7xl leading-[1.03] max-w-[16ch]" style={{ fontWeight:300, letterSpacing:"-0.02em" }}>Las sierras, <span className="italic">sin apuro.</span></h1>
-          <p className="rise ff-body text-white/90 max-w-[44ch] mt-5 text-[16px] sm:text-[18px]" style={{ animationDelay:".1s" }}>Los lugares más lindos para dormir, comer y perderte entre las sierras — elegidos uno por uno.</p>
-          <div className="rise flex flex-wrap items-center gap-x-7 gap-y-4 mt-7" style={{ animationDelay:".18s" }}>
-            <button onClick={()=>go("aloj")} className="inline-flex items-center gap-2.5 rounded-full px-7 py-[15px] ff-body font-semibold text-[15px] transition-transform duration-500 hover:-translate-y-0.5" style={{ background:C.cream, color:C.ink }}>Empezá a explorar</button>
-            <a href="consulta.html" className="navlink ff-body text-[15px] text-white/90">¿No sabés cuál elegir? →</a>
-          </div>
-        </div>
-      </section>
-
-      {/* CATEGORÍAS */}
-      <section className="reveal max-w-6xl mx-auto px-5 sm:px-6 pt-12 sm:pt-20" style={{ background: C.paper }}>
-        <div className="grid grid-cols-3 gap-2 sm:gap-4">
-          <CatTile kicker="Dónde dormir" title="Hospedajes" img="photo-1449158743715-0a90ebb6d2d8" onClick={()=>go("aloj")} />
-          <CatTile kicker="Dónde comer" title="Gastronomía" img="photo-1414235077428-338989a2e8c0" onClick={()=>go("gastro")} />
-          <CatTile kicker="Qué hacer" title="Actividades" img="photo-1551632811-561732d1e306" src="actividades.jpg" onClick={()=>go("qhacer")} />
-        </div>
-      </section>
-
-      {/* BANNER CONOCÉ TANDIL */}
-      <section className="px-5 sm:px-6 pt-12 sm:pt-20" style={{ background: C.paper }}>
-        <div className="max-w-6xl mx-auto">
-          <button onClick={()=>go("conoce")} className="reveal group relative block w-full text-left rounded-lg overflow-hidden h-[260px] sm:h-[340px]">
-            <img src={IMG("photo-1500534314209-a25ddb2bd429")} alt="Conocé Tandil" className="absolute inset-0 w-full h-full object-cover imgzoom" />
-            <div className="absolute inset-0" style={{ background:"linear-gradient(90deg,rgba(20,24,20,0.74) 0%,rgba(20,24,20,0.4) 58%,rgba(20,24,20,0.2) 100%)" }}></div>
-            <div className="absolute inset-0 flex flex-col justify-center px-7 sm:px-12 text-white">
-              <p className="ff-body text-[11px] uppercase tracking-[0.3em] font-semibold text-white/85">La ciudad</p>
-              <h2 className="ff-display text-3xl sm:text-5xl mt-3 leading-[1.05]" style={{ fontWeight:300 }}>Conocé Tandil</h2>
-              <p className="ff-body text-white/85 mt-3 text-[15px] sm:text-[17px] max-w-[40ch]">Itinerarios día a día, miradores, senderos y todos los lugares gratis para descubrir entre las sierras.</p>
-              <span className="inline-flex items-center gap-2 mt-6 ff-body font-semibold text-[15px] w-fit rounded-full px-6 py-3 transition-transform duration-500 group-hover:-translate-y-0.5" style={{ background:C.cream, color:C.ink }}>Explorar la ciudad <span className="transition-transform duration-500 group-hover:translate-x-1">→</span></span>
-            </div>
-          </button>
-        </div>
-      </section>
-
-      {/* CONSULTA */}
-      <section className="reveal text-center px-5 sm:px-6 py-28" style={{ background: C.paper }}>
-        <p className="ff-body text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: C.sage }}>¿No sabés por dónde empezar?</p>
-        <h2 className="ff-display text-3xl sm:text-5xl mt-3 max-w-[16ch] mx-auto leading-[1.05]" style={{ color: C.ink, fontWeight:300 }}>Contanos qué buscás y lo encontramos por vos.</h2>
-        <p className="ff-body text-stone-500 max-w-[42ch] mx-auto mt-5 text-[17px]">Decinos las fechas, cuántos son y qué te gustaría. Nos encargamos del resto.</p>
-        <a href="consulta.html" className="inline-flex items-center gap-2.5 rounded-full px-8 py-4 ff-body font-semibold text-[16px] mt-9 text-white transition-transform duration-500 hover:-translate-y-0.5" style={{ background: C.moss }}>Hacer una consulta →</a>
-      </section>
+    <div className="shead">
+      <span className="idx">{idx}</span>
+      <h2>{title}</h2>
+      {aside ? <span className="aside">{aside}</span> : <span></span>}
     </div>
   );
 }
 
 function PageTitle({ kicker, title, sub }) {
   return (
-    <div style={{ background: C.paper }}>
-      <div className="reveal max-w-6xl mx-auto px-5 sm:px-6 pt-32 pb-14 text-center">
-        <p className="ff-body text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: C.sage }}>{kicker}</p>
-        <h1 className="ff-display text-4xl sm:text-6xl mt-4 leading-[1.04]" style={{ color: C.ink, fontWeight:300, letterSpacing:"-0.02em" }}>{title}</h1>
-        {sub && <p className="ff-body text-stone-500 max-w-xl mx-auto mt-5 text-[17px]">{sub}</p>}
-        <div className="mt-8 flex justify-center"><Horizon color={C.ink} /></div>
+    <div className="ptitle">
+      <div className="in">
+        <p className="kicker rot"><span></span>{kicker}</p>
+        <h1>{title}</h1>
+        {sub && <p>{sub}</p>}
       </div>
     </div>
   );
 }
 
-function ActivitiesPage({ acts, loading }) {
-  const [zona, setZona] = useState("");
-  const [cat, setCat] = useState("");
-  const zonas = [...new Set(acts.map(a=>a.zone).filter(Boolean))].sort();
-  const cats = [...new Set(acts.map(a=>a.category).filter(Boolean))].sort();
-  const show = acts.filter(a => (!zona || a.zone===zona) && (!cat || a.category===cat));
-  const active = (zona?1:0)+(cat?1:0);
-  const clear = () => { setZona(""); setCat(""); };
-  const selCls = "ff-body text-[13px] rounded-full border bg-transparent px-4 py-2 cursor-pointer";
-  const selStyle = { borderColor:"rgba(36,34,28,0.18)", color:C.moss };
+/* ═════════════ HOME ═════════════ */
+function Home({ go }) {
+  const [it, setIt] = useState(1);
+  const [ci, setCi] = useState(""), [co, setCo] = useState(""), [hu, setHu] = useState(""), [pre, setPre] = useState("");
+  const sel = ITINERARIES[it];
+  const irAConsulta = () => {
+    const q = new URLSearchParams();
+    if (ci) q.set("ci", ci); if (co) q.set("co", co);
+    if (hu) q.set("hu", hu); if (pre) q.set("presu", pre);
+    if (OP) q.set("op", OP);
+    location.href = "consulta.html" + (q.toString() ? "?" + q.toString() : "");
+  };
+  const destacados = PLACES.filter(p => ["Cerro El Centinela","Lago del Fuerte","Monte Calvario","Plaza Independencia","Castillo Morisco","Paseo de los Pioneros"].includes(p.n));
+
   return (
-    <div style={{ background: C.paper }}>
-      <PageTitle kicker="Paseos & aventura" title="Qué hacer en Tandil" sub="Cerros, agua, historia y aire puro. Estos son los imperdibles para tu estadía." />
-      <section className="max-w-6xl mx-auto px-5 sm:px-6 pb-24">
-        {!loading && acts.length>0 && (
-          <div className="reveal flex flex-wrap items-center gap-2 mb-9">
-            <select value={cat} onChange={e=>setCat(e.target.value)} className={selCls} style={selStyle}><option value="">Todas las categorías</option>{cats.map(z=><option key={z} value={z}>{z}</option>)}</select>
-            <select value={zona} onChange={e=>setZona(e.target.value)} className={selCls} style={selStyle}><option value="">Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}</select>
-            {active>0 && <button onClick={clear} className="ff-body text-[13px] rounded-full px-4 py-2 border" style={{ borderColor:"rgba(190,106,74,0.4)", color:C.clay }}>Limpiar ✕</button>}
-            <span className="ff-body text-[13px] text-stone-400 ml-auto">{show.length} {show.length===1?"actividad":"actividades"}</span>
+    <div>
+      {/* PORTADA */}
+      <div className="hero">
+        <div className="bg">
+          <video autoPlay muted loop playsInline preload="none" poster="tandil-hero.jpg">
+            <source src="tandil-hero.mp4" type="video/mp4" />
+          </video>
+        </div>
+        <div className="in hgrid">
+          <div className="sheet worn">
+            <p className="kicker rot"><span></span>Guía de fin de semana</p>
+            <h1>Un fin de semana<br/>en las sierras</h1>
+            <p className="lede">Dónde dormir, dónde comer y qué mirar en Tandil. Elegido a mano, sin comisiones y sin listas de cien lugares.</p>
+            <div className="heroctas">
+              <a className="solid" href={"consulta.html" + (OP?("?op="+encodeURIComponent(OP)):"")}>Consultar disponibilidad</a>
+              <button className="ghost" onClick={()=>go("aloj")}>Ver los hospedajes</button>
+            </div>
+            <p className="mano" style={{margin:"22px 0 0",fontSize:"20px"}}>y si podés, quedate hasta el domingo</p>
           </div>
-        )}
-        {loading ? <p className="ff-body text-stone-500 text-center py-10">Cargando…</p>
-        : acts.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">Pronto vas a ver las actividades acá.</p>
-        : show.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">No hay actividades con esos filtros. Probá aflojar alguno.</p>
-        : <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">{show.map((a, i) => (
-            <a key={i} href={"actividad.html?slug=" + a.slug + opSuffix} className="group block">
-              <div className="aspect-[4/3] rounded-md overflow-hidden" style={{ background: C.mist }}><img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} className="w-full h-full object-cover imgzoom" /></div>
-              <div className="mt-4">{a.category && <div className="ff-body text-[11px] uppercase tracking-[0.24em] font-semibold" style={{ color: C.sage }}>{a.category}</div>}<h3 className="ff-display text-xl mt-1" style={{ color: C.ink, fontWeight:400 }}>{a.name}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed clamp2">{a.blurb}</p>{a.duration && <p className="ff-body text-[13px] text-stone-400 mt-2">⏱ {a.duration}</p>}</div>
-            </a>
-          ))}</div>}
+          <div className="rail">
+            <p className="n">01</p>
+            <p className="l">Edición verano</p>
+            <p className="m">las sierras más viejas del país tienen 2.200 millones de años</p>
+          </div>
+        </div>
+      </div>
+
+      {/* TRES PUERTAS */}
+      <div className="strip">
+        <div className="in">
+          <button onClick={()=>go("aloj")}><b>Para dormir</b><small>Cabañas, casas y hoteles</small></button>
+          <button onClick={()=>go("gastro")}><b>Para comer</b><small>Con la carta de cada lugar</small></button>
+          <button onClick={()=>go("qhacer")}><b>Para pasear</b><small>Cerros, agua y aventura</small></button>
+        </div>
+      </div>
+
+      {/* 01 · CONSULTA */}
+      <section className="in reveal">
+        <SHead idx="01" title="Dónde dormir" aside="Una consulta, todos los lugares" />
+        <div className="consulta">
+          <div className="cnote">
+            <p>Contanos qué buscás y le mandamos tu consulta a todos los hospedajes que coinciden con lo que necesitás. No escribís uno por uno: escribís una vez.</p>
+            <ol className="steps">
+              <li>Completás las fechas y para cuántos son.</li>
+              <li>La consulta sale solo a los lugares que entran en eso.</li>
+              <li>Te contestan directo a vos, con su precio y su disponibilidad.</li>
+            </ol>
+            <p className="mano" style={{fontSize:"20px",marginTop:"16px"}}>no cobramos comisión, elegís vos</p>
+          </div>
+          <div className="form worn">
+            <div className="f2">
+              <div className="field"><label htmlFor="ci">Llegada</label>
+                <input id="ci" type="date" value={ci} onChange={e=>setCi(e.target.value)} /></div>
+              <div className="field"><label htmlFor="co">Salida</label>
+                <input id="co" type="date" value={co} onChange={e=>setCo(e.target.value)} /></div>
+              <div className="field"><label htmlFor="hu">Huéspedes</label>
+                <select id="hu" value={hu} onChange={e=>setHu(e.target.value)}>
+                  <option value="">¿Cuántos son?</option>
+                  {[1,2,3,4,5,6,7,8].map(n=><option key={n} value={n}>{n===8?"8 o más":n}</option>)}
+                </select></div>
+              <div className="field"><label htmlFor="pre">Presupuesto por noche</label>
+                <input id="pre" type="text" placeholder="Opcional" value={pre} onChange={e=>setPre(e.target.value)} /></div>
+              <button className="send" onClick={irAConsulta}>Buscar y consultar</button>
+              <p className="fine">Te van a escribir los lugares directamente. Nosotros no intervenimos en el precio ni en la reserva.</p>
+            </div>
+          </div>
+        </div>
       </section>
+
+      {/* BANDA */}
+      <div className="band worn dark">
+        <div className="in">
+          <div>
+            <p className="mano">Doce lugares. Ni uno más.</p>
+            <small>Elegidos a mano, no ordenados por quién paga</small>
+          </div>
+          <span className="num">12</span>
+        </div>
+      </div>
+
+      {/* 02 · PLANES */}
+      <section className="in reveal">
+        <SHead idx="02" title="Si venís dos días" aside={sel.sub} />
+        <div className="tabs">
+          {ITINERARIES.map((p,i)=>(
+            <button key={i} className={it===i?"on":""} onClick={()=>setIt(i)}>{p.days}</button>
+          ))}
+        </div>
+        <div className="plan">
+          {sel.plan.map((day,di)=>(
+            <div className="day" key={di}>
+              <h4>{day.d}</h4>
+              <ul className="stops">
+                {day.stops.map((s,si)=>(
+                  <li key={si}>
+                    <span className="nm">{s}</span>
+                    <a className="mp" href={mapsLink(s)} target="_blank" rel="noreferrer">Mapa</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 03 · PARA PASEAR */}
+      <section className="in reveal" style={{paddingBottom:"30px"}}>
+        <SHead idx="03" title="Para pasear" aside="Casi todo sin entrada" />
+      </section>
+      <div className="mosaic">
+        {destacados.map((p,i)=>{
+          const clases = ["t-monte","t-liq","t-arena","t-ladr","t-monte","t-liq"];
+          return (
+            <a key={i} className={"tile worn dark " + clases[i%6] + (i===1||i===5?" wide":"")}
+               href={mapsLink(p.n)} target="_blank" rel="noreferrer">
+              <span className="kick">{p.cat}</span>
+              <h4>{p.n}</h4>
+              <em>Ver en el mapa</em>
+            </a>
+          );
+        })}
+      </div>
+      <div className="in" style={{padding:"26px 34px 0"}}>
+        <button className="ghost" onClick={()=>go("conoce")}>Ver los 18 lugares gratis</button>
+      </div>
+
+      {/* 04 · PARA COMER */}
+      <section className="in reveal">
+        <SHead idx="04" title="Para comer" aside="Elegí el momento" />
+        <div className="momentos">
+          {MOMENTOS.map((m,i)=>(
+            <button className="mom" key={i} onClick={()=>go("gastro")}>
+              <b>{m.t}</b><small>{m.s}</small><em>Ver lugares</em>
+            </button>
+          ))}
+        </div>
+        <p className="mano" style={{marginTop:"22px",fontSize:"20px"}}>cada lugar tiene su carta acá adentro</p>
+      </section>
+
+      <Instagram />
     </div>
   );
 }
 
-function FoodPage({ food, loading }) {
-  const [zona, setZona] = useState("");
-  const [diet, setDiet] = useState("");
-  const zonas = [...new Set(food.map(f=>f.zone).filter(Boolean))].sort();
-  const show = food.filter(a => (!zona || a.zone===zona) && (diet!=="sintacc" || a.sin_tacc) && (diet!=="veggie" || a.vegetariano));
-  const active = (zona?1:0)+(diet?1:0);
-  const clear = () => { setZona(""); setDiet(""); };
-  const selCls = "ff-body text-[13px] rounded-full border bg-transparent px-4 py-2 cursor-pointer";
-  const selStyle = { borderColor:"rgba(36,34,28,0.18)", color:C.moss };
+/* ═════════════ HOSPEDAJES ═════════════ */
+function CabinCard({ c }) {
+  const cover = c.banner || (c.photos && c.photos[0]);
+  const etiquetas = [];
+  const cap = capRange(c); if(cap) etiquetas.push(cap);
+  if((c.amenities||[]).includes("pileta")) etiquetas.push("Pileta");
+  else if((c.amenities||[]).includes("parrilla")) etiquetas.push("Parrilla");
+  if(c.pet_friendly && etiquetas.length<2) etiquetas.push("Mascotas");
   return (
-    <div style={{ background: C.paper }}>
-      <PageTitle kicker="Sabores serranos" title="Dónde comer en Tandil" sub="De las picadas con salame con Denominación de Origen a la cervecería artesanal: comé como un local." />
-      <section className="max-w-6xl mx-auto px-5 sm:px-6 pb-24">
-        {!loading && food.length>0 && (
-          <div className="reveal flex flex-wrap items-center gap-2 mb-9">
-            <select value={zona} onChange={e=>setZona(e.target.value)} className={selCls} style={selStyle}><option value="">Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}</select>
-            <select value={diet} onChange={e=>setDiet(e.target.value)} className={selCls} style={selStyle}><option value="">Toda la cocina</option><option value="sintacc">Sin TACC</option><option value="veggie">Vegetariano</option></select>
-            {active>0 && <button onClick={clear} className="ff-body text-[13px] rounded-full px-4 py-2 border" style={{ borderColor:"rgba(190,106,74,0.4)", color:C.clay }}>Limpiar ✕</button>}
-            <span className="ff-body text-[13px] text-stone-400 ml-auto">{show.length} {show.length===1?"lugar":"lugares"}</span>
-          </div>
-        )}
-        {loading ? <p className="ff-body text-stone-500 text-center py-10">Cargando…</p>
-        : food.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">Pronto vas a ver los lugares acá.</p>
-        : show.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">No hay lugares con esos filtros. Probá aflojar alguno.</p>
-        : <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">{show.map((a, i) => (
-            <a key={i} href={"resto.html?slug=" + a.slug + opSuffix} className="group block">
-              <div className="aspect-[4/3] rounded-md overflow-hidden" style={{ background: C.mist }}><img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} className="w-full h-full object-cover imgzoom" /></div>
-              <div className="mt-4"><div className="flex gap-1.5 mb-1">{a.sin_tacc && <span className="ff-body text-[11px] rounded-full px-2 py-0.5" style={{ background:"#eef2e8", color:C.moss }}>Sin TACC</span>}{a.vegetariano && <span className="ff-body text-[11px] rounded-full px-2 py-0.5" style={{ background:"#eef2e8", color:C.moss }}>Veggie</span>}</div><h3 className="ff-display text-xl" style={{ color: C.ink, fontWeight:400 }}>{a.name}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed clamp2">{a.blurb}</p></div>
-            </a>
-          ))}</div>}
-      </section>
-    </div>
+    <a className="card worn" href={"cabana.html?slug=" + c.slug + opSuffix}>
+      <div className="ph">
+        <div className="chips">{etiquetas.slice(0,2).map((t,i)=><span className="chip" key={i}>{t}</span>)}</div>
+        <img src={IMG(cover)} alt={c.name} loading="lazy" />
+      </div>
+      <div className="body">
+        <h3>{c.name}</h3>
+        <p className="meta">{c.zone}</p>
+        <div className="price"><b>{money(c.price)}<span className="meta" style={{marginLeft:"6px"}}>noche</span></b><em>Ver</em></div>
+      </div>
+    </a>
   );
 }
 
@@ -363,105 +955,204 @@ function LodgingPage({ cabins, loading }) {
   else if (order==="desc") show = [...show].sort((a,b)=>(b.price||0)-(a.price||0));
   const activeCount = (guests?1:0)+(maxPrice?1:0)+(tipo?1:0)+(order?1:0)+amen.length+(pet?1:0);
   const clear = () => { setGuests(""); setMaxPrice(""); setTipo(""); setOrder(""); setAmen([]); setPet(false); };
-  const selCls = "ff-body text-[13px] rounded-full border bg-transparent px-4 py-2 cursor-pointer";
-  const selStyle = { borderColor:"rgba(36,34,28,0.18)", color:C.moss };
   return (
-    <div style={{ background: C.paper }}>
+    <div>
       <PageTitle kicker="Dónde dormir" title="Hospedajes en Tandil" sub="Cabañas, departamentos y casas de campo elegidos uno por uno. Encontrá el tuyo." />
-      <section className="max-w-6xl mx-auto px-5 sm:px-6 pb-24">
+      <section className="in">
         {!loading && cabins.length>0 && (
-          <div className="reveal mb-9">
-            <div className="flex flex-wrap items-center gap-2">
-              <select value={guests} onChange={e=>setGuests(e.target.value)} className={selCls} style={selStyle}><option value="">Para todos</option><option value="1">Para 1</option><option value="2">Para 2</option><option value="3">Para 3</option><option value="4">Para 4</option><option value="5">Para 5</option><option value="6">Para 6</option><option value="7">Para 7</option><option value="8">Para 8</option></select>
-              <select value={maxPrice} onChange={e=>setMaxPrice(e.target.value)} className={selCls} style={selStyle}><option value="">Cualquier precio</option><option value="120000">Hasta $120.000</option><option value="250000">Hasta $250.000</option><option value="250000+">Más de $250.000</option></select>
-              <select value={tipo} onChange={e=>setTipo(e.target.value)} className={selCls} style={selStyle}><option value="">Todos los tipos</option>{TYPES.map(t=><option key={t} value={t}>{t}</option>)}</select>
-              <select value={order} onChange={e=>setOrder(e.target.value)} className={selCls} style={selStyle}><option value="">Ordenar</option><option value="asc">Precio: menor a mayor</option><option value="desc">Precio: mayor a menor</option></select>
-              <button onClick={()=>setMoreOpen(o=>!o)} className={selCls} style={selStyle}>Comodidades{amen.length?(" ("+amen.length+")"):""} {moreOpen?"▲":"▼"}</button>
-              <button onClick={()=>setPet(p=>!p)} className={selCls} style={pet?{borderColor:C.moss,background:C.moss,color:"#fff"}:selStyle}>🐾 Pet friendly{pet?" ✓":""}</button>
-              {activeCount>0 && <button onClick={clear} className="ff-body text-[13px] rounded-full px-4 py-2 border" style={{ borderColor:"rgba(190,106,74,0.4)", color:C.clay }}>Limpiar filtros ✕</button>}
-              <span className="ff-body text-[13px] text-stone-400 ml-auto">{show.length} {show.length===1?"lugar":"lugares"}</span>
+          <div>
+            <div className="filters">
+              <select className="sel" value={guests} onChange={e=>setGuests(e.target.value)}>
+                <option value="">Para todos</option>
+                {[1,2,3,4,5,6,7,8].map(n=><option key={n} value={n}>Para {n}</option>)}
+              </select>
+              <select className="sel" value={maxPrice} onChange={e=>setMaxPrice(e.target.value)}>
+                <option value="">Cualquier precio</option>
+                <option value="120000">Hasta $120.000</option>
+                <option value="250000">Hasta $250.000</option>
+                <option value="250000+">Más de $250.000</option>
+              </select>
+              <select className="sel" value={tipo} onChange={e=>setTipo(e.target.value)}>
+                <option value="">Todos los tipos</option>
+                {TYPES.map(t=><option key={t} value={t}>{t}</option>)}
+              </select>
+              <select className="sel" value={order} onChange={e=>setOrder(e.target.value)}>
+                <option value="">Ordenar</option>
+                <option value="asc">Precio: menor a mayor</option>
+                <option value="desc">Precio: mayor a menor</option>
+              </select>
+              <button className="sel" onClick={()=>setMoreOpen(o=>!o)}>Comodidades{amen.length?(" ("+amen.length+")"):""}</button>
+              <button className={"sel"+(pet?" on":"")} onClick={()=>setPet(p=>!p)}>Acepta mascotas</button>
+              {activeCount>0 && <button className="sel" onClick={clear}>Limpiar</button>}
+              <span className="count">{show.length} {show.length===1?"lugar":"lugares"}</span>
             </div>
             {moreOpen && (
-              <div className="mt-4 p-4 rounded-2xl border border-black/5 bg-white flex flex-wrap gap-2">
-                {Object.keys(AMEN).map(k=>{const on=amen.includes(k);return <button key={k} onClick={()=>setAmen(on?amen.filter(a=>a!==k):[...amen,k])} className={"rounded-full px-3 py-1.5 ff-body text-[13px] border "+(on?"text-white":"text-stone-600 border-stone-300")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{AMEN[k]}{on?" ✓":""}</button>;})}
+              <div className="amenbox">
+                {Object.keys(AMEN).map(k=>{
+                  const on=amen.includes(k);
+                  return <button key={k} className={"sel"+(on?" on":"")} onClick={()=>setAmen(on?amen.filter(a=>a!==k):[...amen,k])}>{AMEN[k]}</button>;
+                })}
               </div>
             )}
           </div>
         )}
-        {loading ? <p className="ff-body text-stone-500 text-center py-10">Cargando alojamientos…</p>
-        : cabins.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">Pronto vas a ver los alojamientos acá.</p>
-        : show.length === 0 ? <p className="ff-body text-stone-500 text-center py-10">No hay alojamientos con esos filtros. Probá aflojar alguno.</p>
-        : <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">{show.map((c, i) => <CabinCard key={i} c={c} />)}</div>}
+        {loading ? <p className="vacio">Cargando alojamientos…</p>
+        : cabins.length === 0 ? <p className="vacio">Pronto vas a ver los alojamientos acá.</p>
+        : show.length === 0 ? <p className="vacio">No hay alojamientos con esos filtros. Probá aflojar alguno.</p>
+        : <div className="cards reveal">{show.map((c,i)=><CabinCard key={i} c={c} />)}</div>}
       </section>
     </div>
   );
 }
 
-function AboutPage() {
-  const [it, setIt] = useState(2);
-  const sel = ITINERARIES[it];
-  const catColor = { Centro:C.clay, Sierras:C.moss, Lago:C.sage, Naturaleza:"#5e7a4f", Familia:C.sun };
+/* ═════════════ ACTIVIDADES ═════════════ */
+function ActivitiesPage({ acts, loading }) {
+  const [zona, setZona] = useState("");
+  const [cat, setCat] = useState("");
+  const zonas = [...new Set(acts.map(a=>a.zone).filter(Boolean))].sort();
+  const cats = [...new Set(acts.map(a=>a.category).filter(Boolean))].sort();
+  const show = acts.filter(a => (!zona || a.zone===zona) && (!cat || a.category===cat));
+  const active = (zona?1:0)+(cat?1:0);
   return (
-    <div style={{ background: C.paper }}>
-      <PageTitle kicker="La ciudad" title="Conocé Tandil" />
-      <section className="max-w-4xl mx-auto px-5 sm:px-6 pb-16">
-        <div className="rounded-lg overflow-hidden mb-10"><img src={IMG("photo-1500534314209-a25ddb2bd429")} className="w-full aspect-[16/8] object-cover" style={{ background:C.mist }} /></div>
-        <p className="ff-body text-lg text-stone-600 leading-relaxed mb-4">Tandil es una ciudad serrana del centro de la provincia de Buenos Aires, rodeada de cerros milenarios, arroyos y aire limpio. Combina la calma del campo con la comodidad de una ciudad completa.</p>
-        <p className="ff-body text-lg text-stone-600 leading-relaxed mb-12">Es famosa por sus embutidos y quesos artesanales, su turismo religioso en Semana Santa y sus paisajes de sierras suaves, perfectas para caminar, andar en bici o simplemente desconectar.</p>
-        <h2 className="ff-display text-2xl mb-5" style={{ color: C.ink, fontWeight:400 }}>Datos curiosos</h2>
-        <div className="grid sm:grid-cols-2 gap-4">{FACTS.map((f, i) => <div key={i} className="flex gap-3 bg-white border border-black/5 rounded-lg p-5"><span className="text-2xl">{f.e}</span><p className="ff-body text-sm text-stone-600 leading-relaxed">{f.text}</p></div>)}</div>
+    <div>
+      <PageTitle kicker="Paseos y aventura" title="Qué hacer en Tandil" sub="Cerros, agua, historia y aire puro. Estos son los imperdibles para tu estadía." />
+      <section className="in">
+        {!loading && acts.length>0 && (
+          <div className="filters">
+            <select className="sel" value={cat} onChange={e=>setCat(e.target.value)}>
+              <option value="">Todas las categorías</option>{cats.map(z=><option key={z} value={z}>{z}</option>)}
+            </select>
+            <select className="sel" value={zona} onChange={e=>setZona(e.target.value)}>
+              <option value="">Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}
+            </select>
+            {active>0 && <button className="sel" onClick={()=>{setZona("");setCat("");}}>Limpiar</button>}
+            <span className="count">{show.length} {show.length===1?"actividad":"actividades"}</span>
+          </div>
+        )}
+        {loading ? <p className="vacio">Cargando…</p>
+        : acts.length === 0 ? <p className="vacio">Pronto vas a ver las actividades acá.</p>
+        : show.length === 0 ? <p className="vacio">No hay actividades con esos filtros. Probá aflojar alguno.</p>
+        : <div className="cards reveal">{show.map((a,i)=>(
+            <a key={i} className="card worn" href={"actividad.html?slug=" + a.slug + opSuffix}>
+              <div className="ph">
+                <div className="chips">
+                  {a.category && <span className="chip">{a.category}</span>}
+                  {a.duration && <span className="chip">{a.duration}</span>}
+                </div>
+                <img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} loading="lazy" />
+              </div>
+              <div className="body">
+                <h3>{a.name}</h3>
+                <p className="meta">{a.zone || "Tandil"}</p>
+                <div className="price">
+                  <b>{a.price ? money(a.price) : "Consultar"}</b>
+                  <em>Ver</em>
+                </div>
+              </div>
+            </a>
+          ))}</div>}
+      </section>
+    </div>
+  );
+}
+
+/* ═════════════ GASTRONOMÍA ═════════════ */
+function FoodPage({ food, loading }) {
+  const [zona, setZona] = useState("");
+  const [diet, setDiet] = useState("");
+  const zonas = [...new Set(food.map(f=>f.zone).filter(Boolean))].sort();
+  const show = food.filter(a => (!zona || a.zone===zona) && (diet!=="sintacc" || a.sin_tacc) && (diet!=="veggie" || a.vegetariano));
+  const active = (zona?1:0)+(diet?1:0);
+  return (
+    <div>
+      <PageTitle kicker="Sabores serranos" title="Dónde comer en Tandil" sub="De las picadas con salame con Denominación de Origen a la cervecería artesanal: comé como un local." />
+      <section className="in">
+        {!loading && food.length>0 && (
+          <div className="filters">
+            <select className="sel" value={zona} onChange={e=>setZona(e.target.value)}>
+              <option value="">Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}
+            </select>
+            <select className="sel" value={diet} onChange={e=>setDiet(e.target.value)}>
+              <option value="">Toda la cocina</option>
+              <option value="sintacc">Sin TACC</option>
+              <option value="veggie">Vegetariano</option>
+            </select>
+            {active>0 && <button className="sel" onClick={()=>{setZona("");setDiet("");}}>Limpiar</button>}
+            <span className="count">{show.length} {show.length===1?"lugar":"lugares"}</span>
+          </div>
+        )}
+        {loading ? <p className="vacio">Cargando…</p>
+        : food.length === 0 ? <p className="vacio">Pronto vas a ver los lugares acá.</p>
+        : show.length === 0 ? <p className="vacio">No hay lugares con esos filtros. Probá aflojar alguno.</p>
+        : <div className="cards reveal">{show.map((a,i)=>(
+            <a key={i} className="card worn" href={"resto.html?slug=" + a.slug + opSuffix}>
+              <div className="ph">
+                <div className="chips">
+                  {a.sin_tacc && <span className="chip">Sin TACC</span>}
+                  {a.vegetariano && <span className="chip">Veggie</span>}
+                </div>
+                <img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} loading="lazy" />
+              </div>
+              <div className="body">
+                <h3>{a.name}</h3>
+                <p className="meta">{a.zone || "Tandil"}</p>
+                <div className="price"><b></b><em>Ver la carta</em></div>
+              </div>
+            </a>
+          ))}</div>}
+      </section>
+    </div>
+  );
+}
+
+/* ═════════════ CONOCÉ TANDIL ═════════════ */
+function AboutPage() {
+  const [it, setIt] = useState(1);
+  const sel = ITINERARIES[it];
+  return (
+    <div>
+      <PageTitle kicker="La ciudad" title="Conocé Tandil" sub="Tandil es una ciudad serrana del centro de la provincia, rodeada de cerros milenarios, arroyos y aire limpio. Combina la calma del campo con la comodidad de una ciudad completa." />
+      <section className="in reveal">
+        <SHead idx="01" title="Datos curiosos" />
+        <div className="facts">
+          {FACTS.map((f,i)=>(<div className="fact" key={i}><span>{f.e}</span><p style={{margin:0}}>{f.text}</p></div>))}
+        </div>
       </section>
 
-      {/* ITINERARIOS */}
-      <section className="max-w-4xl mx-auto px-5 sm:px-6 pb-16">
-        <p className="ff-body text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: C.sage }}>Armá tu viaje</p>
-        <h2 className="ff-display text-3xl sm:text-4xl mt-3 mb-2 leading-[1.05]" style={{ color: C.ink, fontWeight:300 }}>Itinerarios sugeridos</h2>
-        <p className="ff-body text-stone-500 mb-6 text-[17px]">¿Cuántos días te quedás? Te armamos un recorrido con los mejores lugares — todos gratis.</p>
-        <div className="flex gap-2 mb-8">
-          {ITINERARIES.map((p, i) => (
-            <button key={i} onClick={()=>setIt(i)} className="rounded-full px-5 py-2 ff-body text-sm font-semibold border transition" style={it===i ? { background:C.moss, borderColor:C.moss, color:"#fff" } : { borderColor:"rgba(36,34,28,0.18)", color:C.moss }}>{p.days}</button>
-          ))}
+      <section className="in reveal">
+        <SHead idx="02" title="Itinerarios sugeridos" aside={sel.sub} />
+        <div className="tabs">
+          {ITINERARIES.map((p,i)=>(<button key={i} className={it===i?"on":""} onClick={()=>setIt(i)}>{p.days}</button>))}
         </div>
-        <p className="ff-body text-sm text-stone-400 mb-6 -mt-3">{sel.sub}</p>
-        <div className="space-y-6">
-          {sel.plan.map((day, di) => (
-            <div key={di} className="bg-white border border-black/5 rounded-2xl p-6">
-              <div className="ff-display text-xl mb-4" style={{ color: C.ink, fontWeight:400 }}>{day.d}</div>
-              <ol className="space-y-3">
-                {day.stops.map((s, si) => (
-                  <li key={si} className="flex items-start gap-3">
-                    <span className="shrink-0 w-6 h-6 rounded-full grid place-items-center ff-body text-[12px] font-semibold text-white mt-0.5" style={{ background:C.sage }}>{si+1}</span>
-                    <div className="flex-1 flex items-center justify-between gap-3">
-                      <span className="ff-body text-[15px]" style={{ color:C.ink }}>{s}</span>
-                      <a href={mapsLink(s)} target="_blank" rel="noreferrer" className="ff-body text-[13px] font-semibold whitespace-nowrap navlink" style={{ color:C.clay }}>Mapa →</a>
-                    </div>
+        <div className="plan">
+          {sel.plan.map((day,di)=>(
+            <div className="day" key={di}>
+              <h4>{day.d}</h4>
+              <ul className="stops">
+                {day.stops.map((s,si)=>(
+                  <li key={si}>
+                    <span className="nm">{s}</span>
+                    <a className="mp" href={mapsLink(s)} target="_blank" rel="noreferrer">Mapa</a>
                   </li>
                 ))}
-              </ol>
+              </ul>
             </div>
           ))}
         </div>
       </section>
 
-      {/* LUGARES GRATIS */}
-      <section className="max-w-6xl mx-auto px-5 sm:px-6 pb-24">
-        <div className="flex items-end justify-between gap-4 mb-6">
-          <div>
-            <p className="ff-body text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: C.sage }}>Entrada libre</p>
-            <h2 className="ff-display text-3xl sm:text-4xl mt-3 leading-[1.05]" style={{ color: C.ink, fontWeight:300 }}>Lugares para visitar, gratis</h2>
-          </div>
-          <span className="ff-body text-[13px] text-stone-400 whitespace-nowrap">{PLACES.length} lugares</span>
-        </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {PLACES.map((p, i) => (
-            <div key={i} className="bg-white border border-black/5 rounded-2xl p-5 flex flex-col">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="ff-body text-[11px] uppercase tracking-[0.16em] font-semibold rounded-full px-2.5 py-1" style={{ background:"#eef2e8", color: catColor[p.cat]||C.moss }}>{p.cat}</span>
-                <span className="ff-body text-[11px] font-semibold rounded-full px-2.5 py-1" style={{ background:"rgba(126,143,111,0.16)", color:C.moss }}>✦ Gratis</span>
+      <section className="in reveal">
+        <SHead idx="03" title="Lugares para visitar, gratis" aside={PLACES.length + " lugares"} />
+        <div className="places">
+          {PLACES.map((p,i)=>(
+            <div className="place" key={i}>
+              <p className="cat">{p.cat}</p>
+              <h3>{p.n}</h3>
+              <p>{p.b}</p>
+              <div className="l">
+                <span className="cat">Entrada libre</span>
+                <a className="mp" href={mapsLink(p.n)} target="_blank" rel="noreferrer">Ver en el mapa</a>
               </div>
-              <h3 className="ff-display text-xl leading-snug" style={{ color: C.ink, fontWeight:400 }}>{p.n}</h3>
-              <p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed flex-1">{p.b}</p>
-              <a href={mapsLink(p.n)} target="_blank" rel="noreferrer" className="ff-body text-[13px] font-semibold mt-4 navlink self-start" style={{ color:C.clay }}>Ver en el mapa →</a>
             </div>
           ))}
         </div>
@@ -470,83 +1161,113 @@ function AboutPage() {
   );
 }
 
+/* ═════════════ OPERADORES ═════════════ */
 function OwnersPage() {
   const benefits = [
-    { t:"Tu propia landing", s:"Cada cabaña con su página, fotos, precios y calendario propio." },
-    { t:"Reservas directas", s:"Las consultas te llegan por WhatsApp, sin intermediarios eternos." },
-    { t:"Más visibilidad", s:"Aparecés ante todos los que buscan dónde quedarse en Tandil." },
+    { t:"Tu propia página", s:"Cada lugar con sus fotos, precios y calendario propio." },
+    { t:"Consultas directas", s:"Te llegan por WhatsApp o mail, sin intermediarios eternos." },
+    { t:"Sin comisión", s:"No cobramos por reserva. Vos ponés el precio y cerrás el trato." },
   ];
   return (
-    <div style={{ background: C.paper }}>
-      <PageTitle kicker="Para anfitriones" title="Sumá tu alojamiento" sub="Mostrá tu cabaña ante miles de viajeros que buscan Tandil. Simple, sin comisiones abusivas." />
-      <section className="max-w-5xl mx-auto px-5 sm:px-6 pb-24">
-        <div className="grid sm:grid-cols-3 gap-5 mb-12">{benefits.map((b, i) => <div key={i} className="rounded-lg p-6 bg-white border border-black/5"><div className="w-9 h-9 rounded-full grid place-items-center mb-3 text-white" style={{ background: C.sage }}>✓</div><h3 className="ff-display text-xl" style={{ color: C.ink, fontWeight:400 }}>{b.t}</h3><p className="ff-body text-sm text-stone-500 mt-1.5 leading-relaxed">{b.s}</p></div>)}</div>
-        <div className="rounded-lg p-10 text-center" style={{ background: C.moss }}>
-          <h2 className="ff-display text-3xl text-white mb-3" style={{ fontWeight:300 }}>¿Listos para empezar?</h2>
-          <p className="ff-body text-white/75 max-w-md mx-auto mb-7">Escribinos y en minutos tu cabaña está publicada en Visitando Tandil.</p>
-          <a href={wa} target="_blank" rel="noreferrer" className="inline-block bg-white rounded-full px-7 py-3 ff-body font-semibold" style={{ color: C.moss }}>Quiero sumarme</a>
+    <div>
+      <PageTitle kicker="Para operadores" title="Sumá tu lugar" sub="Mostrá tu cabaña, tu restaurante o tu actividad ante todos los que buscan Tandil." />
+      <section className="in">
+        <div className="join worn dark" style={{padding:"46px 0"}}>
+          <div className="in">
+            <div>
+              <h2>¿Tenés un lugar en Tandil?</h2>
+              <p>Escribinos y lo publicamos. Después lo administrás vos desde tu panel: fotos, precios y disponibilidad.</p>
+              <ul className="benef">
+                {benefits.map((b,i)=>(<li key={i}><b>{b.t}</b>{b.s}</li>))}
+              </ul>
+              <p className="mano" style={{color:"#E7C79E",fontSize:"20px",marginTop:"16px"}}>te contestamos en cuanto podamos</p>
+            </div>
+            <div>
+              <a className="solid" href={wa} target="_blank" rel="noreferrer" style={{padding:"15px 22px"}}>Escribinos por WhatsApp</a>
+              <p style={{fontSize:"12.5px",marginTop:"14px"}}>Si ya sos operador, entrá a tu <a href="panel.html" style={{textDecoration:"underline"}}>panel</a> o mirá la <a href="ayuda.html" style={{textDecoration:"underline"}}>guía para cargar tu lugar</a>.</p>
+            </div>
+          </div>
         </div>
       </section>
     </div>
   );
 }
 
+/* ═════════════ CONTACTO ═════════════ */
 function ContactPage() {
   return (
-    <div style={{ background: C.paper }}>
+    <div>
       <PageTitle kicker="Hablemos" title="Contacto" sub="Estamos para ayudarte a encontrar tu lugar en las sierras." />
-      <section className="max-w-3xl mx-auto px-5 sm:px-6 pb-24">
-        <div className="grid sm:grid-cols-3 gap-4 mb-8">
-          {[{ t:"WhatsApp", s:"+54 9 249 ..." },{ t:"Email", s:"hola@tandilstay.com" },{ t:"Instagram", s:"@tandilstay" }].map((x, i) => (
-            <div key={i} className="rounded-lg p-6 bg-white border border-black/5 text-center"><div className="ff-display text-lg" style={{ color: C.ink, fontWeight:400 }}>{x.t}</div><div className="ff-body text-sm text-stone-500 mt-1">{x.s}</div></div>
-          ))}
+      <section className="in">
+        <div className="places" style={{gridTemplateColumns:"repeat(3,1fr)"}}>
+          <div className="place"><p className="cat">Mensajes</p><h3>WhatsApp</h3><p>La forma más rápida.</p>
+            <a className="mp" href={wa} target="_blank" rel="noreferrer">Escribinos</a></div>
+          <div className="place"><p className="cat">Correo</p><h3>hola@visitandotandil.com</h3><p>Para consultas más largas.</p>
+            <a className="mp" href="mailto:hola@visitandotandil.com">Enviar un mail</a></div>
+          <div className="place"><p className="cat">Redes</p><h3>Instagram</h3><p>Fotos y novedades.</p>
+            <a className="mp" href="https://www.instagram.com/co.makers_/" target="_blank" rel="noreferrer">Seguinos</a></div>
         </div>
-        <a href={wa} target="_blank" rel="noreferrer" className="block text-center w-full rounded-full py-4 ff-body font-semibold text-white" style={{ background: C.moss }}>Escribinos por WhatsApp</a>
-        <div className="mt-20 pt-16 border-t border-black/10 text-center">
-          <p className="ff-body text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: C.sage }}>¿No sabés por dónde empezar?</p>
-          <h2 className="ff-display text-3xl sm:text-4xl mt-3 max-w-[16ch] mx-auto leading-[1.05]" style={{ color: C.ink, fontWeight:300 }}>Contanos qué buscás y lo encontramos por vos.</h2>
-          <p className="ff-body text-stone-500 max-w-[42ch] mx-auto mt-5 text-[17px]">Decinos las fechas, cuántos son y qué te gustaría. Nos encargamos del resto.</p>
-          <a href="consulta.html" className="inline-flex items-center gap-2.5 rounded-full px-8 py-4 ff-body font-semibold text-[16px] mt-8 text-white transition-transform duration-500 hover:-translate-y-0.5" style={{ background: C.moss }}>Hacer una consulta →</a>
+        <div style={{marginTop:"46px",paddingTop:"34px",borderTop:"1px solid var(--linea)"}}>
+          <h2>¿No sabés por dónde empezar?</h2>
+          <p style={{color:"var(--suave)",maxWidth:"46ch",margin:"12px 0 22px"}}>Contanos las fechas, cuántos son y qué te gustaría. Le mandamos la consulta a todos los lugares que coinciden.</p>
+          <a className="solid" href={"consulta.html" + (OP?("?op="+encodeURIComponent(OP)):"")}>Hacer una consulta</a>
         </div>
       </section>
     </div>
   );
 }
 
+/* ═════════════ PIE ═════════════ */
 function Footer({ go }) {
   return (
-    <footer style={{ background: C.mossdeep, color:"rgba(255,255,255,0.72)" }}>
-      <div className="max-w-6xl mx-auto px-5 sm:px-6 py-16">
-        <div className="flex flex-wrap justify-between gap-10">
-          <div className="max-w-[30ch]">
-            <div className="ff-display text-2xl text-white" style={{ fontWeight:400 }}>Visitando Tandil</div>
-            <p className="ff-body text-sm mt-4" style={{ color:"rgba(255,255,255,0.7)" }}>Lo mejor de Tandil para dormir, comer y descubrir — en un solo lugar. Hecho con cariño en Tandil por Brote 🌱</p>
+    <footer className="worn">
+      <div className="in">
+        <div className="fgrid">
+          <div>
+            <div style={{marginBottom:"14px"}}><Marca /></div>
+            <Wordmark />
+            <p className="next">Un lugar por vez, sin apuro. Hecho en Tandil.</p>
           </div>
           <div>
-            <h5 className="ff-body text-[11px] uppercase tracking-[0.26em] mb-3.5" style={{ color:"rgba(255,255,255,0.5)" }}>Explorar</h5>
-            <button onClick={()=>go("aloj")} className="block ff-body text-sm mb-2 hover:text-white">Hospedajes</button>
-            <button onClick={()=>go("gastro")} className="block ff-body text-sm mb-2 hover:text-white">Gastronomía</button>
-            <button onClick={()=>go("qhacer")} className="block ff-body text-sm mb-2 hover:text-white">Actividades</button>
+            <h5>El sitio</h5>
+            <ul>
+              <li><button onClick={()=>go("aloj")}>Para dormir</button></li>
+              <li><button onClick={()=>go("gastro")}>Para comer</button></li>
+              <li><button onClick={()=>go("qhacer")}>Para pasear</button></li>
+              <li><button onClick={()=>go("conoce")}>Conocé Tandil</button></li>
+            </ul>
           </div>
           <div>
-            <h5 className="ff-body text-[11px] uppercase tracking-[0.26em] mb-3.5" style={{ color:"rgba(255,255,255,0.5)" }}>Contacto</h5>
-            <a href={wa} target="_blank" rel="noreferrer" className="block ff-body text-sm mb-2 hover:text-white">WhatsApp</a>
-            <a href="#" className="block ff-body text-sm mb-2 hover:text-white">Instagram</a>
-            <button onClick={()=>go("owners")} className="block ff-body text-sm mb-2 hover:text-white">Soy operador</button>
+            <h5>Planificar</h5>
+            <ul>
+              <li><a href={"consulta.html" + (OP?("?op="+encodeURIComponent(OP)):"")}>Hacer una consulta</a></li>
+              <li><button onClick={()=>go("conoce")}>Itinerarios</button></li>
+              <li><button onClick={()=>go("conoce")}>Lugares gratis</button></li>
+            </ul>
+          </div>
+          <div>
+            <h5>Contacto</h5>
+            <ul>
+              <li><a href={wa} target="_blank" rel="noreferrer">WhatsApp</a></li>
+              <li><a href="https://www.instagram.com/co.makers_/" target="_blank" rel="noreferrer">Instagram</a></li>
+              <li><button onClick={()=>go("owners")}>Sumá tu lugar</button></li>
+              <li><button onClick={()=>go("contacto")}>Contacto</button></li>
+            </ul>
           </div>
         </div>
-        <div className="mt-14 pt-6 flex justify-between flex-wrap gap-2 ff-body text-[13px]" style={{ borderTop:"1px solid rgba(255,255,255,0.12)", color:"rgba(255,255,255,0.5)" }}>
-          <span>© 2026 Visitando Tandil · Creado por <a href="https://www.instagram.com/co.makers_/" target="_blank" rel="noopener noreferrer" style={{color:"inherit",textDecoration:"underline"}}>comaker</a></span><span>Tandil, Buenos Aires</span>
+        <div className="fnote">
+          <span>© 2026 Visitando Tandil · Creado por <a href="https://www.instagram.com/co.makers_/" target="_blank" rel="noopener noreferrer">comaker</a></span>
+          <span>Tandil, Buenos Aires</span>
         </div>
       </div>
     </footer>
   );
 }
 
+/* ═════════════ APP ═════════════ */
 function App() {
   const [menu, setMenu] = useState(false);
   const [view, setView] = useState(new URLSearchParams(location.search).get("view") || "home");
-  const [scrolled, setScrolled] = useState(false);
   const [data, setData] = useState({ loading: true, cabins: [], acts: [], food: [] });
   useEffect(() => {
     (async () => {
@@ -561,21 +1282,16 @@ function App() {
   const go = (v) => { setView(v); setMenu(false); window.scrollTo({ top: 0 }); };
   useEffect(() => { window.scrollTo({ top: 0 }); }, [view]);
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > window.innerHeight * 0.7);
-    onScroll(); window.addEventListener("scroll", onScroll, { passive:true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-  useEffect(() => {
     const els = Array.from(document.querySelectorAll(".reveal:not(.in)"));
     if (!("IntersectionObserver" in window)) { els.forEach(e => e.classList.add("in")); return; }
-    const io = new IntersectionObserver((ents) => { ents.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }); }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
+    const io = new IntersectionObserver((ents) => { ents.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }); }, { threshold: 0.08, rootMargin: "0px 0px -5% 0px" });
     els.forEach(e => io.observe(e));
     return () => io.disconnect();
   }, [view, data]);
-  const solid = view !== "home" || scrolled;
   return (
-    <div className="min-h-screen ff-body" style={{ background: C.paper }}>
-      <Header view={view} go={go} onOpen={() => setMenu(true)} solid={solid} />
+    <div>
+      <PreHeader go={go} />
+      <Header view={view} go={go} onOpen={() => setMenu(true)} />
       <MobileMenu open={menu} go={go} onClose={() => setMenu(false)} />
       {view === "home" && <Home go={go} />}
       {view === "aloj" && <LodgingPage cabins={data.cabins} loading={data.loading} />}
@@ -585,10 +1301,38 @@ function App() {
       {view === "owners" && <OwnersPage />}
       {view === "contacto" && <ContactPage />}
       <Footer go={go} />
+      <Newsletter />
     </div>
   );
 }
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+
+<script>
+/* parallax suave de la portada */
+(function(){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var ticking=false;
+  function mover(){
+    var bg=document.querySelector('.hero .bg');
+    if(bg && window.innerWidth>760){
+      var y=Math.min(window.scrollY,700);
+      bg.style.transform='translate3d(0,'+(y*0.16)+'px,0) scale(1.06)';
+    }
+    ticking=false;
+  }
+  window.addEventListener('scroll',function(){ if(!ticking){ requestAnimationFrame(mover); ticking=true; } },{passive:true});
+})();
+</script>
+<script>
+/* embeds de Instagram */
+(function(){
+  var s=document.createElement('script'); s.async=true; s.src='https://www.instagram.com/embed.js';
+  document.body.appendChild(s);
+  setInterval(function(){
+    try{ if(window.instgrm && window.instgrm.Embeds && document.querySelector('.instagram-media:not([data-instgrm-rendered])')) window.instgrm.Embeds.process(); }catch(e){}
+  }, 1500);
+})();
 </script>
 </body>
 </html>

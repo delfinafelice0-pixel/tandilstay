@@ -11,9 +11,33 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
-.ff-display{font-family:'Fraunces',serif}.ff-body{font-family:'Hanken Grotesk',sans-serif}
+@import url('https://fonts.googleapis.com/css2?family=Young+Serif&family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Nothing+You+Could+Do&display=swap');
+.ff-display{font-family:'Young Serif',Georgia,serif;font-weight:400}
+.ff-body{font-family:'Familjen Grotesk',system-ui,sans-serif}
+.ff-mano{font-family:'Nothing You Could Do',cursive;color:#9C5634}
+
+.ff-display{font-family:'Young Serif',Georgia,serif;font-weight:400}.ff-body{font-family:'Familjen Grotesk',system-ui,sans-serif}
 body{margin:0}
+</style>
+
+<style>
+:root{
+  --monte:#2E3521;--liquen:#63653F;--arena:#DFCCAE;--ladrillo:#9C5634;
+  --crudo:#FBF7E8;--papel:#F4EEDC;--tinta:#23261A;--suave:#5F5945;--linea:rgba(70,62,42,.24);
+  --punt:rgba(70,62,42,.38);
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+body{background:var(--crudo);color:var(--tinta);font-family:'Familjen Grotesk',system-ui,sans-serif}
+body::after{content:"";position:fixed;inset:0;background-image:var(--grain);background-size:180px;
+  mix-blend-mode:multiply;opacity:.12;pointer-events:none;z-index:9999}
+[class*="rounded"]{border-radius:0 !important}
+.bg-white,.bg-stone-50,.bg-stone-100{background:var(--papel) !important}
+.text-stone-400,.text-stone-500,.text-stone-600,.text-stone-700{color:var(--suave) !important}
+[class*="border-black"],[class*="border-stone"]{border-color:var(--linea) !important}
+h1,h2,h3,.ff-display{font-family:'Young Serif',Georgia,serif;font-weight:400 !important}
+input,select,textarea,button{font-family:'Familjen Grotesk',system-ui,sans-serif}
+input,select,textarea{background:#FDFAF1 !important}
+.kick{letter-spacing:.24em !important;text-transform:uppercase}
 </style>
 </head>
 <body>
@@ -25,7 +49,7 @@ const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const C = { paper:"#F3EEE2", ink:"#2C2A24", moss:"#3E4F3F", sage:"#7C8F6F", clay:"#BE6A4A" };
+const C = { paper:"#F4EEDC", cream:"#FBF7E8", mist:"#E7E1D0", ink:"#23261A", moss:"#2E3521", mossdeep:"#232817", sage:"#63653F", clay:"#9C5634", sun:"#DFCCAE" };
 const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=900&q=80`));
 const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
 const kFmt = (n) => (n >= 1000 ? Math.round(n/1000)+"k" : ""+n);

@@ -10,8 +10,32 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
-.ff-display{font-family:'Fraunces',serif}.ff-body{font-family:'Hanken Grotesk',sans-serif}body{margin:0}
+@import url('https://fonts.googleapis.com/css2?family=Young+Serif&family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Nothing+You+Could+Do&display=swap');
+.ff-display{font-family:'Young Serif',Georgia,serif;font-weight:400}
+.ff-body{font-family:'Familjen Grotesk',system-ui,sans-serif}
+.ff-mano{font-family:'Nothing You Could Do',cursive;color:#9C5634}
+
+.ff-display{font-family:'Young Serif',Georgia,serif;font-weight:400}.ff-body{font-family:'Familjen Grotesk',system-ui,sans-serif}body{margin:0}
+</style>
+
+<style>
+:root{
+  --monte:#2E3521;--liquen:#63653F;--arena:#DFCCAE;--ladrillo:#9C5634;
+  --crudo:#FBF7E8;--papel:#F4EEDC;--tinta:#23261A;--suave:#5F5945;--linea:rgba(70,62,42,.24);
+  --punt:rgba(70,62,42,.38);
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+body{background:var(--crudo);color:var(--tinta);font-family:'Familjen Grotesk',system-ui,sans-serif}
+body::after{content:"";position:fixed;inset:0;background-image:var(--grain);background-size:180px;
+  mix-blend-mode:multiply;opacity:.12;pointer-events:none;z-index:9999}
+[class*="rounded"]{border-radius:0 !important}
+.bg-white,.bg-stone-50,.bg-stone-100{background:var(--papel) !important}
+.text-stone-400,.text-stone-500,.text-stone-600,.text-stone-700{color:var(--suave) !important}
+[class*="border-black"],[class*="border-stone"]{border-color:var(--linea) !important}
+h1,h2,h3,.ff-display{font-family:'Young Serif',Georgia,serif;font-weight:400 !important}
+input,select,textarea,button{font-family:'Familjen Grotesk',system-ui,sans-serif}
+input,select,textarea{background:#FDFAF1 !important}
+.kick{letter-spacing:.24em !important;text-transform:uppercase}
 </style>
 </head>
 <body><div id="root"></div>
@@ -20,9 +44,110 @@ const { useState, useEffect } = React;
 const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const C = { paper:"#F3EEE2", ink:"#2C2A24", moss:"#3E4F3F", clay:"#BE6A4A" };
+const C = { paper:"#F4EEDC", cream:"#FBF7E8", mist:"#E7E1D0", ink:"#23261A", moss:"#2E3521", mossdeep:"#232817", sage:"#63653F", clay:"#9C5634", sun:"#DFCCAE" };
 const ROLES = [["hospedaje","Hospedaje"],["gastronomia","Gastronomía"],["actividad","Actividad"],["admin","Admin"]];
 const PANELS = { hospedaje:"panel.html", gastronomia:"gastro-panel.html", actividad:"act-panel.html" };
+
+
+function Newsletter(){
+  const [list,setList]=useState(null);
+  const [q,setQ]=useState("");
+  const [stats,setStats]=useState(null);
+  const [msg,setMsg]=useState("");
+  const cargar=async()=>{
+    const [r,st]=await Promise.all([
+      db.from("subscribers").select("*").order("created_at",{ascending:false}),
+      db.rpc("subscribers_stats"),
+    ]);
+    setList(r.data||[]);
+    setStats((st.data&&st.data[0])||null);
+  };
+  useEffect(()=>{ cargar(); },[]);
+  const activos=(list||[]).filter(x=>!x.unsubscribed);
+  const show=(list||[]).filter(x=>!q || (x.email||"").toLowerCase().includes(q.toLowerCase()));
+  const fecha=(s)=>{ try{ const d=new Date(s); return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear(); }catch(e){ return ""; } };
+
+  const copiar=async()=>{
+    const txt=activos.map(x=>x.email).join(", ");
+    try{ await navigator.clipboard.writeText(txt); setMsg("Copiados "+activos.length+" correos"); }
+    catch(e){ setMsg("No se pudo copiar"); }
+    setTimeout(()=>setMsg(""),2500);
+  };
+  const exportar=()=>{
+    const filas=[["email","alta","origen","baja"]].concat(
+      (list||[]).map(x=>[x.email, x.created_at||"", x.source||"", x.unsubscribed?"si":"no"]));
+    const csv=filas.map(f=>f.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8;"}));
+    a.download="suscriptores-visitando-tandil.csv";
+    a.click();
+  };
+  const baja=async(x)=>{
+    await db.from("subscribers").update({unsubscribed:!x.unsubscribed}).eq("id",x.id);
+    cargar();
+  };
+
+  if(list===null) return <p className="ff-body text-stone-500">Cargando la lista…</p>;
+
+  return (
+    <div className="space-y-5">
+      <div className="grid sm:grid-cols-3 gap-4">
+        <div className="bg-white border border-black/5 p-5">
+          <div className="ff-body text-[11px] uppercase tracking-widest text-stone-500 mb-1">Anotados</div>
+          <div className="ff-display text-3xl" style={{color:C.ink}}>{stats?stats.total:activos.length}</div>
+        </div>
+        <div className="bg-white border border-black/5 p-5">
+          <div className="ff-body text-[11px] uppercase tracking-widest text-stone-500 mb-1">Últimos 30 días</div>
+          <div className="ff-display text-3xl" style={{color:C.ink}}>{stats?stats.last30:"—"}</div>
+        </div>
+        <div className="bg-white border border-black/5 p-5">
+          <div className="ff-body text-[11px] uppercase tracking-widest text-stone-500 mb-1">Últimos 7 días</div>
+          <div className="ff-display text-3xl" style={{color:C.ink}}>{stats?stats.last7:"—"}</div>
+        </div>
+      </div>
+
+      <div className="bg-white border border-black/5 p-5">
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <h3 className="ff-display text-lg" style={{color:C.ink}}>Suscriptores</h3>
+          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar un correo"
+            className="border border-stone-300 px-3 py-2 ff-body text-sm" />
+          <button onClick={exportar} className="px-3.5 py-2 ff-body text-sm text-white ml-auto" style={{background:C.moss}}>Descargar CSV</button>
+          <button onClick={copiar} className="px-3.5 py-2 ff-body text-sm border border-stone-300 text-stone-600">Copiar correos</button>
+          <button onClick={cargar} className="px-3.5 py-2 ff-body text-sm border border-stone-300 text-stone-600">Actualizar</button>
+        </div>
+        {msg && <div className="ff-body text-sm mb-3" style={{color:C.moss}}>{msg}</div>}
+
+        {show.length===0 ? (
+          <p className="ff-body text-stone-500 py-6">Todavía no hay nadie anotado.</p>
+        ) : tab==="newsletter" ? (
+          <Newsletter />
+        ) : (
+          <div>
+            {show.map(x=>(
+              <div key={x.id} className="flex flex-wrap items-center gap-3 py-2.5 border-b border-black/5">
+                <span className="ff-body text-sm" style={{color:x.unsubscribed?"#9a958a":C.ink, textDecoration:x.unsubscribed?"line-through":"none"}}>{x.email}</span>
+                <span className="ff-body text-[11px] uppercase tracking-widest text-stone-500">{fecha(x.created_at)}</span>
+                {x.source && <span className="ff-body text-[11px] uppercase tracking-widest text-stone-500">{x.source}</span>}
+                <button onClick={()=>baja(x)} className="ml-auto px-3 py-1.5 ff-body text-xs border border-stone-300 text-stone-600">
+                  {x.unsubscribed?"Volver a anotar":"Dar de baja"}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="bg-white border border-black/5 p-5">
+        <h3 className="ff-display text-lg mb-2" style={{color:C.ink}}>Cómo mandar el mail</h3>
+        <p className="ff-body text-sm text-stone-600" style={{maxWidth:"62ch"}}>
+          Desde acá se guardan y se administran los correos, pero el envío se hace desde un servicio de mails.
+          Descargá el CSV, importalo en Brevo o Mailchimp y armá el envío ahí. Es gratis hasta unos cuantos
+          cientos de mails por día y te evita terminar en la carpeta de correo no deseado.
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   const [session,setSession]=useState(null), [ready,setReady]=useState(false), [me,setMe]=useState(null);
@@ -101,6 +226,7 @@ function App() {
             <div className="flex rounded-full border border-stone-300 overflow-hidden">
               <button onClick={()=>setTab("usuarios")} className={"px-3.5 py-2 ff-body text-sm "+(tab==="usuarios"?"text-white":"text-stone-600")} style={tab==="usuarios"?{background:C.moss}:{}}>Usuarios</button>
               <button onClick={()=>setTab("resumen")} className={"px-3.5 py-2 ff-body text-sm "+(tab==="resumen"?"text-white":"text-stone-600")} style={tab==="resumen"?{background:C.moss}:{}}>Resumen</button>
+              <button onClick={()=>setTab("newsletter")} className={"px-3.5 py-2 ff-body text-sm "+(tab==="newsletter"?"text-white":"text-stone-600")} style={tab==="newsletter"?{background:C.moss}:{}}>Newsletter</button>
             </div>
             <button onClick={()=>db.auth.signOut()} className="rounded-full px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">Salir</button>
           </div>

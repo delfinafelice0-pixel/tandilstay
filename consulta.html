@@ -3,42 +3,192 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Consultá a varias cabañas · Visitando Tandil</title>
-<meta name="description" content="Contanos qué buscás y mandá una sola consulta a todas las cabañas de Tandil que coinciden." />
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Ccircle%20cx%3D%275%27%20cy%3D%279.5%27%20r%3D%271.5%27%20fill%3D%27%23E2A94E%27%2F%3E%3Cpath%20d%3D%27M2%2017%20Q6%2013%2010%2015%20L13%2015%20L13%208%20Q13%207%2014%207%20L16%207%20Q17%207%2017%208%20L17%2015%20L20%2016%20Q21%2016%2022%2017%27%20fill%3D%27none%27%20stroke%3D%27%233E4F3F%27%20stroke-width%3D%271.7%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%2F%3E%3C%2Fsvg%3E" />
+<title>Consultar disponibilidad · Visitando Tandil</title>
+<meta name="description" content="Contanos qué buscás y mandá una sola consulta a todos los hospedajes de Tandil que coinciden." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Crect%20width%3D%2724%27%20height%3D%2724%27%20fill%3D%27%232E3521%27%2F%3E%3Ccircle%20cx%3D%275%27%20cy%3D%2716%27%20r%3D%271.3%27%20fill%3D%27%23DFCCAE%27%2F%3E%3Cpath%20d%3D%27M7.5%2016%20Q10%2015.6%2011.5%2013.6%20L13%2013.6%20L13%208.6%20Q13%208%2013.7%208%20L15.6%208%20Q16.2%208%2016.2%208.6%20L16.2%2014.4%20Q18.6%2015.4%2021%2015.6%27%20fill%3D%27none%27%20stroke%3D%27%23DFCCAE%27%20stroke-width%3D%271.5%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%2F%3E%3C%2Fsvg%3E" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Visitando Tandil" />
 <meta property="og:locale" content="es_AR" />
-<meta property="og:title" content="Consultá a varias cabañas · Visitando Tandil" />
-<meta property="og:description" content="Contanos qué buscás y mandá una sola consulta a todas las cabañas de Tandil que coinciden." />
-<meta property="og:url" content="https://delfinafelice0-pixel.github.io/tandilstay/consulta.html" />
-<meta property="og:image" content="https://delfinafelice0-pixel.github.io/tandilstay/og.png" />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Visitando Tandil" />
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Consultá a varias cabañas · Visitando Tandil" />
-<meta name="twitter:description" content="Contanos qué buscás y mandá una sola consulta a todas las cabañas de Tandil que coinciden." />
-<meta name="twitter:image" content="https://delfinafelice0-pixel.github.io/tandilstay/og.png" />
+<meta property="og:title" content="Consultar disponibilidad · Visitando Tandil" />
+<meta property="og:description" content="Una sola consulta le llega a todos los hospedajes que coinciden con lo que buscás." />
+<meta property="og:url" content="https://visitandotandil.com/consulta.html" />
+<meta property="og:image" content="https://visitandotandil.com/og.png?v=4" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.7/babel.min.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
-.ff-display{font-family:'Fraunces',serif}.ff-body{font-family:'Hanken Grotesk',sans-serif}
-body{margin:0;background:#F3EEE2}
-
+:root{
+  --monte:#2E3521; --liquen:#63653F; --arena:#DFCCAE;
+  --ladrillo:#9C5634; --crudo:#FBF7E8; --papel:#F4EEDC; --tinta:#23261A;
+  --suave:#5F5945; --linea:rgba(70,62,42,.24); --punt:rgba(70,62,42,.4);
+  --display:'Young Serif',Georgia,serif;
+  --sans:'Familjen Grotesk',system-ui,sans-serif;
+  --mano:'Nothing You Could Do',cursive;
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  --mottle:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='420' height='420' filter='url(%23m)'/%3E%3C/svg%3E");
+}
+*{box-sizing:border-box}
 html{scroll-behavior:smooth}
-.reveal{opacity:0;transform:translateY(26px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
-.reveal.in{opacity:1;transform:none}
-.lift{transition:transform .4s cubic-bezier(.2,.7,.2,1),box-shadow .4s ease}
-.lift:hover{transform:translateY(-6px);box-shadow:0 18px 42px -20px rgba(44,42,36,.45)}
-@media (prefers-reduced-motion: reduce){.reveal{opacity:1!important;transform:none!important;transition:none!important}html{scroll-behavior:auto}}
+body{margin:0;background:var(--crudo);color:var(--tinta);font-family:var(--sans);
+  font-size:15.5px;line-height:1.65;-webkit-font-smoothing:antialiased}
+img,svg{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+.in{max-width:1080px;margin:0 auto;padding:0 34px}
+.mano{font-family:var(--mano);color:var(--ladrillo)}
+.rot{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase}
+.worn{position:relative;isolation:isolate}
+.worn::before{content:"";position:absolute;inset:0;background-image:var(--mottle);background-size:420px;
+  mix-blend-mode:multiply;opacity:.12;z-index:1;pointer-events:none}
+.worn::after{content:"";position:absolute;inset:0;background-image:var(--grain);background-size:180px;
+  mix-blend-mode:multiply;opacity:.18;z-index:2;pointer-events:none}
+.worn > *{position:relative;z-index:3}
+.dark::before{mix-blend-mode:screen;opacity:.20}
+.dark::after{mix-blend-mode:screen;opacity:.12}
+:focus-visible{outline:2px solid var(--ladrillo);outline-offset:3px}
+
+.pre{background:var(--monte);color:#C7BC9C;font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.pre .in{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:38px}
+.pre a{color:#E0D5B8}
+.pdot{width:5px;height:5px;background:var(--ladrillo);border-radius:50%;flex:none}
+.pre .mid{display:flex;align-items:center;gap:9px;color:#E0D5B8}
+
+header{position:sticky;top:0;z-index:60;background:var(--crudo);border-bottom:1px solid var(--linea)}
+.hbar{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 0}
+.lockup{display:flex;align-items:center;gap:12px}
+.wm{font-family:var(--display);text-transform:uppercase;letter-spacing:.15em;line-height:1;margin:0;font-size:15px}
+.wm .sub{display:block;font-family:var(--sans);font-size:7.5px;letter-spacing:.4em;
+  margin-top:6px;color:var(--suave);text-indent:.4em}
+.volver{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ladrillo)}
+
+.ptitle{border-bottom:1px solid var(--linea);padding:48px 0 32px}
+.kicker{display:flex;align-items:center;gap:10px;color:var(--ladrillo);margin:0 0 16px}
+.kicker span{height:1px;background:var(--punt);flex:1;max-width:60px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(30px,4.4vw,48px);line-height:1.05;margin:0;max-width:20ch}
+.ptitle p{color:var(--suave);max-width:56ch;margin:16px 0 0}
+
+section{padding:44px 0 72px}
+.wrap{display:grid;grid-template-columns:.8fr 1.2fr;gap:44px;align-items:start}
+.aside p{color:var(--suave);max-width:36ch}
+.steps{list-style:none;margin:18px 0 0;padding:0;counter-reset:c}
+.steps li{counter-increment:c;display:flex;gap:13px;padding:11px 0;border-bottom:1px dotted var(--punt);
+  font-size:14px;color:var(--suave)}
+.steps li::before{content:counter(c,decimal-leading-zero);font-family:var(--display);
+  font-size:12.5px;color:var(--ladrillo);flex:none;padding-top:1px}
+
+.form{background:var(--papel);border:1px solid var(--linea);padding:28px 30px 32px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:17px 20px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:span 2}
+.field label{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--suave)}
+.field input,.field select,.field textarea{font-family:var(--sans);font-size:15px;color:var(--tinta);
+  background:#FDFAF1;border:1px solid var(--linea);padding:12px 14px;outline:0;width:100%}
+.field textarea{resize:vertical;min-height:92px;line-height:1.6}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ladrillo)}
+.sep{grid-column:span 2;height:1px;background:var(--linea);margin:5px 0 1px}
+.send{grid-column:span 2;margin-top:4px;border:0;background:var(--monte);color:#EDE4CD;
+  font-size:12px;letter-spacing:.22em;text-transform:uppercase;padding:17px;cursor:pointer;width:100%}
+.send:hover{background:#232817}
+.fine{grid-column:span 2;font-size:12px;color:var(--suave);margin:0}
+
+.res{margin-top:56px}
+.resHead{background:var(--monte);color:#E0D5B8;padding:30px 32px}
+.resHead h2{font-family:var(--display);font-weight:400;font-size:26px;margin:0;color:#F2E9D2}
+.resHead p{margin:10px 0 0;font-size:14px;color:#B4AA8C;max-width:52ch}
+.mail{display:inline-block;margin-top:20px;background:var(--arena);color:#2E3521;
+  font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;padding:14px 22px}
+.mail:hover{background:#EBDDC2}
+.nada{border:1px solid var(--linea);background:var(--papel);padding:40px 32px;text-align:center}
+.nada h2{font-family:var(--display);font-weight:400;font-size:24px;margin:0}
+.nada p{color:var(--suave);margin:10px 0 0}
+
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:26px}
+.card{background:var(--papel);border:1px solid var(--linea);display:flex;flex-direction:column}
+.card:hover{border-color:var(--tinta)}
+.card .ph{height:160px;background:#E7E1D0;overflow:hidden}
+.card .ph img{width:100%;height:100%;object-fit:cover}
+.card .body{padding:16px 18px 18px;display:flex;flex-direction:column;flex:1}
+.card h3{font-family:var(--display);font-weight:400;font-size:18px;margin:0 0 3px;line-height:1.15}
+.meta{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--suave)}
+.card .precio{font-family:var(--display);font-size:17px;margin:12px 0 0}
+.acts{display:flex;gap:8px;margin-top:14px;padding-top:13px;border-top:1px dotted var(--punt)}
+.wsp{flex:1;text-align:center;background:var(--ladrillo);color:#F7EEE0;font-size:10.5px;
+  letter-spacing:.16em;text-transform:uppercase;padding:11px 8px}
+.wsp:hover{background:#89482a}
+.ver{text-align:center;border:1px solid var(--linea);color:var(--suave);font-size:10.5px;
+  letter-spacing:.16em;text-transform:uppercase;padding:11px 14px}
+.ver:hover{border-color:var(--tinta);color:var(--tinta)}
+.cargando{text-align:center;color:var(--suave);padding:40px 0}
+
+footer{background:var(--papel);border-top:1px solid var(--linea);padding:34px 0;
+  text-align:center;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--suave)}
+footer a{text-decoration:underline}
+
+@media(max-width:900px){
+  .wrap{grid-template-columns:1fr;gap:30px}
+  .cards{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:700px){
+  .in{padding:0 20px}
+  .pre .mid{display:none}
+  .f2{grid-template-columns:1fr;gap:14px}
+  .field.full,.sep,.send,.fine{grid-column:span 1}
+  .cards{grid-template-columns:1fr}
+  .form{padding:20px 18px 24px}
+  .ptitle{padding:32px 0 24px}
+  section{padding:32px 0 52px}
+  .resHead{padding:24px 20px}
+}
+
+/* ═════ la página como hoja apoyada sobre una foto ═════ */
+.fondo{position:fixed;inset:-30px;z-index:-2;background:url('tandil-hero.jpg') center/cover no-repeat;
+  filter:blur(7px) brightness(.34) saturate(.72)}
+.fondo::after{content:"";position:absolute;inset:0;
+  background:radial-gradient(120% 90% at 50% 30%,rgba(18,20,12,.25) 0%,rgba(18,20,12,.78) 100%)}
+body{background:#1B1E14}
+#root > div{position:relative;isolation:isolate;max-width:1180px;margin:30px auto;background:var(--crudo);
+  box-shadow:0 34px 90px rgba(8,10,5,.62);overflow:hidden}
+#root > div::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:30px;transform:translateX(-50%);
+  z-index:7;pointer-events:none;
+  background:linear-gradient(90deg,rgba(70,60,40,0) 0%,rgba(70,60,40,.10) 42%,rgba(255,255,255,.26) 50%,rgba(70,60,40,.10) 58%,rgba(70,60,40,0) 100%)}
+#root > div::after{content:"";position:absolute;inset:0;z-index:7;pointer-events:none;
+  box-shadow:inset 0 0 100px rgba(60,50,30,.26), inset 0 0 18px rgba(60,50,30,.16)}
+#root > div > *{position:relative;z-index:2}
+/* dentro de la hoja el encabezado no puede quedar fijo */
+header{position:relative !important;top:auto !important}
+@media(max-width:1240px){
+  #root > div{margin:0;max-width:none;box-shadow:none;overflow:visible}
+  #root > div::before{display:none}
+  .fondo{display:none}
+  body{background:var(--crudo)}
+  header{position:sticky !important;top:0 !important}
+}
+
+/* ═════ una sola superficie: el papel es la página ═════ */
+.fondo{display:none !important}
+body{background:var(--crudo) !important}
+#root > div{max-width:none !important;margin:0 !important;box-shadow:none !important;overflow:visible !important}
+#root > div::before,#root > div::after{display:none !important}
+.rail{display:none !important}
+header,header.vt{position:sticky !important;top:0 !important}
+/* la franja verde es la única capa distinta, y va de borde a borde */
+.cards,.sabana{box-shadow:0 0 0 100vmax var(--monte) !important;clip-path:inset(0 -100vmax)}
+
+.nav{display:flex;gap:22px;font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+.nav a{color:var(--suave);padding-bottom:3px;border-bottom:1px solid transparent;white-space:nowrap}
+.nav a:hover{color:var(--tinta);border-color:var(--ladrillo)}
+@media(max-width:760px){
+  .nav{gap:14px;font-size:9.5px;letter-spacing:.12em;overflow-x:auto;scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+}
 </style>
 </head>
 <body>
+<div class="fondo"></div>
 <div id="root"></div>
 <script type="text/babel">
 const { useState, useEffect } = React;
@@ -46,7 +196,10 @@ const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const C = { paper:"#F3EEE2", ink:"#2C2A24", moss:"#3E4F3F", clay:"#BE6A4A", sun:"#E2A94E" };
+const Q = new URLSearchParams(location.search);
+const OP = (Q.get("op")||"").trim();
+const opSuffix = OP ? ("&op="+encodeURIComponent(OP)) : "";
+
 const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=800&q=80`));
 const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
 const pad = (n) => String(n).padStart(2,"0");
@@ -55,19 +208,28 @@ const addDay = (dt,n=1) => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate(
 const isoD = (dt) => `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
 const fromRow = (r) => ({ slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:(r.whatsapp||"").replace(/\D/g,""), email:r.email||"", capacity:r.capacity||0, price:r.price||0, banner:r.banner||"", photos:r.photos||[], blocked:[...new Set([...(r.blocked||[]), ...(r.ical_blocked||[])])] });
 const isAvail = (c,ci,co) => { if(!ci||!co) return true; let d=parseD(ci); const e=parseD(co); if(e<=d) return true; while(d<e){ if(c.blocked.includes(isoD(d))) return false; d=addDay(d); } return true; };
-const fmtDate = (s) => { const d=parseD(s); return d? `${pad(d.getDate())}/${pad(d.getMonth()+1)}` : ""; };
 const fmtFull = (s) => { const d=parseD(s); return d? `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}` : (s||""); };
+const soloNum = (s) => String(s||"").replace(/\D/g,"");
 
-function Logo(){ return (
-  <a href="index.html" className="flex items-center gap-2.5 no-underline">
-    <span className="grid place-items-center" style={{color:C.moss}}><svg viewBox="0 0 520 200" height="30" fill="none" stroke="currentColor" strokeWidth="13" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{display:"block"}}><circle cx="64" cy="150" r="9" fill="currentColor" stroke="none"></circle><path d="M108,150 C150,148 154,142 186,116 C196,108 207,110 211,123 c -8,2 -10,12 1,13 c 9,1 9,-11 -1,-12 L248,128 L248,92 Q248,82 258,82 L306,82 Q316,82 316,92 L316,128 L316,141 C352,151 410,156 462,154 C470,153 475,151 480,150"></path></svg></span>
-    <span><span className="ff-display text-lg leading-none block" style={{color:C.ink}}>Visitando Tandil</span><span className="ff-body text-[11px] text-stone-500">Tandil</span></span>
-  </a>
-); }
+function Marca({ color }) {
+  return (
+    <svg width="86" viewBox="0 0 520 200" fill="none" stroke={color||"#23261A"} strokeWidth="9"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="64" cy="150" r="7" fill={color||"#23261A"} stroke="none"></circle>
+      <path d="M108,150 C150,148 154,142 186,116 C196,108 207,110 211,123 c -8,2 -10,12 1,13 c 9,1 9,-11 -1,-12 L248,128 L248,92 Q248,82 258,82 L306,82 Q316,82 316,92 L316,128 L316,141 C352,151 410,156 462,154 C470,153 475,151 480,150"></path>
+    </svg>
+  );
+}
 
 function App(){
+  const volver = "index.html" + (OP?("?op="+encodeURIComponent(OP)):"");
   const [all,setAll]=useState(null);
-  const [zona,setZona]=useState(""), [huesp,setHuesp]=useState(""), [ci,setCi]=useState(""), [co,setCo]=useState(""), [presu,setPresu]=useState("");
+  /* los datos que llegan desde la portada */
+  const [zona,setZona]=useState(Q.get("zona")||"");
+  const [huesp,setHuesp]=useState(Q.get("hu")||"");
+  const [ci,setCi]=useState(Q.get("ci")||"");
+  const [co,setCo]=useState(Q.get("co")||"");
+  const [presu,setPresu]=useState(soloNum(Q.get("presu")));
   const [nombre,setNombre]=useState(""), [contacto,setContacto]=useState(""), [msg,setMsg]=useState("");
   const [results,setResults]=useState(null);
 
@@ -104,107 +266,138 @@ function App(){
   };
 
   const conMail = results ? results.filter(c=>c.email) : [];
-  const conWa = results ? results.filter(c=>c.whatsapp) : [];
   const mailtoUrl = () => `mailto:?bcc=${encodeURIComponent(conMail.map(c=>c.email).join(","))}&subject=${encodeURIComponent("Consulta de disponibilidad — Tandil")}&body=${encodeURIComponent(cuerpo())}`;
   const waText = (c) => encodeURIComponent(`¡Hola! Vi ${c.name} en Visitando Tandil y quería consultar disponibilidad.` + (ci&&co?` Fechas: ${fmtFull(ci)} al ${fmtFull(co)}.`:"") + (huesp?` Para ${huesp} personas.`:"") + (msg?` ${msg}`:"") + (nombre?` Soy ${nombre}.`:""));
 
-  const Field = ({label, children}) => (<label className="block"><span className="ff-body text-xs font-semibold tracking-wide uppercase text-stone-500">{label}</span><div className="mt-1">{children}</div></label>);
-  const inputC = "w-full border border-stone-300 rounded-xl px-3 py-2.5 ff-body text-sm bg-white";
-
   return (
-    <div className="min-h-screen">
-      <header className="bg-[#F3EEE2]/90 backdrop-blur border-b border-black/5 sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-5 py-3 flex items-center justify-between">
-          <Logo/>
-          <a href="index.html" className="ff-body text-sm font-semibold no-underline" style={{color:C.clay}}>← Volver</a>
+    <div>
+      <div className="pre">
+        <div className="in">
+          <span>Tandil · Buenos Aires</span>
+          <span className="mid"><i className="pdot"></i>Una sola consulta le llega a todos los hospedajes</span>
+          <span><a href={volver}>Volver al sitio</a></span>
+        </div>
+      </div>
+
+      <header className="worn">
+        <div className="in hbar">
+          <a className="lockup" href={volver}>
+            <Marca />
+            <p className="wm">Visitando Tandil<span className="sub">Visitando Ando</span></p>
+          </a>
+          <nav className="nav">
+            {[["home","Para dormir"],["gastro","Para comer"],["qhacer","Para pasear"],["conoce","Conocé Tandil"]]
+              .map(([k,l])=><a key={k} href={"index.html?view="+k+(OP?"&op="+encodeURIComponent(OP):"")}>{l}</a>)}
+          </nav>
         </div>
       </header>
 
-      <div className="max-w-3xl mx-auto px-5 py-8">
-        <p className="ff-body text-xs tracking-[0.2em] uppercase font-bold" style={{color:C.clay}}>Consulta a varias a la vez</p>
-        <h1 className="ff-display font-semibold mt-2" style={{color:C.ink, fontSize:"clamp(28px,5vw,40px)", lineHeight:1.05}}>Contanos qué buscás y te conectamos con las cabañas que coinciden</h1>
-        <p className="ff-body text-stone-600 mt-3">Completá el filtro, así tu consulta le llega solo a las cabañas que de verdad te sirven. Después la mandás a todas juntas por mail (o por WhatsApp a las que quieras).</p>
+      <div className="ptitle">
+        <div className="in">
+          <p className="kicker rot"><span></span>Una consulta, todos los lugares</p>
+          <h1>Contanos qué buscás y te conectamos con los que coinciden</h1>
+          <p>Completá el filtro, así tu consulta le llega solo a los hospedajes que de verdad te sirven. Después la mandás a todos juntos por mail, o por WhatsApp a los que quieras.</p>
+        </div>
+      </div>
 
-        <div className="reveal bg-white rounded-2xl border border-black/5 p-5 mt-6 space-y-4">
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Field label="Llegada"><input type="date" value={ci} onChange={e=>setCi(e.target.value)} className={inputC} /></Field>
-            <Field label="Salida"><input type="date" value={co} onChange={e=>setCo(e.target.value)} className={inputC} /></Field>
-            <Field label="Huéspedes"><input type="number" min="1" value={huesp} onChange={e=>setHuesp(e.target.value)} placeholder="¿Cuántos son?" className={inputC} /></Field>
-            <Field label="Presupuesto máx. / noche"><input type="number" min="0" value={presu} onChange={e=>setPresu(e.target.value)} placeholder="Opcional" className={inputC} /></Field>
-            <Field label="Zona">
-              <select value={zona} onChange={e=>setZona(e.target.value)} className={inputC}>
-                <option value="">Cualquiera</option>
-                {zonas.map(z=><option key={z} value={z}>{z}</option>)}
-              </select>
-            </Field>
+      <section className="in">
+        <div className="wrap">
+          <div className="aside">
+            <p>No escribís uno por uno: escribís una vez. Los hospedajes te contestan directo a vos, con su precio y su disponibilidad.</p>
+            <ol className="steps">
+              <li>Completás las fechas y para cuántos son.</li>
+              <li>Te mostramos los lugares que entran en eso.</li>
+              <li>Mandás la consulta a todos con un solo envío.</li>
+            </ol>
+            <p className="mano" style={{fontSize:"20px",marginTop:"16px"}}>no cobramos comisión, elegís vos</p>
           </div>
-          <div className="border-t border-stone-100 pt-4 grid sm:grid-cols-2 gap-4">
-            <Field label="Tu nombre"><input value={nombre} onChange={e=>setNombre(e.target.value)} className={inputC} /></Field>
-            <Field label="Tu WhatsApp o mail"><input value={contacto} onChange={e=>setContacto(e.target.value)} placeholder="Para que te respondan" className={inputC} /></Field>
+
+          <div className="form worn">
+            <div className="f2">
+              <div className="field"><label htmlFor="ci">Llegada</label>
+                <input id="ci" type="date" value={ci} onChange={e=>setCi(e.target.value)} /></div>
+              <div className="field"><label htmlFor="co">Salida</label>
+                <input id="co" type="date" value={co} onChange={e=>setCo(e.target.value)} /></div>
+              <div className="field"><label htmlFor="hu">Huéspedes</label>
+                <input id="hu" type="number" min="1" value={huesp} onChange={e=>setHuesp(e.target.value)} placeholder="¿Cuántos son?" /></div>
+              <div className="field"><label htmlFor="pr">Presupuesto máx. por noche</label>
+                <input id="pr" type="number" min="0" value={presu} onChange={e=>setPresu(e.target.value)} placeholder="Opcional" /></div>
+              <div className="field full"><label htmlFor="zo">Zona</label>
+                <select id="zo" value={zona} onChange={e=>setZona(e.target.value)}>
+                  <option value="">Cualquiera</option>
+                  {zonas.map(z=><option key={z} value={z}>{z}</option>)}
+                </select></div>
+
+              <div className="sep"></div>
+
+              <div className="field"><label htmlFor="no">Tu nombre</label>
+                <input id="no" value={nombre} onChange={e=>setNombre(e.target.value)} /></div>
+              <div className="field"><label htmlFor="ct">Tu WhatsApp o mail</label>
+                <input id="ct" value={contacto} onChange={e=>setContacto(e.target.value)} placeholder="Para que te respondan" /></div>
+
+              <div className="field full"><label htmlFor="ms">Algo más que quieras aclarar</label>
+                <textarea id="ms" value={msg} onChange={e=>setMsg(e.target.value)} placeholder="Ej: somos 2 adultos y un bebé, buscamos algo con pileta"></textarea></div>
+
+              <button className="send" onClick={search}>{all ? "Buscar los que coinciden" : "Cargando lugares…"}</button>
+              <p className="fine">Te van a escribir los lugares directamente. Nosotros no intervenimos en el precio ni en la reserva.</p>
+            </div>
           </div>
-          <Field label="Mensaje (opcional)"><textarea value={msg} onChange={e=>setMsg(e.target.value)} rows={3} placeholder="Ej: somos 2 adultos y un bebé, buscamos algo con pileta…" className={inputC+" resize-none"} /></Field>
-          <button onClick={search} className="w-full rounded-xl py-3 ff-body font-semibold text-white" style={{background:C.moss}}>Buscar cabañas</button>
         </div>
 
         {results && (
-          <div id="res" className="mt-8">
+          <div className="res" id="res">
             {results.length===0 ? (
-              <div className="bg-white rounded-2xl border border-black/5 p-8 text-center">
-                <p className="ff-display text-xl" style={{color:C.ink}}>No encontramos cabañas con ese filtro</p>
-                <p className="ff-body text-stone-500 mt-2">Probá ampliando las fechas, los huéspedes o el presupuesto.</p>
+              <div className="nada">
+                <h2>No encontramos lugares con ese filtro</h2>
+                <p>Probá ampliando las fechas, los huéspedes o el presupuesto.</p>
               </div>
             ) : (
-              <>
-                <div className="rounded-2xl p-5 mb-5" style={{background:"#e7efe3"}}>
-                  <p className="ff-display text-xl" style={{color:C.moss}}>Encontramos {results.length} {results.length===1?"cabaña":"cabañas"} para vos</p>
-                  <p className="ff-body text-sm text-stone-600 mt-1">Mandá tu consulta a todas las que tienen mail con un solo envío (van en copia oculta, no se ven entre ellas).</p>
+              <div>
+                <div className="resHead worn dark">
+                  <h2>Encontramos {results.length} {results.length===1?"lugar":"lugares"} para vos</h2>
                   {conMail.length>0 ? (
-                    <a href={mailtoUrl()} className="inline-block mt-3 rounded-xl px-5 py-3 ff-body font-semibold text-white no-underline" style={{background:C.moss}}>✉️ Enviar consulta por mail a {conMail.length} {conMail.length===1?"cabaña":"cabañas"}</a>
+                    <div>
+                      <p>Mandá tu consulta a todos los que tienen mail con un solo envío. Van en copia oculta, así que no se ven entre ellos. Se abre tu aplicación de correo con todo escrito: vos solo tocás enviar.</p>
+                      <a className="mail" href={mailtoUrl()}>Enviar la consulta a {conMail.length} {conMail.length===1?"lugar":"lugares"}</a>
+                    </div>
                   ) : (
-                    <p className="ff-body text-sm mt-3 text-stone-500">Ninguna de estas cargó su mail todavía, pero podés escribirles por WhatsApp acá abajo 👇</p>
+                    <p>Ninguno de estos cargó su mail todavía, pero podés escribirles por WhatsApp acá abajo.</p>
                   )}
-                  <p className="ff-body text-xs text-stone-500 mt-2">Se abrirá tu app de mail con todo escrito; solo tocás “enviar”.</p>
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-4">
+                <div className="cards">
                   {results.map(c=>(
-                    <div key={c.slug} className="lift bg-white rounded-2xl border border-black/5 overflow-hidden">
-                      <a href={`cabana.html?slug=${c.slug}`} className="block h-36 bg-stone-200" style={IMG(c.banner||c.photos[0])?{backgroundImage:`url(${IMG(c.banner||c.photos[0])})`,backgroundSize:"cover",backgroundPosition:"center"}:{}}></a>
-                      <div className="p-4">
-                        <h3 className="ff-display text-lg" style={{color:C.ink}}>{c.name}</h3>
-                        <p className="ff-body text-sm text-stone-500">{c.zone}</p>
-                        <p className="ff-body text-sm mt-1" style={{color:C.ink}}><span className="font-bold">{money(c.price)}</span> / noche · hasta {c.capacity}</p>
-                        <div className="flex gap-2 mt-3">
-                          {c.whatsapp && <a href={`https://wa.me/${c.whatsapp}?text=${waText(c)}`} target="_blank" rel="noreferrer" className="flex-1 text-center rounded-lg px-3 py-2 ff-body text-sm font-semibold text-white no-underline" style={{background:"#25D366"}}>WhatsApp</a>}
-                          <a href={`cabana.html?slug=${c.slug}`} className="rounded-lg px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600 no-underline">Ver</a>
+                    <div className="card worn" key={c.slug}>
+                      <a className="ph" href={"cabana.html?slug="+c.slug+opSuffix}>
+                        {IMG(c.banner||c.photos[0]) && <img src={IMG(c.banner||c.photos[0])} alt={c.name} loading="lazy" />}
+                      </a>
+                      <div className="body">
+                        <h3>{c.name}</h3>
+                        <p className="meta">{c.zone}{c.capacity?(" · hasta "+c.capacity):""}</p>
+                        <p className="precio">{money(c.price)} <span className="meta">noche</span></p>
+                        <div className="acts">
+                          {c.whatsapp && <a className="wsp" href={`https://wa.me/${c.whatsapp}?text=${waText(c)}`} target="_blank" rel="noreferrer">WhatsApp</a>}
+                          <a className="ver" href={"cabana.html?slug="+c.slug+opSuffix}>Ver</a>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
-              </>
+              </div>
             )}
           </div>
         )}
 
-        <p className="ff-body text-xs text-stone-400 text-center mt-10">Visitando Tandil · Creado por <a href="https://www.instagram.com/co.makers_/" target="_blank" rel="noopener noreferrer" style={{color:"inherit",textDecoration:"underline"}}>comaker</a></p>
-      </div>
+        {!all && <p className="cargando">Cargando los lugares…</p>}
+      </section>
+
+      <footer>
+        <span>Visitando Tandil · Creado por <a href="https://www.instagram.com/co.makers_/" target="_blank" rel="noopener noreferrer">comaker</a></span>
+      </footer>
     </div>
   );
 }
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
-</script>
-<script>
-(function(){
-  function setup(){
-    if(!('IntersectionObserver' in window)){document.querySelectorAll('.reveal').forEach(function(e){e.classList.add('in')});return;}
-    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:0.12,rootMargin:'0px 0px -6% 0px'});
-    function scan(){document.querySelectorAll('.reveal:not(.in)').forEach(function(el){io.observe(el);});}
-    scan();
-    new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
-  }
-  if(document.readyState!=='loading'){setup();}else{document.addEventListener('DOMContentLoaded',setup);}
-})();
 </script>
 </body>
 </html>
