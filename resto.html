@@ -527,6 +527,11 @@ html{ scroll-padding-top:calc(var(--topH,108px) + 12px) }
   /* en celular sí necesita un respiro, porque la franja es una tarjeta redondeada */
   .sabana, .cards{ margin-top:14px !important }
 }
+
+/* tres columnas siempre: cuatro solo entran si ensanchamos todo el sitio */
+@media(min-width:1500px){
+  .cards, .gA{ grid-template-columns:repeat(3,1fr) !important }
+}
 </style>
 </head>
 <body>
