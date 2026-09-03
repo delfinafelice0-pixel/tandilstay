@@ -324,11 +324,48 @@ const delFromStorage = async (url) => { try { const m=String(url||"").match(/\/s
 const EMPTY = { name:"", operator:"", zone:"", whatsapp:"", blurb:"", capacity:2, bedrooms:1, bathrooms:1, price:0, weekendPrice:null, amenities:[], petFriendly:false, promoText:"", promos:[], blocked:[], overrides:{}, units:[], videos:[], banner:"", photos:[], ical_urls:[], email:"", minNights:1, type:"" };
 
 const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, promoText:r.promo_text||"", promos:r.promos||[], blocked:r.blocked||[], overrides:r.overrides||{}, units:r.units||[], videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], ical_urls:r.ical_urls||[], ical_blocked:r.ical_blocked||[], ical_synced_at:r.ical_synced_at||null, email:r.email||"", minNights:r.min_nights||1, type:r.type||"" });
-const toRow = (c) => { const r = { slug: c.slug || slugify(c.name), name:c.name, operator:c.operator, zone:c.zone, whatsapp:c.whatsapp, blurb:c.blurb, capacity:c.capacity, bedrooms:c.bedrooms, bathrooms:c.bathrooms, price:c.price, weekend_price:c.weekendPrice, amenities:c.amenities, pet_friendly:c.petFriendly, promo_text:c.promoText, promos:c.promos, blocked:c.blocked, overrides:c.overrides, units:c.units, videos:c.videos, banner:c.banner, photos:c.photos, ical_urls:c.ical_urls||[], email:c.email, min_nights:c.minNights||1, type:c.type||null }; if (c.id) r.id = c.id; return r; };
+// Los datos generales de huéspedes/dormitorios/baños ya no se cargan a mano:
+// se calculan como el máximo de las unidades, para que el buscador y las fichas públicas sigan filtrando bien.
+const maxDeUnidades = (units, k, fallback) => {
+  const vals = (units||[]).map(u=>Number(u&&u[k])||0).filter(n=>n>0);
+  return vals.length ? Math.max(...vals) : (Number(fallback)||1);
+};
+const toRow = (c) => { const r = { slug: c.slug || slugify(c.name), name:c.name, operator:c.operator, zone:c.zone, whatsapp:c.whatsapp, blurb:c.blurb, capacity:maxDeUnidades(c.units,"capacity",c.capacity), bedrooms:maxDeUnidades(c.units,"bedrooms",c.bedrooms), bathrooms:maxDeUnidades(c.units,"bathrooms",c.bathrooms), price:c.price, weekend_price:c.weekendPrice, amenities:c.amenities, pet_friendly:c.petFriendly, promo_text:c.promoText, promos:c.promos, blocked:c.blocked, overrides:c.overrides, units:c.units, videos:c.videos, banner:c.banner, photos:c.photos, ical_urls:c.ical_urls||[], email:c.email, min_nights:c.minNights||1, type:c.type||null }; if (c.id) r.id = c.id; return r; };
 
 const nightlyPrice = (c,d) => (c.overrides && c.overrides[d]!=null ? c.overrides[d] : (isWeekend(d) && c.weekendPrice ? c.weekendPrice : c.price));
 
-function Calendar({ cursor, setCursor, blocked, selectedDay, onDay, priceOf }) {
+// ── Reservas ────────────────────────────────────────────────
+// Las noches de una estadía: incluye la entrada, NO incluye el día de salida.
+const nightsBetween = (a,b) => {
+  const out=[]; if(!a) return out;
+  const end = b ? parseD(b) : addDay(parseD(a),1);
+  let d = parseD(a);
+  let guard = 0;
+  while(d < end && guard < 400){ out.push(iso(d)); d = addDay(d,1); guard++; }
+  return out;
+};
+const nightsCount = (a,b) => nightsBetween(a,b).length;
+const dmy = (s) => s ? s.split("-").reverse().slice(0,2).join("/") : "—";
+const dmyLong = (s) => { if(!s) return "—"; const d=parseD(s); return DOW[d.getDay()]+" "+d.getDate()+" "+MONTHS[d.getMonth()].slice(0,3).toLowerCase(); };
+const RES_EMPTY = { slug:"", unit:"", guest_name:"", guest_phone:"", guest_email:"", people:2, start_date:"", end_date:"", status:"confirmada", total:0, deposit:0, channel:"Directo", notes:"" };
+const CANALES = ["Directo","WhatsApp","Instagram","Booking","Airbnb","Otro"];
+const EST = { pendiente:{l:"Pendiente",bg:"#fdf0d8",fg:"#9a6b1e"}, confirmada:{l:"Confirmada",bg:"#e7efe3",fg:"#2E3521"}, cancelada:{l:"Cancelada",bg:"#f1efe9",fg:"#8a8578"} };
+const uKey = (s) => s || "*";
+// Vuelve a armar los días ocupados de cada unidad: los que bloqueó el operador a mano + los de las reservas.
+const recalcUnidades = (cab, reservasDelSlug) => (cab.units||[]).map((u,i)=>{
+  const manual = u.blockedManual || u.blocked || [];
+  const nombre = u.name || ("Cabaña "+(i+1));
+  const porReserva = [];
+  reservasDelSlug.forEach(r=>{
+    if(r.status==="cancelada") return;
+    if(!r.unit || r.unit===nombre || r.unit===u.name) porReserva.push(...nightsBetween(r.start_date, r.end_date));
+  });
+  const res = [...new Set(porReserva)];
+  return { ...u, blockedManual:manual, resBlocked:res, blocked:[...new Set([...manual, ...res])] };
+});
+
+function Calendar({ cursor, setCursor, blocked, locked, selectedDay, onDay, priceOf }) {
+  const lock = locked||[];
   const y=cursor.getFullYear(), m=cursor.getMonth();
   const startDow=new Date(y,m,1).getDay();
   const dim=new Date(y,m+1,0).getDate();
@@ -347,16 +384,18 @@ function Calendar({ cursor, setCursor, blocked, selectedDay, onDay, priceOf }) {
           if(!d) return <div key={i} />;
           const day=`${y}-${pad(m+1)}-${pad(d)}`;
           const past=parseD(day)<TODAY;
+          const isRes=lock.includes(day);
           const isBlocked=blocked.includes(day);
           const isSel=day===selectedDay;
           let cls="ff-body rounded-lg flex flex-col items-center justify-center transition text-sm "+(priceOf?"h-12":"h-9")+" ";
           let style={};
           if(past) cls+="text-stone-300 line-through cursor-not-allowed";
+          else if(isRes){ cls+="cursor-pointer"; style.background="#e7efe3"; style.color=C.moss; style.fontWeight=600; }
           else if(isBlocked) cls+="bg-rose-100 text-rose-500 cursor-pointer";
           else cls+="text-stone-700 cursor-pointer hover:bg-black/5";
           if(isSel) style.boxShadow=`0 0 0 2px ${C.clay}`;
           return (
-            <button key={i} className={cls} style={style} disabled={past} onClick={()=>onDay(day,{past,isBlocked})}>
+            <button key={i} className={cls} style={style} disabled={past} title={isRes?"Reservado":""} onClick={()=>onDay(day,{past,isBlocked,isRes})}>
               <span>{d}</span>
               {priceOf && !past && <span className="text-[9px] leading-none mt-0.5 opacity-70">{kFmt(priceOf(day))}</span>}
             </button>
@@ -437,7 +476,7 @@ function Editor({ c, set }) {
   };
   const calIdx = () => Math.max(0, Math.min(calUnit, (c.units||[]).length-1));
   const unitPrice = (u) => ({ price:(u&&u.price!=null&&u.price!=="")?+u.price:c.price, weekendPrice:(u&&u.weekendPrice!=null&&u.weekendPrice!=="")?+u.weekendPrice:c.weekendPrice, overrides:(u&&u.overrides)||{} });
-  const toggleBlock = (day) => { const k=calIdx(); set({...c, units:c.units.map((x,j)=>{ if(j!==k) return x; const bl=x.blocked||[]; return {...x, blocked: bl.includes(day)?bl.filter(d=>d!==day):[...bl,day]}; })}); };
+  const toggleBlock = (day) => { const k=calIdx(); set({...c, units:c.units.map((x,j)=>{ if(j!==k) return x; const man=x.blockedManual||x.blocked||[]; const res=x.resBlocked||[]; const nm=man.includes(day)?man.filter(d=>d!==day):[...man,day]; return {...x, blockedManual:nm, resBlocked:res, blocked:[...new Set([...nm,...res])]}; })}); };
   const setOverride = (val) => { const k=calIdx(); set({...c, units:c.units.map((x,j)=>{ if(j!==k) return x; const o={...(x.overrides||{})}; if(val) o[selDay]=+val; else delete o[selDay]; return {...x, overrides:o}; })}); };
   return (
     <div className="grid md:grid-cols-2 gap-6">
@@ -451,29 +490,39 @@ function Editor({ c, set }) {
           <Field label="Email de contacto (para consultas)"><input type="email" value={c.email} onChange={e=>set({...c,email:e.target.value})} placeholder="tucabaña@mail.com" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
           <Field label="Operador / cuenta (agrupa alojamientos de un mismo dueño)"><input value={c.operator} onChange={e=>set({...c,operator:e.target.value})} placeholder="Ej: hospedatentandil" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
           <Field label="Descripción"><textarea value={c.blurb} onChange={e=>set({...c,blurb:e.target.value})} rows={3} className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm resize-none" /></Field>
-          <div className="grid grid-cols-3 gap-3">
-            {[["capacity","Huéspedes"],["bedrooms","Dormit."],["bathrooms","Baños"]].map(([k,l])=>(
-              <Field key={k} label={l}><div className="flex items-center gap-1.5"><button onClick={()=>set({...c,[k]:Math.max(1,c[k]-1)})} className="p-1.5 border border-stone-300 rounded-lg">−</button><span className="ff-body font-semibold w-5 text-center">{c[k]}</span><button onClick={()=>set({...c,[k]:c[k]+1})} className="p-1.5 border border-stone-300 rounded-lg">+</button></div></Field>
-            ))}
-          </div>
+          <Field label="Tipo de propiedad"><div className="flex flex-wrap gap-2">{TYPES.map(t=>{const on=c.type===t;return <button key={t} onClick={()=>set({...c,type:on?"":t})} className={"rounded-full px-3 py-1.5 ff-body text-sm border "+(on?"text-white":"text-stone-600 border-stone-300")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{t}{on?" ✓":""}</button>;})}</div></Field>
+          <Field label="Mínimo de noches"><div className="flex items-center gap-2"><button onClick={()=>set({...c,minNights:Math.max(1,(c.minNights||1)-1)})} className="px-3 py-1.5 border border-stone-300 rounded-lg">−</button><span className="ff-body text-sm w-20 text-center">{(c.minNights||1)+" "+((c.minNights||1)===1?"noche":"noches")}</span><button onClick={()=>set({...c,minNights:(c.minNights||1)+1})} className="px-3 py-1.5 border border-stone-300 rounded-lg">+</button></div></Field>
+          <p className="ff-body text-xs text-stone-400 -mt-1">Los huéspedes, dormitorios y baños se cargan abajo, en cada cabaña.</p>
         </div>
 
         <div className="bg-white rounded-2xl border border-black/5 p-5">
           <h3 className="ff-display text-lg mb-1" style={{color:C.ink}}>🏡 Unidades / cabañas</h3>
-          <p className="ff-body text-sm text-stone-500 mb-3">Cargá cada cabaña del complejo con cuántos huéspedes entran.</p>
+          <p className="ff-body text-sm text-stone-500 mb-3">Cargá cada cabaña o departamento con sus huéspedes, dormitorios y baños. Su disponibilidad y su precio se cargan en el calendario de la derecha.</p>
           <div className="space-y-2">
             {(c.units||[]).map((u,i)=>(
               <div key={i} className="border border-stone-200 rounded-xl p-3 space-y-2">
                 <div className="flex items-center gap-2">
                   <input value={u.name} onChange={e=>set({...c,units:c.units.map((x,j)=>j===i?{...x,name:e.target.value}:x)})} placeholder={"Cabaña "+(i+1)} className="flex-1 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
-                  <div className="flex items-center gap-1">
-                    <button onClick={()=>set({...c,units:c.units.map((x,j)=>j===i?{...x,capacity:Math.max(1,(x.capacity||1)-1)}:x)})} className="p-1.5 border border-stone-300 rounded-lg">−</button>
-                    <span className="ff-body text-sm w-12 text-center">{u.capacity||1} 👥</span>
-                    <button onClick={()=>set({...c,units:c.units.map((x,j)=>j===i?{...x,capacity:(x.capacity||1)+1}:x)})} className="p-1.5 border border-stone-300 rounded-lg">+</button>
-                  </div>
                   <button onClick={()=>set({...c,units:c.units.filter((_,j)=>j!==i)})} className="text-rose-500">🗑️</button>
                 </div>
                 {(()=>{ const ph=(u.photos&&u.photos.length)?u.photos:(u.photo?[u.photo]:[]); const vids=(u.videos&&u.videos.length)?u.videos:(u.video?[u.video]:[]); const setU=(patch)=>set({...c,units:c.units.map((x,j)=>j===i?{...x,...patch}:x)}); return (<>
+                <div className="rounded-xl px-3 py-2.5" style={{background:C.paper}}>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[["capacity","Huéspedes",c.capacity],["bedrooms","Dormit.",c.bedrooms],["bathrooms","Baños",c.bathrooms]].map(([k,l,def])=>{
+                      const val = (u[k]!=null && u[k]!=="") ? Number(u[k]) : (Number(def)||1);
+                      return (
+                        <div key={k}>
+                          <span className="ff-body text-[11px] font-semibold text-stone-500 uppercase tracking-wide">{l}</span>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <button onClick={()=>setU({[k]:Math.max(1,val-1)})} className="p-1.5 border border-stone-300 rounded-lg bg-white">−</button>
+                            <span className="ff-body font-semibold w-5 text-center">{val}</span>
+                            <button onClick={()=>setU({[k]:val+1})} className="p-1.5 border border-stone-300 rounded-lg bg-white">+</button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
                 <div>
                   <span className="ff-body text-[11px] font-semibold text-stone-500 uppercase tracking-wide">Fotos de esta cabaña</span>
                   <div className="flex flex-wrap gap-2 mt-1">
@@ -504,17 +553,12 @@ function Editor({ c, set }) {
               </div>
             ))}
           </div>
-          <button onClick={()=>set({...c,units:[...(c.units||[]),{name:"",capacity:2}]})} className="mt-3 ff-body text-sm font-semibold" style={{color:C.clay}}>+ Agregar cabaña</button>
+          <button onClick={()=>set({...c,units:[...(c.units||[]),{name:"",capacity:2,bedrooms:1,bathrooms:1}]})} className="mt-3 ff-body text-sm font-semibold" style={{color:C.clay}}>+ Agregar cabaña</button>
         </div>
 
         <div className="bg-white rounded-2xl border border-black/5 p-5">
-          <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Tipo y estadía</h3>
-          <Field label="Tipo de propiedad"><div className="flex flex-wrap gap-2">{TYPES.map(t=>{const on=c.type===t;return <button key={t} onClick={()=>set({...c,type:on?"":t})} className={"rounded-full px-3 py-1.5 ff-body text-sm border "+(on?"text-white":"text-stone-600 border-stone-300")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{t}{on?" ✓":""}</button>;})}</div></Field>
-          <Field label="Mínimo de noches"><div className="flex items-center gap-2"><button onClick={()=>set({...c,minNights:Math.max(1,(c.minNights||1)-1)})} className="px-3 py-1.5 border border-stone-300 rounded-lg">−</button><span className="ff-body text-sm w-20 text-center">{(c.minNights||1)+" "+((c.minNights||1)===1?"noche":"noches")}</span><button onClick={()=>set({...c,minNights:(c.minNights||1)+1})} className="px-3 py-1.5 border border-stone-300 rounded-lg">+</button></div></Field>
-        </div>
-
-        <div className="bg-white rounded-2xl border border-black/5 p-5">
-          <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Precios</h3>
+          <h3 className="ff-display text-lg mb-1" style={{color:C.ink}}>Precios base</h3>
+          <p className="ff-body text-xs text-stone-500 mb-3">Se usan cuando una cabaña no tiene precio propio cargado.</p>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Precio noche"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="text-stone-400 text-sm">$</span><input type="number" value={c.price} onChange={e=>set({...c,price:+e.target.value})} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
             <Field label="Precio finde"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="text-stone-400 text-sm">$</span><input type="number" placeholder={String(c.price)} value={c.weekendPrice||""} onChange={e=>set({...c,weekendPrice:e.target.value?+e.target.value:null})} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
@@ -617,11 +661,11 @@ function Editor({ c, set }) {
             <button onClick={()=>{setMode("price");setSelDay(null);}} className={"flex-1 rounded-xl py-2 ff-body text-sm border "+(mode==="price"?"border-amber-300 text-amber-700 bg-amber-50":"border-stone-300 text-stone-600")}>🏷️ Precio por día</button>
           </div>
           {mode==="block" ? (
-            <div><p className="ff-body text-sm text-stone-500 mb-3">Tocá un día para ocuparlo o liberarlo.</p><Calendar cursor={cursor} setCursor={setCursor} blocked={cu.blocked||[]} onDay={(day,info)=>{if(!info.past) toggleBlock(day);}} /></div>
+            <div><p className="ff-body text-sm text-stone-500 mb-3">Tocá un día para ocuparlo o liberarlo. Los días en verde vienen de una reserva cargada y se cambian desde 📅 Reservas.</p><Calendar cursor={cursor} setCursor={setCursor} blocked={cu.blockedManual||cu.blocked||[]} locked={cu.resBlocked||[]} onDay={(day,info)=>{if(info.past)return; if(info.isRes){ alert("Ese día está tomado por una reserva. Editala o borrala desde la pestaña 📅 Reservas."); return; } toggleBlock(day);}} /></div>
           ) : (
             <div>
               <p className="ff-body text-sm text-stone-500 mb-3">Tocá un día para ponerle precio especial.</p>
-              <Calendar cursor={cursor} setCursor={setCursor} blocked={cu.blocked||[]} selectedDay={selDay} priceOf={(d)=>nightlyPrice(up,d)} onDay={(day,info)=>{if(info.past)return;setSelDay(day);setPriceInput((cu.overrides&&cu.overrides[day]!=null)?String(cu.overrides[day]):"");}} />
+              <Calendar cursor={cursor} setCursor={setCursor} blocked={cu.blockedManual||cu.blocked||[]} locked={cu.resBlocked||[]} selectedDay={selDay} priceOf={(d)=>nightlyPrice(up,d)} onDay={(day,info)=>{if(info.past)return;setSelDay(day);setPriceInput((cu.overrides&&cu.overrides[day]!=null)?String(cu.overrides[day]):"");}} />
               {selDay && (
                 <div className="mt-4 bg-stone-50 rounded-xl p-3">
                   <div className="ff-body text-sm text-stone-700 mb-2">Precio para <strong>{selDay}</strong></div>
@@ -638,6 +682,350 @@ function Editor({ c, set }) {
         ); })()}
       </div>
     </div>
+    </div>
+  );
+}
+
+function Reservas({ profile, cabins, afterSync }) {
+  const [res,setRes]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [err,setErr]=useState("");
+  const [tab,setTab]=useState("hoy");
+  const [form,setForm]=useState(null);
+  const [saving,setSaving]=useState(false);
+  const [formMsg,setFormMsg]=useState("");
+  const [gridFrom,setGridFrom]=useState(iso(TODAY));
+  const [gridLen,setGridLen]=useState(14);
+  const [mes,setMes]=useState(iso(TODAY).slice(0,7));
+  const hoy = iso(TODAY);
+
+  const traer = async () => {
+    const { data, error } = await db.from("reservations").select("*").eq("rubro","hospedaje").order("start_date",{ascending:true});
+    if(error){ setErr("No se pudieron leer las reservas. ¿Corriste el SQL de reservas en Supabase?"); return []; }
+    setErr(""); setRes(data||[]); return data||[];
+  };
+  useEffect(()=>{ (async()=>{ setLoading(true); await traer(); setLoading(false); })(); },[]);
+
+  // Una fila por cada cabaña de cada alojamiento del operador.
+  const filas = [];
+  (cabins||[]).forEach(c=>{
+    const us = c.units||[];
+    if(us.length) us.forEach((u,i)=> filas.push({ slug:c.slug, cab:c.name, name:u.name||("Cabaña "+(i+1)), cap:u.capacity||c.capacity, manual:(u.blockedManual||u.blocked||[]), c, u }));
+    else filas.push({ slug:c.slug, cab:c.name, name:"", cap:c.capacity, manual:(c.blocked||[]), c, u:null });
+  });
+  const variosAloj = new Set(filas.map(f=>f.slug)).size > 1;
+  const etiqueta = (f) => variosAloj ? (f.cab + (f.name?" · "+f.name:"")) : (f.name || f.cab);
+
+  const activas = res.filter(r=>r.status!=="cancelada");
+  const mapa = {};
+  activas.forEach(r=> nightsBetween(r.start_date,r.end_date).forEach(d=>{ mapa[r.slug+"|"+uKey(r.unit)+"|"+d] = r; }));
+  const reservaEn = (f,day) => mapa[f.slug+"|"+uKey(f.name)+"|"+day] || mapa[f.slug+"|*|"+day];
+
+  const sugerirTotal = (f) => {
+    const cab=(cabins||[]).find(c=>c.slug===f.slug); if(!cab) return 0;
+    const u=(cab.units||[]).find(x=>(x.name||"")===f.unit);
+    const p={ price:(u&&u.price!=null&&u.price!=="")?+u.price:cab.price, weekendPrice:(u&&u.weekendPrice!=null&&u.weekendPrice!=="")?+u.weekendPrice:cab.weekendPrice, overrides:(u&&u.overrides)||cab.overrides||{} };
+    return nightsBetween(f.start_date,f.end_date).reduce((s,d)=>s+(Number(nightlyPrice(p,d))||0),0);
+  };
+
+  // Después de tocar una reserva: recargar y volver a escribir los días ocupados en la ficha.
+  const sincronizar = async (slug) => {
+    const todas = await traer();
+    const cab = (cabins||[]).find(c=>c.slug===slug);
+    if(cab && cab.id && (cab.units||[]).length){
+      const units = recalcUnidades(cab, todas.filter(r=>r.slug===slug));
+      await db.from("cabins").update({ units }).eq("id", cab.id);
+      if(afterSync) afterSync();
+    }
+  };
+
+  const abrirNueva = (pre={}) => { setFormMsg(""); setForm({ ...RES_EMPTY, slug:(filas[0]&&filas[0].slug)||"", unit:(filas[0]&&filas[0].name)||"", ...pre }); };
+
+  const guardar = async () => {
+    const f=form;
+    if(!f.slug){ setFormMsg("Elegí el alojamiento."); return; }
+    if(!String(f.guest_name||"").trim()){ setFormMsg("Poné el nombre del huésped."); return; }
+    if(!f.start_date || !f.end_date){ setFormMsg("Cargá la entrada y la salida."); return; }
+    if(nightsCount(f.start_date,f.end_date)<1){ setFormMsg("La salida tiene que ser posterior a la entrada."); return; }
+    const noches = nightsBetween(f.start_date,f.end_date);
+    const choque = activas.find(r=> r.id!==f.id && r.slug===f.slug && (!r.unit || !f.unit || r.unit===f.unit) && nightsBetween(r.start_date,r.end_date).some(d=>noches.includes(d)));
+    if(choque && !confirm("Esa cabaña ya tiene la reserva de "+choque.guest_name+" del "+dmy(choque.start_date)+" al "+dmy(choque.end_date)+". ¿Guardar igual?")) return;
+    setSaving(true);
+    const row = { rubro:"hospedaje", operator:(profile&&profile.operator)||"", slug:f.slug, unit:f.unit||"", guest_name:f.guest_name, guest_phone:f.guest_phone||"", guest_email:f.guest_email||"", people:+f.people||1, start_date:f.start_date, end_date:f.end_date, status:f.status, total:+f.total||0, deposit:+f.deposit||0, channel:f.channel||"Directo", notes:f.notes||"" };
+    if(f.id) row.id=f.id;
+    const { error } = await db.from("reservations").upsert(row);
+    setSaving(false);
+    if(error){ setFormMsg("No se pudo guardar: "+error.message); return; }
+    await sincronizar(f.slug);
+    setForm(null);
+  };
+
+  const borrar = async (r) => {
+    if(!confirm("¿Borrar la reserva de "+r.guest_name+"?")) return;
+    await db.from("reservations").delete().eq("id",r.id);
+    await sincronizar(r.slug);
+  };
+
+  if(loading) return <p className="ff-body text-stone-500 text-center py-16">Cargando reservas…</p>;
+
+  const entran = activas.filter(r=>r.start_date===hoy);
+  const salen  = activas.filter(r=>r.end_date===hoy);
+  const ocupadas = filas.filter(f=>reservaEn(f,hoy));
+  const libres   = filas.filter(f=>!reservaEn(f,hoy) && !(f.manual||[]).includes(hoy));
+  const bloqueadas = filas.filter(f=>!reservaEn(f,hoy) && (f.manual||[]).includes(hoy));
+
+  const dias = []; { let d=parseD(gridFrom); for(let i=0;i<gridLen;i++){ dias.push(iso(d)); d=addDay(d,1); } }
+
+  const proximas = res.filter(r=> r.status!=="cancelada" ? ((r.end_date||r.start_date) >= hoy) : (r.start_date >= hoy))
+                      .sort((a,b)=> a.start_date < b.start_date ? -1 : 1);
+  const delMes = res.filter(r=> r.status!=="cancelada" && String(r.start_date||"").slice(0,7)===mes);
+  const sum = (arr,k) => arr.reduce((s,x)=>s+(Number(x[k])||0),0);
+  const totalMes = sum(delMes,"total"), senaMes = sum(delMes,"deposit");
+
+  const Pill = ({ id, children }) => (
+    <button onClick={()=>setTab(id)} className={"rounded-full px-4 py-2 ff-body text-sm border "+(tab===id?"text-white":"text-stone-600 border-stone-300 bg-white")} style={tab===id?{background:C.moss,borderColor:C.moss}:{}}>{children}</button>
+  );
+  const Estado = ({ s }) => { const e=EST[s]||EST.confirmada; return <span className="ff-body text-[11px] rounded-full px-2 py-0.5" style={{background:e.bg,color:e.fg}}>{e.l}</span>; };
+
+  const Tarjeta = ({ r }) => {
+    const f = filas.find(x=>x.slug===r.slug && x.name===(r.unit||""));
+    const saldo = (Number(r.total)||0)-(Number(r.deposit)||0);
+    return (
+      <div className="border border-stone-200 rounded-xl p-3">
+        <div className="flex items-start gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="ff-display text-lg" style={{color:C.ink}}>{r.guest_name}</span>
+              <Estado s={r.status} />
+            </div>
+            <p className="ff-body text-sm text-stone-500">{r.unit || (f?f.cab:"Toda la propiedad")}{variosAloj&&f?" · "+f.cab:""} · {r.people} {r.people===1?"huésped":"huéspedes"}</p>
+            <p className="ff-body text-sm mt-1" style={{color:C.ink}}>{dmyLong(r.start_date)} → {dmyLong(r.end_date)} · {nightsCount(r.start_date,r.end_date)} noches</p>
+            {(Number(r.total)||0)>0 && <p className="ff-body text-sm text-stone-500">{money(r.total)} · seña {money(r.deposit)} · <b style={{color:saldo>0?C.clay:C.moss}}>saldo {money(saldo)}</b></p>}
+            {r.notes && <p className="ff-body text-xs text-stone-400 mt-1">{r.notes}</p>}
+          </div>
+          <div className="flex flex-col gap-1 shrink-0">
+            {r.guest_phone && <a href={"https://wa.me/"+String(r.guest_phone).replace(/\D/g,"")} target="_blank" rel="noreferrer" className="rounded-lg px-2 py-1 ff-body text-xs border border-stone-300 text-stone-600">💬</a>}
+            <button onClick={()=>{setFormMsg("");setForm({...r});}} className="rounded-lg px-2 py-1 ff-body text-xs border border-stone-300 text-stone-600">✎</button>
+            <button onClick={()=>borrar(r)} className="rounded-lg px-2 py-1 ff-body text-xs border border-stone-300 text-rose-500">🗑️</button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const cabSel = (cabins||[]).find(c=>c.slug===(form&&form.slug));
+  const unidadesSel = cabSel ? (cabSel.units||[]).map((u,i)=>u.name||("Cabaña "+(i+1))) : [];
+
+  return (
+    <div>
+      {err && <div className="bg-white rounded-2xl border border-rose-200 p-4 mb-5 ff-body text-sm text-rose-700">{err}</div>}
+
+      <div className="flex items-center gap-2 flex-wrap mb-5">
+        <Pill id="hoy">☀️ Hoy</Pill>
+        <Pill id="grilla">🗓️ Grilla</Pill>
+        <Pill id="proximas">📋 Próximas</Pill>
+        <Pill id="plata">💵 Plata</Pill>
+        <button onClick={()=>abrirNueva()} className="ml-auto rounded-full px-4 py-2 ff-body text-sm font-semibold text-white" style={{background:C.clay}}>+ Nueva reserva</button>
+      </div>
+
+      {tab==="hoy" && (
+        <div className="space-y-5">
+          <div className="grid grid-cols-3 gap-3">
+            {[["Ocupadas",ocupadas.length,C.moss],["Libres",libres.length,C.clay],["Bloqueadas",bloqueadas.length,"#8a8578"]].map(([l,n,col])=>(
+              <div key={l} className="bg-white rounded-2xl border border-black/5 p-4 text-center">
+                <div className="ff-display text-3xl" style={{color:col}}>{n}</div>
+                <div className="ff-body text-xs text-stone-500">{l} hoy</div>
+              </div>
+            ))}
+          </div>
+          <div className="grid md:grid-cols-2 gap-5">
+            <div className="bg-white rounded-2xl border border-black/5 p-5">
+              <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>🔑 Entran hoy</h3>
+              {entran.length===0 ? <p className="ff-body text-sm text-stone-400">Nadie entra hoy.</p> : <div className="space-y-2">{entran.map(r=><Tarjeta key={r.id} r={r} />)}</div>}
+            </div>
+            <div className="bg-white rounded-2xl border border-black/5 p-5">
+              <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>👋 Salen hoy</h3>
+              {salen.length===0 ? <p className="ff-body text-sm text-stone-400">Nadie sale hoy.</p> : <div className="space-y-2">{salen.map(r=><Tarjeta key={r.id} r={r} />)}</div>}
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl border border-black/5 p-5">
+            <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Estado de las cabañas hoy</h3>
+            {filas.length===0 ? <p className="ff-body text-sm text-stone-400">Todavía no cargaste ninguna cabaña.</p> : (
+              <div className="space-y-2">
+                {filas.map((f,i)=>{ const r=reservaEn(f,hoy); const blq=!r && (f.manual||[]).includes(hoy);
+                  return (
+                    <div key={i} className="flex items-center gap-3 border border-stone-200 rounded-xl px-3 py-2.5">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{background: r?C.moss : (blq?"#c9c4b7":C.clay)}}></span>
+                      <div className="min-w-0 flex-1">
+                        <div className="ff-body text-sm font-semibold" style={{color:C.ink}}>{etiqueta(f)}</div>
+                        <div className="ff-body text-xs text-stone-500">{r ? (r.guest_name+" · sale "+dmy(r.end_date)) : (blq ? "Bloqueada a mano" : "Libre · hasta "+f.cap+" huéspedes")}</div>
+                      </div>
+                      {!r && !blq && <button onClick={()=>abrirNueva({slug:f.slug, unit:f.name, start_date:hoy, end_date:iso(addDay(TODAY,1))})} className="ff-body text-xs font-semibold shrink-0" style={{color:C.clay}}>+ Reservar</button>}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {tab==="grilla" && (
+        <div className="bg-white rounded-2xl border border-black/5 p-5">
+          <div className="flex items-center gap-2 flex-wrap mb-4">
+            <button onClick={()=>setGridFrom(iso(addDay(parseD(gridFrom),-gridLen)))} className="rounded-lg px-3 py-1.5 ff-body text-sm border border-stone-300">‹</button>
+            <span className="ff-body text-sm text-stone-600">{dmy(dias[0])} — {dmy(dias[dias.length-1])}</span>
+            <button onClick={()=>setGridFrom(iso(addDay(parseD(gridFrom),gridLen)))} className="rounded-lg px-3 py-1.5 ff-body text-sm border border-stone-300">›</button>
+            <button onClick={()=>setGridFrom(hoy)} className="rounded-lg px-3 py-1.5 ff-body text-sm border border-stone-300">Hoy</button>
+            <div className="ml-auto flex gap-1">{[14,30].map(n=><button key={n} onClick={()=>setGridLen(n)} className={"rounded-full px-3 py-1.5 ff-body text-sm border "+(gridLen===n?"text-white":"text-stone-600 border-stone-300")} style={gridLen===n?{background:C.moss,borderColor:C.moss}:{}}>{n} días</button>)}</div>
+          </div>
+          {filas.length===0 ? <p className="ff-body text-sm text-stone-400">Todavía no cargaste ninguna cabaña.</p> : (
+            <div className="overflow-x-auto -mx-2 px-2">
+              <div style={{minWidth: (170 + dias.length*32)+"px"}}>
+                <div className="grid items-end mb-1" style={{gridTemplateColumns:"170px repeat("+dias.length+", 32px)"}}>
+                  <div></div>
+                  {dias.map(d=>(
+                    <div key={d} className="text-center">
+                      <div className="ff-body text-[10px] text-stone-400">{DOW[parseD(d).getDay()][0]}</div>
+                      <div className={"ff-body text-[11px] "+(d===hoy?"font-bold":"text-stone-500")} style={d===hoy?{color:C.clay}:{}}>{parseD(d).getDate()}</div>
+                    </div>
+                  ))}
+                </div>
+                {filas.map((f,i)=>(
+                  <div key={i} className="grid items-center gap-y-1" style={{gridTemplateColumns:"170px repeat("+dias.length+", 32px)"}}>
+                    <div className="ff-body text-xs pr-2 truncate" style={{color:C.ink}} title={etiqueta(f)}>{etiqueta(f)}</div>
+                    {dias.map(d=>{
+                      const r=reservaEn(f,d);
+                      const blq=!r && (f.manual||[]).includes(d);
+                      const sigue = r && reservaEn(f,iso(addDay(parseD(d),-1)))===r;
+                      const bg = r ? (r.status==="pendiente"?"#f0d9a8":C.moss) : (blq?"#e4e0d6":"transparent");
+                      return (
+                        <button key={d} title={r?(r.guest_name+" · "+dmy(r.start_date)+"→"+dmy(r.end_date)):(blq?"Bloqueada":"Libre")}
+                          onClick={()=>{ if(r){ setFormMsg(""); setForm({...r}); } else if(!blq && parseD(d)>=TODAY){ abrirNueva({slug:f.slug,unit:f.name,start_date:d,end_date:iso(addDay(parseD(d),1))}); } }}
+                          className="h-7 my-0.5 flex items-center justify-center ff-body text-[10px] overflow-hidden"
+                          style={{ background:bg, color:(r&&r.status!=="pendiente")?"#EDF0E6":C.ink,
+                                   borderTopLeftRadius:sigue?0:8, borderBottomLeftRadius:sigue?0:8,
+                                   borderTopRightRadius:8, borderBottomRightRadius:8,
+                                   border: (r||blq)?"none":"1px dashed rgba(35,38,26,.14)", marginLeft:sigue?-2:0 }}>
+                          {r && !sigue ? String(r.guest_name||"").trim().charAt(0).toUpperCase() : ""}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="flex items-center gap-4 mt-4 ff-body text-xs text-stone-500 flex-wrap">
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{background:C.moss}}></span> Reservada</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{background:"#f0d9a8"}}></span> Pendiente</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{background:"#e4e0d6"}}></span> Bloqueada a mano</span>
+            <span>Tocá un día libre para cargar una reserva.</span>
+          </div>
+        </div>
+      )}
+
+      {tab==="proximas" && (
+        <div className="bg-white rounded-2xl border border-black/5 p-5">
+          <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Próximas reservas</h3>
+          {proximas.length===0 ? <p className="ff-body text-sm text-stone-400">No hay reservas cargadas de acá en adelante.</p> : (
+            <div className="space-y-2">{proximas.map(r=><Tarjeta key={r.id} r={r} />)}</div>
+          )}
+        </div>
+      )}
+
+      {tab==="plata" && (
+        <div className="space-y-5">
+          <div className="bg-white rounded-2xl border border-black/5 p-5">
+            <div className="flex items-center gap-2 flex-wrap mb-4">
+              <h3 className="ff-display text-lg" style={{color:C.ink}}>Entradas del mes</h3>
+              <input type="month" value={mes} onChange={e=>setMes(e.target.value)} className="ml-auto border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {[["Total",totalMes,C.ink],["Cobrado (señas)",senaMes,C.moss],["Falta cobrar",totalMes-senaMes,C.clay]].map(([l,n,col])=>(
+                <div key={l} className="border border-stone-200 rounded-xl p-3 text-center">
+                  <div className="ff-display text-xl" style={{color:col}}>{money(n)}</div>
+                  <div className="ff-body text-xs text-stone-500">{l}</div>
+                </div>
+              ))}
+            </div>
+            <p className="ff-body text-xs text-stone-400 mt-3">Se cuentan las reservas cuya entrada cae en el mes elegido. Las canceladas no suman.</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-black/5 p-5">
+            <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Detalle</h3>
+            {delMes.length===0 ? <p className="ff-body text-sm text-stone-400">No hay reservas en ese mes.</p> : (
+              <div className="space-y-2">
+                {delMes.map(r=>{ const saldo=(Number(r.total)||0)-(Number(r.deposit)||0); return (
+                  <div key={r.id} className="flex items-center gap-3 border border-stone-200 rounded-xl px-3 py-2.5">
+                    <div className="min-w-0 flex-1">
+                      <div className="ff-body text-sm font-semibold" style={{color:C.ink}}>{r.guest_name}</div>
+                      <div className="ff-body text-xs text-stone-500">{dmy(r.start_date)} → {dmy(r.end_date)} · {r.unit||"toda la propiedad"} · {r.channel}</div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="ff-body text-sm" style={{color:C.ink}}>{money(r.total)}</div>
+                      <div className="ff-body text-xs" style={{color:saldo>0?C.clay:C.moss}}>{saldo>0?("falta "+money(saldo)):"cobrada"}</div>
+                    </div>
+                  </div>
+                ); })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {form && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-5" style={{background:"rgba(35,38,26,.45)"}} onClick={()=>setForm(null)}>
+          <div onClick={e=>e.stopPropagation()} className="bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl p-5 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center mb-4">
+              <h3 className="ff-display text-xl" style={{color:C.ink}}>{form.id?"Editar reserva":"Nueva reserva"}</h3>
+              <button onClick={()=>setForm(null)} className="ml-auto text-stone-400 text-xl">✕</button>
+            </div>
+            {filas.length===0 && <p className="ff-body text-sm text-stone-500 mb-3">Primero cargá al menos una cabaña en la pestaña de alojamientos.</p>}
+            {variosAloj && (
+              <Field label="Alojamiento">
+                <select value={form.slug} onChange={e=>setForm({...form,slug:e.target.value,unit:""})} className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm">
+                  {(cabins||[]).map(c=><option key={c.slug} value={c.slug}>{c.name}</option>)}
+                </select>
+              </Field>
+            )}
+            <Field label="Cabaña">
+              <div className="flex flex-wrap gap-2">
+                {unidadesSel.map(n=>{ const on=form.unit===n; return <button key={n} onClick={()=>setForm({...form,unit:n})} className={"rounded-full px-3 py-1.5 ff-body text-sm border "+(on?"text-white":"text-stone-600 border-stone-300")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{n}</button>; })}
+                <button onClick={()=>setForm({...form,unit:""})} className={"rounded-full px-3 py-1.5 ff-body text-sm border "+(form.unit===""?"text-white":"text-stone-600 border-stone-300")} style={form.unit===""?{background:C.moss,borderColor:C.moss}:{}}>Toda la propiedad</button>
+              </div>
+            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Entrada"><input type="date" value={form.start_date} onChange={e=>setForm({...form,start_date:e.target.value})} className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
+              <Field label="Salida"><input type="date" value={form.end_date||""} onChange={e=>setForm({...form,end_date:e.target.value})} className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
+            </div>
+            {form.start_date && form.end_date && nightsCount(form.start_date,form.end_date)>0 && (
+              <p className="ff-body text-sm -mt-1 mb-3" style={{color:C.moss}}>{nightsCount(form.start_date,form.end_date)} noches · el día de salida queda libre para otro huésped.</p>
+            )}
+            <Field label="Nombre del huésped"><input value={form.guest_name} onChange={e=>setForm({...form,guest_name:e.target.value})} placeholder="Ej: Laura Giménez" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="WhatsApp"><input value={form.guest_phone||""} onChange={e=>setForm({...form,guest_phone:e.target.value})} placeholder="5492494…" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
+              <Field label="Huéspedes"><div className="flex items-center gap-2"><button onClick={()=>setForm({...form,people:Math.max(1,(+form.people||1)-1)})} className="px-3 py-1.5 border border-stone-300 rounded-lg">−</button><span className="ff-body text-sm w-6 text-center">{form.people}</span><button onClick={()=>setForm({...form,people:(+form.people||1)+1})} className="px-3 py-1.5 border border-stone-300 rounded-lg">+</button></div></Field>
+            </div>
+            <Field label="Estado">
+              <div className="flex gap-2">{Object.keys(EST).map(s=>{ const on=form.status===s; return <button key={s} onClick={()=>setForm({...form,status:s})} className={"flex-1 rounded-full px-3 py-1.5 ff-body text-sm border "+(on?"text-white":"text-stone-600 border-stone-300")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{EST[s].l}</button>; })}</div>
+            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Total de la estadía"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="text-stone-400 text-sm">$</span><input type="number" value={form.total||""} onChange={e=>setForm({...form,total:e.target.value})} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
+              <Field label="Seña cobrada"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="text-stone-400 text-sm">$</span><input type="number" value={form.deposit||""} onChange={e=>setForm({...form,deposit:e.target.value})} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
+            </div>
+            <button onClick={()=>setForm({...form,total:sugerirTotal(form)})} className="ff-body text-sm font-semibold mb-3" style={{color:C.clay}}>↻ Calcular el total con los precios cargados</button>
+            <Field label="Por dónde reservó">
+              <div className="flex flex-wrap gap-2">{CANALES.map(ch=>{ const on=form.channel===ch; return <button key={ch} onClick={()=>setForm({...form,channel:ch})} className={"rounded-full px-3 py-1.5 ff-body text-sm border "+(on?"text-white":"text-stone-600 border-stone-300")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{ch}</button>; })}</div>
+            </Field>
+            <Field label="Notas"><textarea value={form.notes||""} onChange={e=>setForm({...form,notes:e.target.value})} rows={2} placeholder="Ej: llega tarde, trae perro, pidió cuna" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm resize-none" /></Field>
+            {formMsg && <p className="ff-body text-sm text-rose-600 mb-2">{formMsg}</p>}
+            <div className="flex gap-2">
+              <button onClick={()=>setForm(null)} className="rounded-full px-4 py-2.5 ff-body text-sm border border-stone-300 text-stone-600">Cancelar</button>
+              <button onClick={guardar} disabled={saving} className="flex-1 rounded-full px-4 py-2.5 ff-body text-sm font-semibold text-white disabled:opacity-50" style={{background:C.clay}}>{saving?"Guardando…":"Guardar reserva"}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -696,6 +1084,7 @@ function App() {
   const [toast,setToast]=useState("");
   const [profile,setProfile]=useState(null);
   const [views,setViews]=useState({});
+  const [vista,setVista]=useState("alojamientos");
 
   useEffect(()=>{
     db.auth.getSession().then(({data})=>{ setSession(data.session); setAuthReady(true); });
@@ -776,7 +1165,9 @@ function App() {
           <div className="flex items-center gap-2.5"><div className="grid place-items-center" style={{color:C.moss}}><svg viewBox="0 0 520 200" height="30" fill="none" stroke="currentColor" strokeWidth="13" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{display:"block"}}><circle cx="64" cy="150" r="9" fill="currentColor" stroke="none"></circle><path d="M108,150 C150,148 154,142 186,116 C196,108 207,110 211,123 c -8,2 -10,12 1,13 c 9,1 9,-11 -1,-12 L248,128 L248,92 Q248,82 258,82 L306,82 Q316,82 316,92 L316,128 L316,141 C352,151 410,156 462,154 C470,153 475,151 480,150"></path></svg></div><div><div className="ff-display text-lg leading-none" style={{color:C.ink}}>Panel</div><div className="ff-body text-[11px] text-stone-500">Visitando Tandil</div></div></div>
           <div className="flex items-center gap-2">
             <a href="ayuda.html?rubro=hospedaje" target="_blank" rel="noreferrer" title="¿Cómo cargar? Ayuda" className="rounded-full px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">❓ Ayuda</a>
-            {(editing || soloEditor) ? (
+            {vista==="reservas" ? (
+              <button onClick={logout} className="rounded-full px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">Salir</button>
+            ) : (editing || soloEditor) ? (
               <>
                 {verSitio && <a href={verSitio} target="_blank" rel="noreferrer" className="rounded-full px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">👁️ Ver sitio</a>}
                 {!soloEditor && <button onClick={()=>setEditing(null)} className="rounded-full px-4 py-2 ff-body text-sm border border-stone-300 text-stone-600">Cancelar</button>}
@@ -796,7 +1187,14 @@ function App() {
 
       <div className="max-w-5xl mx-auto px-5 py-6">
         <ProfileBar profile={profile} />
-        {(editing || soloEditor) ? (
+        <div className="flex gap-2 mb-5">
+          {[["alojamientos","🏡 Alojamientos"],["reservas","📅 Reservas"]].map(([k,l])=>(
+            <button key={k} onClick={()=>setVista(k)} className={"rounded-full px-4 py-2 ff-body text-sm border "+(vista===k?"text-white":"text-stone-600 border-stone-300 bg-white")} style={vista===k?{background:C.moss,borderColor:C.moss}:{}}>{l}</button>
+          ))}
+        </div>
+        {vista==="reservas" ? (
+          <Reservas profile={profile} cabins={list} afterSync={load} />
+        ) : (editing || soloEditor) ? (
           editing ? <Editor c={editing} set={setEditing} /> : <p className="ff-body text-stone-500 text-center py-16">Cargando…</p>
         ) : loadingList ? (
           <p className="ff-body text-stone-500 text-center py-16">Cargando alojamientos…</p>
