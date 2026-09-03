@@ -532,6 +532,23 @@ html{ scroll-padding-top:calc(var(--topH,108px) + 12px) }
 @media(min-width:1500px){
   .cards, .gA{ grid-template-columns:repeat(3,1fr) !important }
 }
+
+/* la foto vuelve a ser vertical: es lo único que deja lugar para la hojita */
+.card .ph, .pA .ph{ aspect-ratio:4/5 !important }
+.etiqueta, .card .body{
+  bottom:-14px !important; left:16px !important; right:38px !important;
+  padding:15px 17px 16px !important;
+}
+.pA, .card{ padding-bottom:44px !important }
+.etiqueta h3, .card .body h3{ font-size:17.5px !important; line-height:1.16 !important }
+@media(max-width:1020px){
+  .card .ph, .pA .ph{ aspect-ratio:4/5 !important }
+}
+@media(max-width:760px){
+  .card .ph, .pA .ph{ aspect-ratio:4/3 !important }
+  .etiqueta, .card .body{ left:14px !important; right:24px !important; bottom:-14px !important }
+  .pA, .card{ padding-bottom:42px !important }
+}
 </style>
 </head>
 <body>
