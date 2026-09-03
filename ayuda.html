@@ -7,7 +7,7 @@
 <meta name="description" content="Guía simple para operadores de Visitando Tandil: cómo entrar, cargar tu lugar, subir fotos y publicar." />
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Crect%20width%3D%2724%27%20height%3D%2724%27%20rx%3D%276%27%20fill%3D%27%233E4F3F%27/%3E%3Ccircle%20cx%3D%2717%27%20cy%3D%277.5%27%20r%3D%272.2%27%20fill%3D%27%23E2A94E%27/%3E%3Cpath%20d%3D%27M3%2018%20L8.5%209%20L12%2013.5%20L15%2010%20L21%2018%20Z%27%20fill%3D%27none%27%20stroke%3D%27%23E2A94E%27%20stroke-width%3D%271.8%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E" />
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Young+Serif&family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Nothing+You+Could+Do&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Nothing+You+Could+Do&display=swap');
 .ff-display{font-family:'Young Serif',Georgia,serif;font-weight:400}
 .ff-body{font-family:'Familjen Grotesk',system-ui,sans-serif}
 .ff-mano{font-family:'Nothing You Could Do',cursive;color:#9C5634}
@@ -54,6 +54,227 @@ ul.clean li b{color:var(--ink)}
 .faq p{font-size:15px;color:#555;padding:0 0 14px}
 .note{background:#fbf6ec;border:1px solid #ecdcbe;border-radius:14px;padding:14px 16px;font-size:14.5px;color:#7a5a22;margin-top:14px}
 footer{text-align:center;color:#8a8678;font-size:13px;margin-top:46px}
+
+/* ═══════════════════════════════════════════════════════════
+   ESTILO DEFINITIVO · versión 3 + sábana B
+   Va último: manda sobre todo lo anterior.
+   ═══════════════════════════════════════════════════════════ */
+:root{
+  --monte:#2E3521; --liquen:#63653F; --arena:#DFCCAE; --ladrillo:#9C5634;
+  --crudo:#FBF7E8; --papel:#F4EEDC; --tinta:#23261A; --suave:#6A6455;
+  --linea:rgba(35,38,26,.10); --punt:rgba(35,38,26,.10);
+  --r:24px; --rm:18px; --rs:14px; --pill:999px;
+  --sombra:0 10px 30px rgba(35,38,26,.07);
+  --sombra2:0 18px 44px rgba(35,38,26,.12);
+  --sans:'Familjen Grotesk',system-ui,sans-serif;
+  --serif:'Instrument Serif',Georgia,serif;
+  --display:'Instrument Serif',Georgia,serif;
+  --mano:'Familjen Grotesk',system-ui,sans-serif;
+}
+/* fuera la textura de papel */
+.worn::before,.worn::after,body::after,body::before,#root::after,.fondo{display:none !important}
+
+/* ── tres tonos y nada más ── */
+body{background:var(--crudo) !important;color:var(--tinta) !important;
+  font-family:var(--sans) !important;font-size:16px !important;line-height:1.6 !important}
+.pre{background:rgba(46,53,33,.94) !important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  color:#C6CDBD !important;position:fixed !important;top:0 !important;left:0;right:0;z-index:95 !important;
+  font-size:12.5px !important;letter-spacing:0 !important;text-transform:none !important}
+.pre a{color:#E2E8D8 !important}
+.pdot{background:var(--arena) !important;width:6px !important;height:6px !important}
+header,header.vt{background:rgba(244,238,220,.85) !important;
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--linea) !important;position:sticky !important;
+  top:var(--preH,40px) !important;z-index:60 !important}
+body{padding-top:var(--preH,40px)}
+.topbar{position:static !important}
+.topbar .pre{position:fixed !important}
+.sabana,.cards,.gA,.strip,.ig,.cerca,.filters,.filtros,.filtrosbar,.listwrap{background:transparent !important}
+footer{background:var(--monte) !important;color:#C6CDBD !important;border-top:0 !important}
+footer h5{color:#9AA48D !important}
+footer a,footer button{color:#DDE3D3 !important}
+footer p,.next,.fnote{color:#9AA48D !important}
+footer .wm,footer .wm span{color:#EDF0E6 !important}
+footer .wm span{color:#9AA48D !important}
+.fnote{border-top:1px solid rgba(237,240,230,.18) !important}
+footer svg{stroke:#EDF0E6 !important}
+footer svg circle{fill:#EDF0E6 !important}
+
+/* ── tipografía ── */
+h1,h2,h3,h4,.disp,.titulo,.wm,.etiqueta h3,.card h3,.tile h4,.mom b,.strip b,.day h4,
+.tira h3,.desde,.datos b,.precio,.ficha .precio,.aa,.big,.type,.fr,.carta h3,.ptitle h1{
+  font-family:var(--serif) !important;font-weight:400 !important;letter-spacing:-.015em !important}
+h1{line-height:1.02 !important}
+.wm{text-transform:none !important;letter-spacing:-.02em !important;font-size:17px !important;
+  font-family:var(--sans) !important;font-weight:600 !important}
+.wm span,.wm .sub{font-family:var(--sans) !important;letter-spacing:.18em !important;font-size:9px !important;
+  color:var(--suave) !important;font-weight:400 !important}
+.mano{font-family:var(--sans) !important;color:var(--suave) !important;font-style:italic}
+.rot,.kick,.meta,.epi,.aside,.cat,.k,.z,.st,.ver,.eyebrow,.idx,.num,.cuenta,.count{
+  text-transform:none !important;letter-spacing:0 !important;font-size:13px !important}
+.eyebrow,.kick{color:var(--ladrillo) !important;font-weight:600 !important;font-size:13px !important}
+.eyebrow i,.eyebrow span,.kicker span{display:none !important}
+.marco > .num,.shead .idx{display:none !important}
+.marco{grid-template-columns:1fr !important;gap:0 !important}
+/* el punto verde antes de cada título */
+h2::before,.titulo::before{content:"" !important;display:inline-block;width:8px;height:8px;
+  border-radius:50%;background:var(--monte);margin-right:12px;vertical-align:middle;position:static}
+
+/* ── botones y campos: pastillas ── */
+.solid,.ghost,.sel,.pill,.send,.mail,.wsp,.ver,.btn,.chip,.mom,.cta{
+  border-radius:var(--pill) !important;text-transform:none !important;letter-spacing:0 !important;
+  font-size:14px !important;font-weight:500 !important}
+.solid{background:var(--ladrillo) !important;border-color:var(--ladrillo) !important;color:#fff !important;
+  padding:12px 22px !important}
+.ghost,.sel,.pill{background:rgba(255,255,255,.62) !important;border:1px solid var(--linea) !important;
+  color:var(--tinta) !important;padding:11px 18px !important;
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.sel.on,.pill.on{background:var(--monte) !important;border-color:var(--monte) !important;color:#EDF0E6 !important}
+.send{background:var(--monte) !important;color:#EDF0E6 !important;border-radius:var(--pill) !important}
+.field input,.field select,.field textarea,input,select,textarea{
+  border-radius:var(--rs) !important;border:1px solid var(--linea) !important;
+  background:rgba(251,247,232,.8) !important;font-family:var(--sans) !important}
+
+/* ── superficies de vidrio ── */
+.form,.calbox,.ficha,.plan,.day,.datos,.indice ol,.momentos,.mom,.carta,.panel,.amenbox,
+.modalbox,.popbox,.reservar,.aviso,.nodisp,.horarios,.bloque{
+  background:rgba(255,255,255,.72) !important;border:1px solid rgba(255,255,255,.6) !important;
+  border-radius:var(--r) !important;box-shadow:var(--sombra) !important;
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.carta{background:var(--monte) !important;border:0 !important;color:#DDE3D3 !important}
+.carta h3{color:#EDF0E6 !important}
+.carta .btn{background:var(--arena) !important;color:var(--monte) !important;border:0 !important}
+.spread img,.par img,.tercias img,.galeria img,.videos iframe,.mapa,.tile,.mini .ph,
+.apertura,.card figure,.unidad .ph{border-radius:var(--rm) !important;overflow:hidden}
+.mapa{filter:grayscale(.25) sepia(.05) !important}
+
+/* ── líneas: sólidas y finas ── */
+.fill,.filas div,.comod div,.item,.stops li,.indice li,.horarios div,.epi,.price,.pie,
+.shead,.sh,.head{border-style:solid !important;border-color:var(--linea) !important}
+.shead,.marco .titulo{border-bottom:1px solid var(--linea) !important;padding-bottom:12px !important}
+
+/* ═══════════ SÁBANA · OPCIÓN B ═══════════ */
+.cards,.gA{display:grid !important;grid-template-columns:repeat(3,1fr) !important;gap:26px !important;
+  padding:8px 0 10px !important;margin:0 !important;clip-path:none !important;box-shadow:none !important}
+.card,.pA{background:transparent !important;border:0 !important;box-shadow:none !important;
+  padding:0 0 44px 0 !important;position:relative !important;
+  -webkit-backdrop-filter:none !important;backdrop-filter:none !important}
+.card:hover,.pA:hover{transform:none !important;box-shadow:none !important;border-color:transparent !important}
+.card .ph,.pA .ph,.card figure{aspect-ratio:4/5 !important;height:auto !important;
+  border-radius:var(--r) !important;overflow:hidden;box-shadow:var(--sombra) !important;position:relative}
+.card:hover .ph,.pA:hover .ph{box-shadow:var(--sombra2) !important}
+.card .ph img,.pA .ph img{width:100% !important;height:100% !important;object-fit:cover !important}
+/* la hojita de vidrio, montada y sobresaliendo */
+.etiqueta,.card .body{
+  position:absolute !important;left:16px !important;right:34px !important;bottom:0 !important;
+  z-index:4;background:rgba(255,255,255,.74) !important;
+  -webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.6) !important;border-radius:var(--rm) !important;
+  padding:16px 18px !important;box-shadow:0 14px 34px rgba(35,38,26,.16) !important;
+  transition:transform .45s cubic-bezier(.2,.8,.2,1),background .3s}
+.card:hover .body,.pA:hover .etiqueta{transform:translateY(-6px);background:rgba(255,255,255,.88) !important}
+.etiqueta h3,.card .body h3{font-size:19px !important;margin:0 0 2px !important}
+.etiqueta .z,.card .body .meta{font-size:12.5px !important;color:var(--suave) !important;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.etiqueta .pie,.card .price{margin-top:12px !important;padding-top:11px !important;
+  border-top:1px solid var(--linea) !important;border-bottom:0 !important}
+.card .price b,.etiqueta .pr{font-family:var(--sans) !important;font-weight:600 !important;
+  font-size:18px !important;letter-spacing:-.02em !important}
+.card .price em,.etiqueta .ver{color:var(--ladrillo) !important;font-weight:500 !important;font-size:13.5px !important}
+/* las etiquetas blancas sobre la foto */
+.chips{top:12px !important;left:12px !important;flex-direction:row !important;flex-wrap:wrap;gap:6px !important}
+.chips .chip,.card .chips .chip{background:rgba(255,255,255,.8) !important;border-radius:var(--pill) !important;
+  padding:6px 12px !important;font-size:11.5px !important;font-weight:500 !important;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:0 !important;margin:0 !important;
+  text-transform:none !important;letter-spacing:0 !important}
+
+/* ── filtros pegados ── */
+.filters,.filtros{position:sticky !important;top:calc(var(--preH,40px) + 66px) !important;z-index:50 !important;
+  background:rgba(251,247,232,.9) !important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  padding:14px 0 12px !important;border-bottom:1px solid var(--linea) !important;
+  border-top:0 !important;box-shadow:none !important;display:flex !important;gap:9px !important;
+  overflow-x:auto;flex-wrap:nowrap !important;scrollbar-width:none}
+.filters::-webkit-scrollbar,.filtros::-webkit-scrollbar{display:none}
+.filters .sel,.filtros .sel{flex:0 0 auto !important}
+.count,.cuenta{margin-left:auto !important;align-self:center;flex:0 0 auto}
+
+/* ── portada ── */
+.hero{border-radius:0 !important}
+.hero .bg,.hero .bg img,.hero .bg video{border-radius:0 !important}
+.hero .bg::after{background:linear-gradient(100deg,rgba(24,28,18,.40) 0%,rgba(24,28,18,.06) 55%,rgba(24,28,18,.32) 100%) !important}
+.sheet{background:rgba(255,255,255,.68) !important;border:1px solid rgba(255,255,255,.55) !important;
+  border-radius:var(--r) !important;-webkit-backdrop-filter:blur(22px) saturate(1.3);
+  backdrop-filter:blur(22px) saturate(1.3);box-shadow:var(--sombra2) !important;
+  padding:30px 32px 28px !important;max-width:480px !important}
+.sheet h1{font-size:clamp(32px,4vw,46px) !important}
+.sheet .lede{font-size:15.5px !important;color:var(--suave) !important}
+.strip button{background:rgba(255,255,255,.7) !important;border:1px solid rgba(255,255,255,.6) !important;
+  border-radius:var(--rm) !important;box-shadow:var(--sombra) !important;margin:0 !important}
+.strip .in{gap:14px !important;padding-top:18px !important;padding-bottom:18px !important}
+.strip{border-bottom:0 !important}
+
+/* ── mosaico y carruseles ── */
+.mosaic{gap:14px !important}
+.mini{display:flex !important;gap:16px !important;overflow-x:auto;scroll-snap-type:x mandatory;
+  scrollbar-width:none;padding-bottom:8px}
+.mini::-webkit-scrollbar{display:none}
+.mini > a{flex:0 0 250px;scroll-snap-align:start;background:rgba(255,255,255,.72);
+  border:1px solid rgba(255,255,255,.6);border-radius:var(--rm);padding:8px;box-shadow:var(--sombra)}
+.mini > a:hover{transform:translateY(-3px);box-shadow:var(--sombra2)}
+.mini h4{margin:11px 8px 0 !important;font-size:17px !important}
+.mini p{margin:2px 8px 10px !important}
+
+/* ── barra de abajo ── */
+.appbar{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:85;
+  background:rgba(255,255,255,.84);-webkit-backdrop-filter:blur(20px) saturate(1.2);
+  backdrop-filter:blur(20px) saturate(1.2);border:1px solid rgba(255,255,255,.7);
+  border-radius:28px;box-shadow:0 14px 40px rgba(35,38,26,.18);
+  display:grid;grid-template-columns:repeat(5,1fr);padding:10px 8px;
+  width:calc(100% - 32px);max-width:520px}
+.appbar a{display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px 2px;
+  font-size:11.5px;color:var(--suave);text-decoration:none;border-radius:16px}
+.appbar a.on{color:var(--ladrillo);font-weight:600}
+.appbar svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round}
+@media(min-width:900px){ .appbar{display:none} }
+
+/* ══════════ CELULAR ══════════ */
+@media(max-width:900px){
+  .nav{display:none !important}
+  .burger{display:none !important}
+  body{padding-bottom:100px}
+  .acts .ghost{display:none !important}
+}
+@media(max-width:760px){
+  .in{padding-left:20px !important;padding-right:20px !important}
+  .pre{position:sticky !important}
+  body{padding-top:0}
+  header,header.vt{position:static !important;background:transparent !important;border-bottom:0 !important}
+  .hbar{padding:14px 0 4px !important;justify-content:center}
+  .acts{display:none !important}
+  .pre .der,.pre .loc{display:none}
+  .pre .in{justify-content:center}
+  .hero{display:block !important;position:relative !important;min-height:0 !important}
+  .hero .bg{position:absolute !important;inset:0 !important;height:100% !important}
+  .hgrid{display:block !important;padding:64px 0 40px !important}
+  .sheet{max-width:none !important;margin:0 !important;padding:24px 20px 22px !important}
+  .sheet h1{font-size:31px !important}
+  .heroctas{display:grid !important;grid-template-columns:1fr !important;gap:9px !important}
+  .heroctas .solid,.heroctas .ghost{text-align:center;padding:14px !important}
+  .strip .in{grid-template-columns:1fr !important;gap:10px !important}
+  .cards,.gA{grid-template-columns:1fr !important;gap:22px !important}
+  .card .ph,.pA .ph{aspect-ratio:4/3 !important}
+  .etiqueta,.card .body{left:14px !important;right:22px !important}
+  .card,.pA{padding-bottom:38px !important}
+  .filters,.filtros{top:0 !important;padding-left:20px !important;padding-right:20px !important;
+    margin-left:-20px !important;margin-right:-20px !important}
+  .mosaic{grid-template-columns:1fr 1fr !important;grid-auto-rows:auto !important;padding:0 20px !important}
+  .mosaic .tile{min-height:150px}
+  .momentos,.plan,.reserva,.comod,.videos,.par,.tercias,.consulta,.f2,.fgrid{grid-template-columns:1fr !important}
+  .apertura{margin:0 20px !important;height:44vh !important;min-height:250px !important}
+  .mini > a{flex:0 0 74%}
+  section{padding-top:40px !important;padding-bottom:40px !important}
+}
 </style>
 
 <style>
@@ -193,6 +414,15 @@ button, input, select, textarea, a[class*="px-"]{ border-radius:var(--rs) !impor
   }
   document.querySelectorAll('[data-pill]').forEach(function(p){ p.addEventListener('click',function(){ setRubro(p.dataset.pill); }); });
   setRubro(rubro);
+</script>
+
+<script>
+(function(){
+  function medir(){var p=document.querySelector('.pre');
+    if(p) document.documentElement.style.setProperty('--preH', p.offsetHeight+'px');}
+  window.addEventListener('load',medir);window.addEventListener('resize',medir);
+  document.addEventListener('DOMContentLoaded',medir);setInterval(medir,1200);
+})();
 </script>
 </body>
 </html>
