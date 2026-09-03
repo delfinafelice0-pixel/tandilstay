@@ -347,6 +347,8 @@ const nightsBetween = (a,b) => {
 const nightsCount = (a,b) => nightsBetween(a,b).length;
 const dmy = (s) => s ? s.split("-").reverse().slice(0,2).join("/") : "—";
 const dmyLong = (s) => { if(!s) return "—"; const d=parseD(s); return DOW[d.getDay()]+" "+d.getDate()+" "+MONTHS[d.getMonth()].slice(0,3).toLowerCase(); };
+const DOW_L = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+const fechaLarga = (s) => { if(!s) return "—"; const d=parseD(s); return DOW_L[d.getDay()]+" "+d.getDate(); };
 const RES_EMPTY = { slug:"", unit:"", guest_name:"", guest_phone:"", guest_email:"", people:2, start_date:"", end_date:"", status:"confirmada", total:0, deposit:0, channel:"Directo", notes:"" };
 const CANALES = ["Directo","WhatsApp","Instagram","Booking","Airbnb","Otro"];
 const EST = { pendiente:{l:"Pendiente",bg:"#fdf0d8",fg:"#9a6b1e"}, confirmada:{l:"Confirmada",bg:"#e7efe3",fg:"#2E3521"}, cancelada:{l:"Cancelada",bg:"#f1efe9",fg:"#8a8578"} };
@@ -690,15 +692,11 @@ function Reservas({ profile, cabins, afterSync }) {
   const [res,setRes]=useState([]);
   const [loading,setLoading]=useState(true);
   const [err,setErr]=useState("");
-  const [tab,setTab]=useState("hoy");
+  const [sel,setSel]=useState({t:"dia",d:iso(TODAY)});
   const [form,setForm]=useState(null);
   const [saving,setSaving]=useState(false);
   const [formMsg,setFormMsg]=useState("");
-  const [gridFrom,setGridFrom]=useState(iso(TODAY));
-  const [gridLen,setGridLen]=useState(14);
-  const [gridVista,setGridVista]=useState("mes");
   const [mesCur,setMesCur]=useState(new Date(TODAY.getFullYear(),TODAY.getMonth(),1));
-  const [mes,setMes]=useState(iso(TODAY).slice(0,7));
   const hoy = iso(TODAY);
 
   const traer = async () => {
@@ -765,56 +763,34 @@ function Reservas({ profile, cabins, afterSync }) {
   const borrar = async (r) => {
     if(!confirm("¿Borrar la reserva de "+r.guest_name+"?")) return;
     await db.from("reservations").delete().eq("id",r.id);
+    setSel({t:"dia",d:r.start_date});
     await sincronizar(r.slug);
   };
 
   if(loading) return <p className="ff-body text-stone-500 text-center py-16">Cargando reservas…</p>;
 
-  const entran = activas.filter(r=>r.start_date===hoy);
-  const salen  = activas.filter(r=>r.end_date===hoy);
-  const ocupadas = filas.filter(f=>reservaEn(f,hoy));
-  const libres   = filas.filter(f=>!reservaEn(f,hoy) && !(f.manual||[]).includes(hoy));
-  const bloqueadas = filas.filter(f=>!reservaEn(f,hoy) && (f.manual||[]).includes(hoy));
+  // ── Los tres números de arriba ──
+  const finSemana = iso(addDay(TODAY,6));
+  const ocupadasHoy = filas.filter(f=>reservaEn(f,hoy)).length;
+  const entranSemana = activas.filter(r=> r.start_date>=hoy && r.start_date<=finSemana).length;
+  const faltaCobrar = activas.filter(r=> (r.end_date||r.start_date)>=hoy)
+    .reduce((s,r)=> s + Math.max(0,(Number(r.total)||0)-(Number(r.deposit)||0)), 0);
 
-  const dias = []; { let d=parseD(gridFrom); for(let i=0;i<gridLen;i++){ dias.push(iso(d)); d=addDay(d,1); } }
+  // ── Qué muestra la columna de la derecha ──
+  const selRes = sel.t==="res" ? res.find(r=>r.id===sel.id) : null;
+  const dSel = selRes ? selRes.start_date : (sel.d || hoy);
+  const entranD = activas.filter(r=>r.start_date===dSel);
+  const salenD  = activas.filter(r=>r.end_date===dSel);
 
-  const proximas = res.filter(r=> r.status!=="cancelada" ? ((r.end_date||r.start_date) >= hoy) : (r.start_date >= hoy))
-                      .sort((a,b)=> a.start_date < b.start_date ? -1 : 1);
-  const delMes = res.filter(r=> r.status!=="cancelada" && String(r.start_date||"").slice(0,7)===mes);
-  const sum = (arr,k) => arr.reduce((s,x)=>s+(Number(x[k])||0),0);
-  const totalMes = sum(delMes,"total"), senaMes = sum(delMes,"deposit");
+  const y=mesCur.getFullYear(), m=mesCur.getMonth();
+  const startDow=new Date(y,m,1).getDay();
+  const dim=new Date(y,m+1,0).getDate();
+  const cells=[]; for(let i=0;i<startDow;i++) cells.push(null);
+  for(let d=1;d<=dim;d++) cells.push(d);
+  while(cells.length%7) cells.push(null);
 
-  const Pill = ({ id, children }) => (
-    <button onClick={()=>setTab(id)} className={"rounded-full px-4 py-2 ff-body text-sm border "+(tab===id?"text-white":"text-stone-600 border-stone-300 bg-white")} style={tab===id?{background:C.moss,borderColor:C.moss}:{}}>{children}</button>
-  );
   const Estado = ({ s }) => { const e=EST[s]||EST.confirmada; return <span className="ff-body text-[11px] rounded-full px-2 py-0.5" style={{background:e.bg,color:e.fg}}>{e.l}</span>; };
-
-  const Tarjeta = ({ r }) => {
-    const f = filas.find(x=>x.slug===r.slug && x.name===(r.unit||""));
-    const saldo = (Number(r.total)||0)-(Number(r.deposit)||0);
-    return (
-      <div className="border border-stone-200 rounded-xl p-3">
-        <div className="flex items-start gap-2">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="ff-display text-lg" style={{color:C.ink}}>{r.guest_name}</span>
-              <Estado s={r.status} />
-            </div>
-            <p className="ff-body text-sm text-stone-500">{r.unit || (f?f.cab:"Toda la propiedad")}{variosAloj&&f?" · "+f.cab:""} · {r.people} {r.people===1?"huésped":"huéspedes"}</p>
-            <p className="ff-body text-sm mt-1" style={{color:C.ink}}>{dmyLong(r.start_date)} → {dmyLong(r.end_date)} · {nightsCount(r.start_date,r.end_date)} noches</p>
-            {(Number(r.total)||0)>0 && <p className="ff-body text-sm text-stone-500">{money(r.total)} · seña {money(r.deposit)} · <b style={{color:saldo>0?C.clay:C.moss}}>saldo {money(saldo)}</b></p>}
-            {r.notes && <p className="ff-body text-xs text-stone-400 mt-1">{r.notes}</p>}
-          </div>
-          <div className="flex flex-col gap-1 shrink-0">
-            {r.guest_phone && <a href={"https://wa.me/"+String(r.guest_phone).replace(/\D/g,"")} target="_blank" rel="noreferrer" className="rounded-lg px-2 py-1 ff-body text-xs border border-stone-300 text-stone-600">💬</a>}
-            <button onClick={()=>{setFormMsg("");setForm({...r});}} className="rounded-lg px-2 py-1 ff-body text-xs border border-stone-300 text-stone-600">✎</button>
-            <button onClick={()=>borrar(r)} className="rounded-lg px-2 py-1 ff-body text-xs border border-stone-300 text-rose-500">🗑️</button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
+  const chipStyle = (r) => ({ background:r.status==="pendiente"?"#f0d9a8":C.moss, color:r.status==="pendiente"?C.ink:"#EDF0E6" });
   const cabSel = (cabins||[]).find(c=>c.slug===(form&&form.slug));
   const unidadesSel = cabSel ? (cabSel.units||[]).map((u,i)=>u.name||("Cabaña "+(i+1))) : [];
 
@@ -822,219 +798,138 @@ function Reservas({ profile, cabins, afterSync }) {
     <div>
       {err && <div className="bg-white rounded-2xl border border-rose-200 p-4 mb-5 ff-body text-sm text-rose-700">{err}</div>}
 
-      <div className="flex items-center gap-2 flex-wrap mb-5">
-        <Pill id="hoy">☀️ Hoy</Pill>
-        <Pill id="grilla">🗓️ Grilla</Pill>
-        <Pill id="proximas">📋 Próximas</Pill>
-        <Pill id="plata">💵 Plata</Pill>
-        <button onClick={()=>abrirNueva()} className="ml-auto rounded-full px-4 py-2 ff-body text-sm font-semibold text-white" style={{background:C.clay}}>+ Nueva reserva</button>
+      <div className="grid grid-cols-3 gap-3 mb-5">
+        {[["Ocupadas hoy", filas.length?(ocupadasHoy+" de "+filas.length):"—"],
+          ["Entran esta semana", String(entranSemana)],
+          ["Falta cobrar", money(faltaCobrar)]].map(([l,v])=>(
+          <div key={l} className="bg-white rounded-2xl border border-black/5 px-4 py-3">
+            <div className="ff-body text-xs text-stone-500">{l}</div>
+            <div className="ff-display text-2xl leading-tight" style={{color:C.ink}}>{v}</div>
+          </div>
+        ))}
       </div>
 
-      {tab==="hoy" && (
-        <div className="space-y-5">
-          <div className="grid grid-cols-3 gap-3">
-            {[["Ocupadas",ocupadas.length,C.moss],["Libres",libres.length,C.clay],["Bloqueadas",bloqueadas.length,"#8a8578"]].map(([l,n,col])=>(
-              <div key={l} className="bg-white rounded-2xl border border-black/5 p-4 text-center">
-                <div className="ff-display text-3xl" style={{color:col}}>{n}</div>
-                <div className="ff-body text-xs text-stone-500">{l} hoy</div>
-              </div>
-            ))}
+      <div className="grid lg:grid-cols-3 gap-4 items-start">
+
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-black/5 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <button onClick={()=>setMesCur(new Date(y,m-1,1))} className="rounded-lg px-2.5 py-1 ff-body text-sm border border-stone-300">‹</button>
+            <span className="ff-display text-lg" style={{color:C.ink}}>{MONTHS[m]} {y}</span>
+            <button onClick={()=>setMesCur(new Date(y,m+1,1))} className="rounded-lg px-2.5 py-1 ff-body text-sm border border-stone-300">›</button>
+            <button onClick={()=>{ setMesCur(new Date(TODAY.getFullYear(),TODAY.getMonth(),1)); setSel({t:"dia",d:hoy}); }} className="ml-auto rounded-full px-3 py-1 ff-body text-sm border border-stone-300">Hoy</button>
           </div>
-          <div className="grid md:grid-cols-2 gap-5">
-            <div className="bg-white rounded-2xl border border-black/5 p-5">
-              <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>🔑 Entran hoy</h3>
-              {entran.length===0 ? <p className="ff-body text-sm text-stone-400">Nadie entra hoy.</p> : <div className="space-y-2">{entran.map(r=><Tarjeta key={r.id} r={r} />)}</div>}
-            </div>
-            <div className="bg-white rounded-2xl border border-black/5 p-5">
-              <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>👋 Salen hoy</h3>
-              {salen.length===0 ? <p className="ff-body text-sm text-stone-400">Nadie sale hoy.</p> : <div className="space-y-2">{salen.map(r=><Tarjeta key={r.id} r={r} />)}</div>}
-            </div>
+          <div className="grid grid-cols-7 gap-1 mb-1">{DOW.map(d=><div key={d} className="ff-body text-[11px] font-semibold text-stone-400 text-center">{d}</div>)}</div>
+          <div className="grid grid-cols-7 gap-1">
+            {cells.map((d,i)=>{
+              if(!d) return <div key={i} className="min-h-[62px] sm:min-h-[76px] rounded-xl" style={{background:"rgba(35,38,26,.025)"}} />;
+              const day=`${y}-${pad(m+1)}-${pad(d)}`;
+              const rs=porDia[day]||[];
+              const esHoy=day===hoy;
+              const elegido=day===dSel;
+              const bloq=filas.length>0 && filas.every(f=>(f.manual||[]).includes(day)) ;
+              return (
+                <div key={i} onClick={()=>setSel({t:"dia",d:day})}
+                  className="min-h-[62px] sm:min-h-[76px] rounded-xl p-1 sm:p-1.5 flex flex-col gap-1 overflow-hidden cursor-pointer"
+                  style={{ border:"1px solid "+(elegido?C.clay:"rgba(35,38,26,.08)"),
+                           boxShadow: elegido?("0 0 0 1px "+C.clay):"none",
+                           background: esHoy?"rgba(156,86,52,.06)":"#fff" }}>
+                  <div className="flex items-baseline">
+                    <span className="ff-body text-[11px]" style={{color:esHoy?C.clay:"#8a8578", fontWeight:esHoy?700:500}}>{d}</span>
+                    {bloq && <span className="ml-auto ff-body text-[9px] text-stone-400">bloq.</span>}
+                  </div>
+                  {rs.slice(0,2).map((r,ri)=>(
+                    <button key={ri} onClick={(e)=>{ e.stopPropagation(); setSel({t:"res",id:r.id}); }}
+                      title={r.guest_name+" · "+(r.unit||"toda la propiedad")}
+                      className="ff-body text-[10px] leading-tight rounded-md px-1.5 py-1 text-left truncate w-full"
+                      style={chipStyle(r)}>
+                      {String(r.guest_name||"").split(" ")[0]}{r.unit?" · "+r.unit:""}
+                    </button>
+                  ))}
+                  {rs.length>2 && <span className="ff-body text-[9px] text-stone-400">+{rs.length-2} más</span>}
+                </div>
+              );
+            })}
           </div>
-          <div className="bg-white rounded-2xl border border-black/5 p-5">
-            <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Estado de las cabañas hoy</h3>
-            {filas.length===0 ? <p className="ff-body text-sm text-stone-400">Todavía no cargaste ninguna cabaña.</p> : (
-              <div className="space-y-2">
-                {filas.map((f,i)=>{ const r=reservaEn(f,hoy); const blq=!r && (f.manual||[]).includes(hoy);
-                  return (
-                    <div key={i} className="flex items-center gap-3 border border-stone-200 rounded-xl px-3 py-2.5">
-                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{background: r?C.moss : (blq?"#c9c4b7":C.clay)}}></span>
-                      <div className="min-w-0 flex-1">
-                        <div className="ff-body text-sm font-semibold" style={{color:C.ink}}>{etiqueta(f)}</div>
-                        <div className="ff-body text-xs text-stone-500">{r ? (r.guest_name+" · sale "+dmy(r.end_date)) : (blq ? "Bloqueada a mano" : "Libre · hasta "+f.cap+" huéspedes")}</div>
-                      </div>
-                      {!r && !blq && <button onClick={()=>abrirNueva({slug:f.slug, unit:f.name, start_date:hoy, end_date:iso(addDay(TODAY,1))})} className="ff-body text-xs font-semibold shrink-0" style={{color:C.clay}}>+ Reservar</button>}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+          <div className="flex items-center gap-4 mt-3 ff-body text-xs text-stone-500 flex-wrap">
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{background:C.moss}}></span> Confirmada</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{background:"#f0d9a8"}}></span> Pendiente</span>
+            <span>Tocá un día para verlo al costado.</span>
           </div>
         </div>
-      )}
 
-      {tab==="grilla" && (
-        <div className="bg-white rounded-2xl border border-black/5 p-5">
-          <div className="flex gap-1 mb-4">
-            {[["mes","🗓️ Mes"],["linea","📊 Línea de tiempo"]].map(([k,l])=>(
-              <button key={k} onClick={()=>setGridVista(k)} className={"rounded-full px-3.5 py-1.5 ff-body text-sm border "+(gridVista===k?"text-white":"text-stone-600 border-stone-300")} style={gridVista===k?{background:C.moss,borderColor:C.moss}:{}}>{l}</button>
-            ))}
-          </div>
-
-          {gridVista==="mes" ? (()=>{
-            const y=mesCur.getFullYear(), m=mesCur.getMonth();
-            const startDow=new Date(y,m,1).getDay();
-            const dim=new Date(y,m+1,0).getDate();
-            const cells=[]; for(let i=0;i<startDow;i++) cells.push(null);
-            for(let d=1;d<=dim;d++) cells.push(d);
-            while(cells.length%7) cells.push(null);
-            const delMesCal = activas.filter(r=>{ const ns=nightsBetween(r.start_date,r.end_date); return ns.some(d=>d.slice(0,7)===`${y}-${pad(m+1)}`); });
-            return (
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <button onClick={()=>setMesCur(new Date(y,m-1,1))} className="rounded-lg px-3 py-1.5 ff-body text-sm border border-stone-300">‹</button>
-                  <span className="ff-display text-lg" style={{color:C.ink}}>{MONTHS[m]} {y}</span>
-                  <button onClick={()=>setMesCur(new Date(y,m+1,1))} className="rounded-lg px-3 py-1.5 ff-body text-sm border border-stone-300">›</button>
-                  <button onClick={()=>setMesCur(new Date(TODAY.getFullYear(),TODAY.getMonth(),1))} className="rounded-lg px-3 py-1.5 ff-body text-sm border border-stone-300">Hoy</button>
-                  <span className="ml-auto ff-body text-sm text-stone-500">{delMesCal.length} {delMesCal.length===1?"reserva":"reservas"}</span>
-                </div>
-                <div className="grid grid-cols-7 gap-1 mb-1">{DOW.map(d=><div key={d} className="ff-body text-[11px] font-semibold text-stone-400 text-center">{d}</div>)}</div>
-                <div className="grid grid-cols-7 gap-1">
-                  {cells.map((d,i)=>{
-                    if(!d) return <div key={i} className="min-h-[86px] rounded-xl" style={{background:"rgba(35,38,26,.025)"}} />;
-                    const day=`${y}-${pad(m+1)}-${pad(d)}`;
-                    const rs=porDia[day]||[];
-                    const esHoy=day===hoy;
-                    const futuro=parseD(day)>=TODAY;
-                    const libres=filas.length ? filas.filter(f=>!reservaEn(f,day) && !(f.manual||[]).includes(day)).length : 0;
-                    return (
-                      <div key={i} className="min-h-[86px] rounded-xl p-1.5 flex flex-col gap-1 overflow-hidden"
-                        style={{ border:"1px solid "+(esHoy?C.clay:"rgba(35,38,26,.08)"), background:esHoy?"rgba(156,86,52,.06)":"#fff" }}>
-                        <div className="flex items-baseline gap-1">
-                          <span className="ff-body text-[11px]" style={{color:esHoy?C.clay:"#8a8578", fontWeight:esHoy?700:500}}>{d}</span>
-                          {filas.length>0 && <span className="ml-auto ff-body text-[9px]" style={{color:libres?C.moss:"#c9c4b7"}}>{libres} libre{libres===1?"":"s"}</span>}
-                        </div>
-                        {rs.slice(0,3).map((r,ri)=>(
-                          <button key={ri} onClick={()=>{setFormMsg("");setForm({...r});}}
-                            title={r.guest_name+" · "+(r.unit||"toda la propiedad")+" · "+dmy(r.start_date)+"→"+dmy(r.end_date)}
-                            className="ff-body text-[10px] leading-tight rounded-md px-1.5 py-1 text-left truncate w-full"
-                            style={{ background:r.status==="pendiente"?"#f0d9a8":C.moss, color:r.status==="pendiente"?C.ink:"#EDF0E6" }}>
-                            {String(r.guest_name||"").split(" ")[0]}{r.unit?" · "+r.unit:""}
-                          </button>
-                        ))}
-                        {rs.length>3 && <span className="ff-body text-[9px] text-stone-400">+{rs.length-3} más</span>}
-                        {rs.length===0 && futuro && filas.length>0 && (
-                          <button onClick={()=>abrirNueva({slug:filas[0].slug, unit:filas[0].name, start_date:day, end_date:iso(addDay(parseD(day),1))})}
-                            className="mt-auto ff-body text-[11px] text-left opacity-40 hover:opacity-100" style={{color:C.clay}}>+ reserva</button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                {filas.length===0 && <p className="ff-body text-sm text-stone-500 mt-4 bg-stone-50 rounded-xl p-3">Para poder cargar reservas y ver qué cabañas quedan libres, primero agregá tus cabañas en 🏡 Alojamientos.</p>}
-              </div>
-            );
-          })() : filas.length===0 ? <p className="ff-body text-sm text-stone-400">Todavía no cargaste ninguna cabaña.</p> : (
+        <div className="bg-white rounded-2xl border border-black/5 p-4">
+          {selRes ? (()=>{ const saldo=(Number(selRes.total)||0)-(Number(selRes.deposit)||0); const f=filas.find(x=>x.slug===selRes.slug && x.name===(selRes.unit||"")); return (
             <div>
-            <div className="flex items-center gap-2 flex-wrap mb-4">
-              <button onClick={()=>setGridFrom(iso(addDay(parseD(gridFrom),-gridLen)))} className="rounded-lg px-3 py-1.5 ff-body text-sm border border-stone-300">‹</button>
-              <span className="ff-body text-sm text-stone-600">{dmy(dias[0])} — {dmy(dias[dias.length-1])}</span>
-              <button onClick={()=>setGridFrom(iso(addDay(parseD(gridFrom),gridLen)))} className="rounded-lg px-3 py-1.5 ff-body text-sm border border-stone-300">›</button>
-              <button onClick={()=>setGridFrom(hoy)} className="rounded-lg px-3 py-1.5 ff-body text-sm border border-stone-300">Hoy</button>
-              <div className="ml-auto flex gap-1">{[14,30].map(n=><button key={n} onClick={()=>setGridLen(n)} className={"rounded-full px-3 py-1.5 ff-body text-sm border "+(gridLen===n?"text-white":"text-stone-600 border-stone-300")} style={gridLen===n?{background:C.moss,borderColor:C.moss}:{}}>{n} días</button>)}</div>
-            </div>
-            <div className="overflow-x-auto -mx-2 px-2">
-              <div style={{minWidth: (170 + dias.length*32)+"px"}}>
-                <div className="grid items-end mb-1" style={{gridTemplateColumns:"170px repeat("+dias.length+", 32px)"}}>
-                  <div></div>
-                  {dias.map(d=>(
-                    <div key={d} className="text-center">
-                      <div className="ff-body text-[10px] text-stone-400">{DOW[parseD(d).getDay()][0]}</div>
-                      <div className={"ff-body text-[11px] "+(d===hoy?"font-bold":"text-stone-500")} style={d===hoy?{color:C.clay}:{}}>{parseD(d).getDate()}</div>
-                    </div>
-                  ))}
+              <button onClick={()=>setSel({t:"dia",d:selRes.start_date})} className="ff-body text-xs text-stone-500 mb-2">‹ Volver al día</button>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="ff-display text-xl" style={{color:C.ink}}>{selRes.guest_name}</span>
+                <Estado s={selRes.status} />
+              </div>
+              <p className="ff-body text-sm text-stone-500">{selRes.unit || (f?f.cab:"Toda la propiedad")}{variosAloj&&f?" · "+f.cab:""}</p>
+              <div className="border-t border-black/5 mt-3 pt-3 space-y-1">
+                <p className="ff-body text-sm" style={{color:C.ink}}>{dmyLong(selRes.start_date)} → {dmyLong(selRes.end_date)}</p>
+                <p className="ff-body text-sm text-stone-500">{nightsCount(selRes.start_date,selRes.end_date)} noches · {selRes.people} {selRes.people===1?"huésped":"huéspedes"} · {selRes.channel}</p>
+              </div>
+              {(Number(selRes.total)||0)>0 && (
+                <div className="border-t border-black/5 mt-3 pt-3 ff-body text-sm space-y-1">
+                  <div className="flex"><span className="text-stone-500">Total</span><span className="ml-auto" style={{color:C.ink}}>{money(selRes.total)}</span></div>
+                  <div className="flex"><span className="text-stone-500">Seña</span><span className="ml-auto" style={{color:C.ink}}>{money(selRes.deposit)}</span></div>
+                  <div className="flex"><span className="text-stone-500">Saldo</span><span className="ml-auto font-semibold" style={{color:saldo>0?C.clay:C.moss}}>{saldo>0?money(saldo):"cobrada"}</span></div>
                 </div>
-                {filas.map((f,i)=>(
-                  <div key={i} className="grid items-center gap-y-1" style={{gridTemplateColumns:"170px repeat("+dias.length+", 32px)"}}>
-                    <div className="ff-body text-xs pr-2 truncate" style={{color:C.ink}} title={etiqueta(f)}>{etiqueta(f)}</div>
-                    {dias.map(d=>{
-                      const r=reservaEn(f,d);
-                      const blq=!r && (f.manual||[]).includes(d);
-                      const sigue = r && reservaEn(f,iso(addDay(parseD(d),-1)))===r;
-                      const bg = r ? (r.status==="pendiente"?"#f0d9a8":C.moss) : (blq?"#e4e0d6":"transparent");
-                      return (
-                        <button key={d} title={r?(r.guest_name+" · "+dmy(r.start_date)+"→"+dmy(r.end_date)):(blq?"Bloqueada":"Libre")}
-                          onClick={()=>{ if(r){ setFormMsg(""); setForm({...r}); } else if(!blq && parseD(d)>=TODAY){ abrirNueva({slug:f.slug,unit:f.name,start_date:d,end_date:iso(addDay(parseD(d),1))}); } }}
-                          className="h-7 my-0.5 flex items-center justify-center ff-body text-[10px] overflow-hidden"
-                          style={{ background:bg, color:(r&&r.status!=="pendiente")?"#EDF0E6":C.ink,
-                                   borderTopLeftRadius:sigue?0:8, borderBottomLeftRadius:sigue?0:8,
-                                   borderTopRightRadius:8, borderBottomRightRadius:8,
-                                   border: (r||blq)?"none":"1px dashed rgba(35,38,26,.14)", marginLeft:sigue?-2:0 }}>
-                          {r && !sigue ? String(r.guest_name||"").trim().charAt(0).toUpperCase() : ""}
-                        </button>
-                      );
-                    })}
-                  </div>
+              )}
+              {selRes.notes && <p className="ff-body text-xs text-stone-500 border-t border-black/5 mt-3 pt-3">{selRes.notes}</p>}
+              <div className="flex gap-2 mt-4">
+                {selRes.guest_phone && <a href={"https://wa.me/"+String(selRes.guest_phone).replace(/\D/g,"")} target="_blank" rel="noreferrer" className="rounded-full px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">💬</a>}
+                <button onClick={()=>{setFormMsg("");setForm({...selRes});}} className="flex-1 rounded-full px-3 py-2 ff-body text-sm font-semibold text-white" style={{background:C.moss}}>Editar</button>
+                <button onClick={()=>borrar(selRes)} className="rounded-full px-3 py-2 ff-body text-sm border border-stone-300 text-rose-500">🗑️</button>
+              </div>
+            </div>
+          ); })() : (
+            <div>
+              <div className="ff-display text-xl" style={{color:C.ink}}>{fechaLarga(dSel)}</div>
+              <p className="ff-body text-sm text-stone-500 mb-3">{dSel===hoy?"Hoy":dmy(dSel)}</p>
+
+              <div className="ff-body text-xs text-stone-500">🔑 Entra</div>
+              <div className="border-t border-black/5 mt-1 pt-2 mb-3">
+                {entranD.length===0 ? <p className="ff-body text-sm text-stone-400">Nadie</p> : entranD.map(r=>(
+                  <button key={r.id} onClick={()=>setSel({t:"res",id:r.id})} className="block w-full text-left mb-1.5">
+                    <div className="ff-body text-sm" style={{color:C.ink}}>{r.guest_name}</div>
+                    <div className="ff-body text-xs text-stone-500">{(r.unit||"toda la propiedad")+" · "+nightsCount(r.start_date,r.end_date)+" noches"}{(Number(r.total)||0)>(Number(r.deposit)||0)?" · falta "+money((Number(r.total)||0)-(Number(r.deposit)||0)):""}</div>
+                  </button>
                 ))}
               </div>
-            </div>
-            </div>
-          )}
-          <div className="flex items-center gap-4 mt-4 ff-body text-xs text-stone-500 flex-wrap">
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{background:C.moss}}></span> Reservada</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{background:"#f0d9a8"}}></span> Pendiente</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{background:"#e4e0d6"}}></span> Bloqueada a mano</span>
-            <span>Tocá una reserva para editarla, o un día libre para cargar una.</span>
-          </div>
-        </div>
-      )}
 
-      {tab==="proximas" && (
-        <div className="bg-white rounded-2xl border border-black/5 p-5">
-          <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Próximas reservas</h3>
-          {proximas.length===0 ? <p className="ff-body text-sm text-stone-400">No hay reservas cargadas de acá en adelante.</p> : (
-            <div className="space-y-2">{proximas.map(r=><Tarjeta key={r.id} r={r} />)}</div>
-          )}
-        </div>
-      )}
-
-      {tab==="plata" && (
-        <div className="space-y-5">
-          <div className="bg-white rounded-2xl border border-black/5 p-5">
-            <div className="flex items-center gap-2 flex-wrap mb-4">
-              <h3 className="ff-display text-lg" style={{color:C.ink}}>Entradas del mes</h3>
-              <input type="month" value={mes} onChange={e=>setMes(e.target.value)} className="ml-auto border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              {[["Total",totalMes,C.ink],["Cobrado (señas)",senaMes,C.moss],["Falta cobrar",totalMes-senaMes,C.clay]].map(([l,n,col])=>(
-                <div key={l} className="border border-stone-200 rounded-xl p-3 text-center">
-                  <div className="ff-display text-xl" style={{color:col}}>{money(n)}</div>
-                  <div className="ff-body text-xs text-stone-500">{l}</div>
-                </div>
-              ))}
-            </div>
-            <p className="ff-body text-xs text-stone-400 mt-3">Se cuentan las reservas cuya entrada cae en el mes elegido. Las canceladas no suman.</p>
-          </div>
-          <div className="bg-white rounded-2xl border border-black/5 p-5">
-            <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Detalle</h3>
-            {delMes.length===0 ? <p className="ff-body text-sm text-stone-400">No hay reservas en ese mes.</p> : (
-              <div className="space-y-2">
-                {delMes.map(r=>{ const saldo=(Number(r.total)||0)-(Number(r.deposit)||0); return (
-                  <div key={r.id} className="flex items-center gap-3 border border-stone-200 rounded-xl px-3 py-2.5">
-                    <div className="min-w-0 flex-1">
-                      <div className="ff-body text-sm font-semibold" style={{color:C.ink}}>{r.guest_name}</div>
-                      <div className="ff-body text-xs text-stone-500">{dmy(r.start_date)} → {dmy(r.end_date)} · {r.unit||"toda la propiedad"} · {r.channel}</div>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <div className="ff-body text-sm" style={{color:C.ink}}>{money(r.total)}</div>
-                      <div className="ff-body text-xs" style={{color:saldo>0?C.clay:C.moss}}>{saldo>0?("falta "+money(saldo)):"cobrada"}</div>
-                    </div>
-                  </div>
-                ); })}
+              <div className="ff-body text-xs text-stone-500">👋 Sale</div>
+              <div className="border-t border-black/5 mt-1 pt-2 mb-3">
+                {salenD.length===0 ? <p className="ff-body text-sm text-stone-400">Nadie</p> : salenD.map(r=>(
+                  <button key={r.id} onClick={()=>setSel({t:"res",id:r.id})} className="block w-full text-left mb-1.5">
+                    <div className="ff-body text-sm" style={{color:C.ink}}>{r.guest_name}</div>
+                    <div className="ff-body text-xs text-stone-500">{r.unit||"toda la propiedad"}</div>
+                  </button>
+                ))}
               </div>
-            )}
-          </div>
+
+              <div className="ff-body text-xs text-stone-500 mb-1">Cabañas</div>
+              {filas.length===0 ? (
+                <p className="ff-body text-sm text-stone-500">Agregá tus cabañas en 🏡 Alojamientos para ver cuáles quedan libres.</p>
+              ) : filas.map((f,i)=>{ const r=reservaEn(f,dSel); const blq=!r && (f.manual||[]).includes(dSel);
+                return (
+                  <div key={i} className="flex items-center gap-2 border-t border-black/5 py-1.5">
+                    <span className="w-2 h-2 rounded-full shrink-0" style={{background: r?C.moss : (blq?"#c9c4b7":C.clay)}}></span>
+                    <span className="ff-body text-sm truncate" style={{color:C.ink}}>{etiqueta(f)}</span>
+                    <span className="ff-body text-xs text-stone-400 ml-auto shrink-0">{r?("sale "+dmy(r.end_date)):(blq?"bloqueada":"libre")}</span>
+                  </div>
+                );
+              })}
+
+              {filas.length>0 && (
+                <button onClick={()=>abrirNueva({slug:filas[0].slug, unit:filas[0].name, start_date:dSel, end_date:iso(addDay(parseD(dSel),1))})}
+                  className="w-full mt-4 rounded-full px-4 py-2.5 ff-body text-sm font-semibold text-white" style={{background:C.clay}}>+ Nueva reserva</button>
+              )}
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {form && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-5" style={{background:"rgba(35,38,26,.45)"}} onClick={()=>setForm(null)}>
