@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Carta · Visitando Tandil</title>
 <meta name="description" content="La carta de este lugar en Tandil. Mirá los platos y pedí por WhatsApp." />
+<meta name="theme-color" content="#FBF7E8" id="tcolor" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Crect%20width%3D%2724%27%20height%3D%2724%27%20rx%3D%276%27%20fill%3D%27%233E4F3F%27/%3E%3Ccircle%20cx%3D%2717%27%20cy%3D%277.5%27%20r%3D%272.2%27%20fill%3D%27%23E2A94E%27/%3E%3Cpath%20d%3D%27M3%2018%20L8.5%209%20L12%2013.5%20L15%2010%20L21%2018%20Z%27%20fill%3D%27none%27%20stroke%3D%27%23E2A94E%27%20stroke-width%3D%271.8%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Visitando Tandil" />
@@ -22,344 +23,492 @@
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.7/babel.min.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Familjen+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
+
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Nothing+You+Could+Do&display=swap');
-.ff-display{font-family:'Young Serif',Georgia,serif;font-weight:400}.ff-body{font-family:'Familjen Grotesk',system-ui,sans-serif}body{margin:0}
-.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+/* ══════════════ CARTA · Visitando Tandil ══════════════
+   Un solo template. El local cambia color y tipografía
+   por variables; la estructura y el movimiento no cambian.
+   ══════════════════════════════════════════════════════ */
+:root{
+  --bg:#FBF7E8; --surf:#FFFFFF; --ink:#23261A; --soft:#6A6455;
+  --acc:#2E3521; --acc-ink:#FBF7E8; --acc2:#9C5634;
+  --line:rgba(35,38,26,.08); --veil:rgba(35,38,26,.5);
+  --disp:'Instrument Serif',Georgia,serif;
+  --sans:'Familjen Grotesk',system-ui,-apple-system,sans-serif;
+  --r:26px; --rm:18px; --rs:14px;
+  --sombra:0 8px 26px rgba(35,38,26,.08);
+  --sombra2:0 -14px 44px rgba(35,38,26,.20);
+  --curva:cubic-bezier(.32,.72,0,1);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;
+  overscroll-behavior-y:none;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input{font:inherit}
+.disp{font-family:var(--disp);font-weight:400;letter-spacing:-.015em;line-height:1.08}
+.wrap{max-width:560px;margin:0 auto;padding:0 18px}
+.hide-sb{scrollbar-width:none;-ms-overflow-style:none}
+.hide-sb::-webkit-scrollbar{display:none}
 .clamp2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
-/* ═══════════════════════════════════════════════════════════
-   ESTILO DEFINITIVO · versión 3 + sábana B
-   Va último: manda sobre todo lo anterior.
-   ═══════════════════════════════════════════════════════════ */
-:root{
-  --monte:#2E3521; --liquen:#63653F; --arena:#DFCCAE; --ladrillo:#9C5634;
-  --crudo:#FBF7E8; --papel:#F4EEDC; --tinta:#23261A; --suave:#6A6455;
-  --linea:rgba(35,38,26,.10); --punt:rgba(35,38,26,.10);
-  --r:24px; --rm:18px; --rs:14px; --pill:999px;
-  --sombra:0 10px 30px rgba(35,38,26,.07);
-  --sombra2:0 18px 44px rgba(35,38,26,.12);
-  --sans:'Familjen Grotesk',system-ui,sans-serif;
-  --serif:'Instrument Serif',Georgia,serif;
-  --display:'Instrument Serif',Georgia,serif;
-  --mano:'Familjen Grotesk',system-ui,sans-serif;
-}
-/* fuera la textura de papel */
-.worn::before,.worn::after,body::after,body::before,#root::after,.fondo{display:none !important}
-
-/* ── tres tonos y nada más ── */
-body{background:var(--crudo) !important;color:var(--tinta) !important;
-  font-family:var(--sans) !important;font-size:16px !important;line-height:1.6 !important}
-.pre{background:rgba(46,53,33,.94) !important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-  color:#C6CDBD !important;position:fixed !important;top:0 !important;left:0;right:0;z-index:95 !important;
-  font-size:12.5px !important;letter-spacing:0 !important;text-transform:none !important}
-.pre a{color:#E2E8D8 !important}
-.pdot{background:var(--arena) !important;width:6px !important;height:6px !important}
-header,header.vt{background:rgba(244,238,220,.85) !important;
-  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
-  border-bottom:1px solid var(--linea) !important;position:sticky !important;
-  top:var(--preH,40px) !important;z-index:60 !important}
-body{padding-top:var(--preH,40px)}
-.topbar{position:static !important}
-.topbar .pre{position:fixed !important}
-.sabana,.cards,.gA,.strip,.ig,.cerca,.filters,.filtros,.filtrosbar,.listwrap{background:transparent !important}
-footer{background:var(--monte) !important;color:#C6CDBD !important;border-top:0 !important}
-footer h5{color:#9AA48D !important}
-footer a,footer button{color:#DDE3D3 !important}
-footer p,.next,.fnote{color:#9AA48D !important}
-footer .wm,footer .wm span{color:#EDF0E6 !important}
-footer .wm span{color:#9AA48D !important}
-.fnote{border-top:1px solid rgba(237,240,230,.18) !important}
-footer svg{stroke:#EDF0E6 !important}
-footer svg circle{fill:#EDF0E6 !important}
-
-/* ── tipografía ── */
-h1,h2,h3,h4,.disp,.titulo,.wm,.etiqueta h3,.card h3,.tile h4,.mom b,.strip b,.day h4,
-.tira h3,.desde,.datos b,.precio,.ficha .precio,.aa,.big,.type,.fr,.carta h3,.ptitle h1{
-  font-family:var(--serif) !important;font-weight:400 !important;letter-spacing:-.015em !important}
-h1{line-height:1.02 !important}
-.wm{text-transform:none !important;letter-spacing:-.02em !important;font-size:17px !important;
-  font-family:var(--sans) !important;font-weight:600 !important}
-.wm span,.wm .sub{font-family:var(--sans) !important;letter-spacing:.18em !important;font-size:9px !important;
-  color:var(--suave) !important;font-weight:400 !important}
-.mano{font-family:var(--sans) !important;color:var(--suave) !important;font-style:italic}
-.rot,.kick,.meta,.epi,.aside,.cat,.k,.z,.st,.ver,.eyebrow,.idx,.num,.cuenta,.count{
-  text-transform:none !important;letter-spacing:0 !important;font-size:13px !important}
-.eyebrow,.kick{color:var(--ladrillo) !important;font-weight:600 !important;font-size:13px !important}
-.eyebrow i,.eyebrow span,.kicker span{display:none !important}
-.marco > .num,.shead .idx{display:none !important}
-.marco{grid-template-columns:1fr !important;gap:0 !important}
-/* el punto verde antes de cada título */
-h2::before,.titulo::before{content:"" !important;display:inline-block;width:8px;height:8px;
-  border-radius:50%;background:var(--monte);margin-right:12px;vertical-align:middle;position:static}
-
-/* ── botones y campos: pastillas ── */
-.solid,.ghost,.sel,.pill,.send,.mail,.wsp,.ver,.btn,.chip,.mom,.cta{
-  border-radius:var(--pill) !important;text-transform:none !important;letter-spacing:0 !important;
-  font-size:14px !important;font-weight:500 !important}
-.solid{background:var(--ladrillo) !important;border-color:var(--ladrillo) !important;color:#fff !important;
-  padding:12px 22px !important}
-.ghost,.sel,.pill{background:rgba(255,255,255,.62) !important;border:1px solid var(--linea) !important;
-  color:var(--tinta) !important;padding:11px 18px !important;
-  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
-.sel.on,.pill.on{background:var(--monte) !important;border-color:var(--monte) !important;color:#EDF0E6 !important}
-.send{background:var(--monte) !important;color:#EDF0E6 !important;border-radius:var(--pill) !important}
-.field input,.field select,.field textarea,input,select,textarea{
-  border-radius:var(--rs) !important;border:1px solid var(--linea) !important;
-  background:rgba(251,247,232,.8) !important;font-family:var(--sans) !important}
-
-/* ── superficies de vidrio ── */
-.form,.calbox,.ficha,.plan,.day,.datos,.indice ol,.momentos,.mom,.carta,.panel,.amenbox,
-.modalbox,.popbox,.reservar,.aviso,.nodisp,.horarios,.bloque{
-  background:rgba(255,255,255,.72) !important;border:1px solid rgba(255,255,255,.6) !important;
-  border-radius:var(--r) !important;box-shadow:var(--sombra) !important;
-  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
-.carta{background:var(--monte) !important;border:0 !important;color:#DDE3D3 !important}
-.carta h3{color:#EDF0E6 !important}
-.carta .btn{background:var(--arena) !important;color:var(--monte) !important;border:0 !important}
-.spread img,.par img,.tercias img,.galeria img,.videos iframe,.mapa,.tile,.mini .ph,
-.apertura,.card figure,.unidad .ph{border-radius:var(--rm) !important;overflow:hidden}
-.mapa{filter:grayscale(.25) sepia(.05) !important}
-
-/* ── líneas: sólidas y finas ── */
-.fill,.filas div,.comod div,.item,.stops li,.indice li,.horarios div,.epi,.price,.pie,
-.shead,.sh,.head{border-style:solid !important;border-color:var(--linea) !important}
-.shead,.marco .titulo{border-bottom:1px solid var(--linea) !important;padding-bottom:12px !important}
-
-/* ═══════════ SÁBANA · OPCIÓN B ═══════════ */
-.cards,.gA{display:grid !important;grid-template-columns:repeat(3,1fr) !important;gap:26px !important;
-  padding:8px 0 10px !important;margin:0 !important;clip-path:none !important;box-shadow:none !important}
-.card,.pA{background:transparent !important;border:0 !important;box-shadow:none !important;
-  padding:0 0 44px 0 !important;position:relative !important;
-  -webkit-backdrop-filter:none !important;backdrop-filter:none !important}
-.card:hover,.pA:hover{transform:none !important;box-shadow:none !important;border-color:transparent !important}
-.card .ph,.pA .ph,.card figure{aspect-ratio:4/5 !important;height:auto !important;
-  border-radius:var(--r) !important;overflow:hidden;box-shadow:var(--sombra) !important;position:relative}
-.card:hover .ph,.pA:hover .ph{box-shadow:var(--sombra2) !important}
-.card .ph img,.pA .ph img{width:100% !important;height:100% !important;object-fit:cover !important}
-/* la hojita de vidrio, montada y sobresaliendo */
-.etiqueta,.card .body{
-  position:absolute !important;left:16px !important;right:34px !important;bottom:0 !important;
-  z-index:4;background:rgba(255,255,255,.74) !important;
-  -webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);
-  border:1px solid rgba(255,255,255,.6) !important;border-radius:var(--rm) !important;
-  padding:16px 18px !important;box-shadow:0 14px 34px rgba(35,38,26,.16) !important;
-  transition:transform .45s cubic-bezier(.2,.8,.2,1),background .3s}
-.card:hover .body,.pA:hover .etiqueta{transform:translateY(-6px);background:rgba(255,255,255,.88) !important}
-.etiqueta h3,.card .body h3{font-size:19px !important;margin:0 0 2px !important}
-.etiqueta .z,.card .body .meta{font-size:12.5px !important;color:var(--suave) !important;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.etiqueta .pie,.card .price{margin-top:12px !important;padding-top:11px !important;
-  border-top:1px solid var(--linea) !important;border-bottom:0 !important}
-.card .price b,.etiqueta .pr{font-family:var(--sans) !important;font-weight:600 !important;
-  font-size:18px !important;letter-spacing:-.02em !important}
-.card .price em,.etiqueta .ver{color:var(--ladrillo) !important;font-weight:500 !important;font-size:13.5px !important}
-/* las etiquetas blancas sobre la foto */
-.chips{top:12px !important;left:12px !important;flex-direction:row !important;flex-wrap:wrap;gap:6px !important}
-.chips .chip,.card .chips .chip{background:rgba(255,255,255,.8) !important;border-radius:var(--pill) !important;
-  padding:6px 12px !important;font-size:11.5px !important;font-weight:500 !important;
-  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:0 !important;margin:0 !important;
-  text-transform:none !important;letter-spacing:0 !important}
-
-/* ── filtros pegados ── */
-.filters,.filtros{position:sticky !important;top:calc(var(--preH,40px) + 66px) !important;z-index:50 !important;
-  background:rgba(251,247,232,.9) !important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-  padding:14px 0 12px !important;border-bottom:1px solid var(--linea) !important;
-  border-top:0 !important;box-shadow:none !important;display:flex !important;gap:9px !important;
-  overflow-x:auto;flex-wrap:nowrap !important;scrollbar-width:none}
-.filters::-webkit-scrollbar,.filtros::-webkit-scrollbar{display:none}
-.filters .sel,.filtros .sel{flex:0 0 auto !important}
-.count,.cuenta{margin-left:auto !important;align-self:center;flex:0 0 auto}
-
 /* ── portada ── */
-.hero{border-radius:0 !important}
-.hero .bg,.hero .bg img,.hero .bg video{border-radius:0 !important}
-.hero .bg::after{background:linear-gradient(100deg,rgba(24,28,18,.40) 0%,rgba(24,28,18,.06) 55%,rgba(24,28,18,.32) 100%) !important}
-.sheet{background:rgba(255,255,255,.68) !important;border:1px solid rgba(255,255,255,.55) !important;
-  border-radius:var(--r) !important;-webkit-backdrop-filter:blur(22px) saturate(1.3);
-  backdrop-filter:blur(22px) saturate(1.3);box-shadow:var(--sombra2) !important;
-  padding:30px 32px 28px !important;max-width:480px !important}
-.sheet h1{font-size:clamp(32px,4vw,46px) !important}
-.sheet .lede{font-size:15.5px !important;color:var(--suave) !important}
-.strip button{background:rgba(255,255,255,.7) !important;border:1px solid rgba(255,255,255,.6) !important;
-  border-radius:var(--rm) !important;box-shadow:var(--sombra) !important;margin:0 !important}
-.strip .in{gap:14px !important;padding-top:18px !important;padding-bottom:18px !important}
-.strip{border-bottom:0 !important}
+.hero{position:relative;height:46vh;min-height:280px;max-height:420px;overflow:hidden;background:var(--acc)}
+.hero .ph{position:absolute;inset:-8% 0;width:100%;height:116%;object-fit:cover;
+  transform:translate3d(0,var(--py,0px),0) scale(1.04);will-change:transform}
+.hero .veil{position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(24,26,18,.42) 0%,rgba(24,26,18,.10) 38%,rgba(24,26,18,.78) 100%)}
+.hero .top{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;
+  padding:calc(14px + env(safe-area-inset-top)) 16px 0;z-index:3}
+.round{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  color:#23261A;box-shadow:0 4px 14px rgba(0,0,0,.16);transition:transform .18s var(--curva)}
+.round:active{transform:scale(.9)}
+.hero .name{position:absolute;left:0;right:0;bottom:0;padding:0 20px 52px;z-index:2;color:#fff}
+.hero h1{margin:0;font-size:clamp(34px,10vw,46px);color:#fff}
+.hero .meta{margin:8px 0 0;font-size:13.5px;color:rgba(255,255,255,.86)}
+.hero .marca{font-size:11.5px;letter-spacing:.02em;color:rgba(255,255,255,.72);margin:0 0 10px}
 
-/* ── mosaico y carruseles ── */
-.mosaic{gap:14px !important}
-.mini{display:flex !important;gap:16px !important;overflow-x:auto;scroll-snap-type:x mandatory;
-  scrollbar-width:none;padding-bottom:8px}
-.mini::-webkit-scrollbar{display:none}
-.mini > a{flex:0 0 250px;scroll-snap-align:start;background:rgba(255,255,255,.72);
-  border:1px solid rgba(255,255,255,.6);border-radius:var(--rm);padding:8px;box-shadow:var(--sombra)}
-.mini > a:hover{transform:translateY(-3px);box-shadow:var(--sombra2)}
-.mini h4{margin:11px 8px 0 !important;font-size:17px !important}
-.mini p{margin:2px 8px 10px !important}
+/* ── la hoja que sube por encima de la foto ── */
+.hoja{position:relative;z-index:4;margin-top:-34px;border-radius:30px 30px 0 0;background:var(--bg);
+  padding-top:22px;min-height:60vh}
+.tags{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 14px}
+.tag{font-size:12.5px;padding:5px 12px;border-radius:999px;background:var(--surf);color:var(--soft);
+  border:1px solid var(--line)}
+.consulta{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:500;
+  color:var(--acc2);text-decoration:none}
 
-/* ── barra de abajo ── */
-.appbar{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:85;
-  background:rgba(255,255,255,.84);-webkit-backdrop-filter:blur(20px) saturate(1.2);
-  backdrop-filter:blur(20px) saturate(1.2);border:1px solid rgba(255,255,255,.7);
-  border-radius:28px;box-shadow:0 14px 40px rgba(35,38,26,.18);
-  display:grid;grid-template-columns:repeat(5,1fr);padding:10px 8px;
-  width:calc(100% - 32px);max-width:520px}
-.appbar a{display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px 2px;
-  font-size:11.5px;color:var(--suave);text-decoration:none;border-radius:16px}
-.appbar a.on{color:var(--ladrillo);font-weight:600}
-.appbar svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;
-  stroke-linecap:round;stroke-linejoin:round}
-@media(min-width:900px){ .appbar{display:none} }
+/* ── riel de categorías ── */
+.riel{position:sticky;top:0;z-index:30;background:var(--bg);padding:10px 0 9px;
+  border-bottom:1px solid transparent;transition:border-color .25s,box-shadow .25s}
+.riel.stuck{border-bottom-color:var(--line);box-shadow:0 6px 18px rgba(35,38,26,.05)}
+.riel .pista{position:relative;display:flex;gap:6px;overflow-x:auto;padding:0 18px;scroll-behavior:smooth}
+.riel .marcador{position:absolute;top:0;bottom:0;border-radius:999px;background:var(--acc);
+  transition:transform .42s var(--curva),width .42s var(--curva);z-index:0;left:0}
+.riel button{position:relative;z-index:1;flex:0 0 auto;padding:8px 15px;border-radius:999px;
+  font-size:14px;font-weight:500;color:var(--soft);white-space:nowrap;transition:color .28s}
+.riel button.on{color:var(--acc-ink)}
 
-/* ══════════ CELULAR ══════════ */
-@media(max-width:900px){
-  .nav{display:none !important}
-  .burger{display:none !important}
-  body{padding-bottom:100px}
-  .acts .ghost{display:none !important}
+/* ── carrusel de destacados ── */
+.carrusel{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;
+  padding:4px 18px 20px;scroll-padding-left:18px}
+.dest{flex:0 0 72%;scroll-snap-align:start;background:var(--surf);border-radius:var(--r);
+  overflow:hidden;box-shadow:var(--sombra);transition:transform .5s var(--curva),opacity .5s;
+  transform:scale(.94);opacity:.62;text-align:left;width:100%}
+.dest.foco{transform:scale(1);opacity:1}
+.dest .im{aspect-ratio:4/3;background:var(--line);position:relative}
+.dest .im img{width:100%;height:100%;object-fit:cover}
+.dest .txt{padding:13px 15px 15px}
+.dest h3{margin:0;font-size:19px}
+.dest .pr{margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+
+/* ── secciones ── */
+.sec{padding:6px 0 10px}
+.stit{display:flex;align-items:center;gap:10px;margin:16px 0 12px}
+.stit i{width:8px;height:8px;border-radius:50%;background:var(--acc);flex:none}
+.stit h2{margin:0;font-size:24px}
+.stit em{font-style:normal;font-size:12.5px;color:var(--soft);margin-left:auto}
+
+.grilla{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.plato{background:var(--surf);border-radius:var(--rm);overflow:hidden;text-align:left;width:100%;
+  box-shadow:var(--sombra);transition:transform .22s var(--curva);display:flex;flex-direction:column}
+.plato:active{transform:scale(.975)}
+.plato .im{aspect-ratio:1/1;background:var(--line);position:relative}
+.plato .im img{width:100%;height:100%;object-fit:cover}
+.plato .txt{padding:11px 12px 12px;flex:1;display:flex;flex-direction:column}
+.plato h3{margin:0;font-size:16.5px}
+.plato .d{font-size:12.5px;color:var(--soft);margin:3px 0 0;line-height:1.35}
+.plato .pr{margin-top:auto;padding-top:10px;display:flex;align-items:center;justify-content:space-between;gap:6px}
+
+.fila{display:flex;gap:13px;align-items:flex-start;width:100%;text-align:left;
+  background:var(--surf);border-radius:var(--rm);padding:13px 14px;margin-bottom:9px;
+  box-shadow:var(--sombra);transition:transform .22s var(--curva)}
+.fila:active{transform:scale(.985)}
+.fila .c{flex:1;min-width:0}
+.fila h3{margin:0;font-size:17px}
+.fila .d{font-size:13px;color:var(--soft);margin:3px 0 0;line-height:1.4}
+.fila .pr{margin-top:9px;display:flex;align-items:center;gap:10px}
+.fila .im{flex:0 0 82px;height:82px;border-radius:var(--rs);overflow:hidden;background:var(--line)}
+.fila .im img{width:100%;height:100%;object-fit:cover}
+
+.precio{font-family:var(--disp);font-size:18px}
+.sinp{font-size:12.5px;color:var(--soft)}
+.mas{width:32px;height:32px;border-radius:50%;background:var(--acc);color:var(--acc-ink);
+  display:grid;place-items:center;font-size:20px;line-height:0;flex:none;
+  transition:transform .2s var(--curva)}
+.mas:active{transform:scale(.85)}
+.cont{display:inline-flex;align-items:center;gap:9px;background:var(--acc);color:var(--acc-ink);
+  border-radius:999px;padding:3px 4px}
+.cont b{font-size:14px;min-width:16px;text-align:center;font-weight:600}
+.cont button{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+  font-size:17px;line-height:0;background:rgba(255,255,255,.16);color:inherit}
+.ini{width:100%;height:100%;display:grid;place-items:center;font-family:var(--disp);
+  font-size:34px;color:var(--soft);opacity:.45}
+.chips{position:absolute;top:9px;left:9px;display:flex;gap:5px;flex-wrap:wrap;max-width:calc(100% - 56px);z-index:2}
+.chips span{background:rgba(255,255,255,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  color:#23261A;font-size:11.5px;font-weight:500;padding:5px 11px;border-radius:999px;line-height:1.2;
+  box-shadow:0 2px 8px rgba(35,38,26,.10)}
+.chips-lin{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chips-lin span{font-size:11.5px;font-weight:500;padding:4px 10px;border-radius:999px;
+  background:var(--bg);color:var(--soft);border:1px solid var(--line);line-height:1.2}
+.glob{position:absolute;top:8px;right:8px;min-width:24px;height:24px;padding:0 7px;border-radius:999px;
+  background:var(--acc2);color:#fff;font-size:12.5px;font-weight:600;display:grid;place-items:center}
+
+/* ── aparición al hacer scroll ── */
+.rev{opacity:0;transform:translateY(14px)}
+.rev.in{opacity:1;transform:none;transition:opacity .55s ease,transform .55s var(--curva)}
+
+/* ── barra del pedido ── */
+.barra{position:fixed;left:0;right:0;bottom:0;z-index:60;padding:12px 18px calc(14px + env(safe-area-inset-bottom));
+  transform:translateY(130%);transition:transform .44s var(--curva);pointer-events:none}
+.barra.on{transform:none;pointer-events:auto}
+.barra .in{max-width:560px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;background:var(--acc);color:var(--acc-ink);border-radius:999px;padding:13px 16px 13px 14px;
+  box-shadow:0 14px 34px rgba(35,38,26,.28);width:100%}
+.barra .n{min-width:28px;height:28px;padding:0 8px;border-radius:999px;background:var(--acc-ink);color:var(--acc);
+  font-size:13.5px;font-weight:600;display:grid;place-items:center}
+.pop{animation:pop .34s var(--curva)}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.28)}100%{transform:scale(1)}}
+
+/* ── hojas (ficha del plato y pedido) ── */
+.velo{position:fixed;inset:0;z-index:70;background:var(--veil);opacity:0;transition:opacity .32s ease}
+.velo.on{opacity:1}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:71;background:var(--bg);
+  border-radius:28px 28px 0 0;box-shadow:var(--sombra2);max-height:92vh;display:flex;flex-direction:column;
+  transform:translate(var(--x,0px),100%);transition:transform .44s var(--curva);max-width:560px;margin:0 auto}
+.sheet.on{transform:translate(var(--x,0px),var(--dy,0px))}
+.asa{padding:10px 0 6px;display:grid;place-items:center;flex:none;touch-action:none;cursor:grab}
+.asa span{width:42px;height:4.5px;border-radius:999px;background:var(--line);display:block}
+.sheet .scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1}
+.sheet .pie{flex:none;padding:14px 18px calc(18px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.foto{width:100%;aspect-ratio:16/11;object-fit:cover;background:var(--line)}
+.campo{width:100%;border-radius:var(--rs);border:1px solid var(--line);background:var(--surf);
+  color:var(--ink);padding:12px 14px;font-size:14.5px;outline:none;transition:border-color .2s}
+.campo:focus{border-color:var(--acc)}
+.campo::placeholder{color:var(--soft);opacity:.75}
+.cta{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
+  border-radius:999px;padding:15px;font-size:15.5px;font-weight:600;text-decoration:none;
+  background:var(--acc);color:var(--acc-ink);transition:transform .2s var(--curva)}
+.cta:active{transform:scale(.98)}
+.cta.wsp{background:var(--acc2);color:#fff}
+.linea{border-bottom:1px solid var(--line)}
+
+footer{background:#2E3521;color:#9AA48D;text-align:center;font-size:13px;padding:26px 20px}
+footer b{color:#EDF0E6;font-weight:500}
+.centro{min-height:100vh;display:grid;place-items:center;text-align:center;padding:26px;color:var(--soft)}
+
+@media (min-width:620px){ .grilla{grid-template-columns:1fr 1fr 1fr} .dest{flex:0 0 46%} }
+
+/* ── escritorio: foto a sangre, hoja centrada encima ── */
+@media (min-width:900px){
+  .hero{height:54vh;max-height:440px}
+  .hero .top{padding:20px 26px 0}
+  .hero .name{padding:0 26px 74px}
+  .hero .name > *{max-width:892px;margin-left:auto;margin-right:auto}
+  .hero h1{font-size:52px}
+  .hoja{max-width:940px;margin:-48px auto 0;border-radius:36px 36px 0 0;padding-top:30px}
+  .wrap{max-width:940px;padding:0 26px}
+  .riel{border-radius:0}
+  .riel .pista{max-width:940px;margin:0 auto;padding:0 26px}
+  .carrusel{max-width:940px;margin:0 auto;padding:4px 26px 24px}
+  .dest{flex:0 0 300px}
+  .grilla{gap:16px}
+  .listado{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
+  .fila{margin-bottom:0}
+  .stit h2{font-size:27px}
+  .sheet{--x:-50%;left:50%;right:auto;bottom:26px;width:100%;max-width:520px;
+    border-radius:28px;max-height:84vh}
+  .barra{padding-bottom:26px}
+  .barra .in{max-width:440px}
+  footer{margin-top:8px}
 }
-@media(max-width:760px){
-  .in{padding-left:20px !important;padding-right:20px !important}
-  .pre{position:sticky !important}
-  body{padding-top:0}
-  header,header.vt{position:static !important;background:transparent !important;border-bottom:0 !important}
-  .hbar{padding:14px 0 4px !important;justify-content:center}
-  .acts{display:none !important}
-  .pre .der,.pre .loc{display:none}
-  .pre .in{justify-content:center}
-  .hero{display:block !important;position:relative !important;min-height:0 !important}
-  .hero .bg{position:absolute !important;inset:0 !important;height:100% !important}
-  .hgrid{display:block !important;padding:64px 0 40px !important}
-  .sheet{max-width:none !important;margin:0 !important;padding:24px 20px 22px !important}
-  .sheet h1{font-size:31px !important}
-  .heroctas{display:grid !important;grid-template-columns:1fr !important;gap:9px !important}
-  .heroctas .solid,.heroctas .ghost{text-align:center;padding:14px !important}
-  .strip .in{grid-template-columns:1fr !important;gap:10px !important}
-  .cards,.gA{grid-template-columns:1fr !important;gap:22px !important}
-  .card .ph,.pA .ph{aspect-ratio:4/3 !important}
-  .etiqueta,.card .body{left:14px !important;right:22px !important}
-  .card,.pA{padding-bottom:38px !important}
-  .filters,.filtros{top:0 !important;padding-left:20px !important;padding-right:20px !important;
-    margin-left:-20px !important;margin-right:-20px !important}
-  .mosaic{grid-template-columns:1fr 1fr !important;grid-auto-rows:auto !important;padding:0 20px !important}
-  .mosaic .tile{min-height:150px}
-  .momentos,.plan,.reserva,.comod,.videos,.par,.tercias,.consulta,.f2,.fgrid{grid-template-columns:1fr !important}
-  .apertura{margin:0 20px !important;height:44vh !important;min-height:250px !important}
-  .mini > a{flex:0 0 74%}
-  section{padding-top:40px !important;padding-bottom:40px !important}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+  .rev{opacity:1;transform:none}
+  .hero .ph{transform:none !important}
 }
-</style>
-
-<style>
-:root{
-  --monte:#2E3521;--liquen:#63653F;--arena:#DFCCAE;--ladrillo:#9C5634;
-  --crudo:#FBF7E8;--papel:#F4EEDC;--tinta:#23261A;--suave:#5F5945;--linea:rgba(70,62,42,.24);
-  --punt:rgba(70,62,42,.38);
-  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-body{background:var(--crudo);color:var(--tinta);font-family:'Familjen Grotesk',system-ui,sans-serif}
-body::after{content:"";position:fixed;inset:0;background-image:var(--grain);background-size:180px;
-  mix-blend-mode:multiply;opacity:.13;pointer-events:none;z-index:9999}
-
-/* la carta es de esquinas rectas, como todo lo impreso de la marca */
-[class*="rounded"]{border-radius:0 !important}
-.bg-white{background:var(--papel) !important}
-.text-stone-400,.text-stone-500,.text-stone-600,.text-stone-700{color:var(--suave) !important}
-[class*="border-black"],[class*="border-stone"]{border-color:var(--linea) !important}
-
-h1,h2,h3,.ff-display{font-family:'Young Serif',Georgia,serif;font-weight:400 !important}
-h1{line-height:1.02}
-
-/* los platos, como un índice: nombre, línea punteada y precio */
-.plato-fila{border-bottom:1px dotted var(--punt) !important}
-
-/* rótulos en versalita espaciada */
-.kick,[class*="tracking-\[0"]{letter-spacing:.24em !important;text-transform:uppercase}
-
-/* el nombre de la categoría, con línea gruesa arriba como en una carta impresa */
-.cat-titulo{border-top:2px solid var(--tinta);padding-top:14px}
-
-/* barra del pedido y hoja: cuadradas y en verde monte */
-.pedido-barra{background:var(--monte) !important;color:#EDE4CD !important}
-
-@media(max-width:760px){
-  h1{font-size:clamp(30px,9vw,40px) !important}
-}
-</style>
-
-<style>
-:root{ --r:14px; --rs:10px }
-[class*="rounded"]{ border-radius:var(--rs) !important }
-img, iframe, video{ border-radius:var(--r) }
-.rounded-full, [class*="rounded-full"]{ border-radius:999px !important }
-button, input, select, textarea, a[class*="px-"]{ border-radius:var(--rs) !important }
-.card, .bg-white{ border-radius:var(--r) !important }
 </style>
 </head>
-<body><div id="root"></div>
+<body>
+<div id="root"></div>
+
 <script type="text/babel">
-const { useState, useEffect } = React;
+const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
 const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const C = { paper:"#F4EEDC", cream:"#FBF7E8", mist:"#E7E1D0", ink:"#23261A", moss:"#2E3521", sage:"#63653F", clay:"#9C5634", sun:"#DFCCAE" };
+
+/* ─────────── temas: lo único que cambia entre locales ─────────── */
+const TEMAS = {
+  serrano: { nombre:"Serrano", bg:"#FBF7E8", surf:"#FFFFFF", ink:"#23261A", soft:"#6A6455",
+    acc:"#2E3521", accInk:"#FBF7E8", acc2:"#9C5634", line:"rgba(35,38,26,.08)",
+    disp:"'Instrument Serif',Georgia,serif", fuente:null },
+  brasa: { nombre:"Brasa", bg:"#1B1D16", surf:"#23261A", ink:"#F4EEDC", soft:"#A79B80",
+    acc:"#9C5634", accInk:"#FBF7E8", acc2:"#DFCCAE", line:"rgba(244,238,220,.12)",
+    disp:"'Fraunces',Georgia,serif", fuente:"Fraunces:opsz,wght@9..144,400;9..144,500" },
+  mercado: { nombre:"Mercado", bg:"#FFFDF7", surf:"#F5F0E1", ink:"#23261A", soft:"#6A6455",
+    acc:"#4F6B2A", accInk:"#FBF7E8", acc2:"#9C5634", line:"rgba(35,38,26,.09)",
+    disp:"'Bricolage Grotesque',system-ui,sans-serif", fuente:"Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600" }
+};
+
+const qs = new URLSearchParams(location.search);
 const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=1200&q=80`));
 const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
-const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano, menu:r.menu||[], banner:r.banner||"", photos:r.photos||[] });
 const slugId = (s) => "cat-" + String(s).replace(/[^a-zA-Z0-9]+/g,"-");
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"",
+  phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano,
+  menu:r.menu||[], banner:r.banner||"", photos:r.photos||[], tema:r.theme||r.tema||null });
 
-function DishCard({ it, qty, onAdd, onDec }) {
-  const initial = (it.name||"·").trim().charAt(0).toUpperCase();
+function aplicarTema(t){
+  const k = qs.get("tema") || (t && t.preset) || "serrano";
+  const base = TEMAS[k] || TEMAS.serrano;
+  const acc = qs.get("acento") || (t && t.acento) || base.acc;
+  const s = document.documentElement.style;
+  s.setProperty("--bg",base.bg); s.setProperty("--surf",base.surf); s.setProperty("--ink",base.ink);
+  s.setProperty("--soft",base.soft); s.setProperty("--acc",acc); s.setProperty("--acc-ink",base.accInk);
+  s.setProperty("--acc2",(t&&t.acento2)||base.acc2); s.setProperty("--line",base.line);
+  s.setProperty("--disp",base.disp);
+  const tc = document.getElementById("tcolor"); if(tc) tc.setAttribute("content",base.bg);
+  if(base.fuente && !document.getElementById("fuente-tema")){
+    const l=document.createElement("link"); l.id="fuente-tema"; l.rel="stylesheet";
+    l.href="https://fonts.googleapis.com/css2?family="+base.fuente+"&display=swap";
+    document.head.appendChild(l);
+  }
+  return base;
+}
+
+/* ─────────── guardados (semilla para la pantalla de Guardados) ─────────── */
+const FAVK = "vt:favoritos:platos";
+const leerFavs = () => { try { return JSON.parse(localStorage.getItem(FAVK)||"[]"); } catch(e){ return []; } };
+function useFavs(slug){
+  const [favs,setFavs] = useState(leerFavs);
+  const clave = (n) => slug+"::"+n;
+  const es = (n) => favs.indexOf(clave(n))>=0;
+  const toggle = (n) => setFavs(p => {
+    const k=clave(n); const s = p.indexOf(k)>=0 ? p.filter(x=>x!==k) : p.concat([k]);
+    try{ localStorage.setItem(FAVK, JSON.stringify(s)); }catch(e){}
+    return s;
+  });
+  return { es, toggle };
+}
+
+/* ─────────── íconos ─────────── */
+const Ico = ({d,fill}) => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill={fill||"none"} stroke="currentColor"
+    strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={d} /></svg>
+);
+const P_ATRAS = "M15 18l-6-6 6-6";
+const P_CORAZON = "M12 20.5s-7.5-4.6-7.5-9.6A4.4 4.4 0 0 1 12 8.2a4.4 4.4 0 0 1 7.5 2.7c0 5-7.5 9.6-7.5 9.6z";
+const P_CERRAR = "M18 6L6 18M6 6l12 12";
+
+/* ─────────── hoja arrastrable ─────────── */
+function Hoja({ abierta, cerrar, children, alto }){
+  const [montada,setMontada] = useState(abierta);
+  const [on,setOn] = useState(false);
+  const caja = useRef(null);
+  const drag = useRef({y0:0,dy:0,activo:false});
+
+  useEffect(()=>{
+    let t;
+    if(abierta){ setMontada(true); t=setTimeout(()=>setOn(true),20); }
+    else { setOn(false); t=setTimeout(()=>setMontada(false),440); }
+    return ()=>clearTimeout(t);
+  },[abierta]);
+
+  useEffect(()=>{
+    if(!montada) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const esc = (e)=>{ if(e.key==="Escape") cerrar(); };
+    window.addEventListener("keydown",esc);
+    return ()=>{ document.body.style.overflow=prev; window.removeEventListener("keydown",esc); };
+  },[montada,cerrar]);
+
+  const down = (e)=>{ drag.current={y0:e.clientY,dy:0,activo:true};
+    if(caja.current){ caja.current.style.transition="none"; caja.current.setPointerCapture(e.pointerId); } };
+  const move = (e)=>{ if(!drag.current.activo||!caja.current) return;
+    const dy = Math.max(0, e.clientY - drag.current.y0); drag.current.dy = dy;
+    caja.current.style.setProperty("--dy", dy+"px"); };
+  const up = ()=>{ if(!drag.current.activo||!caja.current) return;
+    drag.current.activo=false;
+    caja.current.style.transition="";
+    caja.current.style.removeProperty("--dy");
+    if(drag.current.dy > 96) cerrar(); };
+
+  if(!montada) return null;
   return (
-    <div className="bg-white border border-black/5 rounded-2xl overflow-hidden flex flex-col">
-      <div className="aspect-[5/4] w-full overflow-hidden relative" style={{background:"linear-gradient(135deg,"+C.mist+",#d7d1c0)"}}>
-        {it.photo
-          ? <img src={IMG(it.photo)} alt={it.name} className="w-full h-full object-cover" />
-          : <div className="w-full h-full grid place-items-center"><span className="ff-display" style={{fontSize:"40px",color:"rgba(62,79,63,0.35)"}}>{initial}</span></div>}
-        {qty>0 && <span className="absolute top-2 right-2 min-w-[24px] h-6 px-1.5 rounded-full grid place-items-center ff-body text-[12px] font-bold text-white" style={{background:C.clay}}>{qty}</span>}
+    <React.Fragment>
+      <div className={"velo"+(on?" on":"")} onClick={cerrar} />
+      <div ref={caja} className={"sheet"+(on?" on":"")} style={alto?{height:alto}:null} role="dialog" aria-modal="true">
+        <div className="asa" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}><span /></div>
+        {children}
       </div>
-      <div className="p-3 flex-1 flex flex-col">
-        <h3 className="ff-display text-[16px] leading-tight" style={{color:C.ink}}>{it.name}</h3>
-        {it.desc && <p className="ff-body text-[12.5px] text-stone-500 mt-1 leading-snug clamp2">{it.desc}</p>}
-        <div className="mt-auto pt-3 flex items-center justify-between gap-2">
-          {it.price>0
-            ? <span className="ff-display text-[15px]" style={{color:C.ink}}>{money(it.price)}</span>
-            : <span className="ff-body text-[12px] text-stone-400">Consultar</span>}
-          {onAdd && (qty>0
-            ? <div className="flex items-center gap-1.5 shrink-0">
-                <button onClick={onDec} aria-label="Quitar uno" className="w-7 h-7 rounded-full grid place-items-center text-white text-lg leading-none" style={{background:C.sage}}>−</button>
-                <span className="ff-body text-sm font-bold text-center" style={{color:C.ink, minWidth:"16px"}}>{qty}</span>
-                <button onClick={onAdd} aria-label="Agregar uno" className="w-7 h-7 rounded-full grid place-items-center text-white text-lg leading-none" style={{background:C.moss}}>+</button>
-              </div>
-            : <button onClick={onAdd} aria-label={"Agregar "+it.name} className="shrink-0 w-8 h-8 rounded-full grid place-items-center text-white text-xl leading-none" style={{background:C.moss}}>+</button>)}
-        </div>
-      </div>
-    </div>
+    </React.Fragment>
   );
 }
 
-function Menu({ c }) {
-  const cats = [...new Set(c.menu.map(i=>i.category||"Menú"))];
-  const [active, setActive] = useState(cats[0]||"");
-  const [cart, setCart] = useState({});   // índice del plato -> cantidad
-  const [notes, setNotes] = useState({});  // índice del plato -> aclaración
-  const [name, setName] = useState("");
-  const [addr, setAddr] = useState("");
-  const [sheet, setSheet] = useState(false);
+/* ─────────── controles de cantidad ─────────── */
+function Contador({ qty, add, dec, chico }){
+  if(!add) return null;
+  if(!qty) return <button className="mas" onClick={(e)=>{e.stopPropagation(); add();}} aria-label="Agregar">+</button>;
+  return (
+    <span className="cont" onClick={e=>e.stopPropagation()}>
+      <button onClick={dec} aria-label="Quitar uno">−</button>
+      <b>{qty}</b>
+      <button onClick={add} aria-label="Agregar uno">+</button>
+    </span>
+  );
+}
+
+const etiquetasDe = (it) => {
+  const raw = it.tags || it.etiquetas || it.labels || [];
+  const arr = Array.isArray(raw) ? raw : String(raw).split(",");
+  return arr.map(x=>String(x).trim()).filter(Boolean).slice(0,4);
+};
+function Chips({ it, max }){
+  const e = etiquetasDe(it); if(!e.length) return null;
+  return <span className="chips">{e.slice(0,max||2).map((t,i)=><span key={i}>{t}</span>)}</span>;
+}
+function ChipsLinea({ it }){
+  const e = etiquetasDe(it); if(!e.length) return null;
+  return <span className="chips-lin">{e.map((t,i)=><span key={i}>{t}</span>)}</span>;
+}
+function Foto({ it }){
+  return it.photo
+    ? <img src={IMG(it.photo)} alt={it.name} loading="lazy" />
+    : <div className="ini">{(it.name||"·").trim().charAt(0).toUpperCase()}</div>;
+}
+
+/* ─────────── tarjetas ─────────── */
+function Destacado({ it, qty, add, dec, abrir }){
+  return (
+    <button className="dest" onClick={abrir}>
+      <div className="im"><Foto it={it} /><Chips it={it} max={2} />{qty>0 && <span className="glob">{qty}</span>}</div>
+      <div className="txt">
+        <h3 className="disp">{it.name}</h3>
+        {it.desc && <p className="d clamp2" style={{margin:"4px 0 0",fontSize:"13px",color:"var(--soft)"}}>{it.desc}</p>}
+        <div className="pr">
+          {it.price>0 ? <span className="precio">{money(it.price)}</span> : <span className="sinp">Consultar</span>}
+          <Contador qty={qty} add={add} dec={dec} />
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function Tarjeta({ it, qty, add, dec, abrir }){
+  return (
+    <button className="plato rev" onClick={abrir}>
+      <div className="im"><Foto it={it} /><Chips it={it} max={2} />{qty>0 && <span className="glob">{qty}</span>}</div>
+      <div className="txt">
+        <h3 className="disp">{it.name}</h3>
+        {it.desc && <p className="d clamp2">{it.desc}</p>}
+        <div className="pr">
+          {it.price>0 ? <span className="precio">{money(it.price)}</span> : <span className="sinp">Consultar</span>}
+          <Contador qty={qty} add={add} dec={dec} />
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function Fila({ it, qty, add, dec, abrir }){
+  return (
+    <button className="fila rev" onClick={abrir}>
+      <div className="c">
+        <h3 className="disp">{it.name}</h3>
+        {it.desc && <p className="d clamp2">{it.desc}</p>}
+        <ChipsLinea it={it} />
+        <div className="pr">
+          {it.price>0 ? <span className="precio">{money(it.price)}</span> : <span className="sinp">Consultar</span>}
+          <span style={{marginLeft:"auto"}}><Contador qty={qty} add={add} dec={dec} /></span>
+        </div>
+      </div>
+      {it.photo && <div className="im"><Foto it={it} /></div>}
+    </button>
+  );
+}
+
+/* ─────────── ficha del plato ─────────── */
+function Ficha({ plato, qty, add, dec, nota, setNota, cerrar, fav, toggleFav }){
+  const it = plato ? plato.it : null;
+  return (
+    <Hoja abierta={!!plato} cerrar={cerrar}>
+      {it && (
+        <React.Fragment>
+          <div className="scroll">
+            <div style={{position:"relative",margin:"0 14px",borderRadius:"22px",overflow:"hidden",background:"var(--line)"}}>
+              {it.photo
+                ? <img className="foto" src={IMG(it.photo)} alt={it.name} />
+                : <div className="foto ini" style={{fontSize:"64px"}}>{(it.name||"·").trim().charAt(0).toUpperCase()}</div>}
+              <button className="round" style={{position:"absolute",top:"12px",right:"12px"}}
+                onClick={()=>toggleFav(it.name)} aria-label="Guardar plato">
+                <Ico d={P_CORAZON} fill={fav?"#9C5634":"none"} />
+              </button>
+            </div>
+            <div style={{padding:"18px 20px 6px"}}>
+              <h2 className="disp" style={{margin:0,fontSize:"30px"}}>{it.name}</h2>
+              {it.desc && <p style={{margin:"9px 0 0",color:"var(--soft)",fontSize:"14.5px"}}>{it.desc}</p>}
+              <div className="tags" style={{marginTop:"14px"}}>
+                {etiquetasDe(it).map((t,i)=><span key={i} className="tag" style={{borderColor:"var(--acc2)",color:"var(--acc2)"}}>{t}</span>)}
+                {it.category && <span className="tag">{it.category}</span>}
+              </div>
+              {add && <input className="campo" style={{marginTop:"4px"}} value={nota||""}
+                onChange={e=>setNota(e.target.value)}
+                placeholder="Aclaración para la cocina (opcional)" />}
+            </div>
+          </div>
+          <div className="pie">
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"12px"}}>
+              <span style={{color:"var(--soft)",fontSize:"14px"}}>{it.price>0 ? money(it.price)+" por unidad" : "Precio a confirmar"}</span>
+              {add && qty>0 && <Contador qty={qty} add={add} dec={dec} />}
+            </div>
+            {add
+              ? <button className="cta" onClick={()=>{ if(!qty) add(); cerrar(); }}>
+                  {qty>0 ? "Listo, seguir mirando" : "Agregar al pedido"}
+                  {it.price>0 && <span style={{opacity:.8}}>· {money(it.price*(qty||1))}</span>}
+                </button>
+              : <button className="cta" onClick={cerrar}>Volver a la carta</button>}
+          </div>
+        </React.Fragment>
+      )}
+    </Hoja>
+  );
+}
+
+/* ─────────── carta ─────────── */
+function Menu({ c }){
+  const cats = useMemo(()=>[...new Set(c.menu.map(i=>i.category||"Menú"))],[c]);
+  const [activa,setActiva] = useState(cats[0]||"");
+  const [cart,setCart] = useState({});
+  const [notes,setNotes] = useState({});
+  const [name,setName] = useState("");
+  const [addr,setAddr] = useState("");
+  const [sheet,setSheet] = useState(false);
+  const [ficha,setFicha] = useState(null);
+  const [stuck,setStuck] = useState(false);
+  const [late,setLate] = useState(false);
+  const heroRef = useRef(null), rielRef = useRef(null), marcaRef = useRef(null), main = useRef(null);
+  const favs = useFavs(c.slug);
+
   const cartOn = !!c.whatsapp;
   const wa = c.whatsapp ? `https://wa.me/${c.whatsapp}?text=`+encodeURIComponent(`Hola! Quiero hacer una consulta sobre ${c.name}.`) : null;
-  const tags = [c.sinTacc && "Sin TACC", c.vegetariano && "Opciones veggie"].filter(Boolean);
-  const go = (cat) => { setActive(cat); const el=document.getElementById(slugId(cat)); if(el){ const y=el.getBoundingClientRect().top+window.scrollY-92; window.scrollTo({top:y,behavior:"smooth"}); } };
-  const hasBanner = !!c.banner;
+  const tags = [c.zone, c.sinTacc && "Sin TACC", c.vegetariano && "Opciones veggie"].filter(Boolean);
 
-  const add = (idx) => setCart(p => ({ ...p, [idx]: (p[idx]||0)+1 }));
+  const add = (idx) => { setCart(p => ({ ...p, [idx]: (p[idx]||0)+1 })); setLate(true); setTimeout(()=>setLate(false),360); };
   const dec = (idx) => setCart(p => { const q=(p[idx]||0)-1; const n={...p}; if(q<=0) delete n[idx]; else n[idx]=q; return n; });
-  const setNote = (idx, v) => setNotes(p => ({ ...p, [idx]: v }));
+  const setNote = (idx,v) => setNotes(p => ({ ...p, [idx]: v }));
+
   const entries = Object.entries(cart).map(([k,q]) => [Number(k), q]).filter(([i,q]) => q>0 && c.menu[i]);
   const count = entries.reduce((s,[,q]) => s+q, 0);
   const total = entries.reduce((s,[i,q]) => s + ((c.menu[i].price>0 ? c.menu[i].price : 0) * q), 0);
+
   const orderUrl = (() => {
     if (!c.whatsapp || count===0) return null;
     const lines = entries.map(([i,q]) => { const it=c.menu[i]; const nt=(notes[i]||"").trim(); return `• ${q}x ${it.name}` + (it.price>0 ? ` — ${money(it.price*q)}` : " — (a confirmar)") + (nt ? `\n   ↳ ${nt}` : ""); });
@@ -370,158 +519,268 @@ function Menu({ c }) {
     return `https://wa.me/${c.whatsapp}?text=`+encodeURIComponent(msg);
   })();
 
-  return (
-    <div className="ff-body" style={{background:C.paper, minHeight:"100vh"}}>
+  /* portada con parallax + riel que se pega */
+  useEffect(()=>{
+    let tick=false;
+    const on = ()=>{ if(tick) return; tick=true; requestAnimationFrame(()=>{
+      const y = window.scrollY;
+      if(heroRef.current) heroRef.current.style.setProperty("--py", Math.min(y*0.28,120)+"px");
+      if(rielRef.current){ const t = rielRef.current.getBoundingClientRect().top; setStuck(t<=1); }
+      tick=false;
+    }); };
+    window.addEventListener("scroll",on,{passive:true}); on();
+    return ()=>window.removeEventListener("scroll",on);
+  },[]);
 
-      {/* HERO premium */}
-      <header className="relative flex flex-col" style={{minHeight: hasBanner ? "60vh" : "auto"}}>
-        {hasBanner && <div className="absolute inset-0 overflow-hidden">
-          <img src={IMG(c.banner)} className="w-full h-full object-cover" />
-          <div className="absolute inset-0" style={{background:"linear-gradient(180deg, rgba(28,27,23,.30) 0%, rgba(28,27,23,.20) 40%, rgba(28,27,23,.86) 100%)"}} />
-        </div>}
-        <div className="relative max-w-2xl mx-auto w-full px-5 pt-5">
-          <a href={"resto.html?slug="+c.slug} className={"ff-body text-[13px] font-semibold "+(hasBanner?"text-white/85":"text-stone-400")}>‹ Volver a {c.name}</a>
+  /* qué sección estoy mirando */
+  useEffect(()=>{
+    if(!cats.length) return;
+    const obs = new IntersectionObserver((es)=>{
+      es.forEach(e=>{ if(e.isIntersecting){ const cat = e.target.getAttribute("data-cat"); if(cat) setActiva(cat); } });
+    },{ rootMargin:"-42% 0px -52% 0px" });
+    cats.forEach(cat=>{ const el=document.getElementById(slugId(cat)); if(el) obs.observe(el); });
+    return ()=>obs.disconnect();
+  },[cats]);
+
+  /* marcador del riel */
+  useEffect(()=>{
+    const pista = rielRef.current && rielRef.current.querySelector(".pista");
+    if(!pista) return;
+    const b = pista.querySelector("button.on");
+    if(b && marcaRef.current){
+      marcaRef.current.style.width = b.offsetWidth+"px";
+      marcaRef.current.style.transform = "translateX("+b.offsetLeft+"px)";
+      const izq = b.offsetLeft - pista.clientWidth/2 + b.offsetWidth/2;
+      pista.scrollTo({ left: Math.max(0,izq), behavior:"smooth" });
+    }
+  },[activa,cats]);
+
+  /* aparición escalonada */
+  useEffect(()=>{
+    const nodos = document.querySelectorAll(".rev:not(.in)");
+    const obs = new IntersectionObserver((es)=>{
+      let i=0;
+      es.forEach(e=>{ if(e.isIntersecting){ const el=e.target; setTimeout(()=>el.classList.add("in"), i*45); i++; obs.unobserve(el); } });
+    },{ rootMargin:"0px 0px -8% 0px" });
+    nodos.forEach(n=>obs.observe(n));
+    return ()=>obs.disconnect();
+  },[cats,c]);
+
+  /* tarjeta enfocada del carrusel */
+  const carRef = useRef(null);
+  useEffect(()=>{
+    const car = carRef.current; if(!car) return;
+    const obs = new IntersectionObserver((es)=>{
+      es.forEach(e=> e.target.classList.toggle("foco", e.intersectionRatio>0.82));
+    },{ root:car, threshold:[0,.82,1] });
+    Array.from(car.children).forEach(ch=>obs.observe(ch));
+    return ()=>obs.disconnect();
+  },[c]);
+
+  const ir = (cat) => { setActiva(cat); const el=document.getElementById(slugId(cat));
+    if(el) window.scrollTo({ top: el.getBoundingClientRect().top+window.scrollY-64, behavior:"smooth" }); };
+
+  const conFoto = c.menu.filter(i=>i.photo);
+  const destacados = conFoto.slice(0,6).map(it => ({ it, idx: c.menu.indexOf(it) }));
+  const forzado = (c.tema && c.tema.densidad) || qs.get("densidad") || "auto";
+  const modoDe = (items) => forzado!=="auto" ? forzado
+    : (items.filter(x=>x.it.photo).length / items.length >= 0.55 ? "vitrina" : "lista");
+
+  return (
+    <div>
+      <header className="hero" ref={heroRef}>
+        {c.banner && <img className="ph" src={IMG(c.banner)} alt="" />}
+        <div className="veil" />
+        <div className="top">
+          <a className="round" href={"resto.html?slug="+c.slug} aria-label="Volver"><Ico d={P_ATRAS} /></a>
+          {wa && <a className="round" href={wa} target="_blank" rel="noreferrer" aria-label="Consultar por WhatsApp"
+            style={{width:"auto",padding:"0 15px",fontSize:"13.5px",fontWeight:500,borderRadius:"999px"}}>Consultar</a>}
         </div>
-        <div className={"relative max-w-2xl mx-auto w-full px-5 pb-7 "+(hasBanner?"pt-28 mt-auto":"pt-8")}>
-          <div className="ff-body text-[11px] uppercase tracking-[0.3em] font-semibold mb-2" style={{color:hasBanner?"#F0D9A8":C.clay}}>Nuestra carta</div>
-          <h1 className="ff-display text-4xl sm:text-5xl leading-[1.05]" style={{color:hasBanner?"#fff":C.ink}}>{c.name}</h1>
-          {c.zone && <p className={"ff-body text-sm mt-2 "+(hasBanner?"text-white/85":"text-stone-500")}>📍 {c.zone}</p>}
-          {tags.length>0 && <div className="flex flex-wrap gap-2 mt-4">{tags.map((t,i)=><span key={i} className="rounded-full px-3 py-1 ff-body text-xs font-semibold" style={{background:hasBanner?"rgba(255,255,255,.94)":"#fff",color:C.moss}}>{t}</span>)}</div>}
-          {wa && <a href={wa} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full mt-6 px-6 py-3 ff-body font-semibold text-[15px]" style={hasBanner?{background:"#fff",color:C.moss}:{background:C.clay,color:"#fff"}}>💬 Consultar por WhatsApp</a>}
+        <div className="name">
+          <p className="marca">Carta del lugar</p>
+          <h1 className="disp">{c.name}</h1>
+          {c.blurb && <p className="meta clamp2">{c.blurb}</p>}
         </div>
       </header>
 
-      {/* CHIPS de categoría */}
-      {cats.length>1 && (
-        <div className="sticky top-0 z-20 border-b border-black/5" style={{background:"rgba(243,238,226,.93)", backdropFilter:"blur(8px)", WebkitBackdropFilter:"blur(8px)"}}>
-          <div className="max-w-2xl mx-auto px-3 flex gap-1.5 overflow-x-auto py-2.5 no-scrollbar">
-            {cats.map((cat,i)=><button key={i} onClick={()=>go(cat)} className="rounded-full px-4 py-1.5 ff-body text-sm whitespace-nowrap transition border" style={active===cat?{background:C.moss,color:"#fff",borderColor:C.moss}:{color:C.moss,borderColor:"rgba(62,79,63,0.22)"}}>{cat}</button>)}
-          </div>
-        </div>
-      )}
+      <div className="hoja">
+        {tags.length>0 && <div className="wrap"><div className="tags">{tags.map((t,i)=><span key={i} className="tag">{t}</span>)}</div></div>}
 
-      {/* CARTA en tarjetas */}
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8" style={{paddingBottom: count>0 ? "120px" : "32px"}}>
-        {c.menu.length===0 ? <p className="ff-body text-stone-500 text-center py-16">La carta todavía no está cargada.</p> :
-          cats.map((cat,ci)=>(
-            <section key={ci} id={slugId(cat)} className="mb-9" style={{scrollMarginTop:"96px"}}>
-              <h2 className="ff-display text-2xl mb-1" style={{color:C.ink}}>{cat}</h2>
-              <div className="h-px w-12 mb-5" style={{background:C.clay}} />
-              <div className="grid grid-cols-2 gap-3">
-                {c.menu.map((it,idx)=>({it,idx})).filter(x=>(x.it.category||"Menú")===cat).map(({it,idx})=>(
-                  <DishCard key={idx} it={it} qty={cart[idx]||0} onAdd={cartOn?(()=>add(idx)):null} onDec={cartOn?(()=>dec(idx)):null} />
-                ))}
-              </div>
-            </section>
-          ))
-        }
-      </main>
-
-      {/* enlace de consulta al pie */}
-      {wa && (
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 pb-8 text-center">
-          <a href={wa} target="_blank" rel="noreferrer" className="ff-body text-sm font-semibold" style={{color:C.clay}}>¿Dudas? Consultá por WhatsApp →</a>
-        </div>
-      )}
-      <footer className="py-8 text-center ff-body text-sm" style={{background:C.moss,color:"rgba(255,255,255,0.7)"}}>{c.name} · carta vía Visitando Tandil · Brote 🌱</footer>
-
-      {/* BARRA FIJA DEL PEDIDO */}
-      {cartOn && count>0 && !sheet && (
-        <div className="fixed bottom-0 left-0 right-0 z-30 px-4 pb-4 pt-3" style={{background:"linear-gradient(transparent, rgba(243,238,226,.95) 32%)"}}>
-          <div className="max-w-2xl mx-auto">
-            <button onClick={()=>setSheet(true)} className="w-full flex items-center justify-between rounded-2xl px-5 py-4 text-white shadow-lg" style={{background:C.moss}}>
-              <span className="flex items-center gap-2.5 ff-body font-semibold">
-                <span className="min-w-[26px] h-[26px] px-1.5 rounded-full grid place-items-center text-[13px] font-bold" style={{background:"#fff",color:C.moss}}>{count}</span>
-                Ver mi pedido
-              </span>
-              <span className="ff-display text-[17px]">{money(total)}</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* HOJA DEL PEDIDO */}
-      {cartOn && sheet && (
-        <div className="fixed inset-0 z-40 flex items-end justify-center" style={{background:"rgba(28,27,23,.5)"}} onClick={()=>setSheet(false)}>
-          <div onClick={e=>e.stopPropagation()} className="w-full max-w-2xl rounded-t-3xl flex flex-col" style={{background:C.paper, maxHeight:"86vh"}}>
-            <div className="flex items-center justify-between px-5 pt-5 pb-3">
-              <h3 className="ff-display text-2xl" style={{color:C.ink}}>Tu pedido</h3>
-              <button onClick={()=>setSheet(false)} aria-label="Cerrar" className="text-stone-400 hover:text-stone-700 text-2xl leading-none">✕</button>
+        {destacados.length>1 && (
+          <section>
+            <div className="wrap"><div className="stit"><i /><h2 className="disp">Para probar</h2></div></div>
+            <div className="carrusel hide-sb" ref={carRef}>
+              {destacados.map(({it,idx})=>(
+                <Destacado key={idx} it={it} qty={cart[idx]||0}
+                  add={cartOn?(()=>add(idx)):null} dec={cartOn?(()=>dec(idx)):null}
+                  abrir={()=>setFicha({it,idx})} />
+              ))}
             </div>
-            <div className="flex-1 overflow-y-auto px-5 no-scrollbar">
-              {entries.length===0 ? <p className="ff-body text-stone-500 text-center py-10">Tu pedido está vacío.</p> :
-                entries.map(([i,q])=>{ const it=c.menu[i]; return (
-                  <div key={i} className="py-3 border-b border-black/5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0" style={{background:"linear-gradient(135deg,"+C.mist+",#d7d1c0)"}}>
-                        {it.photo
-                          ? <img src={IMG(it.photo)} alt={it.name} className="w-full h-full object-cover" />
-                          : <div className="w-full h-full grid place-items-center ff-display" style={{color:"rgba(62,79,63,0.4)", fontSize:"20px"}}>{(it.name||"·").trim().charAt(0).toUpperCase()}</div>}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="ff-body font-semibold text-[15px] truncate" style={{color:C.ink}}>{it.name}</div>
-                        <div className="ff-body text-[13px] text-stone-500">{it.price>0 ? money(it.price)+" c/u" : "A confirmar"}</div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <button onClick={()=>dec(i)} aria-label="Quitar uno" className="w-7 h-7 rounded-full grid place-items-center text-white text-lg leading-none" style={{background:C.sage}}>−</button>
-                        <span className="ff-body text-sm font-bold text-center" style={{minWidth:"18px"}}>{q}</span>
-                        <button onClick={()=>add(i)} aria-label="Agregar uno" className="w-7 h-7 rounded-full grid place-items-center text-white text-lg leading-none" style={{background:C.moss}}>+</button>
-                      </div>
-                      {it.price>0 && <div className="ff-display text-[15px] text-right shrink-0" style={{color:C.ink, minWidth:"72px"}}>{money(it.price*q)}</div>}
+          </section>
+        )}
+
+        {cats.length>1 && (
+          <div className="riel" ref={rielRef}>
+            <div className="pista hide-sb">
+              <span className="marcador" ref={marcaRef} />
+              {cats.map((cat,i)=>(
+                <button key={i} className={activa===cat?"on":""} onClick={()=>ir(cat)}>{cat}</button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <main className="wrap" ref={main} style={{paddingBottom: count>0 ? "120px" : "40px"}}>
+          {c.menu.length===0
+            ? <p style={{textAlign:"center",color:"var(--soft)",padding:"70px 0"}}>La carta todavía no está cargada.</p>
+            : cats.map((cat,ci)=>{
+                const items = c.menu.map((it,idx)=>({it,idx})).filter(x=>(x.it.category||"Menú")===cat);
+                const modo = modoDe(items);
+                return (
+                  <section key={ci} id={slugId(cat)} data-cat={cat} className="sec" style={{scrollMarginTop:"70px"}}>
+                    <div className="stit"><i /><h2 className="disp">{cat}</h2><em>{items.length}</em></div>
+                    {modo==="vitrina"
+                      ? <div className="grilla">
+                          {items.map(({it,idx})=>(
+                            <Tarjeta key={idx} it={it} qty={cart[idx]||0}
+                              add={cartOn?(()=>add(idx)):null} dec={cartOn?(()=>dec(idx)):null}
+                              abrir={()=>setFicha({it,idx})} />
+                          ))}
+                        </div>
+                      : <div className="listado">
+                          {items.map(({it,idx})=>(
+                            <Fila key={idx} it={it} qty={cart[idx]||0}
+                              add={cartOn?(()=>add(idx)):null} dec={cartOn?(()=>dec(idx)):null}
+                              abrir={()=>setFicha({it,idx})} />
+                          ))}
+                        </div>}
+                  </section>
+                );
+              })}
+        </main>
+
+        {wa && (
+          <div className="wrap" style={{textAlign:"center",paddingBottom:"30px"}}>
+            <a className="consulta" href={wa} target="_blank" rel="noreferrer">¿Alguna duda? Escribinos por WhatsApp</a>
+          </div>
+        )}
+      </div>
+
+      <footer>{c.name} · carta en <b>Visitando Tandil</b></footer>
+
+      {/* barra del pedido */}
+      {cartOn && (
+        <div className={"barra"+(count>0 && !sheet && !ficha ? " on":"")}>
+          <button className="in" onClick={()=>setSheet(true)}>
+            <span style={{display:"flex",alignItems:"center",gap:"11px",fontWeight:600}}>
+              <span className={"n"+(late?" pop":"")}>{count}</span> Ver mi pedido
+            </span>
+            <span className="precio">{money(total)}</span>
+          </button>
+        </div>
+      )}
+
+      <Ficha plato={ficha}
+        qty={ficha ? (cart[ficha.idx]||0) : 0}
+        add={cartOn && ficha ? (()=>add(ficha.idx)) : null}
+        dec={ficha ? (()=>dec(ficha.idx)) : null}
+        nota={ficha ? notes[ficha.idx] : ""}
+        setNota={(v)=>ficha && setNote(ficha.idx,v)}
+        fav={ficha ? favs.es(ficha.it.name) : false}
+        toggleFav={favs.toggle}
+        cerrar={()=>setFicha(null)} />
+
+      {/* hoja del pedido */}
+      <Hoja abierta={cartOn && sheet} cerrar={()=>setSheet(false)}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"2px 20px 12px"}}>
+          <h2 className="disp" style={{margin:0,fontSize:"27px"}}>Tu pedido</h2>
+          <button className="round" onClick={()=>setSheet(false)} aria-label="Cerrar"
+            style={{background:"var(--surf)",boxShadow:"none"}}><Ico d={P_CERRAR} /></button>
+        </div>
+        <div className="scroll" style={{padding:"0 20px"}}>
+          {entries.length===0
+            ? <p style={{textAlign:"center",color:"var(--soft)",padding:"40px 0"}}>Todavía no agregaste nada.</p>
+            : entries.map(([i,q])=>{ const it=c.menu[i]; return (
+                <div key={i} className="linea" style={{padding:"12px 0"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
+                    <div style={{width:"48px",height:"48px",borderRadius:"12px",overflow:"hidden",flex:"none",background:"var(--line)"}}>
+                      <Foto it={it} />
                     </div>
-                    <input value={notes[i]||""} onChange={e=>setNote(i, e.target.value)} placeholder="Aclaración (ej: sin sal, para llevar)" className="w-full mt-2 ff-body text-[13px] rounded-lg px-3 py-2 outline-none" style={{background:"#fff", border:"1px solid rgba(0,0,0,.08)", color:C.ink}} />
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontWeight:500,fontSize:"15px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{it.name}</div>
+                      <div style={{fontSize:"13px",color:"var(--soft)"}}>{it.price>0 ? money(it.price)+" c/u" : "A confirmar"}</div>
+                    </div>
+                    <Contador qty={q} add={()=>add(i)} dec={()=>dec(i)} />
+                    {it.price>0 && <span className="precio" style={{minWidth:"74px",textAlign:"right"}}>{money(it.price*q)}</span>}
                   </div>
-                ); })
-              }
-            </div>
-            <div className="px-5 pt-4 pb-6" style={{borderTop:"1px solid rgba(0,0,0,.06)"}}>
-              {entries.length>0 && (
-                <div className="space-y-2 mb-4">
-                  <input value={name} onChange={e=>setName(e.target.value)} placeholder="Tu nombre" className="w-full ff-body text-[14px] rounded-xl px-3.5 py-3 outline-none" style={{background:"#fff", border:"1px solid rgba(0,0,0,.08)", color:C.ink}} />
-                  <input value={addr} onChange={e=>setAddr(e.target.value)} placeholder="Dirección de entrega (o 'retiro en el local')" className="w-full ff-body text-[14px] rounded-xl px-3.5 py-3 outline-none" style={{background:"#fff", border:"1px solid rgba(0,0,0,.08)", color:C.ink}} />
+                  <input className="campo" style={{marginTop:"8px",fontSize:"13.5px",padding:"9px 12px"}}
+                    value={notes[i]||""} onChange={e=>setNote(i,e.target.value)}
+                    placeholder="Aclaración (ej: sin sal, para llevar)" />
                 </div>
-              )}
-              <div className="flex justify-between items-baseline mb-4">
-                <span className="ff-body font-semibold" style={{color:C.ink}}>Total estimado</span>
-                <span className="ff-display text-2xl" style={{color:C.ink}}>{money(total)}</span>
-              </div>
-              {orderUrl
-                ? <a href={orderUrl} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 rounded-full py-4 ff-body font-semibold text-white" style={{background:C.clay}}>💬 Enviar pedido por WhatsApp</a>
-                : <div className="text-center ff-body text-sm text-stone-500 py-3">Agregá algún plato para enviar el pedido.</div>}
-              {entries.length>0 && <button onClick={()=>{ setCart({}); setNotes({}); }} className="w-full text-center mt-3 ff-body text-sm text-stone-400">Vaciar pedido</button>}
-              <p className="ff-body text-[12px] text-stone-400 text-center mt-3 leading-snug">El total es estimado. El local te confirma disponibilidad, formas de pago y envío por WhatsApp.</p>
-            </div>
-          </div>
+              ); })}
         </div>
-      )}
+        <div className="pie">
+          {entries.length>0 && (
+            <div style={{display:"grid",gap:"8px",marginBottom:"14px"}}>
+              <input className="campo" value={name} onChange={e=>setName(e.target.value)} placeholder="Tu nombre" />
+              <input className="campo" value={addr} onChange={e=>setAddr(e.target.value)} placeholder="Dirección de entrega (o 'retiro en el local')" />
+            </div>
+          )}
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:"14px"}}>
+            <span style={{fontWeight:500}}>Total estimado</span>
+            <span className="disp" style={{fontSize:"27px"}}>{money(total)}</span>
+          </div>
+          {orderUrl
+            ? <a className="cta wsp" href={orderUrl} target="_blank" rel="noreferrer">Enviar pedido por WhatsApp</a>
+            : <p style={{textAlign:"center",color:"var(--soft)",fontSize:"14px",margin:"6px 0"}}>Agregá algún plato para enviar el pedido.</p>}
+          {entries.length>0 && <button onClick={()=>{ setCart({}); setNotes({}); }}
+            style={{display:"block",width:"100%",textAlign:"center",marginTop:"12px",color:"var(--soft)",fontSize:"14px"}}>Vaciar pedido</button>}
+          <p style={{fontSize:"12px",color:"var(--soft)",textAlign:"center",margin:"12px 0 0",lineHeight:1.4}}>
+            El total es estimado. El local confirma disponibilidad, pago y envío por WhatsApp.</p>
+        </div>
+      </Hoja>
     </div>
   );
 }
 
+/* ─────────── carta de demostración (para ver el diseño sin base) ─────────── */
+const DEMO = { id:"demo", slug:"demo", name:"Almacén Serrano", zone:"Centro", whatsapp:"5492494000000",
+  blurb:"Cocina de campo, pan del día y milanesas como las de casa.", sin_tacc:true, vegetariano:true,
+  banner:"photo-1414235077428-338989a2e8c0",
+  menu:[
+    {name:"Milanesa con papas", desc:"Ternera empanada, papas rústicas al romero", price:15000, category:"Milanesas", photo:"photo-1585032226651-759b368d7246"},
+    {name:"Milanesa napolitana", desc:"Con salsa de tomate, jamón y muzzarella", price:17300, category:"Milanesas", photo:"photo-1565299624946-b28f40a0ae38", tags:["Lo más pedido"]},
+    {name:"Milanesa de berenjena", desc:"Opción vegetariana, con ensalada de estación", price:13500, category:"Milanesas", tags:["Vegetariano","Sin TACC"]},
+    {name:"Tarta de verdura", desc:"Acelga, cebolla de verdeo y queso cremoso", price:9800, category:"Tartas", photo:"photo-1565958011703-44f9829ba187"},
+    {name:"Tarta de calabaza y puerro", desc:"Masa casera de hojaldre", price:9800, category:"Tartas"},
+    {name:"Bife de chorizo", desc:"400g a la parrilla, con guarnición a elección", price:36000, category:"Platos", photo:"photo-1546833999-b9f581a1996d", tags:["Recomendado","400 g"]},
+    {name:"Trucha del arroyo", desc:"Al limón, con papas andinas", price:28000, category:"Platos", tags:["De la zona"]},
+    {name:"Provoleta", desc:"Con orégano y aceite de oliva", price:7500, category:"Para compartir", photo:"photo-1541745537411-b8046dc6d66c", tags:["Sin TACC"]},
+    {name:"Picada serrana", desc:"Quesos y fiambres de la zona, para dos", price:22000, category:"Para compartir", tags:["Para dos"]},
+    {name:"Flan casero", desc:"Con dulce de leche y crema", price:6200, category:"Postres", photo:"photo-1551024506-0bccd828d307"},
+    {name:"Helado de la casa", desc:"Dos bochas, sabores del día", price:5400, category:"Postres"}
+  ]};
+
 function App(){
-  const [state,setState]=useState({loading:true});
+  const [state,setState] = useState({loading:true});
   useEffect(()=>{ (async()=>{
-    const slug=new URLSearchParams(location.search).get("slug");
+    const slug = qs.get("slug");
+    if(qs.get("demo")){ aplicarTema(null); document.title="Carta · "+DEMO.name; setState({c:fromRow(DEMO)}); return; }
     if(!slug){ setState({notfound:true}); return; }
-    const {data,error}=await db.from("restaurants").select("*").eq("slug",slug).limit(1);
+    const {data,error} = await db.from("restaurants").select("*").eq("slug",slug).limit(1);
     if(error){ setState({error:true}); return; }
-    if(data&&data[0]){ document.title="Carta · "+data[0].name; setState({c:fromRow(data[0])}); } else setState({notfound:true});
+    if(data && data[0]){
+      const c = fromRow(data[0]);
+      aplicarTema(c.tema);
+      document.title = "Carta · " + c.name;
+      setState({c});
+    } else setState({notfound:true});
   })(); },[]);
-  const center = (txt) => <div className="ff-body" style={{minHeight:"100vh",background:C.paper,color:C.ink,display:"grid",placeItems:"center",padding:"24px",textAlign:"center"}}>{txt}</div>;
-  if(state.loading) return center("Cargando carta…");
-  if(state.notfound||state.error) return center("No encontramos esta carta.");
+  if(state.loading) return <div className="centro">Cargando carta…</div>;
+  if(state.notfound || state.error) return <div className="centro">No encontramos esta carta.</div>;
   return <Menu c={state.c} />;
 }
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-</script>
-
-<script>
-(function(){
-  function medir(){var p=document.querySelector('.pre');
-    if(p) document.documentElement.style.setProperty('--preH', p.offsetHeight+'px');}
-  window.addEventListener('load',medir);window.addEventListener('resize',medir);
-  document.addEventListener('DOMContentLoaded',medir);setInterval(medir,1200);
-})();
 </script>
 </body>
 </html>
