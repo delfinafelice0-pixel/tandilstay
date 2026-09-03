@@ -964,6 +964,255 @@ h2::before,.titulo::before{content:"" !important;display:inline-block;width:8px;
   .mini > a{flex:0 0 74%}
   section{padding-top:40px !important;padding-bottom:40px !important}
 }
+
+/* ═══════════════ AJUSTES FINOS · último bloque ═══════════════ */
+
+/* ── header: el activo es una pastilla suave, no un recuadro ── */
+.nav button, .nav a{ border:0 !important; border-bottom:0 !important; padding:9px 15px !important;
+  border-radius:var(--pill) !important; transition:background .25s, color .25s }
+.nav button:hover, .nav a:hover{ background:rgba(35,38,26,.05) !important; color:var(--tinta) !important }
+.nav button.on, .nav a.on{ background:rgba(46,53,33,.09) !important; color:var(--tinta) !important;
+  font-weight:500 !important; border:0 !important }
+.nav{ gap:6px !important }
+
+/* ── menos aire entre el header y el título ── */
+.ptitle{ padding:26px 0 18px !important; border-bottom:0 !important }
+.listado{ padding-top:22px !important }
+.ptitle h1{ margin-top:6px !important }
+.ptitle p{ margin-top:10px !important }
+.shead{ margin-bottom:16px !important }
+section{ padding-top:40px !important }
+
+/* ── SÁBANA: una sola hojita de vidrio, sin recuadros anidados ── */
+.card, .pA{ background:none !important; border:0 !important; box-shadow:none !important;
+  padding:0 0 40px 0 !important }
+.card .ph, .pA .ph, .card figure{ box-shadow:none !important; border-radius:var(--r) !important;
+  aspect-ratio:4/5 !important; overflow:hidden }
+.card .body, .etiqueta{
+  position:absolute !important; left:14px !important; right:30px !important; bottom:0 !important;
+  background:rgba(255,255,255,.80) !important;
+  -webkit-backdrop-filter:blur(18px) saturate(1.25); backdrop-filter:blur(18px) saturate(1.25);
+  border:1px solid rgba(255,255,255,.6) !important; border-radius:var(--rm) !important;
+  padding:15px 17px !important; box-shadow:0 12px 30px rgba(35,38,26,.14) !important;
+}
+/* nada adentro de la hojita dibuja su propia caja */
+.card .body *, .etiqueta *{ background:none !important; box-shadow:none !important;
+  border-radius:0 !important; border-left:0 !important; border-right:0 !important; border-bottom:0 !important }
+.card .price, .etiqueta .pie{ border-top:1px solid rgba(35,38,26,.12) !important;
+  margin-top:11px !important; padding-top:10px !important }
+.card .body h3, .etiqueta h3{ font-size:19px !important; line-height:1.14 !important }
+.card:hover .body, .pA:hover .etiqueta{ background:rgba(255,255,255,.92) !important }
+.card .chips .chip, .chips .chip{ box-shadow:none !important }
+
+/* ── las tres puertas, iguales a las tarjetas de momentos ── */
+.strip{ background:transparent !important; border:0 !important }
+.strip .in{ display:grid !important; grid-template-columns:repeat(3,1fr) !important; gap:14px !important;
+  padding-top:20px !important; padding-bottom:4px !important }
+.strip button{
+  background:rgba(255,255,255,.80) !important; border:1px solid rgba(255,255,255,.6) !important;
+  border-radius:var(--rm) !important; box-shadow:var(--sombra) !important;
+  padding:20px 22px !important; margin:0 !important; text-align:left !important;
+  display:flex !important; flex-direction:column !important; gap:5px !important;
+  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); transition:.3s }
+.strip button:hover{ transform:translateY(-3px); box-shadow:var(--sombra2) !important;
+  background:rgba(255,255,255,.94) !important }
+.strip b{ font-family:var(--serif) !important; font-weight:400 !important; font-size:21px !important }
+.strip small{ text-transform:none !important; letter-spacing:0 !important; font-size:13px !important;
+  color:var(--suave) !important }
+
+/* ── momentos de comer, todos a la misma altura ── */
+.momentos{ display:grid !important; grid-template-columns:repeat(4,1fr) !important; gap:14px !important;
+  border:0 !important; background:transparent !important; overflow:visible !important }
+.mom{ background:rgba(255,255,255,.80) !important; border:1px solid rgba(255,255,255,.6) !important;
+  border-radius:var(--rm) !important; box-shadow:var(--sombra) !important; padding:20px 22px !important;
+  display:flex !important; flex-direction:column !important; align-items:flex-start !important;
+  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); transition:.3s }
+.mom:hover{ transform:translateY(-3px); box-shadow:var(--sombra2) !important }
+.mom b{ font-family:var(--serif) !important; font-weight:400 !important; font-size:21px !important }
+.mom small{ color:var(--suave) !important; font-size:13.5px !important; margin-top:4px }
+.mom em{ margin-top:auto !important; padding-top:14px !important; color:var(--ladrillo) !important;
+  font-size:13px !important; text-transform:none !important; letter-spacing:0 !important }
+
+@media(max-width:900px){
+  .momentos{ grid-template-columns:1fr 1fr !important }
+}
+@media(max-width:760px){
+  .strip .in{ grid-template-columns:1fr !important }
+  .momentos{ grid-template-columns:1fr !important }
+  .card .ph, .pA .ph{ aspect-ratio:4/3 !important }
+  .card .body, .etiqueta{ left:12px !important; right:20px !important }
+  .card, .pA{ padding-bottom:36px !important }
+  .ptitle{ padding-top:18px !important }
+}
+
+/* ═══════════════ ARREGLO DE CONTENEDORES ═══════════════ */
+
+/* la sábana vuelve a respetar el ancho y los márgenes del sitio */
+.sabana{ max-width:1080px !important; margin:0 auto !important;
+  padding:10px 32px 14px !important; background:transparent !important }
+.cards{ padding-left:0 !important; padding-right:0 !important }
+
+/* la barra de filtros: el fondo va en la franja, de borde a borde */
+.filtrosbar{
+  position:sticky !important; top:calc(var(--preH,40px) + 66px) !important; z-index:50 !important;
+  background:rgba(251,247,232,.93) !important;
+  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--linea) !important; padding:12px 0 10px !important;
+  margin-top:14px !important; box-shadow:none !important;
+}
+.filtrosbar .in{ padding-left:32px !important; padding-right:32px !important }
+.filtrosbar .filtros{
+  position:static !important; background:transparent !important; border:0 !important;
+  padding:0 !important; box-shadow:none !important; backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+/* en la portada los filtros están sueltos: el fondo se estira solo */
+section .filters{
+  position:sticky !important; top:calc(var(--preH,40px) + 66px) !important; z-index:50 !important;
+  background:rgba(251,247,232,.93) !important;
+  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+  box-shadow:0 0 0 100vmax rgba(251,247,232,.93) !important;
+  clip-path:inset(0 -100vmax); border-bottom:1px solid var(--linea) !important;
+  padding:12px 0 10px !important; margin-bottom:16px !important;
+}
+
+@media(max-width:760px){
+  .sabana{ padding:8px 20px 12px !important }
+  .filtrosbar{ top:0 !important; margin-top:10px !important }
+  .filtrosbar .in{ padding-left:20px !important; padding-right:20px !important }
+  section .filters{ top:0 !important; margin-left:0 !important; margin-right:0 !important }
+}
+
+/* ═══════════ LA BARRA SUPERIOR, FIJA DE VERDAD ═══════════ */
+/* en las fichas los dos bloques viven en .topbar: se fija el contenedor entero */
+.topbar{ position:fixed !important; top:0 !important; left:0; right:0; z-index:95 !important }
+.topbar .pre{ position:static !important }
+.topbar header, .topbar header.vt{ position:static !important; top:auto !important }
+body:has(.topbar){ padding-top:var(--topH,106px) }
+
+/* en la portada están sueltos: pre fijo y header pegado abajo */
+body:not(:has(.topbar)) .pre{ position:fixed !important; top:0 !important }
+body:not(:has(.topbar)) header{ position:sticky !important; top:var(--preH,40px) !important }
+
+/* los filtros se pegan justo abajo de la barra, con fondo de borde a borde */
+.filtrosbar{ position:sticky !important; top:var(--topH,106px) !important;
+  background:var(--crudo) !important; -webkit-backdrop-filter:none; backdrop-filter:none;
+  border-bottom:1px solid var(--linea) !important; z-index:50 !important;
+  padding:14px 0 12px !important; margin-top:16px !important }
+section .filters{ position:sticky !important; top:var(--topH,106px) !important;
+  background:var(--crudo) !important; -webkit-backdrop-filter:none; backdrop-filter:none;
+  box-shadow:0 0 0 100vmax var(--crudo) !important; clip-path:inset(0 -100vmax);
+  z-index:50 !important; padding:14px 0 12px !important }
+
+@media(max-width:760px){
+  .topbar{ position:sticky !important }
+  body:has(.topbar){ padding-top:0 }
+  body:not(:has(.topbar)) .pre{ position:sticky !important }
+  body:not(:has(.topbar)) header{ position:static !important }
+  .filtrosbar, section .filters{ top:0 !important }
+}
+
+/* ═══════════ DETALLES FINALES ═══════════ */
+
+/* los filtros pegados al header y con el mismo vidrio */
+.filtrosbar{
+  margin-top:0 !important; top:calc(var(--topH,106px) - 1px) !important;
+  background:rgba(244,238,220,.85) !important;
+  -webkit-backdrop-filter:blur(16px) !important; backdrop-filter:blur(16px) !important;
+  border-top:0 !important; border-bottom:1px solid var(--linea) !important;
+  padding:13px 0 12px !important;
+}
+section .filters{
+  margin-top:0 !important; margin-bottom:20px !important;
+  top:calc(var(--topH,106px) - 1px) !important;
+  background:rgba(244,238,220,.85) !important;
+  -webkit-backdrop-filter:blur(16px) !important; backdrop-filter:blur(16px) !important;
+  box-shadow:0 0 0 100vmax rgba(244,238,220,.85) !important;
+  clip-path:inset(0 -100vmax); border-bottom:1px solid var(--linea) !important;
+  padding:13px 0 12px !important;
+}
+
+/* fuera los recuadros grises alrededor de los títulos de sección */
+.shead, .sh, .head, .ptitle{
+  background:none !important; border:0 !important; box-shadow:none !important;
+  -webkit-backdrop-filter:none !important; backdrop-filter:none !important;
+  padding-top:0 !important; padding-left:0 !important; padding-right:0 !important;
+  border-radius:0 !important;
+}
+.shead{ padding-bottom:12px !important; border-bottom:1px solid var(--linea) !important }
+
+/* "Para comer": tarjetas separadas, sin líneas que las unan */
+.momentos{
+  display:grid !important; grid-template-columns:repeat(4,1fr) !important; gap:14px !important;
+  border:0 !important; background:none !important; box-shadow:none !important;
+  overflow:visible !important; border-radius:0 !important;
+}
+.mom{
+  border:1px solid rgba(255,255,255,.6) !important; border-right:1px solid rgba(255,255,255,.6) !important;
+  border-left:1px solid rgba(255,255,255,.6) !important; border-top:1px solid rgba(255,255,255,.6) !important;
+  border-bottom:1px solid rgba(255,255,255,.6) !important;
+  border-radius:var(--rm) !important; box-shadow:var(--sombra) !important;
+}
+.momentos > *:not(:last-child){ border-right:1px solid rgba(255,255,255,.6) !important }
+
+/* el resaltado al pasar el mouse, como en producción: beige cálido */
+.strip button:hover, .mom:hover, .puerta:hover{
+  background:rgba(237,229,206,.92) !important;
+  transform:translateY(-3px); box-shadow:var(--sombra2) !important;
+}
+.card:hover .body, .pA:hover .etiqueta{ background:rgba(237,229,206,.94) !important }
+.ghost:hover, .sel:hover, .pill:hover{ background:rgba(237,229,206,.92) !important }
+.nav button:hover, .nav a:hover{ background:rgba(46,53,33,.07) !important }
+.mini > a:hover{ background:rgba(237,229,206,.92) !important }
+.solid:hover{ background:#89482a !important }
+
+@media(max-width:900px){ .momentos{ grid-template-columns:1fr 1fr !important } }
+@media(max-width:760px){
+  .momentos{ grid-template-columns:1fr !important }
+  .filtrosbar, section .filters{ top:0 !important }
+}
+
+/* ═══════════ FOCO Y MENÚS PROPIOS ═══════════ */
+
+/* el resaltado al seleccionar sigue la forma de la pastilla */
+:focus-visible{ outline:none !important }
+.sel:focus, .sel:focus-visible, .chip:focus, .pill:focus,
+input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible{
+  outline:none !important;
+  box-shadow:0 0 0 3px rgba(156,86,52,.22) !important;
+  border-color:var(--ladrillo) !important;
+}
+
+/* la flechita es nuestra, no la del navegador */
+select.sel{
+  -webkit-appearance:none !important; appearance:none !important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236A6455' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important;
+  background-repeat:no-repeat !important; background-position:right 14px center !important;
+  background-size:15px !important; padding-right:38px !important; cursor:pointer;
+}
+select.sel.abierto{ border-color:var(--ladrillo) !important;
+  box-shadow:0 0 0 3px rgba(156,86,52,.22) !important }
+
+/* nuestro menú desplegable */
+.menu-sel{
+  position:absolute; z-index:200; min-width:200px; max-height:320px; overflow-y:auto;
+  background:rgba(255,255,255,.92); -webkit-backdrop-filter:blur(20px) saturate(1.3);
+  backdrop-filter:blur(20px) saturate(1.3); border:1px solid rgba(255,255,255,.7);
+  border-radius:18px; box-shadow:0 18px 44px rgba(35,38,26,.18); padding:7px;
+  font-family:var(--sans); animation:menuEntra .16s ease-out both;
+}
+@keyframes menuEntra{ from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:none} }
+.menu-sel button{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%;
+  background:none; border:0; text-align:left; padding:11px 14px; border-radius:12px;
+  font-size:14.5px; color:var(--tinta); cursor:pointer; font-family:var(--sans);
+}
+.menu-sel button:hover{ background:rgba(237,229,206,.9) }
+.menu-sel button.on{ background:rgba(46,53,33,.09); font-weight:500 }
+.menu-sel button.on::after{ content:""; width:7px; height:7px; border-radius:50%;
+  background:var(--monte); flex:none }
+.menu-sel::-webkit-scrollbar{ width:8px }
+.menu-sel::-webkit-scrollbar-thumb{ background:rgba(35,38,26,.18); border-radius:8px }
 </style>
 </head>
 <body>
@@ -1394,22 +1643,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 })();
 </script>
 
-<script>
-/* mide el alto real de la barra para que los filtros se peguen justo abajo */
-(function(){
-  function calc(){
-    var pre=document.querySelector('.pre'), hd=document.querySelector('header');
-    if(!hd) return;
-    var p = pre ? pre.offsetHeight : 0;
-    document.documentElement.style.setProperty('--preH', p+'px');
-    document.documentElement.style.setProperty('--topH', (p+hd.offsetHeight)+'px');
-  }
-  window.addEventListener('load',calc);
-  window.addEventListener('resize',calc);
-  document.addEventListener('DOMContentLoaded',calc);
-  setInterval(calc,1200);
-})();
-</script>
+
 
 <nav class="appbar">
   <a href="index.html"><svg viewBox="0 0 24 24"><path d="M4 11l8-6.5 8 6.5v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1v-8z"/></svg>Inicio</a>
@@ -1419,12 +1653,86 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
   <a href="index.html?view=conoce"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-9.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7 3.5C19 15.5 12 20 12 20z"/></svg>Guardados</a>
 </nav>
 
+
 <script>
+/* mide la barra superior completa para que los filtros se peguen justo abajo */
 (function(){
-  function medir(){var p=document.querySelector('.pre');
-    if(p) document.documentElement.style.setProperty('--preH', p.offsetHeight+'px');}
-  window.addEventListener('load',medir);window.addEventListener('resize',medir);
-  document.addEventListener('DOMContentLoaded',medir);setInterval(medir,1200);
+  function medir(){
+    var top=document.querySelector('.topbar');
+    var pre=document.querySelector('.pre');
+    var hd=document.querySelector('header');
+    var raiz=document.documentElement;
+    if(pre) raiz.style.setProperty('--preH', pre.offsetHeight+'px');
+    var alto = top ? top.offsetHeight : ((pre?pre.offsetHeight:0) + (hd?hd.offsetHeight:0));
+    if(alto) raiz.style.setProperty('--topH', alto+'px');
+  }
+  window.addEventListener('load',medir);
+  window.addEventListener('resize',medir);
+  document.addEventListener('DOMContentLoaded',medir);
+  setInterval(medir,1000);
+})();
+</script>
+<script>
+/* Reemplaza el menú desplegable del navegador por uno de la marca.
+   Le avisa a React del cambio, así los filtros siguen funcionando igual. */
+(function(){
+  var abierto=null, selActual=null;
+
+  function cerrar(){
+    if(abierto){ abierto.remove(); abierto=null; }
+    if(selActual){ selActual.classList.remove('abierto'); selActual=null; }
+  }
+
+  function avisarReact(sel, valor){
+    var proto = window.HTMLSelectElement.prototype;
+    var setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
+    setter.call(sel, valor);
+    sel.dispatchEvent(new Event('input',  { bubbles:true }));
+    sel.dispatchEvent(new Event('change', { bubbles:true }));
+  }
+
+  function abrir(sel){
+    cerrar();
+    var caja = document.createElement('div');
+    caja.className = 'menu-sel';
+    Array.prototype.forEach.call(sel.options, function(op){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = op.textContent;
+      if(op.value === sel.value) b.className = 'on';
+      b.addEventListener('click', function(ev){
+        ev.preventDefault(); ev.stopPropagation();
+        avisarReact(sel, op.value);
+        cerrar();
+      });
+      caja.appendChild(b);
+    });
+    document.body.appendChild(caja);
+
+    var r = sel.getBoundingClientRect();
+    var ancho = Math.max(r.width, 200);
+    caja.style.width = ancho + 'px';
+    var izq = r.left + window.scrollX;
+    if(izq + ancho > window.innerWidth - 12) izq = window.innerWidth - ancho - 12;
+    caja.style.left = Math.max(12, izq) + 'px';
+    var arriba = r.bottom + window.scrollY + 8;
+    if(r.bottom + caja.offsetHeight + 20 > window.innerHeight){
+      arriba = r.top + window.scrollY - caja.offsetHeight - 8;
+    }
+    caja.style.top = arriba + 'px';
+
+    abierto = caja; selActual = sel; sel.classList.add('abierto');
+  }
+
+  document.addEventListener('mousedown', function(e){
+    var sel = e.target.closest && e.target.closest('select.sel');
+    if(sel){ e.preventDefault(); (sel===selActual) ? cerrar() : abrir(sel); return; }
+    if(abierto && !e.target.closest('.menu-sel')) cerrar();
+  }, true);
+
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') cerrar(); });
+  window.addEventListener('scroll', cerrar, true);
+  window.addEventListener('resize', cerrar);
 })();
 </script>
 </body>

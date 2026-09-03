@@ -1060,6 +1060,337 @@ h2::before,.titulo::before{content:"" !important;display:inline-block;width:8px;
   .mini > a{flex:0 0 74%}
   section{padding-top:40px !important;padding-bottom:40px !important}
 }
+
+/* ═══════════════ AJUSTES FINOS · último bloque ═══════════════ */
+
+/* ── header: el activo es una pastilla suave, no un recuadro ── */
+.nav button, .nav a{ border:0 !important; border-bottom:0 !important; padding:9px 15px !important;
+  border-radius:var(--pill) !important; transition:background .25s, color .25s }
+.nav button:hover, .nav a:hover{ background:rgba(35,38,26,.05) !important; color:var(--tinta) !important }
+.nav button.on, .nav a.on{ background:rgba(46,53,33,.09) !important; color:var(--tinta) !important;
+  font-weight:500 !important; border:0 !important }
+.nav{ gap:6px !important }
+
+/* ── menos aire entre el header y el título ── */
+.ptitle{ padding:26px 0 18px !important; border-bottom:0 !important }
+.listado{ padding-top:22px !important }
+.ptitle h1{ margin-top:6px !important }
+.ptitle p{ margin-top:10px !important }
+.shead{ margin-bottom:16px !important }
+section{ padding-top:40px !important }
+
+/* ── SÁBANA: una sola hojita de vidrio, sin recuadros anidados ── */
+.card, .pA{ background:none !important; border:0 !important; box-shadow:none !important;
+  padding:0 0 40px 0 !important }
+.card .ph, .pA .ph, .card figure{ box-shadow:none !important; border-radius:var(--r) !important;
+  aspect-ratio:4/5 !important; overflow:hidden }
+.card .body, .etiqueta{
+  position:absolute !important; left:14px !important; right:30px !important; bottom:0 !important;
+  background:rgba(255,255,255,.80) !important;
+  -webkit-backdrop-filter:blur(18px) saturate(1.25); backdrop-filter:blur(18px) saturate(1.25);
+  border:1px solid rgba(255,255,255,.6) !important; border-radius:var(--rm) !important;
+  padding:15px 17px !important; box-shadow:0 12px 30px rgba(35,38,26,.14) !important;
+}
+/* nada adentro de la hojita dibuja su propia caja */
+.card .body *, .etiqueta *{ background:none !important; box-shadow:none !important;
+  border-radius:0 !important; border-left:0 !important; border-right:0 !important; border-bottom:0 !important }
+.card .price, .etiqueta .pie{ border-top:1px solid rgba(35,38,26,.12) !important;
+  margin-top:11px !important; padding-top:10px !important }
+.card .body h3, .etiqueta h3{ font-size:19px !important; line-height:1.14 !important }
+.card:hover .body, .pA:hover .etiqueta{ background:rgba(255,255,255,.92) !important }
+.card .chips .chip, .chips .chip{ box-shadow:none !important }
+
+/* ── las tres puertas, iguales a las tarjetas de momentos ── */
+.strip{ background:transparent !important; border:0 !important }
+.strip .in{ display:grid !important; grid-template-columns:repeat(3,1fr) !important; gap:14px !important;
+  padding-top:20px !important; padding-bottom:4px !important }
+.strip button{
+  background:rgba(255,255,255,.80) !important; border:1px solid rgba(255,255,255,.6) !important;
+  border-radius:var(--rm) !important; box-shadow:var(--sombra) !important;
+  padding:20px 22px !important; margin:0 !important; text-align:left !important;
+  display:flex !important; flex-direction:column !important; gap:5px !important;
+  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); transition:.3s }
+.strip button:hover{ transform:translateY(-3px); box-shadow:var(--sombra2) !important;
+  background:rgba(255,255,255,.94) !important }
+.strip b{ font-family:var(--serif) !important; font-weight:400 !important; font-size:21px !important }
+.strip small{ text-transform:none !important; letter-spacing:0 !important; font-size:13px !important;
+  color:var(--suave) !important }
+
+/* ── momentos de comer, todos a la misma altura ── */
+.momentos{ display:grid !important; grid-template-columns:repeat(4,1fr) !important; gap:14px !important;
+  border:0 !important; background:transparent !important; overflow:visible !important }
+.mom{ background:rgba(255,255,255,.80) !important; border:1px solid rgba(255,255,255,.6) !important;
+  border-radius:var(--rm) !important; box-shadow:var(--sombra) !important; padding:20px 22px !important;
+  display:flex !important; flex-direction:column !important; align-items:flex-start !important;
+  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); transition:.3s }
+.mom:hover{ transform:translateY(-3px); box-shadow:var(--sombra2) !important }
+.mom b{ font-family:var(--serif) !important; font-weight:400 !important; font-size:21px !important }
+.mom small{ color:var(--suave) !important; font-size:13.5px !important; margin-top:4px }
+.mom em{ margin-top:auto !important; padding-top:14px !important; color:var(--ladrillo) !important;
+  font-size:13px !important; text-transform:none !important; letter-spacing:0 !important }
+
+@media(max-width:900px){
+  .momentos{ grid-template-columns:1fr 1fr !important }
+}
+@media(max-width:760px){
+  .strip .in{ grid-template-columns:1fr !important }
+  .momentos{ grid-template-columns:1fr !important }
+  .card .ph, .pA .ph{ aspect-ratio:4/3 !important }
+  .card .body, .etiqueta{ left:12px !important; right:20px !important }
+  .card, .pA{ padding-bottom:36px !important }
+  .ptitle{ padding-top:18px !important }
+}
+
+/* ═══════════════ ARREGLO DE CONTENEDORES ═══════════════ */
+
+/* la sábana vuelve a respetar el ancho y los márgenes del sitio */
+.sabana{ max-width:1080px !important; margin:0 auto !important;
+  padding:10px 32px 14px !important; background:transparent !important }
+.cards{ padding-left:0 !important; padding-right:0 !important }
+
+/* la barra de filtros: el fondo va en la franja, de borde a borde */
+.filtrosbar{
+  position:sticky !important; top:calc(var(--preH,40px) + 66px) !important; z-index:50 !important;
+  background:rgba(251,247,232,.93) !important;
+  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--linea) !important; padding:12px 0 10px !important;
+  margin-top:14px !important; box-shadow:none !important;
+}
+.filtrosbar .in{ padding-left:32px !important; padding-right:32px !important }
+.filtrosbar .filtros{
+  position:static !important; background:transparent !important; border:0 !important;
+  padding:0 !important; box-shadow:none !important; backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+/* en la portada los filtros están sueltos: el fondo se estira solo */
+section .filters{
+  position:sticky !important; top:calc(var(--preH,40px) + 66px) !important; z-index:50 !important;
+  background:rgba(251,247,232,.93) !important;
+  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+  box-shadow:0 0 0 100vmax rgba(251,247,232,.93) !important;
+  clip-path:inset(0 -100vmax); border-bottom:1px solid var(--linea) !important;
+  padding:12px 0 10px !important; margin-bottom:16px !important;
+}
+
+@media(max-width:760px){
+  .sabana{ padding:8px 20px 12px !important }
+  .filtrosbar{ top:0 !important; margin-top:10px !important }
+  .filtrosbar .in{ padding-left:20px !important; padding-right:20px !important }
+  section .filters{ top:0 !important; margin-left:0 !important; margin-right:0 !important }
+}
+
+/* ═══════════════ FICHA NUEVA ═══════════════ */
+.apertura2{position:relative;margin:26px 0 0;border-radius:var(--r);overflow:hidden;
+  min-height:460px;display:flex;align-items:flex-end;box-shadow:var(--sombra2)}
+.apertura2 img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.veloficha{position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(24,28,18,.28) 0%,rgba(24,28,18,.04) 45%,rgba(24,28,18,.38) 100%)}
+.volver2{position:absolute;top:18px;left:20px;z-index:5;color:#fff;font-size:13px;
+  background:rgba(24,28,18,.4);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  padding:8px 14px;border-radius:999px}
+.encabeza{position:relative;z-index:3;margin:26px;padding:26px 28px;max-width:560px;
+  background:rgba(255,255,255,.70);-webkit-backdrop-filter:blur(22px) saturate(1.3);
+  backdrop-filter:blur(22px) saturate(1.3);border:1px solid rgba(255,255,255,.55);
+  border-radius:var(--r);box-shadow:var(--sombra2)}
+.encabeza h1{font-family:var(--serif);font-weight:400;font-size:clamp(30px,3.8vw,44px);
+  line-height:1.03;letter-spacing:-.02em;margin:0}
+.zona2{color:var(--suave);font-size:14px;margin:8px 0 0}
+.tags2{display:flex;gap:7px;flex-wrap:wrap;margin:16px 0 0}
+.tags2 span{background:rgba(46,53,33,.10);border-radius:999px;padding:7px 13px;font-size:12.5px}
+.ctas2{display:flex;gap:9px;margin-top:18px;flex-wrap:wrap}
+
+.cuerpo2{display:grid;grid-template-columns:1.35fr .65fr;gap:26px;padding:28px 0 10px;align-items:start}
+.bloque2{background:rgba(255,255,255,.74);border:1px solid rgba(255,255,255,.6);
+  border-radius:var(--r);padding:26px 28px;box-shadow:var(--sombra);margin-bottom:18px;
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.bloque2 h2{font-family:var(--serif);font-weight:400;font-size:26px;margin:0 0 14px;letter-spacing:-.01em}
+.bloque2 h2::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;
+  background:var(--monte);margin-right:12px;vertical-align:middle}
+.texto2{color:var(--suave);margin:0 0 12px;font-size:15.5px}
+.promo2{color:var(--ladrillo);font-weight:500;margin:14px 0 0}
+.galeria2{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+.galeria2 img{border-radius:var(--rm);object-fit:cover;width:100%;aspect-ratio:1/1;cursor:zoom-in}
+.galeria2 img:first-child{grid-row:span 2;aspect-ratio:auto;height:100%}
+.comod2{display:grid;grid-template-columns:1fr 1fr;gap:2px 20px}
+.comod2 div{display:flex;align-items:center;gap:11px;padding:9px 0;font-size:15px;color:var(--suave)}
+.comod2 i{width:6px;height:6px;border-radius:50%;background:var(--monte);flex:none}
+.unidades2{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.unidad2{background:transparent;border:0;padding:0;text-align:left;cursor:pointer}
+.unidad2 .ph{position:relative;aspect-ratio:4/3;border-radius:var(--rm);overflow:hidden;background:var(--papel)}
+.unidad2 .ph img{width:100%;height:100%;object-fit:cover}
+.unidad2 .play{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:20px;
+  background:rgba(28,32,20,.3)}
+.unidad2 b{display:block;font-family:var(--serif);font-weight:400;font-size:17px;margin-top:9px}
+.unidad2 small{color:var(--suave);font-size:12.5px}
+.aviso2{background:rgba(156,86,52,.10);border:0;border-radius:var(--rs);padding:12px 14px;
+  color:var(--ladrillo);font-size:14px;margin:14px 0 0}
+
+.panel2{position:sticky;top:calc(var(--preH,40px) + 82px);background:rgba(255,255,255,.80);
+  border:1px solid rgba(255,255,255,.6);border-radius:var(--r);padding:24px;
+  box-shadow:var(--sombra2);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.precio2{font-family:var(--sans);font-weight:600;font-size:30px;letter-spacing:-.03em;margin:0}
+.precio2 small{font-weight:400;font-size:13px;color:var(--suave);margin-left:5px}
+.unidad3{font-size:13px;color:var(--ladrillo);margin:8px 0 0}
+.unidad3 button{background:none;border:0;text-decoration:underline;color:var(--suave);
+  cursor:pointer;font-size:13px;margin-left:8px}
+.fechas2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0 0;cursor:pointer}
+.fechas2 div{border:1px solid var(--linea);border-radius:var(--rs);padding:11px 13px;
+  background:rgba(251,247,232,.7);font-size:14.5px}
+.fechas2 span{display:block;font-size:11.5px;color:var(--suave)}
+.cuentas2{margin:16px 0 0;font-size:14.5px}
+.cuentas2 div{display:flex;justify-content:space-between;padding:7px 0}
+.cuentas2 .desc{color:var(--ladrillo)}
+.cuentas2 .total{border-top:1px solid var(--linea);margin-top:6px;padding-top:12px;
+  font-weight:600;font-size:17px}
+.solid.full,.ghost.full{display:block;width:100%;text-align:center;margin-top:14px}
+.nota2{font-size:12.5px;color:var(--suave);text-align:center;margin:10px 0 0}
+
+@media(max-width:900px){ .cuerpo2{grid-template-columns:1fr;gap:0} .panel2{position:static;margin-bottom:18px} }
+@media(max-width:760px){
+  .apertura2{min-height:0;display:block;margin:14px 0 0;border-radius:var(--rm)}
+  .apertura2 img{position:relative;height:250px}
+  .veloficha{height:250px}
+  .encabeza{margin:-40px 12px 12px;max-width:none;padding:22px 20px;border-radius:var(--rm)}
+  .encabeza h1{font-size:29px}
+  .ctas2{display:grid;grid-template-columns:1fr;gap:9px}
+  .ctas2 .solid,.ctas2 .ghost{text-align:center;padding:14px}
+  .cuerpo2{padding-top:16px}
+  .bloque2{padding:20px 20px}
+  .galeria2{grid-template-columns:1fr 1fr}
+  .galeria2 img:first-child{grid-column:span 2;grid-row:auto;aspect-ratio:4/3;height:auto}
+  .comod2,.unidades2{grid-template-columns:1fr}
+}
+
+/* ═══════════ LA BARRA SUPERIOR, FIJA DE VERDAD ═══════════ */
+/* en las fichas los dos bloques viven en .topbar: se fija el contenedor entero */
+.topbar{ position:fixed !important; top:0 !important; left:0; right:0; z-index:95 !important }
+.topbar .pre{ position:static !important }
+.topbar header, .topbar header.vt{ position:static !important; top:auto !important }
+body:has(.topbar){ padding-top:var(--topH,106px) }
+
+/* en la portada están sueltos: pre fijo y header pegado abajo */
+body:not(:has(.topbar)) .pre{ position:fixed !important; top:0 !important }
+body:not(:has(.topbar)) header{ position:sticky !important; top:var(--preH,40px) !important }
+
+/* los filtros se pegan justo abajo de la barra, con fondo de borde a borde */
+.filtrosbar{ position:sticky !important; top:var(--topH,106px) !important;
+  background:var(--crudo) !important; -webkit-backdrop-filter:none; backdrop-filter:none;
+  border-bottom:1px solid var(--linea) !important; z-index:50 !important;
+  padding:14px 0 12px !important; margin-top:16px !important }
+section .filters{ position:sticky !important; top:var(--topH,106px) !important;
+  background:var(--crudo) !important; -webkit-backdrop-filter:none; backdrop-filter:none;
+  box-shadow:0 0 0 100vmax var(--crudo) !important; clip-path:inset(0 -100vmax);
+  z-index:50 !important; padding:14px 0 12px !important }
+
+@media(max-width:760px){
+  .topbar{ position:sticky !important }
+  body:has(.topbar){ padding-top:0 }
+  body:not(:has(.topbar)) .pre{ position:sticky !important }
+  body:not(:has(.topbar)) header{ position:static !important }
+  .filtrosbar, section .filters{ top:0 !important }
+}
+
+/* ═══════════ DETALLES FINALES ═══════════ */
+
+/* los filtros pegados al header y con el mismo vidrio */
+.filtrosbar{
+  margin-top:0 !important; top:calc(var(--topH,106px) - 1px) !important;
+  background:rgba(244,238,220,.85) !important;
+  -webkit-backdrop-filter:blur(16px) !important; backdrop-filter:blur(16px) !important;
+  border-top:0 !important; border-bottom:1px solid var(--linea) !important;
+  padding:13px 0 12px !important;
+}
+section .filters{
+  margin-top:0 !important; margin-bottom:20px !important;
+  top:calc(var(--topH,106px) - 1px) !important;
+  background:rgba(244,238,220,.85) !important;
+  -webkit-backdrop-filter:blur(16px) !important; backdrop-filter:blur(16px) !important;
+  box-shadow:0 0 0 100vmax rgba(244,238,220,.85) !important;
+  clip-path:inset(0 -100vmax); border-bottom:1px solid var(--linea) !important;
+  padding:13px 0 12px !important;
+}
+
+/* fuera los recuadros grises alrededor de los títulos de sección */
+.shead, .sh, .head, .ptitle{
+  background:none !important; border:0 !important; box-shadow:none !important;
+  -webkit-backdrop-filter:none !important; backdrop-filter:none !important;
+  padding-top:0 !important; padding-left:0 !important; padding-right:0 !important;
+  border-radius:0 !important;
+}
+.shead{ padding-bottom:12px !important; border-bottom:1px solid var(--linea) !important }
+
+/* "Para comer": tarjetas separadas, sin líneas que las unan */
+.momentos{
+  display:grid !important; grid-template-columns:repeat(4,1fr) !important; gap:14px !important;
+  border:0 !important; background:none !important; box-shadow:none !important;
+  overflow:visible !important; border-radius:0 !important;
+}
+.mom{
+  border:1px solid rgba(255,255,255,.6) !important; border-right:1px solid rgba(255,255,255,.6) !important;
+  border-left:1px solid rgba(255,255,255,.6) !important; border-top:1px solid rgba(255,255,255,.6) !important;
+  border-bottom:1px solid rgba(255,255,255,.6) !important;
+  border-radius:var(--rm) !important; box-shadow:var(--sombra) !important;
+}
+.momentos > *:not(:last-child){ border-right:1px solid rgba(255,255,255,.6) !important }
+
+/* el resaltado al pasar el mouse, como en producción: beige cálido */
+.strip button:hover, .mom:hover, .puerta:hover{
+  background:rgba(237,229,206,.92) !important;
+  transform:translateY(-3px); box-shadow:var(--sombra2) !important;
+}
+.card:hover .body, .pA:hover .etiqueta{ background:rgba(237,229,206,.94) !important }
+.ghost:hover, .sel:hover, .pill:hover{ background:rgba(237,229,206,.92) !important }
+.nav button:hover, .nav a:hover{ background:rgba(46,53,33,.07) !important }
+.mini > a:hover{ background:rgba(237,229,206,.92) !important }
+.solid:hover{ background:#89482a !important }
+
+@media(max-width:900px){ .momentos{ grid-template-columns:1fr 1fr !important } }
+@media(max-width:760px){
+  .momentos{ grid-template-columns:1fr !important }
+  .filtrosbar, section .filters{ top:0 !important }
+}
+
+/* ═══════════ FOCO Y MENÚS PROPIOS ═══════════ */
+
+/* el resaltado al seleccionar sigue la forma de la pastilla */
+:focus-visible{ outline:none !important }
+.sel:focus, .sel:focus-visible, .chip:focus, .pill:focus,
+input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible{
+  outline:none !important;
+  box-shadow:0 0 0 3px rgba(156,86,52,.22) !important;
+  border-color:var(--ladrillo) !important;
+}
+
+/* la flechita es nuestra, no la del navegador */
+select.sel{
+  -webkit-appearance:none !important; appearance:none !important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236A6455' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important;
+  background-repeat:no-repeat !important; background-position:right 14px center !important;
+  background-size:15px !important; padding-right:38px !important; cursor:pointer;
+}
+select.sel.abierto{ border-color:var(--ladrillo) !important;
+  box-shadow:0 0 0 3px rgba(156,86,52,.22) !important }
+
+/* nuestro menú desplegable */
+.menu-sel{
+  position:absolute; z-index:200; min-width:200px; max-height:320px; overflow-y:auto;
+  background:rgba(255,255,255,.92); -webkit-backdrop-filter:blur(20px) saturate(1.3);
+  backdrop-filter:blur(20px) saturate(1.3); border:1px solid rgba(255,255,255,.7);
+  border-radius:18px; box-shadow:0 18px 44px rgba(35,38,26,.18); padding:7px;
+  font-family:var(--sans); animation:menuEntra .16s ease-out both;
+}
+@keyframes menuEntra{ from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:none} }
+.menu-sel button{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%;
+  background:none; border:0; text-align:left; padding:11px 14px; border-radius:12px;
+  font-size:14.5px; color:var(--tinta); cursor:pointer; font-family:var(--sans);
+}
+.menu-sel button:hover{ background:rgba(237,229,206,.9) }
+.menu-sel button.on{ background:rgba(46,53,33,.09); font-weight:500 }
+.menu-sel button.on::after{ content:""; width:7px; height:7px; border-radius:50%;
+  background:var(--monte); flex:none }
+.menu-sel::-webkit-scrollbar{ width:8px }
+.menu-sel::-webkit-scrollbar-thumb{ background:rgba(35,38,26,.18); border-radius:8px }
 </style>
 </head>
 <body>
@@ -1265,241 +1596,219 @@ function Landing({ c, acts=[], food=[] }) {
   if(c.amenities.length||c.petFriendly||c.minNights>1||c.type) indice.push(["06","Qué incluye","b-comod"]);
   if(c.zone) indice.push(["07","Cómo llegar","b-mapa"]);
 
+
   return (
     <div>
       <SiteHeader />
-      <div className="rail">{c.name} · Visitando Tandil</div>
 
-      <div className="apertura">
-        {cover && <img src={IMG(cover)} alt={c.name} />}
-        <div className="volver">
-          <div className="in">
-            <a href={homeHref}><span>‹ Volver</span></a>
-            <span>Hospedaje</span>
-          </div>
-        </div>
-        {c.zone && <div className="epi-ap"><div className="in"><span>{c.zone}</span></div></div>}
-      </div>
-
-      <div className="in titular">
-        <p className="eyebrow rot">Dónde dormir en Tandil<i></i></p>
-        <h1>{c.name}</h1>
-        {partes[0] && <p className="bajada">{partes[0].length>190 ? partes[0].slice(0,190)+"…" : partes[0]}</p>}
-        <div className="datos">
-          <div><span>Capacidad</span><b>{capLabel(c)}</b></div>
-          <div><span>Desde</span><b>{money(c.price)}</b></div>
-          <div><span>Zona</span><b>{c.zone||"Tandil"}</b></div>
-          <div><span>{c.type?"Tipo":"Mascotas"}</span><b>{c.type||(c.petFriendly?"Acepta":"No acepta")}</b></div>
-        </div>
-
-        <div className="indice">
-          <p>En esta ficha</p>
-          <ol>
-            {indice.map(([n,t,id])=>(
-              <li key={id}>
-                <span className="n">{n}</span>
-                <span className="t"><a href={"#"+id}>{t}</a></span>
-                <span className="fill"></span>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </div>
-
-      <div className="in cuerpo">
-
-        {partes.length>0 && (
-          <Bloque num="01" titulo="El lugar" id="b-lugar">
-            <div className="prosa">{partes.map((p,i)=><p key={i}>{p}</p>)}</div>
-            {c.promoText && (
-              <div className="cita">
-                <p>{c.promoText}</p>
-                {c.promos.length>0 && <small>{c.promos.map(p=>`${p.min} noches o más · ${p.pct}% menos`).join("   ·   ")}</small>}
-              </div>
-            )}
-          </Bloque>
-        )}
-
-        {photos.length>0 && (
-          <Bloque num="02" titulo="Las fotos" id="b-fotos">
-            <div className="spread"><img className="lb-img" src={IMG(photos[0])} alt="" /></div>
-            <p className="epi"><span>Fig. 01 — {c.name}</span><span>{c.zone}</span></p>
-            {photos.length>=3 && (
-              <div>
-                <div className="par">
-                  {photos.slice(1,3).map((p,i)=><img key={i} className="lb-img" src={IMG(p)} alt="" loading="lazy" />)}
-                </div>
-                <p className="epi"><span>Fig. 02 y 03</span><span>Interiores</span></p>
-              </div>
-            )}
-            {photos.length===2 && (
-              <div>
-                <div className="par"><img className="lb-img" src={IMG(photos[1])} alt="" loading="lazy" /></div>
-                <p className="epi"><span>Fig. 02</span><span>Interiores</span></p>
-              </div>
-            )}
-            {photos.length>3 && (
-              <div>
-                <div className="tercias">
-                  {photos.slice(3).map((p,i)=><img key={i} className="lb-img" src={IMG(p)} alt="" loading="lazy" />)}
-                </div>
-                <p className="epi"><span>Fig. 04 en adelante</span><span>Tocá una foto para verla grande</span></p>
-              </div>
-            )}
-          </Bloque>
-        )}
-
-        {videos.length>0 && (
-          <Bloque num="03" titulo="En video" id="b-video">
-            <div className="videos">
-              {videos.map((v,i)=>{
-                const yt=ytEmbed(v);
-                if(yt) return <iframe key={i} title={"v"+i} src={yt} allowFullScreen></iframe>;
-                const ig=igEmbed(v);
-                if(ig) return <blockquote key={i} className="instagram-media" data-instgrm-permalink={ig} data-instgrm-version="14" style={{margin:0,width:"100%",minWidth:0,background:"#fff"}}></blockquote>;
-                return <a key={i} className="ghost" href={v} target="_blank" rel="noreferrer">Ver video</a>;
-              })}
+      <div className="in">
+        <div className="apertura2">
+          {cover && <img src={IMG(cover)} alt={c.name} />}
+          <div className="veloficha"></div>
+          <a className="volver2" href={homeHref}>‹ Volver</a>
+          <div className="encabeza">
+            <h1>{c.name}</h1>
+            {c.zone && <p className="zona2">{c.zone} · Tandil</p>}
+            <div className="tags2">
+              <span>{capLabel(c)}</span>
+              {c.bedrooms ? <span>{c.bedrooms} {c.bedrooms===1?"dormitorio":"dormitorios"}</span> : null}
+              {c.amenities.includes("pileta") && <span>Pileta</span>}
+              {c.amenities.includes("parrilla") && <span>Parrilla</span>}
+              {c.petFriendly && <span>Acepta mascotas</span>}
             </div>
-          </Bloque>
-        )}
-
-        {units.length>0 && (
-          <Bloque num="04" titulo={units.length===1?"La unidad":"Las cabañas"} id="b-unidades">
-            <div className="unidades">
-              {units.map((u,i)=>{
-                const ph=uPhotos(u); const vids=uVideos(u);
-                const yid=vids[0]?ytId(vids[0]):null;
-                const poster = ph[0] ? IMG(ph[0]) : (yid ? ("https://img.youtube.com/vi/"+yid+"/hqdefault.jpg") : null);
-                return (
-                  <button className="unidad" key={i} onClick={()=>setOpenUnit(i)}>
-                    <div className="ph">
-                      {poster && <img src={poster} alt={u.name||("Cabaña "+(i+1))} loading="lazy" />}
-                      {vids.length>0 && <span className="play">▶</span>}
-                    </div>
-                    <div className="l">
-                      <b>{u.name||("Cabaña "+(i+1))}</b>
-                      {u.capacity && <small>hasta {u.capacity}</small>}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </Bloque>
-        )}
-
-        {openUnit!==null && units[openUnit] && (
-          <div className="modal" onClick={()=>setOpenUnit(null)}>
-            <div className="modalbox worn" onClick={e=>e.stopPropagation()}>
-              <div className="modaltop">
-                <b>{units[openUnit].name||("Cabaña "+(openUnit+1))}</b>
-                <button onClick={()=>setOpenUnit(null)} aria-label="Cerrar">✕</button>
-              </div>
-              <div className="modalbody">
-                {uPhotos(units[openUnit]).map((p,k)=><img key={k} src={IMG(p)} alt="" />)}
-                {uVideos(units[openUnit]).map((v,k)=>{
-                  const uyt=ytEmbed(v); const uig=igEmbed(v);
-                  if(uyt) return <iframe key={k} title={"uvid"+k} src={uyt} allowFullScreen></iframe>;
-                  if(uig) return <blockquote key={k} className="instagram-media" data-instgrm-permalink={uig} data-instgrm-version="14" style={{margin:0,width:"100%",minWidth:0}}></blockquote>;
-                  return <a key={k} className="ghost" href={v} target="_blank" rel="noreferrer">Ver video</a>;
-                })}
-                {units[openUnit].capacity && <p style={{margin:0,fontSize:"13px",color:"var(--suave)"}}>Hasta {units[openUnit].capacity} huéspedes</p>}
-                <button className="solid" onClick={()=>{ setSelUnit(openUnit); setOpenUnit(null); setTimeout(()=>irA("calendario"),60); }}>Reservar esta cabaña</button>
-                {validBooking(units[openUnit]) && <a className="ghost" href={units[openUnit].bookingUrl} target="_blank" rel="noreferrer">Ver en Booking o Airbnb</a>}
-              </div>
+            <div className="ctas2">
+              {c.whatsapp && <a className="solid" href={wa} target="_blank" rel="noreferrer">Reservar por WhatsApp</a>}
+              <button className="ghost" onClick={()=>irA("calendario")}>Ver disponibilidad</button>
             </div>
           </div>
-        )}
+        </div>
 
-        <Bloque num="05" titulo="Fechas y precios" id="calendario">
-          {multi && (
-            <div>
-              <div className="pills">
-                {units.map((u,ui)=>(
-                  <button key={ui} className={"pill"+(selUnit===ui?" on":"")} onClick={()=>setSelUnit(ui)}>
-                    {u.name||("Cabaña "+(ui+1))}{u.capacity?(" · "+u.capacity):""}
-                  </button>
-                ))}
+        <div className="cuerpo2">
+          <div>
+            {partes.length>0 && (
+              <div className="bloque2 reveal">
+                <h2>El lugar</h2>
+                {partes.map((p,i)=><p key={i} className="texto2">{p}</p>)}
+                {c.promoText && <p className="promo2">{c.promoText}</p>}
               </div>
-              {selUnit==null && <div className="aviso">Elegí tu cabaña arriba para ver su disponibilidad real y reservar.</div>}
-            </div>
-          )}
+            )}
 
-          <div className="reserva">
-            <div>
+            {photos.length>0 && (
+              <div className="bloque2 reveal">
+                <h2>Las fotos</h2>
+                <div className="galeria2">
+                  {photos.slice(0,5).map((p,i)=>(
+                    <img key={i} className="lb-img" src={IMG(p)} alt="" loading="lazy" />
+                  ))}
+                </div>
+                {photos.length>5 && <p className="texto2" style={{marginTop:"12px"}}>Y {photos.length-5} fotos más. Tocá cualquiera para verlas todas.</p>}
+              </div>
+            )}
+
+            {videos.length>0 && (
+              <div className="bloque2 reveal">
+                <h2>En video</h2>
+                <div className="videos">
+                  {videos.map((v,i)=>{
+                    const yt=ytEmbed(v);
+                    if(yt) return <iframe key={i} title={"v"+i} src={yt} allowFullScreen></iframe>;
+                    const ig=igEmbed(v);
+                    if(ig) return <blockquote key={i} className="instagram-media" data-instgrm-permalink={ig} data-instgrm-version="14" style={{margin:0,width:"100%",minWidth:0,background:"#fff"}}></blockquote>;
+                    return <a key={i} className="ghost" href={v} target="_blank" rel="noreferrer">Ver video</a>;
+                  })}
+                </div>
+              </div>
+            )}
+
+            {units.length>0 && (
+              <div className="bloque2 reveal">
+                <h2>{units.length===1?"La unidad":"Las cabañas"}</h2>
+                <div className="unidades2">
+                  {units.map((u,i)=>{
+                    const ph=uPhotos(u); const vids=uVideos(u);
+                    const yid=vids[0]?ytId(vids[0]):null;
+                    const poster = ph[0] ? IMG(ph[0]) : (yid ? ("https://img.youtube.com/vi/"+yid+"/hqdefault.jpg") : null);
+                    return (
+                      <button className="unidad2" key={i} onClick={()=>setOpenUnit(i)}>
+                        <div className="ph">{poster && <img src={poster} alt={u.name||("Cabaña "+(i+1))} loading="lazy" />}
+                          {vids.length>0 && <span className="play">▶</span>}</div>
+                        <b>{u.name||("Cabaña "+(i+1))}</b>
+                        {u.capacity && <small>hasta {u.capacity}</small>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {openUnit!==null && units[openUnit] && (
+              <div className="modal" onClick={()=>setOpenUnit(null)}>
+                <div className="modalbox" onClick={e=>e.stopPropagation()}>
+                  <div className="modaltop">
+                    <b>{units[openUnit].name||("Cabaña "+(openUnit+1))}</b>
+                    <button onClick={()=>setOpenUnit(null)} aria-label="Cerrar">✕</button>
+                  </div>
+                  <div className="modalbody">
+                    {uPhotos(units[openUnit]).map((p,k)=><img key={k} src={IMG(p)} alt="" />)}
+                    {uVideos(units[openUnit]).map((v,k)=>{
+                      const uyt=ytEmbed(v); const uig=igEmbed(v);
+                      if(uyt) return <iframe key={k} title={"uvid"+k} src={uyt} allowFullScreen></iframe>;
+                      if(uig) return <blockquote key={k} className="instagram-media" data-instgrm-permalink={uig} data-instgrm-version="14" style={{margin:0,width:"100%",minWidth:0}}></blockquote>;
+                      return <a key={k} className="ghost" href={v} target="_blank" rel="noreferrer">Ver video</a>;
+                    })}
+                    {units[openUnit].capacity && <p className="texto2" style={{margin:0}}>Hasta {units[openUnit].capacity} huéspedes</p>}
+                    <button className="solid" onClick={()=>{ setSelUnit(openUnit); setOpenUnit(null); setTimeout(()=>irA("calendario"),60); }}>Reservar esta cabaña</button>
+                    {validBooking(units[openUnit]) && <a className="ghost" href={units[openUnit].bookingUrl} target="_blank" rel="noreferrer">Ver en Booking o Airbnb</a>}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="bloque2 reveal" id="calendario" style={{scrollMarginTop:"120px"}}>
+              <h2>Fechas y precios</h2>
+              {multi && (
+                <div>
+                  <div className="pills">
+                    {units.map((u,ui)=>(
+                      <button key={ui} className={"pill"+(selUnit===ui?" on":"")} onClick={()=>setSelUnit(ui)}>
+                        {u.name||("Cabaña "+(ui+1))}{u.capacity?(" · "+u.capacity):""}
+                      </button>
+                    ))}
+                  </div>
+                  {selUnit==null && <p className="aviso2">Elegí tu cabaña para ver su disponibilidad real.</p>}
+                </div>
+              )}
               <div className={"calbox"+(ready?"":" off")}>
                 <Calendar cursor={cursor} setCursor={setCursor} blocked={ready?cv.blocked:[]} ci={q.ci} co={q.co}
                   priceOf={(d)=>nightlyPrice(pv,d)} onDay={ready?pick:(()=>{})} />
               </div>
-              <p className="epi" style={{marginTop:"10px",marginBottom:0}}>
-                <span>Tocá el día de entrada y el de salida</span>
-                <span>Tachado: ocupado</span>
-              </p>
+              <p className="texto2" style={{marginTop:"10px",fontSize:"13.5px"}}>Tocá el día de entrada y el de salida. Los días tachados están ocupados.</p>
             </div>
 
-            <div className="ficha">
-              <h4>Ficha técnica</h4>
-              <p className="precio">{money(cv.price)}<small>por noche</small></p>
-              {su && (
-                <p className="rot" style={{color:"var(--ladrillo)",margin:"8px 0 0"}}>
-                  {su.name||("Cabaña "+(selUnit+1))}
-                  {multi && <button onClick={()=>setSelUnit(null)} style={{background:"none",border:0,textDecoration:"underline",color:"var(--suave)",cursor:"pointer",marginLeft:"8px",font:"inherit"}}>cambiar</button>}
-                </p>
-              )}
-              <div className="filas">
-                {cv.weekendPrice ? <div><span>Viernes y sábado</span><span className="fill"></span><span className="v">{money(cv.weekendPrice)}</span></div> : null}
-                <div><span>Entrada</span><span className="fill"></span><span className="v">{q.ci?fmtDMY(q.ci):"—"}</span></div>
-                <div><span>Salida</span><span className="fill"></span><span className="v">{q.co?fmtDMY(q.co):"—"}</span></div>
-                {stay && avail && <div><span>{stay.n} {stay.n===1?"noche":"noches"}</span><span className="fill"></span><span className="v">{money(stay.sub)}</span></div>}
-                {stay && avail && stay.pct>0 && <div className="destaque"><span>Promo por {stay.n} noches</span><span className="fill"></span><span className="v">−{money(stay.disc)}</span></div>}
-                {stay && avail && <div className="total"><span>Total</span><span className="fill"></span><span className="v">{money(stay.total)}</span></div>}
-                {c.minNights>1 && <div><span>Mínimo de noches</span><span className="fill"></span><span className="v">{c.minNights}</span></div>}
+            {(c.amenities.length>0 || c.petFriendly || (c.minNights>1) || c.type) && (
+              <div className="bloque2 reveal">
+                <h2>Qué incluye</h2>
+                <div className="comod2">
+                  {c.type && <div><i></i>{c.type}</div>}
+                  {c.bedrooms ? <div><i></i>{c.bedrooms} {c.bedrooms===1?"dormitorio":"dormitorios"}</div> : null}
+                  {c.bathrooms ? <div><i></i>{c.bathrooms} {c.bathrooms===1?"baño":"baños"}</div> : null}
+                  {c.minNights>1 && <div><i></i>Mínimo {c.minNights} noches</div>}
+                  {c.petFriendly && <div><i></i>Acepta mascotas</div>}
+                  {c.amenities.map(a=><div key={a}><i></i>{AMEN[a]||a}</div>)}
+                </div>
               </div>
+            )}
 
-              {stay && !avail && <div className="nodisp">No disponible en esas fechas.</div>}
-              {!stay && <p className="ayuda" style={{textAlign:"left",marginTop:"14px"}}>Elegí las fechas en el calendario y acá aparece el total.</p>}
-
-              {ready && c.whatsapp && <a className="solid wfull" href={wa} target="_blank" rel="noreferrer">Reservar por WhatsApp</a>}
-              {ready && su && validBooking(su) && <a className="ghost wfull" href={su.bookingUrl} target="_blank" rel="noreferrer">Reservar en Booking o Airbnb</a>}
-              <p className="ayuda">Te contesta el hospedaje directamente.</p>
-            </div>
+            {c.zone && (
+              <div className="bloque2 reveal">
+                <h2>Cómo llegar</h2>
+                <p className="texto2" style={{marginBottom:"14px"}}>{c.zone}</p>
+                <iframe className="mapa" title="mapa" loading="lazy"
+                  src={"https://www.google.com/maps?q="+encodeURIComponent(c.zone)+"&output=embed"}></iframe>
+              </div>
+            )}
           </div>
-        </Bloque>
 
-        {(c.amenities.length>0 || c.petFriendly || (c.minNights>1) || c.type) && (
-          <Bloque num="06" titulo="Qué incluye" id="b-comod">
-            <div className="comod">
-              {c.type && <div><span>Tipo</span><span className="fill"></span><span>{c.type}</span></div>}
-              {c.bedrooms && <div><span>Dormitorios</span><span className="fill"></span><span>{c.bedrooms}</span></div>}
-              {c.bathrooms && <div><span>Baños</span><span className="fill"></span><span>{c.bathrooms}</span></div>}
-              {c.petFriendly && <div><span>Mascotas</span><span className="fill"></span><span>Sí</span></div>}
-              {c.amenities.map(a=><div key={a}><span>{AMEN[a]||a}</span><span className="fill"></span><span>Sí</span></div>)}
+          <aside>
+            <div className="panel2">
+              {(multi && selUnit==null) ? (
+                <div>
+                  <p className="precio2" style={{fontSize:"22px"}}>Elegí tu cabaña</p>
+                  <p className="texto2" style={{margin:"8px 0 14px"}}>Este hospedaje tiene {units.length} cabañas, cada una con su precio.</p>
+                  <div className="pills">
+                    {units.map((u,ui)=>(
+                      <button key={ui} className="pill" onClick={()=>setSelUnit(ui)}>
+                        {u.name||("Cabaña "+(ui+1))}{u.capacity?(" · "+u.capacity):""}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <p className="precio2">{money(cv.price)}<small>por noche</small></p>
+                  {su && <p className="unidad3">{su.name||("Cabaña "+(selUnit+1))}
+                    {multi && <button onClick={()=>setSelUnit(null)}>cambiar</button>}</p>}
+                  {cv.weekendPrice ? <p className="texto2" style={{margin:"6px 0 0",fontSize:"13.5px"}}>Viernes y sábado: {money(cv.weekendPrice)}</p> : null}
+
+                  <div className="fechas2" onClick={()=>irA("calendario")}>
+                    <div><span>Entrada</span>{q.ci?fmtDMY(q.ci):"—"}</div>
+                    <div><span>Salida</span>{q.co?fmtDMY(q.co):"—"}</div>
+                  </div>
+
+                  {stay ? (avail ? (
+                    <div className="cuentas2">
+                      <div><span>{stay.n} {stay.n===1?"noche":"noches"}</span><span>{money(stay.sub)}</span></div>
+                      {stay.pct>0 && <div className="desc"><span>Promo −{stay.pct}%</span><span>−{money(stay.disc)}</span></div>}
+                      <div className="total"><span>Total</span><span>{money(stay.total)}</span></div>
+                    </div>
+                  ) : <p className="aviso2">No disponible en esas fechas.</p>)
+                  : <p className="texto2" style={{marginTop:"14px",fontSize:"13.5px"}}>Elegí las fechas en el calendario y acá aparece el total.</p>}
+
+                  {c.whatsapp && <a className="solid full" href={wa} target="_blank" rel="noreferrer">Reservar por WhatsApp</a>}
+                  {su && validBooking(su) && <a className="ghost full" href={su.bookingUrl} target="_blank" rel="noreferrer">Reservar en Booking o Airbnb</a>}
+                  <p className="nota2">Te contesta el hospedaje directamente.</p>
+                </div>
+              )}
             </div>
-          </Bloque>
-        )}
-
-        {c.zone && (
-          <Bloque num="07" titulo="Cómo llegar" id="b-mapa">
-            <iframe className="mapa" title="mapa" loading="lazy"
-              src={"https://www.google.com/maps?q="+encodeURIComponent(c.zone)+"&output=embed"}></iframe>
-            <p className="epi" style={{marginTop:"10px",marginBottom:0}}>
-              <span>{c.zone}</span><span>Tandil, Buenos Aires</span>
-            </p>
-          </Bloque>
-        )}
+          </aside>
+        </div>
       </div>
 
       <Nearby acts={acts} food={food} />
 
       <footer>
         <div className="in">
-          <div style={{display:"flex",justifyContent:"center",marginBottom:"14px"}}><Marca color="#D9CDB2" /></div>
-          <p className="colofon">un lugar por vez, sin apuro</p>
-          <p>{c.name} · Visitando Tandil · Creado por <a href="https://www.instagram.com/co.makers_/" target="_blank" rel="noopener noreferrer">comaker</a></p>
+          <div style={{display:"flex",justifyContent:"center",marginBottom:"14px"}}><Marca color="#EDF0E6" /></div>
+          <p className="wm" style={{textAlign:"center"}}>Visitando Tandil<span>Visitando Ando</span></p>
+          <p style={{textAlign:"center",marginTop:"14px",fontSize:"13px"}}>
+            © 2026 Visitando Tandil · Creado por <a href="https://www.instagram.com/co.makers_/" target="_blank" rel="noopener noreferrer" style={{textDecoration:"underline"}}>comakers</a>
+          </p>
         </div>
       </footer>
     </div>
   );
 }
+
 
 function App() {
   const [state,setState]=useState({ loading:true });
@@ -1688,22 +1997,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 })();
 </script>
 
-<script>
-/* mide el alto real de la barra para que los filtros se peguen justo abajo */
-(function(){
-  function calc(){
-    var pre=document.querySelector('.pre'), hd=document.querySelector('header');
-    if(!hd) return;
-    var p = pre ? pre.offsetHeight : 0;
-    document.documentElement.style.setProperty('--preH', p+'px');
-    document.documentElement.style.setProperty('--topH', (p+hd.offsetHeight)+'px');
-  }
-  window.addEventListener('load',calc);
-  window.addEventListener('resize',calc);
-  document.addEventListener('DOMContentLoaded',calc);
-  setInterval(calc,1200);
-})();
-</script>
+
 
 <nav class="appbar">
   <a href="index.html"><svg viewBox="0 0 24 24"><path d="M4 11l8-6.5 8 6.5v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1v-8z"/></svg>Inicio</a>
@@ -1713,12 +2007,86 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
   <a href="index.html?view=conoce"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-9.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7 3.5C19 15.5 12 20 12 20z"/></svg>Guardados</a>
 </nav>
 
+
 <script>
+/* mide la barra superior completa para que los filtros se peguen justo abajo */
 (function(){
-  function medir(){var p=document.querySelector('.pre');
-    if(p) document.documentElement.style.setProperty('--preH', p.offsetHeight+'px');}
-  window.addEventListener('load',medir);window.addEventListener('resize',medir);
-  document.addEventListener('DOMContentLoaded',medir);setInterval(medir,1200);
+  function medir(){
+    var top=document.querySelector('.topbar');
+    var pre=document.querySelector('.pre');
+    var hd=document.querySelector('header');
+    var raiz=document.documentElement;
+    if(pre) raiz.style.setProperty('--preH', pre.offsetHeight+'px');
+    var alto = top ? top.offsetHeight : ((pre?pre.offsetHeight:0) + (hd?hd.offsetHeight:0));
+    if(alto) raiz.style.setProperty('--topH', alto+'px');
+  }
+  window.addEventListener('load',medir);
+  window.addEventListener('resize',medir);
+  document.addEventListener('DOMContentLoaded',medir);
+  setInterval(medir,1000);
+})();
+</script>
+<script>
+/* Reemplaza el menú desplegable del navegador por uno de la marca.
+   Le avisa a React del cambio, así los filtros siguen funcionando igual. */
+(function(){
+  var abierto=null, selActual=null;
+
+  function cerrar(){
+    if(abierto){ abierto.remove(); abierto=null; }
+    if(selActual){ selActual.classList.remove('abierto'); selActual=null; }
+  }
+
+  function avisarReact(sel, valor){
+    var proto = window.HTMLSelectElement.prototype;
+    var setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
+    setter.call(sel, valor);
+    sel.dispatchEvent(new Event('input',  { bubbles:true }));
+    sel.dispatchEvent(new Event('change', { bubbles:true }));
+  }
+
+  function abrir(sel){
+    cerrar();
+    var caja = document.createElement('div');
+    caja.className = 'menu-sel';
+    Array.prototype.forEach.call(sel.options, function(op){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = op.textContent;
+      if(op.value === sel.value) b.className = 'on';
+      b.addEventListener('click', function(ev){
+        ev.preventDefault(); ev.stopPropagation();
+        avisarReact(sel, op.value);
+        cerrar();
+      });
+      caja.appendChild(b);
+    });
+    document.body.appendChild(caja);
+
+    var r = sel.getBoundingClientRect();
+    var ancho = Math.max(r.width, 200);
+    caja.style.width = ancho + 'px';
+    var izq = r.left + window.scrollX;
+    if(izq + ancho > window.innerWidth - 12) izq = window.innerWidth - ancho - 12;
+    caja.style.left = Math.max(12, izq) + 'px';
+    var arriba = r.bottom + window.scrollY + 8;
+    if(r.bottom + caja.offsetHeight + 20 > window.innerHeight){
+      arriba = r.top + window.scrollY - caja.offsetHeight - 8;
+    }
+    caja.style.top = arriba + 'px';
+
+    abierto = caja; selActual = sel; sel.classList.add('abierto');
+  }
+
+  document.addEventListener('mousedown', function(e){
+    var sel = e.target.closest && e.target.closest('select.sel');
+    if(sel){ e.preventDefault(); (sel===selActual) ? cerrar() : abrir(sel); return; }
+    if(abierto && !e.target.closest('.menu-sel')) cerrar();
+  }, true);
+
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') cerrar(); });
+  window.addEventListener('scroll', cerrar, true);
+  window.addEventListener('resize', cerrar);
 })();
 </script>
 </body>
