@@ -1213,6 +1213,102 @@ select.sel.abierto{ border-color:var(--ladrillo) !important;
   background:var(--monte); flex:none }
 .menu-sel::-webkit-scrollbar{ width:8px }
 .menu-sel::-webkit-scrollbar-thumb{ background:rgba(35,38,26,.18); border-radius:8px }
+
+/* ═══════════════ FICHA NUEVA ═══════════════ */
+.apertura2{position:relative;margin:26px 0 0;border-radius:var(--r);overflow:hidden;
+  min-height:460px;display:flex;align-items:flex-end;box-shadow:var(--sombra2)}
+.apertura2 img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.veloficha{position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(24,28,18,.28) 0%,rgba(24,28,18,.04) 45%,rgba(24,28,18,.38) 100%)}
+.volver2{position:absolute;top:18px;left:20px;z-index:5;color:#fff;font-size:13px;
+  background:rgba(24,28,18,.4);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  padding:8px 14px;border-radius:999px}
+.encabeza{position:relative;z-index:3;margin:26px;padding:26px 28px;max-width:560px;
+  background:rgba(255,255,255,.70);-webkit-backdrop-filter:blur(22px) saturate(1.3);
+  backdrop-filter:blur(22px) saturate(1.3);border:1px solid rgba(255,255,255,.55);
+  border-radius:var(--r);box-shadow:var(--sombra2)}
+.encabeza h1{font-family:var(--serif);font-weight:400;font-size:clamp(30px,3.8vw,44px);
+  line-height:1.03;letter-spacing:-.02em;margin:0}
+.zona2{color:var(--suave);font-size:14px;margin:8px 0 0}
+.tags2{display:flex;gap:7px;flex-wrap:wrap;margin:16px 0 0}
+.tags2 span{background:rgba(46,53,33,.10);border-radius:999px;padding:7px 13px;font-size:12.5px}
+.ctas2{display:flex;gap:9px;margin-top:18px;flex-wrap:wrap}
+
+.cuerpo2{display:grid;grid-template-columns:1.35fr .65fr;gap:26px;padding:28px 0 10px;align-items:start}
+.bloque2{background:rgba(255,255,255,.74);border:1px solid rgba(255,255,255,.6);
+  border-radius:var(--r);padding:26px 28px;box-shadow:var(--sombra);margin-bottom:18px;
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.bloque2 h2{font-family:var(--serif);font-weight:400;font-size:26px;margin:0 0 14px;letter-spacing:-.01em}
+.bloque2 h2::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;
+  background:var(--monte);margin-right:12px;vertical-align:middle}
+.texto2{color:var(--suave);margin:0 0 12px;font-size:15.5px}
+.promo2{color:var(--ladrillo);font-weight:500;margin:14px 0 0}
+.galeria2{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+.galeria2 img{border-radius:var(--rm);object-fit:cover;width:100%;aspect-ratio:1/1;cursor:zoom-in}
+.galeria2 img:first-child{grid-row:span 2;aspect-ratio:auto;height:100%}
+.comod2{display:grid;grid-template-columns:1fr 1fr;gap:2px 20px}
+.comod2 div{display:flex;align-items:center;gap:11px;padding:9px 0;font-size:15px;color:var(--suave)}
+.comod2 i{width:6px;height:6px;border-radius:50%;background:var(--monte);flex:none}
+.unidades2{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.unidad2{background:transparent;border:0;padding:0;text-align:left;cursor:pointer}
+.unidad2 .ph{position:relative;aspect-ratio:4/3;border-radius:var(--rm);overflow:hidden;background:var(--papel)}
+.unidad2 .ph img{width:100%;height:100%;object-fit:cover}
+.unidad2 .play{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:20px;
+  background:rgba(28,32,20,.3)}
+.unidad2 b{display:block;font-family:var(--serif);font-weight:400;font-size:17px;margin-top:9px}
+.unidad2 small{color:var(--suave);font-size:12.5px}
+.aviso2{background:rgba(156,86,52,.10);border:0;border-radius:var(--rs);padding:12px 14px;
+  color:var(--ladrillo);font-size:14px;margin:14px 0 0}
+
+.panel2{position:sticky;top:calc(var(--preH,40px) + 82px);background:rgba(255,255,255,.80);
+  border:1px solid rgba(255,255,255,.6);border-radius:var(--r);padding:24px;
+  box-shadow:var(--sombra2);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.precio2{font-family:var(--sans);font-weight:600;font-size:30px;letter-spacing:-.03em;margin:0}
+.precio2 small{font-weight:400;font-size:13px;color:var(--suave);margin-left:5px}
+.unidad3{font-size:13px;color:var(--ladrillo);margin:8px 0 0}
+.unidad3 button{background:none;border:0;text-decoration:underline;color:var(--suave);
+  cursor:pointer;font-size:13px;margin-left:8px}
+.fechas2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0 0;cursor:pointer}
+.fechas2 div{border:1px solid var(--linea);border-radius:var(--rs);padding:11px 13px;
+  background:rgba(251,247,232,.7);font-size:14.5px}
+.fechas2 span{display:block;font-size:11.5px;color:var(--suave)}
+.cuentas2{margin:16px 0 0;font-size:14.5px}
+.cuentas2 div{display:flex;justify-content:space-between;padding:7px 0}
+.cuentas2 .desc{color:var(--ladrillo)}
+.cuentas2 .total{border-top:1px solid var(--linea);margin-top:6px;padding-top:12px;
+  font-weight:600;font-size:17px}
+.solid.full,.ghost.full{display:block;width:100%;text-align:center;margin-top:14px}
+.nota2{font-size:12.5px;color:var(--suave);text-align:center;margin:10px 0 0}
+
+@media(max-width:900px){ .cuerpo2{grid-template-columns:1fr;gap:0} .panel2{position:static;margin-bottom:18px} }
+@media(max-width:760px){
+  .apertura2{min-height:0;display:block;margin:14px 0 0;border-radius:var(--rm)}
+  .apertura2 img{position:relative;height:250px}
+  .veloficha{height:250px}
+  .encabeza{margin:-40px 12px 12px;max-width:none;padding:22px 20px;border-radius:var(--rm)}
+  .encabeza h1{font-size:29px}
+  .ctas2{display:grid;grid-template-columns:1fr;gap:9px}
+  .ctas2 .solid,.ctas2 .ghost{text-align:center;padding:14px}
+  .cuerpo2{padding-top:16px}
+  .bloque2{padding:20px 20px}
+  .galeria2{grid-template-columns:1fr 1fr}
+  .galeria2 img:first-child{grid-column:span 2;grid-row:auto;aspect-ratio:4/3;height:auto}
+  .comod2,.unidades2{grid-template-columns:1fr}
+}
+
+/* ═══════════ FICHAS DE GASTRONOMÍA Y ACTIVIDAD ═══════════ */
+.tags2 .abierto2{ background:rgba(78,107,58,.14) !important; color:#3E5A2C !important; font-weight:500 }
+.tags2 .cerrado2{ background:rgba(156,86,52,.14) !important; color:var(--ladrillo) !important; font-weight:500 }
+.estado2{ font-size:14px; font-weight:600; margin:0 0 4px; padding:10px 14px; border-radius:999px;
+  text-align:center }
+.estado2.abierto2{ background:rgba(78,107,58,.14); color:#3E5A2C }
+.estado2.cerrado2{ background:rgba(156,86,52,.14); color:var(--ladrillo) }
+.horarios2{ margin:14px 0 0 }
+.horarios2 div{ display:flex; justify-content:space-between; gap:14px; padding:9px 0;
+  border-bottom:1px solid var(--linea); font-size:14px; color:var(--suave) }
+.horarios2 div:last-child{ border-bottom:0 }
+.horarios2 .hoy{ color:var(--tinta); font-weight:500 }
+.horarios2 .hoy span:first-child::after{ content:" · hoy"; color:var(--ladrillo); font-weight:400 }
 </style>
 </head>
 <body>
@@ -1344,141 +1440,118 @@ function Actividad({ c, cabins=[], food=[] }) {
   if(c.schedule || (c.reserva && c.comoReservar)) indice.push(["05","Horarios y reservas","b-horarios"]);
   if(c.zone) indice.push(["06","Dónde es","b-mapa"]);
 
+
   return (
     <div>
       <SiteHeader />
-      <div className="rail">{c.name} · Visitando Tandil</div>
 
-      <div className="apertura">
-        {cover && <img src={IMG(cover)} alt={c.name} />}
-        <div className="volver">
-          <div className="in">
-            <a href={homeHref}><span>‹ Volver</span></a>
-            <span>Para pasear</span>
+      <div className="in">
+        <div className="apertura2">
+          {cover && <img src={IMG(cover)} alt={c.name} />}
+          <div className="veloficha"></div>
+          <a className="volver2" href={homeHref}>‹ Volver</a>
+          <div className="encabeza">
+            <h1>{c.name}</h1>
+            {c.zone && <p className="zona2">{c.zone} · Tandil</p>}
+            <div className="tags2">
+              {c.category && <span>{c.category}</span>}
+              {c.duration && <span>{c.duration}</span>}
+              <span>{c.price>0 ? "desde "+money(c.price) : "Precio a consultar"}</span>
+              <span>{c.reserva ? "Con reserva" : "Sin reserva"}</span>
+            </div>
+            <div className="ctas2">
+              {wa && <a className="solid" href={wa} target="_blank" rel="noreferrer">Consultar por WhatsApp</a>}
+              {c.phone && <a className="ghost" href={"tel:"+c.phone}>{c.phone}</a>}
+            </div>
           </div>
         </div>
-        {c.zone && <div className="epi-ap"><div className="in"><span>{c.zone}</span></div></div>}
-      </div>
 
-      <div className="in titular">
-        <p className="eyebrow rot">{c.category || "Qué hacer en Tandil"}<i></i></p>
-        <h1>{c.name}</h1>
-        {partes[0] && <p className="bajada">{partes[0].length>190 ? partes[0].slice(0,190)+"…" : partes[0]}</p>}
-        <div className="ctas">
-          {wa && <a className="solid" href={wa} target="_blank" rel="noreferrer">Consultar por WhatsApp</a>}
-          {c.phone && <a className="ghost" href={"tel:"+c.phone}>{c.phone}</a>}
-        </div>
-        <div className="datos">
-          <div><span>Precio</span><b>{c.price>0 ? "desde "+money(c.price) : "Consultar"}</b></div>
-          <div><span>Duración</span><b>{c.duration||"—"}</b></div>
-          <div><span>{c.category?"Categoría":"Zona"}</span><b>{c.category||c.zone||"Tandil"}</b></div>
-          <div><span>Reserva</span><b>{c.reserva?"Hace falta":"No hace falta"}</b></div>
-        </div>
+        <div className="cuerpo2">
+          <div>
+            {partes.length>0 && (
+              <div className="bloque2 reveal">
+                <h2>La experiencia</h2>
+                {partes.map((p,i)=><p key={i} className="texto2">{p}</p>)}
+              </div>
+            )}
 
-        <div className="indice">
-          <p>En esta ficha</p>
-          <ol>
-            {indice.map(([n,t,id])=>(
-              <li key={id}>
-                <span className="n">{n}</span>
-                <span className="t"><a href={"#"+id}>{t}</a></span>
-                <span className="fill"></span>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </div>
+            {incluye.length>0 && (
+              <div className="bloque2 reveal">
+                <h2>Qué incluye</h2>
+                <div className="comod2">
+                  {incluye.map((x,i)=><div key={i}><i></i>{x}</div>)}
+                </div>
+              </div>
+            )}
 
-      <div className="in cuerpo">
+            {photos.length>0 && (
+              <div className="bloque2 reveal">
+                <h2>Las fotos</h2>
+                <div className="galeria2">
+                  {photos.slice(0,5).map((p,i)=><img key={i} className="lb-img" src={IMG(p)} alt="" loading="lazy" />)}
+                </div>
+                {photos.length>5 && <p className="texto2" style={{marginTop:"12px"}}>Y {photos.length-5} fotos más. Tocá cualquiera para verlas todas.</p>}
+              </div>
+            )}
 
-        {partes.length>0 && (
-          <Bloque num="01" titulo="La experiencia" id="b-lugar">
-            <div className="prosa">{partes.map((p,i)=><p key={i}>{p}</p>)}</div>
-          </Bloque>
-        )}
+            {videos.length>0 && (
+              <div className="bloque2 reveal">
+                <h2>En video</h2>
+                <div className="videos">
+                  {videos.map((v,i)=>{
+                    const yt=ytEmbed(v);
+                    if(yt) return <iframe key={i} title={"v"+i} src={yt} allowFullScreen></iframe>;
+                    const ig=igEmbed(v);
+                    if(ig) return <blockquote key={i} className="instagram-media" data-instgrm-permalink={ig} data-instgrm-version="14" style={{margin:0,width:"100%",minWidth:0,background:"#fff"}}></blockquote>;
+                    return <a key={i} className="ghost" href={v} target="_blank" rel="noreferrer">Ver video</a>;
+                  })}
+                </div>
+              </div>
+            )}
 
-        {incluye.length>0 && (
-          <Bloque num="02" titulo="Qué incluye" id="b-incluye">
-            <div className="horarios">
-              {incluye.map((x,i)=>(
-                <div key={i}><span>{x}</span><span className="fill"></span><span className="v">Incluido</span></div>
-              ))}
+            {c.zone && (
+              <div className="bloque2 reveal">
+                <h2>Dónde es</h2>
+                <p className="texto2" style={{marginBottom:"14px"}}>{c.zone}</p>
+                <iframe className="mapa" title="mapa" loading="lazy"
+                  src={"https://www.google.com/maps?q="+encodeURIComponent(c.zone)+"&output=embed"}></iframe>
+              </div>
+            )}
+          </div>
+
+          <aside>
+            <div className="panel2">
+              <p className="precio2">{c.price>0 ? money(c.price) : "A consultar"}{c.price>0 && <small>por persona</small>}</p>
+              <div className="horarios2">
+                {c.duration && <div><span>Duración</span><span>{c.duration}</span></div>}
+                {c.category && <div><span>Categoría</span><span>{c.category}</span></div>}
+                <div><span>Reserva</span><span>{c.reserva ? "Hace falta" : "No hace falta"}</span></div>
+              </div>
+              {c.schedule && <p className="texto2" style={{whiteSpace:"pre-line",marginTop:"14px",fontSize:"14px"}}>{c.schedule}</p>}
+              {c.reserva && c.comoReservar && <p className="aviso2">{c.comoReservar}</p>}
+              {!c.reserva && <p className="texto2" style={{marginTop:"12px",fontSize:"13.5px"}}>No hace falta reservar: caés y listo.</p>}
+              {wa && <a className="solid full" href={wa} target="_blank" rel="noreferrer">Consultar por WhatsApp</a>}
+              <p className="nota2">Te contesta quien organiza la salida.</p>
             </div>
-          </Bloque>
-        )}
-
-        {photos.length>0 && (
-          <Bloque num="03" titulo="Las fotos" id="b-fotos">
-            <div className="spread"><img className="lb-img" src={IMG(photos[0])} alt="" /></div>
-            <p className="epi"><span>Fig. 01 — {c.name}</span><span>{c.zone}</span></p>
-            {photos.length>=3 && (
-              <div>
-                <div className="par">{photos.slice(1,3).map((p,i)=><img key={i} className="lb-img" src={IMG(p)} alt="" loading="lazy" />)}</div>
-                <p className="epi"><span>Fig. 02 y 03</span><span>La salida</span></p>
-              </div>
-            )}
-            {photos.length===2 && (
-              <div>
-                <div className="par"><img className="lb-img" src={IMG(photos[1])} alt="" loading="lazy" /></div>
-                <p className="epi"><span>Fig. 02</span><span>La salida</span></p>
-              </div>
-            )}
-            {photos.length>3 && (
-              <div>
-                <div className="tercias">{photos.slice(3).map((p,i)=><img key={i} className="lb-img" src={IMG(p)} alt="" loading="lazy" />)}</div>
-                <p className="epi"><span>Fig. 04 en adelante</span><span>Tocá una foto para verla grande</span></p>
-              </div>
-            )}
-          </Bloque>
-        )}
-
-        {videos.length>0 && (
-          <Bloque num="04" titulo="En video" id="b-video">
-            <div className="videos">
-              {videos.map((v,i)=>{
-                const yt=ytEmbed(v);
-                if(yt) return <iframe key={i} title={"v"+i} src={yt} allowFullScreen></iframe>;
-                const ig=igEmbed(v);
-                if(ig) return <blockquote key={i} className="instagram-media" data-instgrm-permalink={ig} data-instgrm-version="14" style={{margin:0,width:"100%",minWidth:0,background:"#fff"}}></blockquote>;
-                return <a key={i} className="ghost" href={v} target="_blank" rel="noreferrer">Ver video</a>;
-              })}
-            </div>
-          </Bloque>
-        )}
-
-        {(c.schedule || (c.reserva && c.comoReservar)) && (
-          <Bloque num="05" titulo="Horarios y reservas" id="b-horarios">
-            {c.schedule && <p className="texto" style={{whiteSpace:"pre-line",color:"var(--suave)",maxWidth:"58ch",margin:"0 0 20px"}}>{c.schedule}</p>}
-            {c.reserva && c.comoReservar && (
-              <div className="reservar"><b>Cómo reservar</b>{c.comoReservar}</div>
-            )}
-            {!c.reserva && <p className="mano" style={{fontSize:"20px",marginTop:"8px"}}>no hace falta reservar, caés y listo</p>}
-          </Bloque>
-        )}
-
-        {c.zone && (
-          <Bloque num="06" titulo="Dónde es" id="b-mapa">
-            <iframe className="mapa" title="mapa" loading="lazy"
-              src={"https://www.google.com/maps?q="+encodeURIComponent(c.zone)+"&output=embed"}></iframe>
-            <p className="epi" style={{marginTop:"10px",marginBottom:0}}>
-              <span>{c.zone}</span><span>Punto de encuentro</span>
-            </p>
-          </Bloque>
-        )}
+          </aside>
+        </div>
       </div>
 
       <Nearby cabins={OP?[]:cabins} food={food} />
 
       <footer>
         <div className="in">
-          <div style={{display:"flex",justifyContent:"center",marginBottom:"14px"}}><Marca color="#D9CDB2" /></div>
-          <p className="colofon">llevá agua y salí temprano</p>
-          <p>{c.name} · Visitando Tandil · Creado por <a href="https://www.instagram.com/co.makers_/" target="_blank" rel="noopener noreferrer">comaker</a></p>
+          <div style={{display:"flex",justifyContent:"center",marginBottom:"14px"}}><Marca color="#EDF0E6" /></div>
+          <p className="wm" style={{textAlign:"center"}}>Visitando Tandil<span>Visitando Ando</span></p>
+          <p style={{textAlign:"center",marginTop:"14px",fontSize:"13px"}}>
+            © 2026 Visitando Tandil · Creado por <a href="https://www.instagram.com/co.makers_/" target="_blank" rel="noopener noreferrer" style={{textDecoration:"underline"}}>comakers</a>
+          </p>
         </div>
       </footer>
     </div>
   );
 }
+
 
 function App() {
   const [state,setState]=useState({loading:true});
