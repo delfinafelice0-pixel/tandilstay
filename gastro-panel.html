@@ -243,6 +243,17 @@ h2::before,.titulo::before{content:"" !important;display:inline-block;width:8px;
 [class*="border-black"],[class*="border-stone"]{border-color:var(--linea) !important}
 h1,h2,h3,.ff-display{font-family:'Instrument Serif',Georgia,serif !important;font-weight:400 !important}
 button,input,select,textarea{font-family:'Familjen Grotesk',system-ui,sans-serif}
+
+/* ── Panel: no existe el pre-header verde, así que --preH nunca se define
+      y quedan 40px de aire arriba. Lo anulo acá, al final de todo. ── */
+body{padding-top:0 !important}
+header,header.vt{position:sticky !important;top:0 !important;
+  background:#F4EEDC !important;border-bottom:1px solid rgba(35,38,26,.06) !important;
+  box-shadow:0 6px 20px rgba(35,38,26,.07) !important}
+@media(max-width:760px){
+  header,header.vt{position:sticky !important;top:0 !important;
+    background:#F4EEDC !important;border-bottom:1px solid rgba(35,38,26,.06) !important}
+}
 </style>
 </head>
 <body><div id="root"></div>
