@@ -267,15 +267,33 @@ const PRESETS = {
   mercado: { nombre:"Mercado", detalle:"Arena y verde oliva · Bricolage",         bg:"#FFFDF7", surf:"#F5F0E1", ink:"#23261A", acc:"#4F6B2A" }
 };
 const ACENTOS = ["#2E3521","#4F6B2A","#63653F","#9C5634","#7A4A2B","#8C6A3F","#3C5148","#5B4A6B"];
-const DENSIDADES = [["auto","Automático"],["vitrina","Con fotos"],["lista","Lista compacta"]];
+const FONDOS  = ["#FBF7E8","#FFFDF7","#F4EEDC","#EFE9DC","#E9EEE6","#1B1D16","#23261A","#2B2418"];
+
+const brillo = (hex) => { const h=String(hex).replace("#",""); const n=h.length===3?h.split("").map(x=>x+x).join(""):h;
+  const r=parseInt(n.substr(0,2),16),g=parseInt(n.substr(2,2),16),b=parseInt(n.substr(4,2),16);
+  if(isNaN(r)) return 1; return (0.299*r+0.587*g+0.114*b)/255; };
+
+const IcoCarrusel = () => (<svg width="26" height="18" viewBox="0 0 26 18" fill="none"><rect x="1" y="2" width="13" height="14" rx="2.5" fill="currentColor"/><rect x="16.5" y="2" width="9" height="14" rx="2.5" fill="currentColor" opacity=".35"/></svg>);
+const IcoVitrina  = () => (<svg width="26" height="18" viewBox="0 0 26 18" fill="none"><rect x="1" y="1.5" width="11" height="15" rx="2.5" fill="currentColor"/><rect x="14" y="1.5" width="11" height="15" rx="2.5" fill="currentColor"/></svg>);
+const IcoLista    = () => (<svg width="26" height="18" viewBox="0 0 26 18" fill="none"><rect x="1" y="1.5" width="24" height="6.5" rx="2" fill="currentColor"/><rect x="1" y="10" width="24" height="6.5" rx="2" fill="currentColor"/></svg>);
+const MODOS = [["auto","Automático",null],["carrusel","Carrusel",IcoCarrusel],["vitrina","Con fotos",IcoVitrina],["lista","Lista",IcoLista]];
 
 function Estilo({ c, set }){
   const t = c.theme || {};
   const preset = t.preset || "serrano";
   const P = PRESETS[preset] || PRESETS.serrano;
   const acento = t.acento || P.acc;
-  const densidad = t.densidad || "auto";
-  const cambiar = (patch) => set({ ...c, theme: { preset, acento, densidad, ...patch } });
+  const fondo = t.fondo || P.bg;
+  const verDest = t.verDest !== false;
+  const tituloDest = t.tituloDest !== undefined ? t.tituloDest : "Para probar";
+  const bloques = t.bloques || {};
+  const cambiar = (patch) => set({ ...c, theme: { ...t, preset, acento, ...patch } });
+  const cats = [];
+  (c.menu||[]).forEach(it=>{ const k=(it.category||"Menú").trim(); if(k && cats.indexOf(k)<0) cats.push(k); });
+  const claro = brillo(fondo) > 0.55;
+  const prevInk = claro ? "#23261A" : "#F7F3E6";
+  const prevSurf = claro ? "rgba(255,255,255,.74)" : "rgba(255,255,255,.09)";
+
   return (
     <div className="bg-white rounded-2xl border border-black/5 p-5">
       <h3 className="ff-display text-lg mb-1" style={{color:C.ink}}>Estilo de la carta</h3>
@@ -284,11 +302,11 @@ function Estilo({ c, set }){
       <span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">Combinación</span>
       <div className="grid gap-2 mt-2 mb-4">
         {Object.keys(PRESETS).map(k=>{ const q=PRESETS[k]; const on=preset===k; return (
-          <button key={k} onClick={()=>cambiar({ preset:k, acento:q.acc })}
+          <button key={k} onClick={()=>set({...c, theme:{ ...t, preset:k, acento:q.acc, fondo:null }})}
             className={"flex items-center gap-3 rounded-xl border p-2.5 text-left "+(on?"":"border-stone-200")}
             style={on?{borderColor:C.moss,background:"#F7F5EC"}:{}}>
             <span className="w-12 h-12 rounded-lg shrink-0 grid place-items-center" style={{background:q.bg,border:"1px solid rgba(0,0,0,.08)"}}>
-              <span className="w-6 h-6 rounded-md" style={{background:q.surf,border:"1px solid rgba(0,0,0,.06)",position:"relative"}}>
+              <span className="w-6 h-6 rounded-md" style={{background:q.surf,border:"1px solid rgba(0,0,0,.06)"}}>
                 <span className="block w-2.5 h-2.5 rounded-full" style={{background:q.acc,margin:"1.5px auto 0"}} />
               </span>
             </span>
@@ -302,34 +320,74 @@ function Estilo({ c, set }){
       </div>
 
       <span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">Color principal</span>
-      <div className="flex flex-wrap gap-2 mt-2 mb-1">
+      <div className="flex flex-wrap gap-2 mt-2 mb-1 items-center">
         {ACENTOS.map(a=>(
-          <button key={a} onClick={()=>cambiar({ acento:a })} title={a}
-            className="w-8 h-8 rounded-full"
+          <button key={a} onClick={()=>cambiar({ acento:a })} title={a} className="w-8 h-8 rounded-full"
             style={{background:a, boxShadow: acento===a ? "0 0 0 2.5px #fff, 0 0 0 4px "+a : "inset 0 0 0 1px rgba(0,0,0,.12)"}} />
         ))}
+        <label className="w-8 h-8 rounded-full grid place-items-center cursor-pointer text-xs"
+          style={{border:"1.5px dashed #c4bfae",color:"#8a836f"}} title="Elegir otro color">
+          +<input type="color" value={acento} onChange={e=>cambiar({ acento:e.target.value })} className="hidden" />
+        </label>
       </div>
-      <p className="ff-body text-[11px] text-stone-400 mb-4">Se usa en los botones, el punto de cada sección y la barra del pedido.</p>
+      <p className="ff-body text-[11px] text-stone-400 mb-4">Botones, punto de cada sección y barra del pedido.</p>
 
-      <span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">Cómo se ven los platos</span>
-      <div className="flex flex-wrap gap-2 mt-2 mb-1">
-        {DENSIDADES.map(([k,l])=>(
-          <button key={k} onClick={()=>cambiar({ densidad:k })}
-            className={"rounded-full px-3 py-1.5 ff-body text-sm border "+(densidad===k?"text-white":"text-stone-600 border-stone-300")}
-            style={densidad===k?{background:C.moss,borderColor:C.moss}:{}}>{l}</button>
+      <span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">Color de fondo</span>
+      <div className="flex flex-wrap gap-2 mt-2 mb-1 items-center">
+        {FONDOS.map(f=>(
+          <button key={f} onClick={()=>cambiar({ fondo:f })} title={f} className="w-8 h-8 rounded-full"
+            style={{background:f, boxShadow: fondo.toLowerCase()===f.toLowerCase() ? "0 0 0 2.5px #fff, 0 0 0 4px "+C.moss : "inset 0 0 0 1px rgba(0,0,0,.14)"}} />
         ))}
+        <label className="w-8 h-8 rounded-full grid place-items-center cursor-pointer text-xs"
+          style={{border:"1.5px dashed #c4bfae",color:"#8a836f"}} title="Elegir cualquier color">
+          +<input type="color" value={fondo} onChange={e=>cambiar({ fondo:e.target.value })} className="hidden" />
+        </label>
+        {t.fondo && <button onClick={()=>cambiar({ fondo:null })} className="ff-body text-xs" style={{color:C.clay}}>Volver al del estilo</button>}
       </div>
-      <p className="ff-body text-[11px] text-stone-400 mb-4">Automático: las categorías con fotos van en tarjetas grandes y las que no, en lista.</p>
+      <p className="ff-body text-[11px] text-stone-400 mb-4">
+        Podés poner cualquier color. Si es oscuro, los textos y las tarjetas se aclaran solos para que se sigan leyendo.
+      </p>
 
-      <div className="rounded-xl overflow-hidden" style={{background:P.bg,border:"1px solid rgba(0,0,0,.08)"}}>
+      <span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">Sección destacada</span>
+      <div className="flex gap-2 mt-2 mb-1">
+        <input value={tituloDest} onChange={e=>cambiar({ tituloDest:e.target.value })} maxLength={26}
+          placeholder="Para probar" className="flex-1 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+        <button onClick={()=>cambiar({ verDest:!verDest })}
+          className={"rounded-full px-3 ff-body text-sm border "+(verDest?"text-white":"text-stone-500 border-stone-300")}
+          style={verDest?{background:C.moss,borderColor:C.moss}:{}}>{verDest?"Se muestra":"Oculta"}</button>
+      </div>
+      <p className="ff-body text-[11px] text-stone-400 mb-4">Es el carrusel de arriba de todo, con los primeros platos que tengan foto.</p>
+
+      <span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">Cómo se ve cada sección</span>
+      {cats.length===0
+        ? <p className="ff-body text-sm text-stone-400 mt-2 mb-4">Cargá platos con categoría y vas a poder elegir el estilo de cada una.</p>
+        : <div className="mt-2 mb-4 divide-y divide-stone-100">
+            {cats.map(cat=>{ const actual = bloques[cat] || "auto"; return (
+              <div key={cat} className="flex items-center gap-2 py-2">
+                <span className="ff-body text-sm truncate flex-1" style={{color:C.ink}}>{cat}</span>
+                <div className="flex gap-1 shrink-0">
+                  {MODOS.map(([k,l,Ic])=>{ const on=actual===k; return (
+                    <button key={k} title={l}
+                      onClick={()=>cambiar({ bloques:{ ...bloques, [cat]: k==="auto" ? undefined : k } })}
+                      className={"rounded-lg border grid place-items-center "+(on?"text-white":"text-stone-400 border-stone-200")}
+                      style={Object.assign({width:"38px",height:"30px"}, on?{background:C.moss,borderColor:C.moss}:{})}>
+                      {Ic ? <Ic /> : <span className="ff-body text-[11px] font-semibold">Auto</span>}
+                    </button>
+                  ); })}
+                </div>
+              </div>
+            ); })}
+          </div>}
+
+      <div className="rounded-xl overflow-hidden" style={{background:fondo,border:"1px solid rgba(0,0,0,.10)"}}>
         <div className="px-3 pt-3 pb-2 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full" style={{background:acento}} />
-          <span className="ff-display text-sm" style={{color:P.ink}}>Principales</span>
+          <span className="ff-display text-sm" style={{color:prevInk}}>Principales</span>
         </div>
-        <div className="mx-3 mb-3 rounded-lg p-2.5 flex items-center gap-2" style={{background:P.surf}}>
+        <div className="mx-3 mb-3 rounded-lg p-2.5 flex items-center gap-2" style={{background:prevSurf}}>
           <span className="min-w-0 flex-1">
-            <span className="block ff-body text-xs font-semibold" style={{color:P.ink}}>Milanesa con papas</span>
-            <span className="block ff-body text-[11px]" style={{color:P.ink,opacity:.6}}>$15.000</span>
+            <span className="block ff-body text-xs font-semibold" style={{color:prevInk}}>Milanesa con papas</span>
+            <span className="block ff-body text-[11px]" style={{color:prevInk,opacity:.6}}>$15.000</span>
           </span>
           <span className="w-6 h-6 rounded-full grid place-items-center text-white text-sm leading-none" style={{background:acento}}>+</span>
         </div>
@@ -613,7 +671,7 @@ function App() {
   const lim=profile?profile.max_listings:null; const atLimit=lim!=null&&list.length>=lim&&!(profile&&profile.role==="admin"); const verSitio=editing&&editing.slug?"resto.html?slug="+editing.slug:null;
   return (
     <div className="min-h-screen ff-body" style={{background:C.paper}}>
-      <header className="sticky top-0 z-30 border-b border-black/5" style={{background:C.paper}}>
+      <header className="sticky top-0 z-30 border-b border-black/5" style={{background:C.paper,boxShadow:"0 6px 20px rgba(35,38,26,.07)"}}>
         <div className="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5"><div className="w-9 h-9 rounded-xl grid place-items-center text-xl" style={{background:C.clay}}>🍴</div><div><div className="ff-display text-lg leading-none" style={{color:C.ink}}>Gastronomía</div><div className="ff-body text-[11px] text-stone-500">Visitando Tandil</div></div></div>
           <div className="flex items-center gap-2">

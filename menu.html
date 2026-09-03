@@ -108,6 +108,8 @@ input{font:inherit}
 .dest .pr{margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 
 /* ── secciones ── */
+.car-sec{margin-left:-18px;margin-right:-18px;padding:2px 18px 12px}
+.car-sec .dest{flex:0 0 66%}
 .sec{padding:6px 0 10px}
 .stit{display:flex;align-items:center;gap:10px;margin:16px 0 12px}
 .stit i{width:8px;height:8px;border-radius:50%;background:var(--acc);flex:none}
@@ -216,6 +218,8 @@ footer b{color:#EDF0E6;font-weight:500}
   .riel{border-radius:0}
   .riel .pista{max-width:940px;margin:0 auto;padding:0 26px}
   .carrusel{max-width:940px;margin:0 auto;padding:4px 26px 24px}
+  .car-sec{margin-left:-26px;margin-right:-26px;padding:2px 26px 14px;max-width:none}
+  .car-sec .dest{flex:0 0 280px}
   .dest{flex:0 0 300px}
   .grilla{gap:16px}
   .listado{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
@@ -265,6 +269,17 @@ const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", wh
   phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano,
   menu:r.menu||[], banner:r.banner||"", photos:r.photos||[], tema:r.theme||r.tema||null });
 
+const lum = (hex) => { const h=String(hex).replace("#",""); const n=h.length===3?h.split("").map(x=>x+x).join(""):h;
+  const r=parseInt(n.substr(0,2),16), g=parseInt(n.substr(2,2),16), b=parseInt(n.substr(4,2),16);
+  if(isNaN(r)||isNaN(g)||isNaN(b)) return 1;
+  return (0.299*r + 0.587*g + 0.114*b)/255; };
+const mezcla = (hex, hacia, p) => { const par=(x)=>{ const h=String(x).replace("#",""); const n=h.length===3?h.split("").map(y=>y+y).join(""):h;
+    return [parseInt(n.substr(0,2),16),parseInt(n.substr(2,2),16),parseInt(n.substr(4,2),16)]; };
+  const a=par(hex), b=par(hacia);
+  if(a.some(isNaN)) return hex;
+  const m=a.map((v,i)=>Math.round(v+(b[i]-v)*p));
+  return "#"+m.map(v=>v.toString(16).padStart(2,"0")).join(""); };
+
 function aplicarTema(t){
   const k = qs.get("tema") || (t && t.preset) || "serrano";
   const base = TEMAS[k] || TEMAS.serrano;
@@ -274,7 +289,16 @@ function aplicarTema(t){
   s.setProperty("--soft",base.soft); s.setProperty("--acc",acc); s.setProperty("--acc-ink",base.accInk);
   s.setProperty("--acc2",(t&&t.acento2)||base.acc2); s.setProperty("--line",base.line);
   s.setProperty("--disp",base.disp);
-  const tc = document.getElementById("tcolor"); if(tc) tc.setAttribute("content",base.bg);
+  const fondo = qs.get("fondo") || (t && t.fondo);
+  if(fondo){
+    const claro = lum(fondo) > 0.55;
+    s.setProperty("--bg", fondo);
+    s.setProperty("--surf", claro ? mezcla(fondo,"#FFFFFF",.74) : mezcla(fondo,"#FFFFFF",.09));
+    s.setProperty("--ink",  claro ? "#23261A" : "#F7F3E6");
+    s.setProperty("--soft", claro ? mezcla(fondo,"#000000",.52) : mezcla(fondo,"#FFFFFF",.58));
+    s.setProperty("--line", claro ? "rgba(35,38,26,.10)" : "rgba(255,255,255,.14)");
+  }
+  const tc = document.getElementById("tcolor"); if(tc) tc.setAttribute("content", fondo || base.bg);
   if(base.fuente && !document.getElementById("fuente-tema")){
     const l=document.createElement("link"); l.id="fuente-tema"; l.rel="stylesheet";
     l.href="https://fonts.googleapis.com/css2?family="+base.fuente+"&display=swap";
@@ -567,24 +591,32 @@ function Menu({ c }){
   },[cats,c]);
 
   /* tarjeta enfocada del carrusel */
-  const carRef = useRef(null);
   useEffect(()=>{
-    const car = carRef.current; if(!car) return;
-    const obs = new IntersectionObserver((es)=>{
-      es.forEach(e=> e.target.classList.toggle("foco", e.intersectionRatio>0.82));
-    },{ root:car, threshold:[0,.82,1] });
-    Array.from(car.children).forEach(ch=>obs.observe(ch));
-    return ()=>obs.disconnect();
-  },[c]);
+    const obs = [];
+    document.querySelectorAll(".carrusel").forEach(car=>{
+      const o = new IntersectionObserver((es)=>{
+        es.forEach(e=> e.target.classList.toggle("foco", e.intersectionRatio>0.82));
+      },{ root:car, threshold:[0,.82,1] });
+      Array.from(car.children).forEach(ch=>o.observe(ch));
+      obs.push(o);
+    });
+    return ()=>obs.forEach(o=>o.disconnect());
+  },[c,cats]);
 
   const ir = (cat) => { setActiva(cat); const el=document.getElementById(slugId(cat));
     if(el) window.scrollTo({ top: el.getBoundingClientRect().top+window.scrollY-64, behavior:"smooth" }); };
 
   const conFoto = c.menu.filter(i=>i.photo);
   const destacados = conFoto.slice(0,6).map(it => ({ it, idx: c.menu.indexOf(it) }));
-  const forzado = (c.tema && c.tema.densidad) || qs.get("densidad") || "auto";
-  const modoDe = (items) => forzado!=="auto" ? forzado
-    : (items.filter(x=>x.it.photo).length / items.length >= 0.55 ? "vitrina" : "lista");
+  const conf = c.tema || {};
+  const bloques = conf.bloques || {};
+  const verDest = conf.verDest !== false;
+  const tituloDest = (conf.tituloDest || "Para probar").trim() || "Para probar";
+  const modoDe = (cat, items) => {
+    const m = qs.get("densidad") || bloques[cat];
+    if(m==="vitrina" || m==="lista" || m==="carrusel") return m;
+    return items.filter(x=>x.it.photo).length / items.length >= 0.55 ? "vitrina" : "lista";
+  };
 
   return (
     <div>
@@ -606,10 +638,10 @@ function Menu({ c }){
       <div className="hoja">
         {tags.length>0 && <div className="wrap"><div className="tags">{tags.map((t,i)=><span key={i} className="tag">{t}</span>)}</div></div>}
 
-        {destacados.length>1 && (
+        {verDest && destacados.length>1 && (
           <section>
-            <div className="wrap"><div className="stit"><i /><h2 className="disp">Para probar</h2></div></div>
-            <div className="carrusel hide-sb" ref={carRef}>
+            <div className="wrap"><div className="stit"><i /><h2 className="disp">{tituloDest}</h2></div></div>
+            <div className="carrusel hide-sb">
               {destacados.map(({it,idx})=>(
                 <Destacado key={idx} it={it} qty={cart[idx]||0}
                   add={cartOn?(()=>add(idx)):null} dec={cartOn?(()=>dec(idx)):null}
@@ -635,11 +667,19 @@ function Menu({ c }){
             ? <p style={{textAlign:"center",color:"var(--soft)",padding:"70px 0"}}>La carta todavía no está cargada.</p>
             : cats.map((cat,ci)=>{
                 const items = c.menu.map((it,idx)=>({it,idx})).filter(x=>(x.it.category||"Menú")===cat);
-                const modo = modoDe(items);
+                const modo = modoDe(cat, items);
                 return (
                   <section key={ci} id={slugId(cat)} data-cat={cat} className="sec" style={{scrollMarginTop:"70px"}}>
                     <div className="stit"><i /><h2 className="disp">{cat}</h2><em>{items.length}</em></div>
-                    {modo==="vitrina"
+                    {modo==="carrusel"
+                      ? <div className="carrusel car-sec hide-sb">
+                          {items.map(({it,idx})=>(
+                            <Destacado key={idx} it={it} qty={cart[idx]||0}
+                              add={cartOn?(()=>add(idx)):null} dec={cartOn?(()=>dec(idx)):null}
+                              abrir={()=>setFicha({it,idx})} />
+                          ))}
+                        </div>
+                      : modo==="vitrina"
                       ? <div className="grilla">
                           {items.map(({it,idx})=>(
                             <Tarjeta key={idx} it={it} qty={cart[idx]||0}
