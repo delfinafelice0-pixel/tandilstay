@@ -383,7 +383,7 @@ function Editor({ c, set }) {
 
       <div className="bg-white rounded-2xl border border-black/5 p-5 h-fit">
         <h3 className="ff-display text-lg mb-1" style={{color:C.ink}}>🍽️ Menú</h3>
-        <p className="ff-body text-sm text-stone-500 mb-4">Cargá tus platos con foto, precio y categoría.</p>
+        <p className="ff-body text-sm text-stone-500 mb-4">Cargá tus platos con foto, precio, categoría y etiquetas.</p>
         <div className="space-y-4">
           {c.menu.map((it,i)=>(
             <div key={i} className="border border-stone-200 rounded-xl p-3">
@@ -399,14 +399,59 @@ function Editor({ c, set }) {
                     <div className="flex items-center border border-stone-300 rounded-lg px-2 w-28"><span className="text-stone-400 text-sm">$</span><input type="number" value={it.price||""} onChange={e=>setItem(i,{price:+e.target.value})} className="w-full py-1.5 ff-body text-sm outline-none" /></div>
                   </div>
                   <input value={it.desc||""} onChange={e=>setItem(i,{desc:e.target.value})} placeholder="Descripción corta" className="w-full border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                  <Etiquetas it={it} onChange={(t)=>setItem(i,{tags:t})} />
                 </div>
                 <button onClick={()=>{ const it=c.menu[i]; if(it&&it.photo) delFromStorage(it.photo); set({...c,menu:c.menu.filter((_,j)=>j!==i)}); }} className="text-rose-500 self-start">🗑️</button>
               </div>
             </div>
           ))}
         </div>
-        <button onClick={()=>set({...c,menu:[...c.menu,{name:"",category:"",price:0,desc:"",photo:""}]})} className="mt-3 ff-body text-sm font-semibold" style={{color:C.clay}}>+ Agregar plato</button>
+        <button onClick={()=>set({...c,menu:[...c.menu,{name:"",category:"",price:0,desc:"",photo:"",tags:[]}]})} className="mt-3 ff-body text-sm font-semibold" style={{color:C.clay}}>+ Agregar plato</button>
       </div>
+    </div>
+  );
+}
+
+const SUGERIDAS = ["Lo más pedido","Recomendado","Vegetariano","Vegano","Sin TACC","Picante","Para compartir","Novedad"];
+const tagsDe = (it) => Array.isArray(it.tags) ? it.tags : String(it.tags||"").split(",").map(x=>x.trim()).filter(Boolean);
+
+function Etiquetas({ it, onChange }){
+  const [libre,setLibre] = useState("");
+  const tags = tagsDe(it);
+  const MAX = 3;
+  const lleno = tags.length >= MAX;
+  const tiene = (t) => tags.some(x=>x.toLowerCase()===t.toLowerCase());
+  const toggle = (t) => {
+    if(tiene(t)) onChange(tags.filter(x=>x.toLowerCase()!==t.toLowerCase()));
+    else if(!lleno) onChange(tags.concat([t]));
+  };
+  const agregar = () => { const t=libre.trim(); if(!t||lleno||tiene(t)) { setLibre(""); return; } onChange(tags.concat([t])); setLibre(""); };
+  const propias = tags.filter(t=>!SUGERIDAS.some(s=>s.toLowerCase()===t.toLowerCase()));
+  return (
+    <div className="pt-1">
+      <div className="flex flex-wrap gap-1.5">
+        {SUGERIDAS.map(t=>{ const on=tiene(t); return (
+          <button key={t} type="button" onClick={()=>toggle(t)}
+            className={"rounded-full px-2.5 py-1 ff-body text-xs border "+(on?"text-white":"text-stone-500")}
+            style={on ? {background:C.moss,borderColor:C.moss}
+                      : {borderColor:"#d6d3d1",opacity:lleno?0.35:1,cursor:lleno?"not-allowed":"pointer"}}>{t}</button>
+        ); })}
+        {propias.map(t=>(
+          <button key={t} type="button" onClick={()=>toggle(t)} title="Quitar"
+            className="rounded-full px-2.5 py-1 ff-body text-xs text-white" style={{background:C.clay}}>{t} ✕</button>
+        ))}
+      </div>
+      <div className="flex gap-2 mt-1.5 items-center">
+        <input value={libre} onChange={e=>setLibre(e.target.value)}
+          onKeyDown={e=>{ if(e.key==="Enter"){ e.preventDefault(); agregar(); } }}
+          placeholder="Otra etiqueta (ej: 400 g)" maxLength={18}
+          className="flex-1 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-xs" />
+        <button type="button" onClick={agregar} className="ff-body text-xs font-semibold px-1"
+          style={{color:C.clay,opacity:lleno?0.35:1}}>Agregar</button>
+      </div>
+      <p className="ff-body text-[11px] text-stone-400 mt-1">
+        {tags.length}/{MAX} etiquetas · en la carta se ven las dos primeras sobre la foto del plato
+      </p>
     </div>
   );
 }
