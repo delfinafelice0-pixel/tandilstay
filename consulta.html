@@ -94,6 +94,10 @@ section{padding:44px 0 72px}
   font-size:12px;letter-spacing:.22em;text-transform:uppercase;padding:17px;cursor:pointer;width:100%}
 .send:hover{background:#232817}
 .fine{grid-column:span 2;font-size:12px;color:var(--suave);margin:0}
+.falta{grid-column:span 2;margin:0;font-size:13.5px;line-height:1.5;color:#7A3B2A;
+  background:#F6E7DD;border:1px solid #E2C4B4;padding:11px 14px;border-radius:var(--rs)}
+.send:disabled{opacity:.6;cursor:default}
+.resHead b{color:#F2E9D2;font-weight:600}
 
 .res{margin-top:56px}
 .resHead{background:var(--monte);color:#E0D5B8;padding:30px 32px}
@@ -136,7 +140,7 @@ footer a{text-decoration:underline}
   .in{padding:0 20px}
   .pre .mid{display:none}
   .f2{grid-template-columns:1fr;gap:14px}
-  .field.full,.sep,.send,.fine{grid-column:span 1}
+  .field.full,.sep,.send,.fine,.falta{grid-column:span 1}
   .cards{grid-template-columns:1fr}
   .form{padding:20px 18px 24px}
   .ptitle{padding:32px 0 24px}
@@ -1035,33 +1039,59 @@ function App(){
   const volver = "index.html" + (OP?("?op="+encodeURIComponent(OP)):"");
   const [all,setAll]=useState(null);
   /* los datos que llegan desde la portada */
-  const [zona,setZona]=useState(Q.get("zona")||"");
   const [huesp,setHuesp]=useState(Q.get("hu")||"");
   const [ci,setCi]=useState(Q.get("ci")||"");
   const [co,setCo]=useState(Q.get("co")||"");
   const [presu,setPresu]=useState(soloNum(Q.get("presu")));
   const [nombre,setNombre]=useState(""), [contacto,setContacto]=useState(""), [msg,setMsg]=useState("");
   const [results,setResults]=useState(null);
+  const [envio,setEnvio]=useState(null);   /* null | {estado:"enviando"|"ok"|"error", n} */
+  const [aviso,setAviso]=useState("");
 
   useEffect(()=>{ db.from("cabins").select("*").then(({data})=>setAll((data||[]).map(fromRow))); },[]);
-  const zonas = all ? [...new Set(all.map(c=>c.zone).filter(Boolean))].sort() : [];
 
-  const search = () => {
-    if(!all) return;
+  const enviar = async () => {
+    if(!all || (envio && envio.estado==="enviando")) return;
+    if(!nombre.trim() || !contacto.trim()){
+      setAviso("Nos falta tu nombre y un mail o WhatsApp. Sin eso los hospedajes no tienen cómo responderte.");
+      return;
+    }
+    setAviso(""); setEnvio(null);
+
     let l=[...all];
     if(huesp) l=l.filter(c=>c.capacity>=Number(huesp));
     if(presu) l=l.filter(c=>!c.price || c.price<=Number(presu));
-    if(zona) l=l.filter(c=>c.zone===zona);
     if(ci&&co) l=l.filter(c=>isAvail(c,ci,co));
     setResults(l);
     setTimeout(()=>{ const el=document.getElementById("res"); if(el) el.scrollIntoView({behavior:"smooth"}); },60);
+
+    const conM = l.filter(c=>c.email);
+    if(!conM.length) return;
+
+    setEnvio({estado:"enviando"});
+    try{
+      const { data, error } = await db.functions.invoke("consulta", { body:{
+        nombre: nombre.trim(),
+        contacto: contacto.trim(),
+        mensaje: msg.trim(),
+        ci, co,
+        huespedes: huesp,
+        presupuesto: presu,
+        slugs: conM.map(c=>c.slug)
+      }});
+      if(error) throw error;
+      if(data && data.error) throw new Error(data.error);
+      setEnvio({estado:"ok", n: (data && typeof data.enviados==="number") ? data.enviados : conM.length});
+    }catch(e){
+      console.error("consulta:", e);
+      setEnvio({estado:"error"});
+    }
   };
 
   const lineas = () => {
     const L=[];
     if(ci&&co) L.push(`Fechas: ${fmtFull(ci)} al ${fmtFull(co)}`);
     if(huesp) L.push(`Huéspedes: ${huesp}`);
-    if(zona) L.push(`Zona: ${zona}`);
     if(presu) L.push(`Presupuesto máx. por noche: ${money(presu)}`);
     return L;
   };
@@ -1120,7 +1150,7 @@ function App(){
         <div className="in">
           <p className="kicker rot"><span></span>Una consulta, todos los lugares</p>
           <h1>Contanos qué buscás y te conectamos con los que coinciden</h1>
-          <p>Completá el filtro, así tu consulta le llega solo a los hospedajes que de verdad te sirven. Después la mandás a todos juntos por mail, o por WhatsApp a los que quieras.</p>
+          <p>Completá el filtro y mandá una sola consulta: le llega por mail a cada hospedaje que coincide con lo que buscás.</p>
         </div>
       </div>
 
@@ -1130,8 +1160,8 @@ function App(){
             <p>No escribís uno por uno: escribís una vez. Los hospedajes te contestan directo a vos, con su precio y su disponibilidad.</p>
             <ol className="steps">
               <li>Completás las fechas y para cuántos son.</li>
-              <li>Te mostramos los lugares que entran en eso.</li>
-              <li>Mandás la consulta a todos con un solo envío.</li>
+              <li>Dejás tu nombre y cómo te contactan.</li>
+              <li>Les llega tu consulta por mail y te responden a vos.</li>
             </ol>
           </div>
 
@@ -1145,12 +1175,6 @@ function App(){
                 <input id="hu" type="number" min="1" value={huesp} onChange={e=>setHuesp(e.target.value)} placeholder="¿Cuántos son?" /></div>
               <div className="field"><label htmlFor="pr">Presupuesto máx. por noche</label>
                 <input id="pr" type="number" min="0" value={presu} onChange={e=>setPresu(e.target.value)} placeholder="Opcional" /></div>
-              <div className="field full"><label htmlFor="zo">Zona</label>
-                <select id="zo" value={zona} onChange={e=>setZona(e.target.value)}>
-                  <option value="">Cualquiera</option>
-                  {zonas.map(z=><option key={z} value={z}>{z}</option>)}
-                </select></div>
-
               <div className="sep"></div>
 
               <div className="field"><label htmlFor="no">Tu nombre</label>
@@ -1161,8 +1185,11 @@ function App(){
               <div className="field full"><label htmlFor="ms">Algo más que quieras aclarar</label>
                 <textarea id="ms" value={msg} onChange={e=>setMsg(e.target.value)} placeholder="Ej: somos 2 adultos y un bebé, buscamos algo con pileta"></textarea></div>
 
-              <button className="send" onClick={search}>{all ? "Buscar los que coinciden" : "Cargando lugares…"}</button>
-              <p className="fine">Te van a escribir los lugares directamente. Nosotros no intervenimos en el precio ni en la reserva.</p>
+              {aviso && <p className="falta">{aviso}</p>}
+              <button className="send" onClick={enviar} disabled={!all || (envio && envio.estado==="enviando")}>
+                {!all ? "Cargando lugares…" : (envio && envio.estado==="enviando" ? "Enviando tu consulta…" : "Enviar mi consulta")}
+              </button>
+              <p className="fine">Tu consulta le llega por mail a cada hospedaje que coincide. Te escriben directamente a vos: nosotros no intervenimos en el precio ni en la reserva.</p>
             </div>
           </div>
         </div>
@@ -1178,13 +1205,22 @@ function App(){
               <div>
                 <div className="resHead worn dark">
                   <h2>Encontramos {results.length} {results.length===1?"lugar":"lugares"} para vos</h2>
-                  {conMail.length>0 ? (
+                  {conMail.length===0 && (
+                    <p>Ninguno de estos cargó su mail todavía, así que la consulta no salió. Escribiles por WhatsApp acá abajo.</p>
+                  )}
+                  {envio && envio.estado==="enviando" && (
+                    <p>Mandando tu consulta…</p>
+                  )}
+                  {envio && envio.estado==="ok" && (
                     <div>
-                      <p>Mandá tu consulta a todos los que tienen mail con un solo envío. Van en copia oculta, así que no se ven entre ellos. Se abre tu aplicación de correo con todo escrito: vos solo tocás enviar.</p>
-                      <a className="mail" href={mailtoUrl()}>Enviar la consulta a {conMail.length} {conMail.length===1?"lugar":"lugares"}</a>
+                      <p>Listo: tu consulta salió a {envio.n} {envio.n===1?"hospedaje":"hospedajes"}. Cada uno la recibe por separado y te responde a <b>{contacto}</b>.{results.length>envio.n ? ` A ${results.length-envio.n===1?"el que falta":"los "+(results.length-envio.n)+" que faltan"} escribiles por WhatsApp acá abajo.` : ""}</p>
                     </div>
-                  ) : (
-                    <p>Ninguno de estos cargó su mail todavía, pero podés escribirles por WhatsApp acá abajo.</p>
+                  )}
+                  {envio && envio.estado==="error" && (
+                    <div>
+                      <p>No pudimos mandarla desde acá. Podés abrir tu correo con todo escrito y enviarla vos, o escribirles por WhatsApp acá abajo.</p>
+                      <a className="mail" href={mailtoUrl()}>Abrir mi correo con la consulta</a>
+                    </div>
                   )}
                 </div>
 
