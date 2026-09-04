@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sumá tu lugar · Visitando Tandil</title>
+<meta name="description" content="Publicá tu hospedaje, tu restaurante o tu actividad en Visitando Tandil. Página propia, panel para editar cuando quieras y consultas directo a tu WhatsApp." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Crect%20width%3D%2724%27%20height%3D%2724%27%20fill%3D%27%232E3521%27%2F%3E%3Ccircle%20cx%3D%275%27%20cy%3D%2716%27%20r%3D%271.3%27%20fill%3D%27%23DFCCAE%27%2F%3E%3Cpath%20d%3D%27M7.5%2016%20Q10%2015.6%2011.5%2013.6%20L13%2013.6%20L13%208.6%20Q13%208%2013.7%208%20L15.6%208%20Q16.2%208%2016.2%208.6%20L16.2%2014.4%20Q18.6%2015.4%2021%2015.6%27%20fill%3D%27none%27%20stroke%3D%27%23DFCCAE%27%20stroke-width%3D%271.5%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%2F%3E%3C%2Fsvg%3E" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Visitando Tandil" />
+<meta property="og:locale" content="es_AR" />
+<meta property="og:title" content="Sumá tu lugar · Visitando Tandil" />
+<meta property="og:description" content="Página propia, panel para editar cuando quieras y consultas directo a tu WhatsApp." />
+<meta property="og:url" content="https://visitandotandil.com/sumate.html" />
+<meta property="og:image" content="https://visitandotandil.com/og.png?v=4" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
+<style>
+:root{
+  --monte:#2E3521; --liquen:#63653F; --arena:#DFCCAE;
+  --ladrillo:#9C5634; --crudo:#FBF7E8; --papel:#F4EEDC; --tinta:#23261A;
+  --suave:#5F5945; --linea:rgba(70,62,42,.24); --punt:rgba(70,62,42,.4);
+  --display:'Instrument Serif',Georgia,serif;
+  --sans:'Familjen Grotesk',system-ui,sans-serif;
+  --mano:'Nothing You Could Do',cursive;
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  --mottle:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='420' height='420' filter='url(%23m)'/%3E%3C/svg%3E");
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--crudo);color:var(--tinta);font-family:var(--sans);
+  font-size:15.5px;line-height:1.65;-webkit-font-smoothing:antialiased}
+body.lock{overflow:hidden}
+img,svg{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+h1,h2,h3,h4{font-family:var(--display);font-weight:400;margin:0}
+p{margin:0}
+.mano{font-family:var(--mano);color:var(--ladrillo)}
+.rot{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase}
+.in{max-width:1080px;margin:0 auto;padding:0 40px}
+.worn{position:relative;isolation:isolate}
+.worn::before{content:"";position:absolute;inset:0;background-image:var(--mottle);background-size:420px;
+  mix-blend-mode:multiply;opacity:.12;z-index:1;pointer-events:none}
+.worn::after{content:"";position:absolute;inset:0;background-image:var(--grain);background-size:180px;
+  mix-blend-mode:multiply;opacity:.18;z-index:2;pointer-events:none}
+.worn > *{position:relative;z-index:3}
+.dark::before{mix-blend-mode:screen;opacity:.20}
+.dark::after{mix-blend-mode:screen;opacity:.12}
+:focus-visible{outline:2px solid var(--ladrillo);outline-offset:3px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+
+/* pre-header */
+.pre{background:var(--monte);color:#C7BC9C;font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.pre .in{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:38px}
+.pre a{color:#E0D5B8}
+.pre a:hover{color:#fff}
+.pre .mid{display:flex;align-items:center;gap:9px;color:#E0D5B8}
+.pdot{width:5px;height:5px;background:var(--ladrillo);border-radius:50%;flex:none}
+.pre .right{display:flex;gap:22px}
+
+/* header */
+header{position:sticky;top:0;z-index:60;background:var(--crudo);border-bottom:1px solid var(--linea)}
+.hbar{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:14px 0}
+.lockup{display:flex;align-items:center;gap:12px;flex:none}
+.wm{font-family:var(--display);text-transform:uppercase;letter-spacing:.15em;line-height:1;margin:0;font-size:15px}
+.wm .sub{display:block;font-family:var(--sans);font-size:7.5px;letter-spacing:.4em;
+  margin-top:6px;color:var(--suave);text-indent:.4em}
+.nav{display:flex;gap:24px;font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+.nav a{padding:4px 0;color:var(--suave);border-bottom:1px solid transparent}
+.nav a:hover,.nav a.on{color:var(--tinta);border-color:var(--ladrillo)}
+.acts{display:flex;align-items:center;gap:12px;flex:none}
+.solid{background:var(--ladrillo);color:#F7EEE0;border:1px solid var(--ladrillo);
+  font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;padding:10px 18px;cursor:pointer;display:inline-block}
+.solid:hover{background:#89482a;border-color:#89482a}
+.ghost{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;border:1px solid var(--linea);
+  padding:10px 16px;color:var(--suave);background:transparent;cursor:pointer;display:inline-block}
+.ghost:hover{border-color:var(--tinta);color:var(--tinta)}
+.burger{display:none;background:transparent;border:1px solid var(--linea);width:42px;height:38px;
+  cursor:pointer;align-items:center;justify-content:center;flex-direction:column;gap:4px}
+.burger i{display:block;width:17px;height:1.5px;background:var(--tinta)}
+.panelmenu{position:fixed;inset:0;z-index:90;background:var(--crudo);display:none;
+  flex-direction:column;padding:22px 24px 34px;overflow-y:auto}
+.panelmenu.open{display:flex}
+.ptop{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.pclose{background:transparent;border:1px solid var(--linea);width:42px;height:38px;
+  font-size:19px;line-height:1;cursor:pointer;color:var(--tinta)}
+.panelmenu nav{display:flex;flex-direction:column;border-top:1px solid var(--linea)}
+.panelmenu nav a{border-bottom:1px solid var(--linea);padding:16px 2px;font-family:var(--display);font-size:22px}
+.panelmenu .solid{margin-top:24px;text-align:center;padding:15px}
+
+/* cabecera de página */
+.ptitle{border-bottom:1px solid var(--linea);padding:52px 0 34px}
+.kicker{display:flex;align-items:center;gap:10px;color:var(--ladrillo);margin:0 0 18px}
+.kicker span{height:1px;background:var(--punt);flex:1;max-width:60px}
+.ptitle h1{font-size:clamp(32px,4.6vw,54px);line-height:1.04;max-width:16ch}
+.ptitle .lede{color:var(--suave);max-width:52ch;margin:18px 0 0;font-size:16px}
+.ptitle .ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px;align-items:center}
+
+section{padding:74px 0}
+.shead{display:grid;grid-template-columns:auto 1fr auto;align-items:end;gap:22px;
+  border-bottom:1px solid var(--tinta);padding-bottom:12px;margin-bottom:30px}
+.shead .idx{font-family:var(--display);font-size:13px;letter-spacing:.1em;color:var(--ladrillo)}
+h2{font-size:clamp(25px,3.3vw,37px);line-height:1.02}
+.shead .aside{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--suave);white-space:nowrap}
+
+/* solapas */
+.tabs{display:flex;gap:8px;margin-bottom:26px;flex-wrap:wrap}
+.tabs button{background:transparent;border:1px solid var(--linea);padding:10px 19px;cursor:pointer;
+  font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--suave)}
+.tabs button:hover{border-color:var(--tinta);color:var(--tinta)}
+.tabs button[aria-selected="true"]{background:var(--monte);border-color:var(--monte);color:#EDE4CD}
+.tabpanel[hidden]{display:none}
+.intro{color:var(--suave);max-width:56ch;margin-bottom:26px}
+.rasgos{display:grid;grid-template-columns:repeat(3,1fr);gap:0 40px}
+.rasgo{padding:18px 0;border-bottom:1px dotted var(--punt)}
+.rasgo .cat{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ladrillo)}
+.rasgo h3{font-size:19px;margin:5px 0 3px;line-height:1.15}
+.rasgo p{font-size:13.5px;color:var(--suave)}
+.nota{margin-top:30px;background:var(--papel);border:1px solid var(--linea);padding:24px 28px;
+  display:grid;grid-template-columns:1fr auto;gap:26px;align-items:center}
+.nota h4{font-size:21px;margin-bottom:5px}
+.nota p{font-size:14px;color:var(--suave);max-width:52ch}
+
+/* pasos */
+.pasos{background:var(--monte);color:#E0D5B8}
+.pasos h2{color:#F2E9D2}
+.pasos .shead{border-bottom-color:rgba(224,213,184,.4)}
+.pasos .shead .idx{color:#C79A73}
+.pasos .shead .aside{color:#B4AA8C}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid rgba(224,213,184,.28)}
+.paso{padding:26px 26px 30px;border-right:1px solid rgba(224,213,184,.28)}
+.paso:last-child{border-right:0}
+.paso .n{font-family:var(--display);font-size:13px;letter-spacing:.1em;color:#C79A73}
+.paso h4{font-size:21px;color:#F2E9D2;margin:8px 0 8px}
+.paso p{font-size:13.8px;color:#B4AA8C}
+
+/* tarifa */
+.tarifa{display:grid;grid-template-columns:.85fr 1.15fr;border:1px solid var(--linea)}
+.tarifa .lado{background:var(--monte);color:#B4AA8C;padding:44px 40px;display:flex;flex-direction:column;justify-content:center}
+.tarifa .lado .et{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:#C79A73}
+.tarifa .num{font-family:var(--display);font-size:clamp(46px,6.4vw,68px);color:#F2E9D2;line-height:1;margin-top:16px}
+.tarifa .per{font-size:12px;letter-spacing:.18em;text-transform:uppercase;margin-top:10px}
+.tarifa .lado .fine{font-size:13.5px;margin-top:20px;padding-top:18px;border-top:1px dotted rgba(224,213,184,.35);max-width:30ch}
+.tarifa .lado .solid{margin-top:24px;align-self:flex-start;padding:14px 22px}
+.tarifa .lista{background:var(--papel);padding:38px 40px}
+.tarifa .lista h4{font-size:20px;margin-bottom:8px}
+.tarifa ul{list-style:none;margin:0;padding:0}
+.tarifa li{display:flex;gap:13px;align-items:baseline;padding:11px 0;border-bottom:1px dotted var(--punt);font-size:14.5px}
+.tarifa li:last-child{border-bottom:0}
+.tick{flex:none;color:var(--ladrillo);font-size:13px;line-height:1.3}
+
+/* preguntas */
+details{border-bottom:1px dotted var(--punt);padding:16px 0}
+details summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:20px;
+  align-items:baseline;font-family:var(--display);font-size:21px}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"+";color:var(--ladrillo);font-size:19px}
+details[open] summary::after{content:"–"}
+details p{margin-top:10px;color:var(--suave);font-size:14.5px;max-width:66ch}
+
+/* banda final */
+.band{background:var(--ladrillo);color:#F8F0E4;padding:60px 0}
+.band .in{display:grid;grid-template-columns:1fr auto;align-items:center;gap:34px}
+.band .mano{font-size:33px;color:#F8F0E4;line-height:1.2;margin:0;max-width:18ch}
+.band small{display:block;font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;opacity:.8;margin-top:12px}
+.band .solid{background:#F8F0E4;color:var(--ladrillo);border-color:#F8F0E4;padding:15px 24px}
+.band .solid:hover{background:#fff;border-color:#fff}
+
+/* pie */
+footer{background:var(--papel);padding:66px 0 32px;border-top:1px solid var(--linea)}
+.fgrid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:38px;align-items:start}
+footer h5{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--suave);margin:0 0 14px}
+footer ul{list-style:none;margin:0;padding:0;font-size:14px;line-height:2.1}
+footer a:hover{color:var(--ladrillo)}
+.next{margin-top:20px;padding-top:15px;border-top:1px dotted var(--punt);font-size:13px;color:var(--suave)}
+.fnote{margin-top:42px;padding-top:18px;border-top:1px solid var(--linea);display:flex;
+  justify-content:space-between;gap:18px;flex-wrap:wrap;font-size:10.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--suave)}
+.fnote a{text-decoration:underline}
+
+@media(max-width:1020px){
+  .nav{display:none}
+  .burger{display:flex}
+  .in{padding:0 24px}
+  .rasgos{grid-template-columns:repeat(2,1fr)}
+  .grid4{grid-template-columns:1fr 1fr}
+  .paso:nth-child(2){border-right:0}
+  .paso:nth-child(1),.paso:nth-child(2){border-bottom:1px solid rgba(224,213,184,.28)}
+  .tarifa{grid-template-columns:1fr}
+  .fgrid{grid-template-columns:1fr 1fr}
+  .pre .mid{display:none}
+}
+@media(max-width:640px){
+  section{padding:54px 0}
+  .rasgos{grid-template-columns:1fr}
+  .grid4{grid-template-columns:1fr}
+  .paso{border-right:0;border-bottom:1px solid rgba(224,213,184,.28)}
+  .paso:last-child{border-bottom:0}
+  .nota{grid-template-columns:1fr}
+  .band .in{grid-template-columns:1fr}
+  .tarifa .lado,.tarifa .lista{padding:32px 26px}
+  .pre .loc{display:none}
+  .fgrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="pre">
+  <div class="in">
+    <span class="loc">Tandil · Buenos Aires · a 350 km de la Capital</span>
+    <span class="mid"><i class="pdot"></i>Una sola consulta le llega a todos los hospedajes</span>
+    <span class="right">
+      <a href="index.html">Ver el sitio</a>
+      <a href="https://www.instagram.com/co.makers_/" target="_blank" rel="noreferrer">Instagram</a>
+    </span>
+  </div>
+</div>
+
+<header class="worn">
+  <div class="in hbar">
+    <a class="lockup" href="index.html" aria-label="Ir al inicio">
+      <svg width="86" viewBox="0 0 520 200" fill="none" stroke="#23261A" stroke-width="9"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="64" cy="150" r="7" fill="#23261A" stroke="none"></circle>
+        <path d="M108,150 C150,148 154,142 186,116 C196,108 207,110 211,123 c -8,2 -10,12 1,13 c 9,1 9,-11 -1,-12 L248,128 L248,92 Q248,82 258,82 L306,82 Q316,82 316,92 L316,128 L316,141 C352,151 410,156 462,154 C470,153 475,151 480,150"></path>
+      </svg>
+      <p class="wm">Visitando Tandil<span class="sub">Visitando Ando</span></p>
+    </a>
+    <nav class="nav">
+      <a href="index.html?view=aloj">Para dormir</a>
+      <a href="index.html?view=gastro">Para comer</a>
+      <a href="index.html?view=qhacer">Para pasear</a>
+      <a href="sumate.html" class="on">Sumá tu lugar</a>
+    </nav>
+    <div class="acts">
+      <a class="solid" href="#" data-wa>Escribinos</a>
+      <button class="burger" id="burger" aria-label="Abrir el menú"><i></i><i></i><i></i></button>
+    </div>
+  </div>
+</header>
+
+<div class="panelmenu" id="menu">
+  <div class="ptop">
+    <p class="wm">Visitando Tandil<span class="sub">Visitando Ando</span></p>
+    <button class="pclose" id="cerrar" aria-label="Cerrar el menú">✕</button>
+  </div>
+  <nav>
+    <a href="index.html?view=aloj">Para dormir</a>
+    <a href="index.html?view=gastro">Para comer</a>
+    <a href="index.html?view=qhacer">Para pasear</a>
+    <a href="index.html?view=conoce">Conocé Tandil</a>
+    <a href="sumate.html">Sumá tu lugar</a>
+    <a href="ayuda.html">Guía para cargar tu lugar</a>
+  </nav>
+  <a class="solid" href="#" data-wa>Escribinos por WhatsApp</a>
+</div>
+
+<div class="ptitle">
+  <div class="in">
+    <p class="kicker rot"><span></span>Para operadores</p>
+    <h1>Sumá tu lugar a Visitando Tandil</h1>
+    <p class="lede">Tu cabaña, tu restaurante o tu actividad con página propia. Vos subís tus fotos y tus precios desde tu panel, y lo que cambiás se ve al instante. Se ve bien en la compu y en el celular, y las consultas te llegan directo al WhatsApp.</p>
+    <div class="ctas">
+      <a class="solid" href="#" data-wa style="padding:14px 22px">Escribinos por WhatsApp</a>
+      <a class="ghost" href="#tarifa" style="padding:14px 20px">Ver el precio</a>
+    </div>
+  </div>
+</div>
+
+<section id="que-incluye">
+  <div class="in">
+    <div class="shead">
+      <span class="idx">01</span>
+      <h2>Qué incluye según tu rubro</h2>
+      <span class="aside">Cada uno con lo suyo</span>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Tipo de lugar">
+      <button role="tab" id="tab-dormir" aria-controls="p-dormir" aria-selected="true">Para dormir</button>
+      <button role="tab" id="tab-comer" aria-controls="p-comer" aria-selected="false">Para comer</button>
+      <button role="tab" id="tab-hacer" aria-controls="p-hacer" aria-selected="false">Actividades</button>
+    </div>
+
+    <!-- DORMIR -->
+    <div class="tabpanel" id="p-dormir" role="tabpanel" aria-labelledby="tab-dormir">
+      <p class="intro">Cabañas, casas y departamentos. Una página por alojamiento, con calendario, precios y galería, más un link propio para mandar por WhatsApp o poner en tu Instagram.</p>
+      <div class="rasgos">
+        <div class="rasgo"><p class="cat">Fotos</p><h3>Subís tu galería</h3>
+          <p>Cargás y ordenás las fotos, y elegís la principal, la que abre tu página.</p></div>
+        <div class="rasgo"><p class="cat">Disponibilidad</p><h3>Calendario propio</h3>
+          <p>Bloqueás las fechas ocupadas y ponés un precio distinto para cada día.</p></div>
+        <div class="rasgo"><p class="cat">Tarifas</p><h3>Precios y promos</h3>
+          <p>Precio de semana, de fin de semana y descuentos por cantidad de noches.</p></div>
+        <div class="rasgo"><p class="cat">Ficha</p><h3>Toda tu info junta</h3>
+          <p>Capacidad, dormitorios, baños, comodidades y si aceptás mascotas.</p></div>
+        <div class="rasgo"><p class="cat">Contacto</p><h3>Consultas a tu WhatsApp</h3>
+          <p>El botón abre el chat con el mensaje escrito, con el nombre del lugar y las fechas.</p></div>
+        <div class="rasgo"><p class="cat">Ubicación</p><h3>Mapa y filtros por zona</h3>
+          <p>Tu punto en el mapa y tu lugar aparece cuando alguien busca por zona.</p></div>
+      </div>
+      <div class="nota">
+        <div>
+          <h4>¿Administrás varios alojamientos?</h4>
+          <p>Podés tener todos bajo la misma cuenta y una página que los muestre juntos, para mandar un solo link con tu catálogo completo.</p>
+        </div>
+        <a class="solid" href="#" data-wa>Contame mi caso</a>
+      </div>
+    </div>
+
+    <!-- COMER -->
+    <div class="tabpanel" id="p-comer" role="tabpanel" aria-labelledby="tab-comer" hidden>
+      <p class="intro">Restaurantes, bares y cafés. La ficha de tu local más una carta digital con fotos en su propia página: cambiás un precio y ya está actualizado en la mesa, sin reimprimir nada.</p>
+      <div class="rasgos">
+        <div class="rasgo"><p class="cat">Mesa</p><h3>QR listo para imprimir</h3>
+          <p>Lo generás desde el panel. El cliente escanea y abre tu carta en el celular.</p></div>
+        <div class="rasgo"><p class="cat">Carta</p><h3>Cargás tus platos</h3>
+          <p>Cada uno con su foto, nombre, descripción y precio, agrupado por categorías.</p></div>
+        <div class="rasgo"><p class="cat">Etiquetas</p><h3>Sin TACC y vegetariano</h3>
+          <p>Se entiende de un vistazo qué puede comer cada uno de los que llegan.</p></div>
+        <div class="rasgo"><p class="cat">Mesas</p><h3>Reservas claras</h3>
+          <p>Decís si tomás reserva y cómo, así nadie llega sin saber si hay lugar.</p></div>
+        <div class="rasgo"><p class="cat">Contenido</p><h3>Videos y fotos del local</h3>
+          <p>Sumás tus videos de Instagram o YouTube y la galería del salón.</p></div>
+        <div class="rasgo"><p class="cat">Día a día</p><h3>Cambios en tiempo real</h3>
+          <p>Subió un precio o se terminó un plato: lo editás y se ve al toque.</p></div>
+      </div>
+      <div class="nota">
+        <div>
+          <h4>Tu carta también funciona como página</h4>
+          <p>El mismo link te sirve para el QR de la mesa, para la bio de Instagram y para responderle a quien te pregunta qué tenés.</p>
+        </div>
+        <a class="solid" href="#" data-wa>Quiero mi carta</a>
+      </div>
+    </div>
+
+    <!-- ACTIVIDADES -->
+    <div class="tabpanel" id="p-hacer" role="tabpanel" aria-labelledby="tab-hacer" hidden>
+      <p class="intro">Excursiones, paseos y experiencias. Tu actividad contada como la busca el turista: qué es, cuánto dura, qué incluye, cuánto sale y cómo reservarla.</p>
+      <div class="rasgos">
+        <div class="rasgo"><p class="cat">Agenda</p><h3>Duración y horarios</h3>
+          <p>A qué hora salís y cuánto dura, para que sepan si les entra en el día.</p></div>
+        <div class="rasgo"><p class="cat">Detalle</p><h3>Qué incluye</h3>
+          <p>Todo lo que va adentro del precio: equipo, guía, entrada, refrigerio.</p></div>
+        <div class="rasgo"><p class="cat">Tarifa</p><h3>Precio o "consultar"</h3>
+          <p>Mostrás el valor por persona y lo actualizás cuando cambia la temporada.</p></div>
+        <div class="rasgo"><p class="cat">Rubro</p><h3>Tu categoría</h3>
+          <p>Trekking, cabalgata, kayak, naturaleza, cultura, familiar o alquiler de bicis.</p></div>
+        <div class="rasgo"><p class="cat">Contenido</p><h3>Videos y galería</h3>
+          <p>Nada vende una salida como verla: subís tus videos y tus mejores fotos.</p></div>
+        <div class="rasgo"><p class="cat">Salida</p><h3>Punto de encuentro</h3>
+          <p>El mapa con el lugar exacto y el botón de WhatsApp para reservar.</p></div>
+      </div>
+      <div class="nota">
+        <div>
+          <h4>Aparecés en "Para pasear"</h4>
+          <p>Es la sección que mira el que ya reservó dónde dormir y está armando el fin de semana. Ahí es donde se decide.</p>
+        </div>
+        <a class="solid" href="#" data-wa>Sumar mi actividad</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pasos worn dark" id="como-funciona">
+  <div class="in">
+    <div class="shead">
+      <span class="idx">02</span>
+      <h2>Cómo funciona</h2>
+      <span class="aside">Cuatro pasos</span>
+    </div>
+    <div class="grid4">
+      <div class="paso"><span class="n">Paso 1</span><h4>Te damos tu usuario</h4>
+        <p>Creamos tu cuenta y entrás a tu panel. Te mostramos cómo se usa; es simple y anda desde la compu o el celular.</p></div>
+      <div class="paso"><span class="n">Paso 2</span><h4>Subís tus fotos y tus datos</h4>
+        <p>Cargás la galería, los precios y la información de tu lugar. Si te trabás, te damos una mano.</p></div>
+      <div class="paso"><span class="n">Paso 3</span><h4>Publicás</h4>
+        <p>Tocás publicar y tu página queda online con su link propio, lista para compartir.</p></div>
+      <div class="paso"><span class="n">Paso 4</span><h4>Editás cuando quieras</h4>
+        <p>Cambiás un precio, bloqueás una fecha o subís una foto nueva y se ve al instante. Sin esperar a nadie.</p></div>
+    </div>
+    <p class="mano" style="color:#E7C79E;font-size:20px;margin-top:22px">y si preferís, te ayudamos a cargarlo la primera vez</p>
+  </div>
+</section>
+
+<section id="tarifa">
+  <div class="in">
+    <div class="shead">
+      <span class="idx">03</span>
+      <h2>El precio</h2>
+      <span class="aside">Uno solo, para los tres rubros</span>
+    </div>
+    <div class="tarifa">
+      <div class="lado worn dark">
+        <span class="et">Un solo plan</span>
+        <div class="num" id="js-precio">$40.000</div>
+        <div class="per" id="js-periodo">Por mes</div>
+        <p class="fine">Sin costo de armado y sin permanencia. Si no te sirve, lo dás de baja y listo.</p>
+        <a class="solid" href="#" data-wa>Quiero sumar mi lugar</a>
+      </div>
+      <div class="lista">
+        <h4>Todo esto va incluido</h4>
+        <ul>
+          <li><span class="tick">✦</span>Página propia con tu link para compartir</li>
+          <li><span class="tick">✦</span>Panel propio para editar cuando quieras</li>
+          <li><span class="tick">✦</span>Se ve bien en la compu y en el celular</li>
+          <li><span class="tick">✦</span>Subís las fotos que quieras, sin límite</li>
+          <li><span class="tick">✦</span>Consultas directo a tu WhatsApp</li>
+          <li><span class="tick">✦</span>Mapa, teléfono y redes</li>
+          <li><span class="tick">✦</span>Cambios en tiempo real, sin costo extra</li>
+          <li><span class="tick">✦</span>Aparecés en la guía de Tandil</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="preguntas" style="padding-top:0">
+  <div class="in">
+    <div class="shead">
+      <span class="idx">04</span>
+      <h2>Preguntas frecuentes</h2>
+      <span class="aside">Lo que más nos preguntan</span>
+    </div>
+    <details><summary>¿Tengo que saber de computación?</summary>
+      <p>No. El panel es simple: completás los datos y arrastrás las fotos, como cuando subís algo a Instagram. Te lo mostramos al principio y quedás andando.</p></details>
+    <details><summary>¿Quién carga las fotos?</summary>
+      <p>Las subís vos desde el panel, con tu usuario. Así elegís cuáles van, en qué orden y las cambiás cuando sacás nuevas. Las primeras veces te ayudamos nosotras hasta que le agarres la mano.</p></details>
+    <details><summary>¿Las reservas pasan por ustedes?</summary>
+      <p>No. La consulta te llega directo a tu WhatsApp y vos cerrás con el cliente como siempre. No cobramos comisión por reserva.</p></details>
+    <details><summary>¿Cuánto tarda en estar lista?</summary>
+      <p>Depende de vos: con las fotos y los precios a mano, en un rato la tenés cargada y publicada el mismo día.</p></details>
+    <details><summary>¿Puedo tener más de un lugar?</summary>
+      <p>Sí. Podés tener varios bajo la misma cuenta y una página que los muestre todos juntos. Escribinos y lo vemos según tu caso.</p></details>
+    <details><summary>¿Y si ya estoy en Booking o Airbnb?</summary>
+      <p>Suma igual: acá el turista te contacta directo, sin intermediarios ni comisión por reserva.</p></details>
+    <details><summary>¿Puedo darlo de baja?</summary>
+      <p>Cuando quieras. No hay permanencia ni multa por dar de baja.</p></details>
+  </div>
+</section>
+
+<div class="band worn">
+  <div class="in">
+    <div>
+      <p class="mano">Mostrale tu lugar a quien está buscando Tandil ahora mismo</p>
+      <small>Contanos qué tenés y te decimos cómo quedaría tu página</small>
+    </div>
+    <a class="solid" href="#" data-wa>Escribinos por WhatsApp</a>
+  </div>
+</div>
+
+<footer class="worn">
+  <div class="in">
+    <div class="fgrid">
+      <div>
+        <div style="margin-bottom:14px">
+          <svg width="86" viewBox="0 0 520 200" fill="none" stroke="#23261A" stroke-width="9"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="64" cy="150" r="7" fill="#23261A" stroke="none"></circle>
+            <path d="M108,150 C150,148 154,142 186,116 C196,108 207,110 211,123 c -8,2 -10,12 1,13 c 9,1 9,-11 -1,-12 L248,128 L248,92 Q248,82 258,82 L306,82 Q316,82 316,92 L316,128 L316,141 C352,151 410,156 462,154 C470,153 475,151 480,150"></path>
+          </svg>
+        </div>
+        <p class="wm">Visitando Tandil<span class="sub">Visitando Ando</span></p>
+        <p class="next">Un lugar por vez, sin apuro. Hecho en Tandil.</p>
+      </div>
+      <div>
+        <h5>El sitio</h5>
+        <ul>
+          <li><a href="index.html?view=aloj">Para dormir</a></li>
+          <li><a href="index.html?view=gastro">Para comer</a></li>
+          <li><a href="index.html?view=qhacer">Para pasear</a></li>
+          <li><a href="index.html?view=conoce">Conocé Tandil</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Para operadores</h5>
+        <ul>
+          <li><a href="sumate.html">Sumá tu lugar</a></li>
+          <li><a href="panel.html">Entrar a mi panel</a></li>
+          <li><a href="ayuda.html">Guía para cargar tu lugar</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Contacto</h5>
+        <ul>
+          <li><a href="#" data-wa>WhatsApp</a></li>
+          <li><a href="https://www.instagram.com/co.makers_/" target="_blank" rel="noreferrer">Instagram</a></li>
+          <li><a href="consulta.html">Hacer una consulta</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="fnote">
+      <span>© 2026 Visitando Tandil · Creado por <a href="https://www.instagram.com/co.makers_/" target="_blank" rel="noopener noreferrer">Comakers</a></span>
+      <span>Tandil, Buenos Aires</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  /* ═══ EDITÁ ACÁ ═══ */
+  var WHATSAPP = "5492494000000";   // país + área + número, sin + ni espacios
+  var PRECIO   = "$40.000";
+  var PERIODO  = "Por mes";         // poné "" si alguna vez es pago único
+  /* ════════════════ */
+
+  var mensajes = {
+    dormir: "Hola! Tengo un alojamiento en Tandil y quiero sumarlo a Visitando Tandil.",
+    comer:  "Hola! Tengo un local gastronómico en Tandil y quiero sumarlo a Visitando Tandil.",
+    hacer:  "Hola! Organizo actividades en Tandil y quiero sumarlas a Visitando Tandil."
+  };
+  var actual = "dormir";
+
+  document.getElementById("js-precio").textContent = PRECIO;
+  document.getElementById("js-periodo").textContent = PERIODO;
+
+  function refrescar(){
+    var url = "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(mensajes[actual]);
+    document.querySelectorAll("[data-wa]").forEach(function(a){
+      a.href = url; a.target = "_blank"; a.rel = "noopener";
+    });
+  }
+
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tabs [role="tab"]'));
+  function abrir(tab){
+    tabs.forEach(function(t){
+      var on = t === tab;
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+    });
+    actual = tab.id.replace("tab-", "");
+    refrescar();
+  }
+  tabs.forEach(function(t, i){
+    t.addEventListener("click", function(){ abrir(t); });
+    t.addEventListener("keydown", function(e){
+      var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+      if(!d) return;
+      e.preventDefault();
+      var n = tabs[(i + d + tabs.length) % tabs.length];
+      n.focus(); abrir(n);
+    });
+  });
+
+  var menu = document.getElementById("menu");
+  document.getElementById("burger").addEventListener("click", function(){
+    menu.classList.add("open"); document.body.classList.add("lock");
+  });
+  document.getElementById("cerrar").addEventListener("click", function(){
+    menu.classList.remove("open"); document.body.classList.remove("lock");
+  });
+
+  refrescar();
+})();
+</script>
+</body>
+</html>
