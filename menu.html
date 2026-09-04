@@ -404,9 +404,16 @@ function ChipsLinea({ it }){
   return <span className="chips-lin">{e.map((t,i)=><span key={i}>{t}</span>)}</span>;
 }
 function Foto({ it }){
-  return it.photo
-    ? <img src={IMG(it.photo)} alt={it.name} loading="lazy" />
+  const [rota,setRota] = useState(false);
+  return (it.photo && !rota)
+    ? <img src={IMG(it.photo)} alt={it.name} loading="lazy" onError={()=>setRota(true)} />
     : <div className="ini">{(it.name||"·").trim().charAt(0).toUpperCase()}</div>;
+}
+function FotoGrande({ it }){
+  const [rota,setRota] = useState(false);
+  return (it.photo && !rota)
+    ? <img className="foto" src={IMG(it.photo)} alt={it.name} onError={()=>setRota(true)} />
+    : <div className="foto ini" style={{fontSize:"64px"}}>{(it.name||"·").trim().charAt(0).toUpperCase()}</div>;
 }
 
 /* ─────────── tarjetas ─────────── */
@@ -468,9 +475,7 @@ function Ficha({ plato, qty, add, dec, nota, setNota, cerrar, fav, toggleFav }){
         <React.Fragment>
           <div className="scroll">
             <div style={{position:"relative",margin:"0 14px",borderRadius:"22px",overflow:"hidden",background:"var(--line)"}}>
-              {it.photo
-                ? <img className="foto" src={IMG(it.photo)} alt={it.name} />
-                : <div className="foto ini" style={{fontSize:"64px"}}>{(it.name||"·").trim().charAt(0).toUpperCase()}</div>}
+              <FotoGrande it={it} />
               <button className="round" style={{position:"absolute",top:"12px",right:"12px"}}
                 onClick={()=>toggleFav(it.name)} aria-label="Guardar plato">
                 <Ico d={P_CORAZON} fill={fav?"#9C5634":"none"} />
@@ -624,7 +629,7 @@ function Menu({ c }){
         {c.banner && <img className="ph" src={IMG(c.banner)} alt="" />}
         <div className="veil" />
         <div className="top">
-          <a className="round" href={"resto.html?slug="+c.slug} aria-label="Volver"><Ico d={P_ATRAS} /></a>
+          <a className="round" href={String(c.slug||"").startsWith("demo") ? "index.html?view=gastro" : ("resto.html?slug="+c.slug)} aria-label="Volver"><Ico d={P_ATRAS} /></a>
           {wa && <a className="round" href={wa} target="_blank" rel="noreferrer" aria-label="Consultar por WhatsApp"
             style={{width:"auto",padding:"0 15px",fontSize:"13.5px",fontWeight:500,borderRadius:"999px"}}>Consultar</a>}
         </div>
@@ -801,11 +806,119 @@ const DEMO = { id:"demo", slug:"demo", name:"Almacén Serrano", zone:"Centro", w
     {name:"Helado de la casa", desc:"Dos bochas, sabores del día", price:5400, category:"Postres"}
   ]};
 
+
+/* ─────────── cartas de demostración (para mostrar el diseño sin base) ───────────
+   Se abren con ?demo=sushi · ?demo=cafe · ?demo=cerveceria
+   Las fotos son de Unsplash. Si alguna no carga, el plato queda con su inicial
+   y no se rompe nada: para cambiarla, reemplazá el "photo-…" por otro id o por
+   una URL completa que empiece con https://
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+const DEMO_SUSHI = { id:"d-sushi", slug:"demo-sushi", name:"Kaido Sushi", zone:"Centro, Tandil",
+  whatsapp:"5492494000001", blurb:"Barra de sushi de autor. Pescado del día, arroz templado y cortes a la vista.",
+  sin_tacc:true, vegetariano:true,
+  theme:{ preset:"brasa", fondo:"#12141A", acento:"#C0392B", acento2:"#E8D8B7" },
+  banner:"photo-1579871494447-9811cf80d66c",
+  menu:[
+    {name:"Edamame", desc:"Vainas de soja al vapor con sal marina", price:7800, category:"Para empezar", photo:"photo-1626082927389-6cd097cdc6ec", tags:["Vegetariano","Sin TACC"]},
+    {name:"Gyozas de cerdo", desc:"Seis unidades, selladas a la plancha, con salsa ponzu", price:12500, category:"Para empezar", photo:"photo-1594007654729-407eedc4be65", tags:["Lo más pedido"]},
+    {name:"Sopa miso", desc:"Caldo dashi, tofu, alga wakame y cebolla de verdeo", price:6200, category:"Para empezar"},
+    {name:"Tartar de salmón", desc:"Cubos de salmón, palta, sésamo y cítricos", price:16800, category:"Para empezar", photo:"photo-1553621042-f6e147245754"},
+    {name:"California roll", desc:"Diez piezas. Kanikama, palta y pepino", price:14500, category:"Rolls clásicos", photo:"photo-1579871494447-9811cf80d66c"},
+    {name:"Philadelphia", desc:"Diez piezas. Salmón, queso crema y cebollín", price:15800, category:"Rolls clásicos", photo:"photo-1611143669185-af224c5e3252", tags:["Lo más pedido"]},
+    {name:"Salmón crocante", desc:"Diez piezas. Salmón, palta y panko dorado", price:16200, category:"Rolls clásicos", photo:"photo-1617196034796-73dfa7b1fd56"},
+    {name:"Veggie roll", desc:"Diez piezas. Palta, zanahoria, pepino y mango", price:13200, category:"Rolls clásicos", tags:["Vegetariano"]},
+    {name:"Serrano", desc:"Salmón ahumado en casa, queso de Tandil y nuez", price:18900, category:"Rolls de autor", photo:"photo-1615361200141-f45040f367be", tags:["De la casa"]},
+    {name:"Tempura de langostino", desc:"Langostino rebozado, palta y alioli de sriracha", price:21000, category:"Rolls de autor", photo:"photo-1563612116625-3012372fccce", tags:["Picante"]},
+    {name:"Niku roll", desc:"Ojo de bife sellado, cebolla caramelizada y teriyaki", price:19500, category:"Rolls de autor"},
+    {name:"Sashimi de salmón", desc:"Nueve cortes gruesos, con wasabi fresco", price:22000, category:"Sashimi y niguiri", photo:"photo-1584583570840-0a3d88497593", tags:["Sin TACC"]},
+    {name:"Niguiri mixto", desc:"Seis piezas: salmón, pez blanco y langostino", price:17500, category:"Sashimi y niguiri", photo:"photo-1611143669185-af224c5e3252"},
+    {name:"Combinado 15 piezas", desc:"Para uno. Mezcla de rolls clásicos y niguiri", price:26500, category:"Combinados", photo:"photo-1617196034796-73dfa7b1fd56"},
+    {name:"Combinado 30 piezas", desc:"Para dos. Clásicos, de autor y sashimi", price:48000, category:"Combinados", tags:["Para dos"]},
+    {name:"Combinado 45 piezas", desc:"Para tres o cuatro. Lo mejor de la barra", price:69000, category:"Combinados", tags:["Para compartir"]},
+    {name:"Helado de té verde", desc:"Dos bochas, con sésamo tostado", price:6800, category:"Postres", photo:"photo-1551024506-0bccd828d307"},
+    {name:"Mochi", desc:"Tres unidades, sabores del día", price:7200, category:"Postres"},
+    {name:"Limonada de jengibre", desc:"Con menta y hielo", price:5200, category:"Bebidas", tags:["Sin alcohol"]},
+    {name:"Cerveza japonesa", desc:"Rubia lager, 330 ml", price:6500, category:"Bebidas"}
+  ]};
+
+const DEMO_CAFE = { id:"d-cafe", slug:"demo-cafe", name:"Hoja de Roble", zone:"Villa del Lago, Tandil",
+  whatsapp:"5492494000002", blurb:"Café de especialidad, pan del día y una mesa junto a la ventana.",
+  sin_tacc:true, vegetariano:true,
+  theme:{ preset:"mercado", fondo:"#FDF7EC", acento:"#8A5A34", acento2:"#4F6B2A" },
+  banner:"photo-1414235077428-338989a2e8c0",
+  menu:[
+    {name:"Espresso", desc:"Doble, de nuestro blend de temporada", price:2800, category:"Café", photo:"photo-1495474472287-4d71bcdd2085"},
+    {name:"Cortado", desc:"Espresso con un toque de leche texturada", price:3200, category:"Café"},
+    {name:"Flat white", desc:"Doble espresso y leche sedosa", price:4600, category:"Café", photo:"photo-1509042239860-f550ce710b93", tags:["Lo más pedido"]},
+    {name:"Capuchino", desc:"Con espuma alta y cacao por encima", price:4800, category:"Café", photo:"photo-1521302080334-4bebac2763a6"},
+    {name:"Café de filtro", desc:"V60, grano de origen que cambia cada semana", price:4600, category:"Café", tags:["De especialidad"]},
+    {name:"Submarino", desc:"Leche caliente y barra de chocolate", price:5200, category:"Café"},
+    {name:"Iced latte", desc:"Espresso, leche fría y hielo", price:5400, category:"Fríos", photo:"photo-1461023058943-07fcbe16d735"},
+    {name:"Cold brew", desc:"Doce horas de infusión en frío", price:5600, category:"Fríos", tags:["Sin TACC"]},
+    {name:"Limonada de menta", desc:"Exprimida al momento", price:4900, category:"Fríos", tags:["Sin alcohol"]},
+    {name:"Medialuna", desc:"De manteca, tibia", price:1800, category:"Para acompañar", photo:"photo-1550617931-e17a7b70dce2"},
+    {name:"Tres medialunas", desc:"Para compartir, o no", price:4800, category:"Para acompañar", tags:["Lo más pedido"]},
+    {name:"Croissant de manteca", desc:"Masa de setenta y dos horas", price:3600, category:"Para acompañar", photo:"photo-1555507036-ab1f4038808a"},
+    {name:"Alfajor de maicena", desc:"Con dulce de leche y coco", price:2900, category:"Para acompañar"},
+    {name:"Desayuno serrano", desc:"Café a elección, jugo, tostadas, queso de Tandil y dulce casero", price:12500, category:"Desayunos y meriendas", photo:"photo-1528735602780-2552fd46c7af", tags:["Recomendado"]},
+    {name:"Tostada de palta", desc:"Pan de masa madre, palta, huevo y semillas", price:9800, category:"Desayunos y meriendas", tags:["Vegetariano"]},
+    {name:"Yogur con granola", desc:"Yogur natural, granola de la casa y frutas de estación", price:7200, category:"Desayunos y meriendas", tags:["Vegetariano"]},
+    {name:"Tostado de jamón y queso", desc:"En pan de campo, con manteca", price:7900, category:"Sándwiches", photo:"photo-1568901346375-23c9450c58cd"},
+    {name:"Sándwich de pollo", desc:"Pollo grillado, rúcula, tomate asado y alioli", price:11500, category:"Sándwiches"},
+    {name:"Sándwich veggie", desc:"Berenjena, queso de cabra y pesto", price:10200, category:"Sándwiches", tags:["Vegetariano"]},
+    {name:"Budín de limón", desc:"Con glaseado ácido", price:4200, category:"Pastelería", photo:"photo-1486427944299-d1955d23e34d"},
+    {name:"Cheesecake", desc:"De frutos rojos de la zona", price:7800, category:"Pastelería", photo:"photo-1551024506-0bccd828d307", tags:["Lo más pedido"]},
+    {name:"Carrot cake", desc:"Con frosting de queso crema", price:7500, category:"Pastelería"},
+    {name:"Brownie sin TACC", desc:"Con nuez y chocolate 70%", price:5200, category:"Pastelería", tags:["Sin TACC"]}
+  ]};
+
+const DEMO_CERVE = { id:"d-cerve", slug:"demo-cerveceria", name:"Piedra Mora", zone:"Avenida Avellaneda, Tandil",
+  whatsapp:"5492494000003", blurb:"Diez canillas propias, tragos de barra y algo para picar hasta tarde.",
+  sin_tacc:false, vegetariano:true,
+  theme:{ preset:"brasa", fondo:"#171410", acento:"#C8892A", acento2:"#E5D3AE" },
+  banner:"photo-1436076863939-06870fe779c2",
+  menu:[
+    {name:"Golden", desc:"Rubia suave, 4.8%. La puerta de entrada", price:5200, category:"Nuestras canillas", photo:"photo-1608270586620-248524c67de9"},
+    {name:"IPA", desc:"Lúpulo cítrico y amargor firme, 6.2%", price:5800, category:"Nuestras canillas", photo:"photo-1436076863939-06870fe779c2", tags:["Lo más pedido"]},
+    {name:"Honey", desc:"Con miel de la sierra, 5.0%", price:5400, category:"Nuestras canillas"},
+    {name:"Scotch", desc:"Maltosa, tostada, 6.5%", price:5800, category:"Nuestras canillas"},
+    {name:"Stout", desc:"Café y chocolate, cremosa, 5.5%", price:6000, category:"Nuestras canillas", photo:"photo-1571613316887-6f8d5cbf7ef7"},
+    {name:"Flight de cuatro", desc:"Cuatro medidas para probar antes de decidir", price:11500, category:"Nuestras canillas", tags:["Para probar"]},
+    {name:"Gin tonic serrano", desc:"Gin local, tónica, romero y pomelo", price:9800, category:"Tragos", photo:"photo-1514362545857-3bc16c4c7d1b", tags:["Lo más pedido"]},
+    {name:"Negroni", desc:"Gin, campari y vermut rosso", price:10500, category:"Tragos"},
+    {name:"Aperol spritz", desc:"Aperol, prosecco y soda", price:9500, category:"Tragos"},
+    {name:"Fernet con cola", desc:"Medida generosa, mucho hielo", price:7500, category:"Tragos"},
+    {name:"Michelada", desc:"Golden, lima, salsas y borde de sal", price:7200, category:"Tragos", tags:["Picante"]},
+    {name:"Daiquiri de frutilla", desc:"Ron blanco, frutilla y lima", price:9200, category:"Tragos"},
+    {name:"Limonada de jengibre", desc:"Sin alcohol, con menta", price:4900, category:"Tragos", tags:["Sin alcohol"]},
+    {name:"Papas bravas", desc:"Con alioli y salsa picante de la casa", price:9500, category:"Para picar", photo:"photo-1518099074172-2e47ee6cfdc0", tags:["Vegetariano"]},
+    {name:"Rabas", desc:"Con limón y mayonesa de perejil", price:16800, category:"Para picar"},
+    {name:"Nachos con cheddar", desc:"Cheddar fundido, pico de gallo y jalapeño", price:11200, category:"Para picar", tags:["Picante","Para dos"]},
+    {name:"Provoleta", desc:"Con orégano y aceite de oliva", price:7500, category:"Para picar", photo:"photo-1541745537411-b8046dc6d66c", tags:["Sin TACC"]},
+    {name:"Tabla de fiambres", desc:"Quesos y salame de Tandil, para dos", price:22000, category:"Para picar", tags:["Para dos"]},
+    {name:"Clásica", desc:"Medallón de 180g, cheddar, lechuga y tomate", price:15500, category:"Hamburguesas", photo:"photo-1568901346375-23c9450c58cd"},
+    {name:"Doble cheddar", desc:"Dos medallones, doble cheddar y panceta", price:19800, category:"Hamburguesas", photo:"photo-1550547660-d9450f859349", tags:["Lo más pedido"]},
+    {name:"De la casa", desc:"Ojo de bife desmenuzado, cebolla caramelizada y queso azul", price:21000, category:"Hamburguesas", photo:"photo-1546833999-b9f581a1996d", tags:["Recomendado"]},
+    {name:"Veggie", desc:"Medallón de legumbres, palta y alioli", price:14800, category:"Hamburguesas", tags:["Vegetariano"]},
+    {name:"Brownie con helado", desc:"Tibio, con una bocha de crema americana", price:7200, category:"Para el final", photo:"photo-1551024506-0bccd828d307"}
+  ]};
+
+const DEMOS = { sushi:DEMO_SUSHI, cafe:DEMO_CAFE, cafeteria:DEMO_CAFE, cerveceria:DEMO_CERVE, cerve:DEMO_CERVE };
+
 function App(){
   const [state,setState] = useState({loading:true});
   useEffect(()=>{ (async()=>{
     const slug = qs.get("slug");
-    if(qs.get("demo")){ aplicarTema(null); document.title="Carta · "+DEMO.name; setState({c:fromRow(DEMO)}); return; }
+    const d = qs.get("demo");
+    if(d){
+      const elegido = DEMOS[String(d).toLowerCase()] || DEMO;
+      const c = fromRow(elegido);
+      aplicarTema(c.tema);
+      document.title = "Carta · " + c.name;
+      setState({c});
+      return;
+    }
     if(!slug){ setState({notfound:true}); return; }
     const {data,error} = await db.from("restaurants").select("*").eq("slug",slug).limit(1);
     if(error){ setState({error:true}); return; }
