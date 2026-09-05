@@ -1869,9 +1869,9 @@ function Numerito({ valor, sufijo = "", separador = true }) {
       entradas.forEach((e) => {
         if (e.isIntersecting && !hecho.current) {
           hecho.current = true; io.disconnect();
-          const dur = 1400, t0 = performance.now();
+          const dur = 1600, t0 = performance.now() + 180;
           const paso = (t) => {
-            const p = Math.min(1, (t - t0) / dur);
+            const p = Math.max(0, Math.min(1, (t - t0) / dur));
             const suave = 1 - Math.pow(1 - p, 3);
             setN(Math.round(valor * suave));
             if (p < 1) requestAnimationFrame(paso);
@@ -1879,7 +1879,7 @@ function Numerito({ valor, sufijo = "", separador = true }) {
           requestAnimationFrame(paso);
         }
       });
-    }, { threshold: 0.45 });
+    }, { threshold: 1, rootMargin: "0px 0px -22% 0px" });   // recién cuando el número está bien adentro de la pantalla
     io.observe(el);
     return () => io.disconnect();
   }, [valor]);
