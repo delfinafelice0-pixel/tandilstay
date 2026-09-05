@@ -45,7 +45,7 @@ body{margin:0;background:var(--crudo);color:var(--tinta);font-family:var(--sans)
 body.lock{overflow:hidden}
 img,svg,video{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
-button{font-family:inherit}
+button{font-family:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 .disp{font-family:var(--display);font-weight:400}
 .mano{font-family:var(--mano);color:var(--ladrillo)}
 .rot{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase}
@@ -1484,6 +1484,14 @@ select.sel.abierto{ border-color:var(--ladrillo) !important;
   .segm{ padding:4px }
   .segm button{ padding:9px 18px; font-size:14px }
 }
+
+/* ── en iPhone los botones se pintaban de azul por defecto ── */
+button, button b, button small, button em, button span{ color:inherit }
+.mom b{ color:var(--tinta) }
+.mom small{ color:var(--suave) }
+.mom em{ color:var(--ladrillo) }
+footer button, .panel nav button{ color:var(--tinta) }
+input, select, textarea{ color:var(--tinta) }
 </style>
 </head>
 <body>
