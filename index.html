@@ -1540,18 +1540,35 @@ h2::before, .titulo::before{ display:none !important; content:none !important }
   .etiqueta h3, .card .body h3{ font-size:15px !important }
 }
 
-/* 5 · textura de piedra serrana, apenas perceptible */
 :root{
-  --piedra:url("textura-piedra.png");
 }
-.piedra{ position:fixed; inset:0; z-index:9990; pointer-events:none;
-  background-image:var(--piedra); background-size:420px; background-repeat:repeat;
-  mix-blend-mode:multiply; opacity:.20 }
-@media(max-width:760px){ .piedra{ opacity:.16; background-size:300px } }
 
 .pdot{ display:none !important }
 
 .datovt .n{ font-variant-numeric:tabular-nums; font-feature-settings:'tnum' 1 }
+
+
+/* ══════════ intro: la marca antes de entrar ══════════ */
+body.introAbierta{ overflow:hidden }
+.intro{ position:fixed; inset:0; z-index:99999; background:var(--crudo);
+  display:grid; place-items:center; transition:opacity .8s ease, visibility .8s }
+.intro.fuera{ opacity:0; visibility:hidden }
+.intro .adentro{ text-align:center; padding:0 26px }
+.intro svg{ margin:0 auto 22px; overflow:visible }
+.intro svg path, .intro svg circle{ stroke-dasharray:1400; stroke-dashoffset:1400;
+  animation:trazo 1.5s cubic-bezier(.5,0,.2,1) forwards }
+.intro svg circle{ animation-delay:.15s }
+@keyframes trazo{ to{ stroke-dashoffset:0 } }
+.intro .nombre{ font-family:var(--display); font-size:clamp(30px,5.4vw,52px); color:var(--tinta);
+  line-height:1; opacity:0; animation:subir 1s cubic-bezier(.2,.8,.2,1) .55s forwards }
+.intro .bajada{ font-size:11px; letter-spacing:.32em; text-transform:uppercase; color:var(--suave);
+  margin-top:14px; opacity:0; animation:subir 1s cubic-bezier(.2,.8,.2,1) .85s forwards }
+@keyframes subir{ from{ opacity:0; transform:translateY(14px) } to{ opacity:1; transform:none } }
+.intro .barra{ width:min(240px,60vw); height:1px; background:rgba(70,62,42,.2);
+  margin:30px auto 0; overflow:hidden }
+.intro .barra i{ display:block; height:100%; width:0; background:var(--monte);
+  animation:cargar 1.9s cubic-bezier(.4,0,.2,1) forwards }
+@keyframes cargar{ to{ width:100% } }
 </style>
 <script>
 /* si la dirección viene con barra final, la saca: así las rutas relativas resuelven bien */
@@ -1563,8 +1580,19 @@ h2::before, .titulo::before{ display:none !important; content:none !important }
 </head>
 <body>
 <div class="fondo"></div>
+<div class="intro" id="intro" aria-hidden="true">
+  <div class="adentro">
+    <svg width="130" viewBox="0 0 520 200" fill="none" stroke="#23261A" stroke-width="9"
+      stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="64" cy="150" r="7" fill="none"></circle>
+      <path d="M108,150 C150,148 154,142 186,116 C196,108 207,110 211,123 c -8,2 -10,12 1,13 c 9,1 9,-11 -1,-12 L248,128 L248,92 Q248,82 258,82 L306,82 Q316,82 316,92 L316,128 L316,141 C352,151 410,156 462,154 C470,153 475,151 480,150"></path>
+    </svg>
+    <p class="nombre">Visitando Tandil</p>
+    <p class="bajada">Sierras · Buenos Aires</p>
+    <div class="barra"><i></i></div>
+  </div>
+</div>
 <div id="root"></div>
-<div class="piedra" aria-hidden="true"></div>
 <script type="text/babel">
 const { useState, useEffect, useRef } = React;
 const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
@@ -2412,7 +2440,7 @@ function Footer({ go }) {
           <div>
             <div style={{marginBottom:"14px"}}><Marca /></div>
             <Wordmark />
-            <p className="next">Hecho en Tandil, para que la vivas como un local.</p>
+            <p className="next">Hecha en Tandil, para que descubras los mejores lugares de nuestra ciudad.</p>
           </div>
           <div>
             <h5>El sitio</h5>
@@ -2632,6 +2660,24 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') cerrar(); });
   window.addEventListener('scroll', cerrar, true);
   window.addEventListener('resize', cerrar);
+})();
+</script>
+<script>
+/* La intro se muestra una vez por visita: si ya la vio, entra derecho. */
+(function(){
+  var intro = document.getElementById("intro");
+  if(!intro) return;
+  var quieto = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var yaLaVio = false;
+  try { yaLaVio = sessionStorage.getItem("vt-intro") === "1"; } catch(e){}
+  if (yaLaVio || quieto) { intro.parentNode.removeChild(intro); return; }
+  document.body.classList.add("introAbierta");
+  setTimeout(function(){
+    intro.classList.add("fuera");
+    document.body.classList.remove("introAbierta");
+    try { sessionStorage.setItem("vt-intro","1"); } catch(e){}
+    setTimeout(function(){ if(intro.parentNode) intro.parentNode.removeChild(intro); }, 900);
+  }, 2100);
 })();
 </script>
 </body>

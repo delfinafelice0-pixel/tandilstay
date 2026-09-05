@@ -246,14 +246,10 @@ h2::before, .titulo::before{ display:none !important; content:none !important }
 .card .body .meta{ font-size:12.5px !important }
 .card .price b{ font-size:15px !important }
 :root{
-  --piedra:url("textura-piedra.png");
 }
-.piedra{ position:fixed; inset:0; z-index:9990; pointer-events:none;
-  background-image:var(--piedra); background-size:420px; background-repeat:repeat;
-  mix-blend-mode:multiply; opacity:.20 }
-@media(max-width:760px){ .piedra{ opacity:.16; background-size:300px } }
 
 .pdot{ display:none !important }
+
 </style>
 </head>
 <body>
@@ -517,7 +513,7 @@ h2::before, .titulo::before{ display:none !important; content:none !important }
           <path d="M108,150 C150,148 154,142 186,116 C196,108 207,110 211,123 c -8,2 -10,12 1,13 c 9,1 9,-11 -1,-12 L248,128 L248,92 Q248,82 258,82 L306,82 Q316,82 316,92 L316,128 L316,141 C352,151 410,156 462,154 C470,153 475,151 480,150"></path>
         </svg>
         <p class="wm">Visitando Tandil</p>
-        <p class="lema">Hecho en Tandil, para que la vivas como un local.</p>
+        <p class="lema">Hecha en Tandil, para que descubras los mejores lugares de nuestra ciudad.</p>
       </div>
       <div>
         <h5>El sitio</h5>
@@ -617,6 +613,5 @@ h2::before, .titulo::before{ display:none !important; content:none !important }
   refrescar();
 })();
 </script>
-<div class="piedra" aria-hidden="true"></div>
 </body>
 </html>
