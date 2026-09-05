@@ -1550,6 +1550,8 @@ h2::before, .titulo::before{ display:none !important; content:none !important }
 @media(max-width:760px){ .piedra{ opacity:.16; background-size:300px } }
 
 .pdot{ display:none !important }
+
+.datovt .n{ font-variant-numeric:tabular-nums; font-feature-settings:'tnum' 1 }
 </style>
 <script>
 /* si la dirección viene con barra final, la saca: así las rutas relativas resuelven bien */
@@ -1564,7 +1566,7 @@ h2::before, .titulo::before{ display:none !important; content:none !important }
 <div id="root"></div>
 <div class="piedra" aria-hidden="true"></div>
 <script type="text/babel">
-const { useState, useEffect } = React;
+const { useState, useEffect, useRef } = React;
 const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -1826,6 +1828,37 @@ function MobileMenu({ open, go, onClose }) {
   );
 }
 
+/* número que cuenta desde cero la primera vez que aparece en pantalla */
+function Numerito({ valor, sufijo = "", separador = true }) {
+  const [n, setN] = useState(0);
+  const ref = useRef(null);
+  const hecho = useRef(false);
+  useEffect(() => {
+    const el = ref.current;
+    const quieto = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!el || quieto || !("IntersectionObserver" in window)) { setN(valor); return; }
+    const io = new IntersectionObserver((entradas) => {
+      entradas.forEach((e) => {
+        if (e.isIntersecting && !hecho.current) {
+          hecho.current = true; io.disconnect();
+          const dur = 1400, t0 = performance.now();
+          const paso = (t) => {
+            const p = Math.min(1, (t - t0) / dur);
+            const suave = 1 - Math.pow(1 - p, 3);
+            setN(Math.round(valor * suave));
+            if (p < 1) requestAnimationFrame(paso);
+          };
+          requestAnimationFrame(paso);
+        }
+      });
+    }, { threshold: 0.45 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [valor]);
+  const txt = separador ? n.toLocaleString("es-AR") : String(n);
+  return <span ref={ref}>{txt}{sufijo}</span>;
+}
+
 function SHead({ idx, title, aside }) {
   return (
     <div className="shead">
@@ -1883,7 +1916,7 @@ function Home({ go, data }) {
         <div className="in hgrid">
           <div className="titulohero">
             <h1>Un fin de semana<br/>en las sierras</h1>
-            <p className="lede">Dónde dormir, dónde comer y qué mirar en Tandil.</p>
+            <p className="lede">Dónde dormir, dónde comer y qué hacer en Tandil.</p>
           </div>
           <div className="rail">
             <p className="n">01</p>
@@ -2016,10 +2049,10 @@ function Home({ go, data }) {
       <section className="in reveal">
         <SHead idx="05" title="Un poco de Tandil" aside="Antes de llegar" />
         <div className="datosvt">
-          <div className="datovt"><div className="n">2.200</div><p>Millones de años tienen estas sierras: están entre las más antiguas del planeta.</p></div>
-          <div className="datovt"><div className="n">1912</div><p>El año en que se desplomó la Piedra Movediza original. La actual es una réplica.</p></div>
-          <div className="datovt"><div className="n">1</div><p>El salame de Tandil es el único del país con Denominación de Origen.</p></div>
-          <div className="datovt"><div className="n">4 h</div><p>Lo que tardás desde Buenos Aires. Entra cómodo en un fin de semana largo.</p></div>
+          <div className="datovt"><div className="n"><Numerito valor={2200} /></div><p>Millones de años tienen estas sierras: están entre las más antiguas del planeta.</p></div>
+          <div className="datovt"><div className="n"><Numerito valor={1912} separador={false} /></div><p>El año en que se desplomó la Piedra Movediza original. La actual es una réplica.</p></div>
+          <div className="datovt"><div className="n"><Numerito valor={1} /></div><p>El salame de Tandil es el único del país con Denominación de Origen.</p></div>
+          <div className="datovt"><div className="n"><Numerito valor={4} sufijo=" h" /></div><p>Lo que tardás desde Buenos Aires. Entra cómodo en un fin de semana largo.</p></div>
         </div>
       </section>
 
@@ -2379,7 +2412,7 @@ function Footer({ go }) {
           <div>
             <div style={{marginBottom:"14px"}}><Marca /></div>
             <Wordmark />
-            <p className="next">Un lugar por vez, sin apuro. Hecho en Tandil.</p>
+            <p className="next">Hecho en Tandil, para que la vivas como un local.</p>
           </div>
           <div>
             <h5>El sitio</h5>
