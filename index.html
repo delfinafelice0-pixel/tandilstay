@@ -1687,7 +1687,7 @@ function PreHeader({ go }) {
         <span className="loc">Tandil · Buenos Aires · a 350 km de la Capital</span>
         <span className="mid"><i className="pdot"></i>Una sola consulta le llega a todos los hospedajes</span>
         <span className="right">
-          <button onClick={()=>go("owners")} style={{background:"none",border:0,color:"#E0D5B8",cursor:"pointer",font:"inherit",letterSpacing:"inherit",textTransform:"inherit"}}>Sumá tu lugar</button>
+          <a href="sumate.html">Sumá tu lugar</a>
           <a href="https://www.instagram.com/co.makers_/" target="_blank" rel="noreferrer">Instagram</a>
         </span>
       </div>
@@ -1723,7 +1723,7 @@ function MobileMenu({ open, go, onClose }) {
     return ()=>document.body.classList.remove("lock");
   },[open]);
   if (!open) return null;
-  const items = [...NAV, { key:"owners", label:"Sumá tu lugar" }, { key:"contacto", label:"Contacto" }];
+  const items = [...NAV, { key:"contacto", label:"Contacto" }];
   return (
     <div className="panel">
       <div className="ptop">
@@ -1732,6 +1732,7 @@ function MobileMenu({ open, go, onClose }) {
       </div>
       <nav>
         {items.map(n => <button key={n.key} onClick={()=>{ go(n.key); onClose(); }}>{n.label}</button>)}
+        <a href="sumate.html" style={{padding:"16px 2px",borderBottom:"1px solid var(--linea)",fontFamily:"var(--display)",fontSize:"22px"}}>Sumá tu lugar</a>
       </nav>
       <a className="solid" href={"consulta.html" + (OP?("?op="+encodeURIComponent(OP)):"")}>Hacer una consulta</a>
     </div>
@@ -2312,7 +2313,7 @@ function Footer({ go }) {
             <ul>
               <li><a href={wa} target="_blank" rel="noreferrer">WhatsApp</a></li>
               <li><a href="https://www.instagram.com/co.makers_/" target="_blank" rel="noreferrer">Instagram</a></li>
-              <li><button onClick={()=>go("owners")}>Sumá tu lugar</button></li>
+              <li><a href="sumate.html">Sumá tu lugar</a></li>
               <li><button onClick={()=>go("contacto")}>Contacto</button></li>
             </ul>
           </div>
