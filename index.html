@@ -1503,11 +1503,57 @@ h1,h2,h3,h4,.wm,.num,.n{letter-spacing:-.01em}
   .titulohero{ max-width:100% }
   .hero .rail{ padding-left:0; padding-right:0 }
 }
+
+/* ══════════ ajustes pedidos ══════════ */
+
+/* 1 · fuera los puntitos delante de los títulos */
+h2::before, .titulo::before{ display:none !important; content:none !important }
+
+/* 2 · foto suave detrás de cada momento gastronómico */
+.mom{ position:relative; overflow:hidden; isolation:isolate }
+.momfoto{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  z-index:-1; filter:blur(3px) saturate(.85); transform:scale(1.12);
+  opacity:.30; transition:opacity .4s, transform .6s }
+.mom::after{ content:""; position:absolute; inset:0; z-index:-1;
+  background:linear-gradient(180deg, rgba(251,247,232,.86) 0%, rgba(251,247,232,.94) 100%) }
+.mom:hover .momfoto{ opacity:.42; transform:scale(1.16) }
+.mom b, .mom small, .mom em{ position:relative; z-index:1 }
+
+/* 3 · el mosaico de lugares, sin huecos en celular */
+@media(max-width:760px){
+  .mosaic{ grid-template-columns:1fr 1fr !important; gap:12px !important }
+  .mosaic .wide{ grid-column:span 1 !important }
+  .mosaic .tile{ aspect-ratio:1/1; min-height:0 !important }
+}
+@media(max-width:400px){ .mosaic .tile{ aspect-ratio:4/3 } }
+
+/* 4 · el cartel de nombre y precio, más chico */
+.etiqueta, .card .body{
+  left:12px !important; right:44px !important; padding:11px 13px 12px !important }
+.etiqueta h3, .card .body h3{ font-size:15.5px !important; line-height:1.14 !important }
+.card .body .meta{ font-size:12.5px !important; margin-top:2px !important }
+.card .price{ margin-top:8px !important; padding-top:7px !important }
+.card .price b{ font-size:15px !important }
+.card .price em, .card .price span{ font-size:11px !important }
+@media(max-width:760px){
+  .etiqueta, .card .body{ right:30px !important; padding:10px 12px 11px !important }
+  .etiqueta h3, .card .body h3{ font-size:15px !important }
+}
+
+/* 5 · textura de piedra serrana, apenas perceptible */
+:root{
+  --piedra:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.035 0.05' numOctaves='5' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.85'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='600' height='600' filter='url(%23p)'/%3E%3Crect width='600' height='600' filter='url(%23g)' opacity='0.4'/%3E%3C/svg%3E");
+}
+.piedra{ position:fixed; inset:0; z-index:9990; pointer-events:none;
+  background-image:var(--piedra); background-size:520px;
+  mix-blend-mode:multiply; opacity:.055 }
+@media(max-width:760px){ .piedra{ opacity:.045; background-size:380px } }
 </style>
 </head>
 <body>
 <div class="fondo"></div>
 <div id="root"></div>
+<div class="piedra" aria-hidden="true"></div>
 <script type="text/babel">
 const { useState, useEffect } = React;
 const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
@@ -1597,10 +1643,10 @@ const ITINERARIES = [
 ];
 
 const MOMENTOS = [
-  { t:"Desayuno y merienda", s:"Cafés, panaderías y casas de té." },
-  { t:"Almuerzo", s:"Parrillas, pastas y cocina de todos los días." },
-  { t:"Cena", s:"Para sentarse tranquilo y quedarse un rato." },
-  { t:"Cervecerías", s:"Birra artesanal y picada para compartir." },
+  { t:"Desayuno y merienda", s:"Cafés, panaderías y casas de té.", f:"photo-1495474472287-4d71bcdd2085" },
+  { t:"Almuerzo", s:"Parrillas, pastas y cocina de todos los días.", f:"photo-1544025162-d76694265947" },
+  { t:"Cena", s:"Para sentarse tranquilo y quedarse un rato.", f:"photo-1414235077428-338989a2e8c0" },
+  { t:"Cervecerías", s:"Birra artesanal y picada para compartir.", f:"photo-1436076863939-06870fe779c2" },
 ];
 
 function Marca({ color }) {
@@ -1947,6 +1993,7 @@ function Home({ go, data }) {
         <div className="momentos">
           {MOMENTOS.map((m,i)=>(
             <button className="mom" key={i} onClick={()=>go("gastro")}>
+              {m.f && <img className="momfoto" src={IMG(m.f)} alt="" loading="lazy" onError={e=>e.target.remove()} />}
               <b>{m.t}</b><small>{m.s}</small><em>Ver lugares</em>
             </button>
           ))}

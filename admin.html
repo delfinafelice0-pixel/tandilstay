@@ -352,8 +352,6 @@ function Newsletter(){
 
         {show.length===0 ? (
           <p className="ff-body text-stone-500 py-6">Todavía no hay nadie anotado.</p>
-        ) : tab==="newsletter" ? (
-          <Newsletter />
         ) : (
           <div>
             {show.map(x=>(
@@ -493,7 +491,7 @@ function App() {
                   return (
                   <div key={p.id} className="border border-stone-200 rounded-xl p-3.5">
                     <div className="flex items-center gap-2.5">
-                      {p.logo ? <img src={p.logo} className="w-9 h-9 rounded-full object-cover shrink-0" /> : <div className="w-9 h-9 rounded-full grid place-items-center text-white ff-display text-sm shrink-0" style={{background:C.moss}}>{initial}</div>}
+                      {p.logo ? <img src={p.logo} className="w-9 h-9 rounded-full object-cover shrink-0" style={{background:"#fff",border:"1px solid rgba(70,62,42,.18)",padding:"1px"}} /> : <div className="w-9 h-9 rounded-full grid place-items-center text-white ff-display text-sm shrink-0" style={{background:C.moss}}>{initial}</div>}
                       <div className="min-w-0 flex-1">
                         <div className="ff-body text-sm font-semibold truncate" style={{color:C.ink}}>{p.operator||"(sin operador)"}</div>
                         <div className="ff-body text-xs text-stone-500 truncate">{p.email}</div>
@@ -541,6 +539,8 @@ function App() {
               </div>
             </div>
           </div>
+        ) : tab==="newsletter" ? (
+          <Newsletter />
         ) : (
           <div className="space-y-6">
             <div className="grid sm:grid-cols-3 gap-4">

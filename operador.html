@@ -273,6 +273,20 @@ h2::before,.titulo::before{content:"" !important;display:inline-block;width:8px;
   .mini > a{flex:0 0 74%}
   section{padding-top:40px !important;padding-bottom:40px !important}
 }
+
+/* ── mismos ajustes que la home ── */
+h2::before, .titulo::before{ display:none !important; content:none !important }
+.etiqueta, .card .body{ padding:11px 13px 12px !important }
+.etiqueta h3, .card .body h3{ font-size:15.5px !important; line-height:1.14 !important }
+.card .body .meta{ font-size:12.5px !important }
+.card .price b{ font-size:15px !important }
+:root{
+  --piedra:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.035 0.05' numOctaves='5' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.85'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='600' height='600' filter='url(%23p)'/%3E%3Crect width='600' height='600' filter='url(%23g)' opacity='0.4'/%3E%3C/svg%3E");
+}
+.piedra{ position:fixed; inset:0; z-index:9990; pointer-events:none;
+  background-image:var(--piedra); background-size:520px;
+  mix-blend-mode:multiply; opacity:.055 }
+@media(max-width:760px){ .piedra{ opacity:.045; background-size:380px } }
 </style>
 
 <style>
@@ -309,6 +323,7 @@ input, select, textarea{ color:inherit }
 </head>
 <body>
 <div id="root"></div>
+<div class="piedra" aria-hidden="true"></div>
 <script type="text/babel">
 const { useState, useEffect } = React;
 const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
