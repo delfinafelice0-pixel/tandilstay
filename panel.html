@@ -11,12 +11,12 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Nothing+You+Could+Do&display=swap');
-.ff-display{font-family:'Young Serif',Georgia,serif;font-weight:400}
-.ff-body{font-family:'Familjen Grotesk',system-ui,sans-serif}
-.ff-mano{font-family:'Nothing You Could Do',cursive;color:#9C5634}
 
-.ff-display{font-family:'Young Serif',Georgia,serif;font-weight:400}.ff-body{font-family:'Familjen Grotesk',system-ui,sans-serif}
+.ff-display{font-family:'Young Serif',Georgia,serif;font-weight:400}
+.ff-body{font-family:'DM Sans',system-ui,sans-serif}
+.ff-mano{font-family:'Nothing You Could Do',cursive;color:#2E3521}
+
+.ff-display{font-family:'Young Serif',Georgia,serif;font-weight:400}.ff-body{font-family:'DM Sans',system-ui,sans-serif}
 body{margin:0}
 
 /* ═══════════════════════════════════════════════════════════
@@ -24,16 +24,16 @@ body{margin:0}
    Va último: manda sobre todo lo anterior.
    ═══════════════════════════════════════════════════════════ */
 :root{
-  --monte:#2E3521; --liquen:#63653F; --arena:#DFCCAE; --ladrillo:#9C5634;
+  --monte:#2E3521; --liquen:#63653F; --arena:#DFCCAE; --ladrillo:#2E3521;
   --crudo:#FBF7E8; --papel:#F4EEDC; --tinta:#23261A; --suave:#6A6455;
   --linea:rgba(35,38,26,.10); --punt:rgba(35,38,26,.10);
   --r:24px; --rm:18px; --rs:14px; --pill:999px;
   --sombra:0 10px 30px rgba(35,38,26,.07);
   --sombra2:0 18px 44px rgba(35,38,26,.12);
-  --sans:'Familjen Grotesk',system-ui,sans-serif;
-  --serif:'Instrument Serif',Georgia,serif;
-  --display:'Instrument Serif',Georgia,serif;
-  --mano:'Familjen Grotesk',system-ui,sans-serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --serif:'DM Serif Display',Georgia,serif;
+  --display:'DM Serif Display',Georgia,serif;
+  --mano:'DM Sans',system-ui,sans-serif;
 }
 /* fuera la textura de papel */
 .worn::before,.worn::after,body::after,body::before,#root::after,.fondo{display:none !important}
@@ -243,12 +243,12 @@ h2::before,.titulo::before{content:"" !important;display:inline-block;width:8px;
 
 <style>
 :root{
-  --monte:#2E3521;--liquen:#63653F;--arena:#DFCCAE;--ladrillo:#9C5634;
+  --monte:#2E3521;--liquen:#63653F;--arena:#DFCCAE;--ladrillo:#2E3521;
   --crudo:#FBF7E8;--papel:#F4EEDC;--tinta:#23261A;--suave:#5F5945;--linea:rgba(70,62,42,.24);
   --punt:rgba(70,62,42,.38);
   --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-body{background:var(--crudo);color:var(--tinta);font-family:'Familjen Grotesk',system-ui,sans-serif}
+body{background:var(--crudo);color:var(--tinta);font-family:'DM Sans',system-ui,sans-serif}
 body::after{content:"";position:fixed;inset:0;background-image:var(--grain);background-size:180px;
   mix-blend-mode:multiply;opacity:.12;pointer-events:none;z-index:9999}
 [class*="rounded"]{border-radius:0 !important}
@@ -256,7 +256,7 @@ body::after{content:"";position:fixed;inset:0;background-image:var(--grain);back
 .text-stone-400,.text-stone-500,.text-stone-600,.text-stone-700{color:var(--suave) !important}
 [class*="border-black"],[class*="border-stone"]{border-color:var(--linea) !important}
 h1,h2,h3,.ff-display{font-family:'Young Serif',Georgia,serif;font-weight:400 !important}
-input,select,textarea,button{font-family:'Familjen Grotesk',system-ui,sans-serif}
+input,select,textarea,button{font-family:'DM Sans',system-ui,sans-serif}
 input,select,textarea{background:#FDFAF1 !important}
 .kick{letter-spacing:.24em !important;text-transform:uppercase}
 </style>
@@ -268,6 +268,9 @@ img, iframe, video{ border-radius:var(--r) }
 .rounded-full, [class*="rounded-full"]{ border-radius:999px !important }
 button, input, select, textarea, a[class*="px-"]{ border-radius:var(--rs) !important }
 .card, .bg-white{ border-radius:var(--r) !important }
+
+button, button b, button small, button em, button span{ color:inherit }
+input, select, textarea{ color:inherit }
 </style>
 </head>
 <body>
@@ -279,7 +282,7 @@ const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const C = { paper:"#F4EEDC", cream:"#FBF7E8", mist:"#E7E1D0", ink:"#23261A", moss:"#2E3521", mossdeep:"#232817", sage:"#63653F", clay:"#9C5634", sun:"#DFCCAE" };
+const C = { paper:"#F4EEDC", cream:"#FBF7E8", mist:"#E7E1D0", ink:"#23261A", moss:"#2E3521", mossdeep:"#232817", sage:"#63653F", clay:"#2E3521", sun:"#DFCCAE" };
 const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=900&q=80`));
 const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
 const kFmt = (n) => (n >= 1000 ? Math.round(n/1000)+"k" : ""+n);

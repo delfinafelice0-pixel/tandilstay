@@ -35,10 +35,10 @@
    ══════════════════════════════════════════════════════ */
 :root{
   --bg:#FBF7E8; --surf:#FFFFFF; --ink:#23261A; --soft:#6A6455;
-  --acc:#2E3521; --acc-ink:#FBF7E8; --acc2:#9C5634;
+  --acc:#2E3521; --acc-ink:#FBF7E8; --acc2:#2E3521;
   --line:rgba(35,38,26,.08); --veil:rgba(35,38,26,.5);
-  --disp:'Instrument Serif',Georgia,serif;
-  --sans:'Familjen Grotesk',system-ui,-apple-system,sans-serif;
+  --disp:'DM Serif Display',Georgia,serif;
+  --sans:'DM Sans',system-ui,-apple-system,sans-serif;
   --r:26px; --rm:18px; --rs:14px;
   --sombra:0 8px 26px rgba(35,38,26,.08);
   --sombra2:0 -14px 44px rgba(35,38,26,.20);
@@ -236,6 +236,9 @@ footer b{color:#EDF0E6;font-weight:500}
   .rev{opacity:1;transform:none}
   .hero .ph{transform:none !important}
 }
+
+button, button b, button small, button em, button span{ color:inherit }
+input, select, textarea{ color:inherit }
 </style>
 </head>
 <body>
@@ -251,13 +254,13 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 /* ─────────── temas: lo único que cambia entre locales ─────────── */
 const TEMAS = {
   serrano: { nombre:"Serrano", bg:"#FBF7E8", surf:"#FFFFFF", ink:"#23261A", soft:"#6A6455",
-    acc:"#2E3521", accInk:"#FBF7E8", acc2:"#9C5634", line:"rgba(35,38,26,.08)",
-    disp:"'Instrument Serif',Georgia,serif", fuente:null },
+    acc:"#2E3521", accInk:"#FBF7E8", acc2:"#2E3521", line:"rgba(35,38,26,.08)",
+    disp:"'DM Serif Display',Georgia,serif", fuente:null },
   brasa: { nombre:"Brasa", bg:"#1B1D16", surf:"#23261A", ink:"#F4EEDC", soft:"#A79B80",
-    acc:"#9C5634", accInk:"#FBF7E8", acc2:"#DFCCAE", line:"rgba(244,238,220,.12)",
+    acc:"#2E3521", accInk:"#FBF7E8", acc2:"#DFCCAE", line:"rgba(244,238,220,.12)",
     disp:"'Fraunces',Georgia,serif", fuente:"Fraunces:opsz,wght@9..144,400;9..144,500" },
   mercado: { nombre:"Mercado", bg:"#FFFDF7", surf:"#F5F0E1", ink:"#23261A", soft:"#6A6455",
-    acc:"#4F6B2A", accInk:"#FBF7E8", acc2:"#9C5634", line:"rgba(35,38,26,.09)",
+    acc:"#4F6B2A", accInk:"#FBF7E8", acc2:"#2E3521", line:"rgba(35,38,26,.09)",
     disp:"'Bricolage Grotesque',system-ui,sans-serif", fuente:"Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600" }
 };
 
@@ -478,7 +481,7 @@ function Ficha({ plato, qty, add, dec, nota, setNota, cerrar, fav, toggleFav }){
               <FotoGrande it={it} />
               <button className="round" style={{position:"absolute",top:"12px",right:"12px"}}
                 onClick={()=>toggleFav(it.name)} aria-label="Guardar plato">
-                <Ico d={P_CORAZON} fill={fav?"#9C5634":"none"} />
+                <Ico d={P_CORAZON} fill={fav?"#2E3521":"none"} />
               </button>
             </div>
             <div style={{padding:"18px 20px 6px"}}>

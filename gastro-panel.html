@@ -9,8 +9,10 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&display=swap');
-.ff-display{font-family:'Instrument Serif',Georgia,serif;font-weight:400}.ff-body{font-family:'Familjen Grotesk',system-ui,sans-serif}body{margin:0}
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap');
+.ff-display{font-family:'DM Serif Display',Georgia,serif;font-weight:400}.ff-body{font-family:'DM Sans',system-ui,sans-serif}body{margin:0}
+
+button, button b, button small, button em, button span{ color:inherit }
 </style>
 <style>
 /* ═══════════════════════════════════════════════════════════
@@ -18,16 +20,16 @@
    Va último: manda sobre todo lo anterior.
    ═══════════════════════════════════════════════════════════ */
 :root{
-  --monte:#2E3521; --liquen:#63653F; --arena:#DFCCAE; --ladrillo:#9C5634;
+  --monte:#2E3521; --liquen:#63653F; --arena:#DFCCAE; --ladrillo:#2E3521;
   --crudo:#FBF7E8; --papel:#F4EEDC; --tinta:#23261A; --suave:#6A6455;
   --linea:rgba(35,38,26,.10); --punt:rgba(35,38,26,.10);
   --r:24px; --rm:18px; --rs:14px; --pill:999px;
   --sombra:0 10px 30px rgba(35,38,26,.07);
   --sombra2:0 18px 44px rgba(35,38,26,.12);
-  --sans:'Familjen Grotesk',system-ui,sans-serif;
-  --serif:'Instrument Serif',Georgia,serif;
-  --display:'Instrument Serif',Georgia,serif;
-  --mano:'Familjen Grotesk',system-ui,sans-serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --serif:'DM Serif Display',Georgia,serif;
+  --display:'DM Serif Display',Georgia,serif;
+  --mano:'DM Sans',system-ui,sans-serif;
 }
 /* fuera la textura de papel */
 .worn::before,.worn::after,body::after,body::before,#root::after,.fondo{display:none !important}
@@ -241,8 +243,8 @@ h2::before,.titulo::before{content:"" !important;display:inline-block;width:8px;
   -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 .text-stone-400,.text-stone-500,.text-stone-600,.text-stone-700{color:var(--suave) !important}
 [class*="border-black"],[class*="border-stone"]{border-color:var(--linea) !important}
-h1,h2,h3,.ff-display{font-family:'Instrument Serif',Georgia,serif !important;font-weight:400 !important}
-button,input,select,textarea{font-family:'Familjen Grotesk',system-ui,sans-serif}
+h1,h2,h3,.ff-display{font-family:'DM Serif Display',Georgia,serif !important;font-weight:400 !important}
+button,input,select,textarea{font-family:'DM Sans',system-ui,sans-serif}
 
 /* ── Panel: no existe el pre-header verde, así que --preH nunca se define
       y quedan 40px de aire arriba. Lo anulo acá, al final de todo. ── */
@@ -262,7 +264,7 @@ const { useState, useEffect } = React;
 const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const C = { paper:"#F4EEDC", cream:"#FBF7E8", mist:"#E7E1D0", ink:"#23261A", moss:"#2E3521", mossdeep:"#232817", sage:"#63653F", clay:"#9C5634", sun:"#DFCCAE" };
+const C = { paper:"#F4EEDC", cream:"#FBF7E8", mist:"#E7E1D0", ink:"#23261A", moss:"#2E3521", mossdeep:"#232817", sage:"#63653F", clay:"#2E3521", sun:"#DFCCAE" };
 const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=900&q=80`));
 const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
 const slugify = (s) => (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
@@ -273,7 +275,7 @@ const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator
 const toRow = (c) => { const r = { slug:c.slug||slugify(c.name), name:c.name, operator:c.operator, zone:c.zone, whatsapp:c.whatsapp, phone:c.phone, blurb:c.blurb, sin_tacc:c.sinTacc, vegetariano:c.vegetariano, reserva:c.reserva, como_reservar:c.comoReservar, menu_url:c.menuUrl, videos:c.videos, banner:c.banner, photos:c.photos, menu:c.menu, hours:c.hours||null, theme:c.theme||null }; if(c.id) r.id=c.id; return r; };
 
 const PRESETS = {
-  serrano: { nombre:"Serrano", detalle:"Crema y verde monte · Instrument Serif", bg:"#FBF7E8", surf:"#FFFFFF", ink:"#23261A", acc:"#2E3521" },
+  serrano: { nombre:"Serrano", detalle:"Crema y verde monte · DM Serif Display", bg:"#FBF7E8", surf:"#FFFFFF", ink:"#23261A", acc:"#2E3521" },
   brasa:   { nombre:"Brasa",   detalle:"Fondo oscuro y ladrillo · Fraunces",      bg:"#1B1D16", surf:"#23261A", ink:"#F4EEDC", acc:"#9C5634" },
   mercado: { nombre:"Mercado", detalle:"Arena y verde oliva · Bricolage",         bg:"#FFFDF7", surf:"#F5F0E1", ink:"#23261A", acc:"#4F6B2A" }
 };
@@ -612,7 +614,7 @@ function printQR(c){
   const qr = "https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&data="+encodeURIComponent(url);
   const w = window.open("", "_blank");
   if(!w){ alert("Permití las ventanas emergentes para imprimir el QR."); return; }
-  w.document.write("<!doctype html><html><head><meta charset='utf-8'><title>QR - "+c.name+"</title><style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Familjen+Grotesk:wght@400;600&display=swap');body{font-family:'Familjen Grotesk',system-ui,sans-serif;text-align:center;color:#23261A;padding:48px 24px;margin:0}h1{font-family:'Instrument Serif',Georgia,serif;font-size:30px;margin:0 0 6px}p{color:#6b6b60;margin:4px 0}img{width:340px;height:340px;margin:22px auto;display:block}.u{font-size:12px;color:#aaa;word-break:break-all}button{font-family:inherit;font-weight:600;font-size:15px;color:#fff;background:#9C5634;border:none;border-radius:12px;padding:12px 22px;margin-top:16px;cursor:pointer}@media print{button{display:none}}</style></head><body><h1>"+c.name+"</h1><p>Escaneá para ver nuestra carta &#127860;</p><img src='"+qr+"' alt='QR'/><p class='u'>"+url+"</p><button onclick='window.print()'>Imprimir</button></body></html>");
+  w.document.write("<!doctype html><html><head><meta charset='utf-8'><title>QR - "+c.name+"</title><style>@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;600&display=swap');body{font-family:'DM Sans',system-ui,sans-serif;text-align:center;color:#23261A;padding:48px 24px;margin:0}h1{font-family:'DM Serif Display',Georgia,serif;font-size:30px;margin:0 0 6px}p{color:#6b6b60;margin:4px 0}img{width:340px;height:340px;margin:22px auto;display:block}.u{font-size:12px;color:#aaa;word-break:break-all}button{font-family:inherit;font-weight:600;font-size:15px;color:#fff;background:#2E3521;border:none;border-radius:12px;padding:12px 22px;margin-top:16px;cursor:pointer}@media print{button{display:none}}</style></head><body><h1>"+c.name+"</h1><p>Escaneá para ver nuestra carta &#127860;</p><img src='"+qr+"' alt='QR'/><p class='u'>"+url+"</p><button onclick='window.print()'>Imprimir</button></body></html>");
   w.document.close();
 }
 

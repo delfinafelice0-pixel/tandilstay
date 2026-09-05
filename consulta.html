@@ -15,7 +15,7 @@
 <meta property="og:image" content="https://visitandotandil.com/og.png?v=4" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.7/babel.min.js"></script>
@@ -23,10 +23,10 @@
 <style>
 :root{
   --monte:#2E3521; --liquen:#63653F; --arena:#DFCCAE;
-  --ladrillo:#9C5634; --crudo:#FBF7E8; --papel:#F4EEDC; --tinta:#23261A;
+  --ladrillo:#2E3521; --crudo:#FBF7E8; --papel:#F4EEDC; --tinta:#23261A;
   --suave:#5F5945; --linea:rgba(70,62,42,.24); --punt:rgba(70,62,42,.4);
-  --display:'Young Serif',Georgia,serif;
-  --sans:'Familjen Grotesk',system-ui,sans-serif;
+  --display:'DM Serif Display',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
   --mano:'Nothing You Could Do',cursive;
   --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
   --mottle:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='420' height='420' filter='url(%23m)'/%3E%3C/svg%3E");
@@ -37,7 +37,7 @@ body{margin:0;background:var(--crudo);color:var(--tinta);font-family:var(--sans)
   font-size:15.5px;line-height:1.65;-webkit-font-smoothing:antialiased}
 img,svg{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
-button{font-family:inherit}
+button{font-family:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 .in{max-width:1080px;margin:0 auto;padding:0 34px}
 .mano{font-family:var(--mano);color:var(--ladrillo)}
 .rot{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase}
@@ -531,16 +531,16 @@ footer, .cerca, .ig, .strip, .filters, .filtros, .filtrosbar,
    Va último: manda sobre todo lo anterior.
    ═══════════════════════════════════════════════════════════ */
 :root{
-  --monte:#2E3521; --liquen:#63653F; --arena:#DFCCAE; --ladrillo:#9C5634;
+  --monte:#2E3521; --liquen:#63653F; --arena:#DFCCAE; --ladrillo:#2E3521;
   --crudo:#FBF7E8; --papel:#F4EEDC; --tinta:#23261A; --suave:#6A6455;
   --linea:rgba(35,38,26,.10); --punt:rgba(35,38,26,.10);
   --r:24px; --rm:18px; --rs:14px; --pill:999px;
   --sombra:0 10px 30px rgba(35,38,26,.07);
   --sombra2:0 18px 44px rgba(35,38,26,.12);
-  --sans:'Familjen Grotesk',system-ui,sans-serif;
-  --serif:'Instrument Serif',Georgia,serif;
-  --display:'Instrument Serif',Georgia,serif;
-  --mano:'Familjen Grotesk',system-ui,sans-serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --serif:'DM Serif Display',Georgia,serif;
+  --display:'DM Serif Display',Georgia,serif;
+  --mano:'DM Sans',system-ui,sans-serif;
 }
 /* fuera la textura de papel */
 .worn::before,.worn::after,body::after,body::before,#root::after,.fondo{display:none !important}
@@ -995,6 +995,9 @@ select.sel.abierto{ border-color:var(--ladrillo) !important;
   background:var(--monte); flex:none }
 .menu-sel::-webkit-scrollbar{ width:8px }
 .menu-sel::-webkit-scrollbar-thumb{ background:rgba(35,38,26,.18); border-radius:8px }
+
+button, button b, button small, button em, button span{ color:inherit }
+input, select, textarea{ color:inherit }
 </style>
 </head>
 <body>
@@ -1124,7 +1127,7 @@ function App(){
         <div className="in hbar">
           <a className="lockup" href={volver}>
             <Marca />
-            <p className="wm">Visitando Tandil<span className="sub">Visitando Ando</span></p>
+            <p className="wm">Visitando Tandil</p>
           </a>
           <nav className="nav">
             {NAV.map(([k,l])=><a key={k} href={"index.html?view="+k+(OP?"&op="+encodeURIComponent(OP):"")}>{l}</a>)}
@@ -1136,7 +1139,7 @@ function App(){
       {menu && (
         <div className="menupanel">
           <div className="ptop">
-            <p className="wm">Visitando Tandil<span className="sub">Visitando Ando</span></p>
+            <p className="wm">Visitando Tandil</p>
             <button className="pclose" onClick={()=>setMenu(false)} aria-label="Cerrar">✕</button>
           </div>
           <nav>
