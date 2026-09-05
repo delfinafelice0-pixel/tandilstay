@@ -13,7 +13,7 @@
 <meta property="og:image" content="https://visitandotandil.com/og.png?v=4" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
 <style>
 :root{
   --monte:#2E3521; --liquen:#63653F; --arena:#DFCCAE;
@@ -22,8 +22,8 @@
   --r:18px; --rs:12px; --rx:26px;
   --sombra:0 1px 2px rgba(21,24,15,.04), 0 12px 28px -18px rgba(21,24,15,.30);
   --sombra-alta:0 2px 8px rgba(21,24,15,.06), 0 26px 50px -26px rgba(21,24,15,.42);
-  --display:'Instrument Serif',Georgia,serif;
-  --sans:'Familjen Grotesk',system-ui,sans-serif;
+  --display:'DM Serif Display',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
   --mano:'Nothing You Could Do',cursive;
   --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
 }
@@ -233,6 +233,11 @@ button, button b, button small, button em, button span{ color:inherit }
 .mom em{ color:var(--ladrillo) }
 footer button, .panel nav button{ color:var(--tinta) }
 input, select, textarea{ color:var(--tinta) }
+
+/* ── opción tipográfica: DM Serif Display + DM Sans ── */
+h1,h2,h3,h4,.wm,.num{ letter-spacing:-.01em }
+.hero h1{ line-height:1.02 }
+@media(max-width:760px){ .hero .in{ padding-left:22px; padding-right:22px } }
 </style>
 </head>
 <body>

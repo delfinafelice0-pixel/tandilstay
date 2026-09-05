@@ -22,7 +22,7 @@
 <meta name="twitter:image" content="https://visitandotandil.com/og.png?v=4" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.7/babel.min.js"></script>
@@ -32,8 +32,8 @@
   --monte:#2E3521; --liquen:#63653F; --arena:#DFCCAE;
   --ladrillo:#2E3521; --brote:#9BD08F; --crudo:#FBF7E8; --papel:#F4EEDC; --tinta:#23261A;
   --suave:#5F5945; --linea:rgba(70,62,42,.24); --punt:rgba(70,62,42,.4);
-  --display:'Young Serif',Georgia,serif;
-  --sans:'Familjen Grotesk',system-ui,sans-serif;
+  --display:'DM Serif Display',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
   --mano:'Nothing You Could Do',cursive;
   --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
   --mottle:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='420' height='420' filter='url(%23m)'/%3E%3C/svg%3E");
@@ -875,10 +875,10 @@ footer, .cerca, .ig, .strip, .filters, .filtros, .filtrosbar,
   --r:24px; --rm:18px; --rs:14px; --pill:999px;
   --sombra:0 10px 30px rgba(35,38,26,.07);
   --sombra2:0 18px 44px rgba(35,38,26,.12);
-  --sans:'Familjen Grotesk',system-ui,sans-serif;
-  --serif:'Instrument Serif',Georgia,serif;
-  --display:'Instrument Serif',Georgia,serif;
-  --mano:'Familjen Grotesk',system-ui,sans-serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --serif:'DM Serif Display',Georgia,serif;
+  --display:'DM Serif Display',Georgia,serif;
+  --mano:'DM Sans',system-ui,sans-serif;
 }
 /* fuera la textura de papel */
 .worn::before,.worn::after,body::after,body::before,#root::after,.fondo{display:none !important}
@@ -1492,6 +1492,17 @@ button, button b, button small, button em, button span{ color:inherit }
 .mom em{ color:var(--ladrillo) }
 footer button, .panel nav button{ color:var(--tinta) }
 input, select, textarea{ color:var(--tinta) }
+
+/* ── opción tipográfica: C · DM Serif Display + DM Sans ── */
+h1,h2,h3,h4,.wm,.num,.n{letter-spacing:-.01em}
+.hero h1,.titulohero h1{line-height:1.02}
+
+/* ── margen del texto de la portada en celular ── */
+@media(max-width:760px){
+  .hgrid{ padding-left:22px !important; padding-right:22px !important }
+  .titulohero{ max-width:100% }
+  .hero .rail{ padding-left:0; padding-right:0 }
+}
 </style>
 </head>
 <body>
