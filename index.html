@@ -30,7 +30,7 @@
 <style>
 :root{
   --monte:#2E3521; --liquen:#63653F; --arena:#DFCCAE;
-  --ladrillo:#9C5634; --crudo:#FBF7E8; --papel:#F4EEDC; --tinta:#23261A;
+  --ladrillo:#2E3521; --brote:#9BD08F; --crudo:#FBF7E8; --papel:#F4EEDC; --tinta:#23261A;
   --suave:#5F5945; --linea:rgba(70,62,42,.24); --punt:rgba(70,62,42,.4);
   --display:'Young Serif',Georgia,serif;
   --sans:'Familjen Grotesk',system-ui,sans-serif;
@@ -124,7 +124,7 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(34px,5vw,56px);lin
 .rail p{margin:0}
 .rail .n{font-family:var(--display);font-size:58px;line-height:.9;opacity:.9}
 .rail .l{font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;opacity:.8;margin-top:10px}
-.rail .m{font-family:var(--mano);color:#E7C79E;font-size:19px;margin-top:20px;max-width:15ch;
+.rail .m{font-family:var(--mano);color:#C9DEBB;font-size:19px;margin-top:20px;max-width:15ch;
   display:inline-block;text-align:left}
 
 /* tres puertas */
@@ -869,7 +869,7 @@ footer, .cerca, .ig, .strip, .filters, .filtros, .filtrosbar,
    Va último: manda sobre todo lo anterior.
    ═══════════════════════════════════════════════════════════ */
 :root{
-  --monte:#2E3521; --liquen:#63653F; --arena:#DFCCAE; --ladrillo:#9C5634;
+  --monte:#2E3521; --liquen:#63653F; --arena:#DFCCAE; --ladrillo:#2E3521; --brote:#9BD08F;
   --crudo:#FBF7E8; --papel:#F4EEDC; --tinta:#23261A; --suave:#6A6455;
   --linea:rgba(35,38,26,.10); --punt:rgba(35,38,26,.10);
   --r:24px; --rm:18px; --rs:14px; --pill:999px;
@@ -1333,6 +1333,157 @@ select.sel.abierto{ border-color:var(--ladrillo) !important;
   background:var(--monte); flex:none }
 .menu-sel::-webkit-scrollbar{ width:8px }
 .menu-sel::-webkit-scrollbar-thumb{ background:rgba(35,38,26,.18); border-radius:8px }
+
+/* ══════════════ AJUSTES 2026 · más aire, redondeo y verde ══════════════ */
+:root{ --r:18px; --rs:12px; --rx:26px;
+  --sombra:0 1px 2px rgba(21,24,15,.04), 0 12px 28px -18px rgba(21,24,15,.30);
+  --sombra-alta:0 2px 8px rgba(21,24,15,.06), 0 26px 50px -26px rgba(21,24,15,.42); }
+
+/* la textura, apenas insinuada */
+.worn::before{ opacity:.06 !important }
+.worn::after{ opacity:.07 !important }
+
+/* tarjetas: sombra suave y movimiento al pasar el mouse */
+.card{ border:0 !important; background:#fff; box-shadow:var(--sombra);
+  transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s }
+.card:hover{ transform:translateY(-4px); box-shadow:var(--sombra-alta) }
+.card .ph img{ transition:transform .6s cubic-bezier(.2,.8,.2,1) }
+.card:hover .ph img{ transform:scale(1.045) }
+.form,.mom,.plan,.momentos,.datos{ box-shadow:var(--sombra) }
+.chips .chip{ background:rgba(255,255,255,.94); color:var(--tinta); font-weight:600;
+  box-shadow:0 2px 8px rgba(21,24,15,.14); letter-spacing:0; text-transform:none; font-size:12px }
+
+/* buscador flotante bajo la portada */
+.buscahero{ position:relative; z-index:20; max-width:1000px; margin:-46px auto 0; background:#fff;
+  border-radius:var(--rx) !important; box-shadow:var(--sombra-alta); padding:14px;
+  display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:6px; align-items:end }
+.buscahero .campo{ padding:10px 16px; border-radius:var(--rs); transition:background .2s }
+.buscahero .campo:hover{ background:#F7F4EA }
+.buscahero label{ display:block; font-size:12.5px; font-weight:600; letter-spacing:0;
+  text-transform:none; color:var(--suave); margin-bottom:3px }
+.buscahero input,.buscahero select{ width:100%; border:0 !important; background:transparent !important;
+  padding:0 !important; font-size:15.5px; font-weight:500; outline:0; color:var(--tinta) }
+.buscahero .campo + .campo{ border-left:1px solid var(--linea) }
+.buscahero .ir{ border:0; background:var(--monte); color:#EDE4CD; font-weight:600; font-size:15px;
+  border-radius:999px !important; padding:0 30px; height:56px; cursor:pointer; transition:background .2s }
+.buscahero .ir:hover{ background:#232817 }
+.subbusca{ max-width:1000px; margin:13px auto 0; text-align:center; font-size:13.5px; color:var(--suave) }
+@media(max-width:900px){ .buscahero{ grid-template-columns:1fr 1fr; margin-top:-30px }
+  .buscahero .campo:nth-child(3){ border-left:0 }
+  .buscahero .ir{ grid-column:span 2; width:100% } }
+@media(max-width:600px){ .buscahero{ grid-template-columns:1fr; margin:-22px 0 0; gap:2px }
+  .buscahero .campo + .campo{ border-left:0; border-top:1px solid var(--linea) }
+  .buscahero .ir{ grid-column:1; margin-top:8px } }
+
+/* selector de rubro */
+.segm{ display:inline-flex; gap:4px; background:rgba(46,53,33,.07); padding:5px;
+  border-radius:999px !important; margin-bottom:24px; flex-wrap:wrap }
+.segm button{ border:0; background:transparent; padding:10px 22px; border-radius:999px !important;
+  font-size:14.5px; font-weight:600; letter-spacing:0; text-transform:none; color:var(--suave);
+  cursor:pointer; transition:.2s }
+.segm button:hover{ color:var(--tinta) }
+.segm button.on{ background:#fff; color:var(--tinta); box-shadow:0 1px 4px rgba(21,24,15,.14) }
+.gridhome{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px }
+@media(max-width:900px){ .gridhome{ grid-template-columns:1fr 1fr } }
+@media(max-width:600px){ .gridhome{ grid-template-columns:1fr } }
+.vaciohome{ grid-column:1/-1; text-align:center; color:var(--suave); padding:34px 0 }
+
+/* consulta en verde */
+.consulta2{ background:var(--monte); color:#E9E7DA; border-radius:var(--rx) !important;
+  padding:52px 52px; display:grid; grid-template-columns:1.05fr .95fr; gap:46px; align-items:center }
+.consulta2 h3{ font-family:var(--display); font-weight:400; color:#F7F5EA; margin:0;
+  font-size:clamp(26px,3.4vw,38px); line-height:1.05 }
+.consulta2 p{ color:rgba(233,231,218,.75); margin-top:14px; max-width:40ch }
+.consulta2 .btn{ display:inline-block; margin-top:24px; background:#F7F5EA; color:var(--monte);
+  border:0; border-radius:999px !important; padding:14px 26px; font-weight:600; font-size:15px; cursor:pointer }
+.consulta2 .btn:hover{ background:#fff }
+.pasos2{ display:grid; gap:12px }
+.pasos2 > div{ background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.13);
+  border-radius:var(--rs); padding:17px 20px; display:flex; gap:15px; align-items:flex-start }
+.pasos2 b{ font-family:var(--display); font-weight:400; font-size:15px; color:var(--brote); flex:none }
+.pasos2 span{ font-size:14.5px; color:rgba(233,231,218,.9) }
+@media(max-width:860px){ .consulta2{ grid-template-columns:1fr; padding:34px 26px; gap:28px } }
+
+/* mosaico con fotos de verdad */
+.mosaic .tile{ border-radius:var(--r) !important; box-shadow:var(--sombra) }
+.tile.t-photo .veil{ background:linear-gradient(180deg,rgba(16,20,10,.12) 0%,rgba(16,20,10,.74) 100%) }
+.tile img{ transition:transform .7s cubic-bezier(.2,.8,.2,1) }
+.tile:hover img{ transform:scale(1.05) }
+.tile .kick{ opacity:.9 }
+
+/* un poco de Tandil */
+.datosvt{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px }
+.datovt{ background:#fff; border-radius:var(--r); padding:24px 22px; box-shadow:var(--sombra) }
+.datovt .n{ font-family:var(--display); font-weight:400; font-size:34px; color:var(--ladrillo); line-height:1 }
+.datovt p{ margin-top:8px; font-size:14px; color:var(--suave) }
+@media(max-width:860px){ .datosvt{ grid-template-columns:1fr 1fr } }
+
+/* banda de operadores */
+.operavt{ background:var(--arena); border-radius:var(--rx); padding:44px 48px; display:grid;
+  grid-template-columns:1fr auto; gap:30px; align-items:center }
+.operavt h3{ font-family:var(--display); font-weight:400; font-size:clamp(24px,3.2vw,34px);
+  margin:0; max-width:20ch }
+.operavt p{ color:#6A6553; margin-top:12px; max-width:46ch; font-size:15px }
+.btnop{ background:var(--monte); color:#EDE4CD; border-radius:999px !important; padding:15px 28px;
+  font-weight:600; font-size:15px; white-space:nowrap; transition:background .2s }
+.btnop:hover{ background:#232817 }
+@media(max-width:760px){ .operavt{ grid-template-columns:1fr; padding:32px 24px } }
+
+/* barra de abajo, al tono */
+.appbar{ border-radius:26px !important; box-shadow:0 16px 44px -12px rgba(21,24,15,.28) }
+.appbar a.on{ color:var(--ladrillo) }
+
+/* botones redondeados en toda la home */
+.ghost,.solid{ border-radius:999px !important; padding:12px 22px }
+
+/* ── portada: título sobre la foto, sin la ficha blanca ── */
+.hero .bg img{ object-position:center 62% }
+.titulohero{ color:#fff; max-width:600px }
+.titulohero h1{ color:#fff; text-shadow:0 2px 26px rgba(12,16,8,.45) }
+.titulohero .lede{ color:rgba(255,255,255,.9); margin-top:16px; font-size:18px;
+  text-shadow:0 1px 16px rgba(12,16,8,.5) }
+@media(max-width:760px){
+  .hero{ min-height:auto !important }
+  .hgrid{ padding:56px 0 92px !important }
+  .titulohero h1{ font-size:34px !important }
+  .titulohero .lede{ font-size:16px }
+}
+
+/* ── carrusel de publicaciones ── */
+.segmfila{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap }
+.segmfila .segm{ margin-bottom:0 }
+.carrflechas{ display:flex; gap:8px }
+.carrflechas button{ width:42px; height:42px; border-radius:999px !important; border:1px solid var(--linea);
+  background:#fff; cursor:pointer; font-size:19px; line-height:1; color:var(--tinta); transition:.2s }
+.carrflechas button:hover{ border-color:var(--tinta); box-shadow:var(--sombra) }
+@media(max-width:600px){ .carrflechas{ display:none } }
+.carrusel{ display:flex; gap:18px; overflow-x:auto; scroll-snap-type:x mandatory;
+  margin-top:22px; padding:4px 2px 16px; scrollbar-width:none; -webkit-overflow-scrolling:touch }
+.carrusel::-webkit-scrollbar{ display:none }
+.carrusel > *{ flex:0 0 320px; scroll-snap-align:start }
+.carrusel .vaciohome{ flex:1 1 100% }
+@media(max-width:600px){ .carrusel > *{ flex:0 0 80% } }
+
+/* ── la banda de operadores, con aire ── */
+.operavt{ margin-top:38px }
+
+/* ── Instagram en celular: carrusel ── */
+@media(max-width:760px){
+  .ig .igrid{ display:flex !important; overflow-x:auto; gap:14px; scroll-snap-type:x mandatory;
+    padding-bottom:12px; scrollbar-width:none; grid-template-columns:none !important }
+  .ig .igrid::-webkit-scrollbar{ display:none }
+  .ig .igrid > *{ flex:0 0 84% !important; scroll-snap-align:center; min-width:0 !important }
+}
+
+/* ── el selector de rubro, siempre en una sola línea ── */
+.segm{ flex-wrap:nowrap !important; max-width:100%; overflow-x:auto; scrollbar-width:none }
+.segm::-webkit-scrollbar{ display:none }
+.segm button{ white-space:nowrap }
+@media(max-width:600px){
+  .segmfila{ flex-wrap:nowrap }
+  .segm{ padding:4px }
+  .segm button{ padding:9px 18px; font-size:14px }
+}
 </style>
 </head>
 <body>
@@ -1390,6 +1541,11 @@ const PLACES = [
   { n:"Arroyo escondido — Parque del Origen", cat:"Naturaleza", b:"Un rincón con agua que muy poca gente conoce." },
   { n:"Arroyo en la Escollera Oeste", cat:"Naturaleza", b:"Un rincón tranquilo y poco transitado en el dique." },
 ];
+/* fotos libres de Wikimedia Commons (se pueden reemplazar por fotos propias) */
+const COMMONS = (archivo, ancho=1200) =>
+  "https://commons.wikimedia.org/wiki/Special:FilePath/" + encodeURIComponent(archivo) + "?width=" + ancho;
+const FOTO_RESPALDO = "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=900&q=80";
+
 const mapsLink = (n) => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(n + ", Tandil, Buenos Aires");
 
 const ITINERARIES = [
@@ -1426,9 +1582,7 @@ function Marca({ color }) {
 }
 function Wordmark({ color, sub }) {
   return (
-    <p className="wm" style={color?{color:color}:{}}>Visitando Tandil
-      <span className="sub" style={sub?{color:sub}:{}}>Visitando Ando</span>
-    </p>
+    <p className="wm" style={color?{color:color}:{}}>Visitando Tandil</p>
   );
 }
 
@@ -1607,8 +1761,9 @@ function PageTitle({ kicker, title, sub }) {
 }
 
 /* ═════════════ HOME ═════════════ */
-function Home({ go }) {
+function Home({ go, data }) {
   const [it, setIt] = useState(1);
+  const [rubro, setRubro] = useState("dormir");
   const [ci, setCi] = useState(""), [co, setCo] = useState(""), [hu, setHu] = useState(""), [pre, setPre] = useState("");
   const sel = ITINERARIES[it];
   const irAConsulta = () => {
@@ -1619,25 +1774,26 @@ function Home({ go }) {
     location.href = "consulta.html" + (q.toString() ? "?" + q.toString() : "");
   };
   const destacados = PLACES.filter(p => ["Cerro El Centinela","Lago del Fuerte","Monumento a Don Quijote de la Mancha","Monte Calvario","Plaza Independencia","Castillo Morisco"].includes(p.n));
-  const FOTOS_LUGAR = { "Monumento a Don Quijote de la Mancha":"don-quijote.jpg" };
+  const FOTOS_LUGAR = {
+    "Monumento a Don Quijote de la Mancha":"don-quijote.jpg",
+    "Plaza Independencia":COMMONS("Plaza Tandil.JPG"),
+    "Castillo Morisco":COMMONS("CastilloMoriscoTandil-9marzo2013.JPG"),
+    "Lago del Fuerte":COMMONS("Club de regatas. Lago del Fuerte.jpg"),
+    "Cerro El Centinela":COMMONS("Cerro El Centinela.JPG"),
+    "Monte Calvario":COMMONS("Cristo en el Monte Calvario, Tandil.jpg"),
+  };
 
   return (
     <div>
       {/* PORTADA */}
       <div className="hero">
         <div className="bg">
-          <video autoPlay muted loop playsInline preload="none" poster="tandil-hero.jpg">
-            <source src="tandil-hero.mp4" type="video/mp4" />
-          </video>
+          <img src="banner-castillo.jpg" alt="El Castillo Morisco de Tandil al atardecer" />
         </div>
         <div className="in hgrid">
-          <div className="sheet worn">
+          <div className="titulohero">
             <h1>Un fin de semana<br/>en las sierras</h1>
             <p className="lede">Dónde dormir, dónde comer y qué mirar en Tandil.</p>
-            <div className="heroctas">
-              <a className="solid" href={"consulta.html" + (OP?("?op="+encodeURIComponent(OP)):"")}>Consultar disponibilidad</a>
-              <button className="ghost" onClick={()=>go("qhacer")}>Qué hacer en Tandil</button>
-            </div>
           </div>
           <div className="rail">
             <p className="n">01</p>
@@ -1647,43 +1803,83 @@ function Home({ go }) {
         </div>
       </div>
 
-      {/* TRES PUERTAS */}
-      <div className="strip">
-        <div className="in">
-          <button onClick={()=>go("aloj")}><b>Para dormir</b><small>Cabañas, casas y hoteles</small></button>
-          <button onClick={()=>go("gastro")}><b>Para comer</b><small>Con la carta de cada lugar</small></button>
-          <button onClick={()=>go("qhacer")}><b>Para pasear</b><small>Cerros, agua y aventura</small></button>
+      {/* BUSCADOR FLOTANTE */}
+      <div className="in" style={{position:"relative",zIndex:20}}>
+        <div className="buscahero">
+          <div className="campo">
+            <label htmlFor="hci">Llegada</label>
+            <input id="hci" type="date" value={ci} onChange={e=>setCi(e.target.value)} />
+          </div>
+          <div className="campo">
+            <label htmlFor="hco">Salida</label>
+            <input id="hco" type="date" value={co} onChange={e=>setCo(e.target.value)} />
+          </div>
+          <div className="campo">
+            <label htmlFor="hhu">Huéspedes</label>
+            <select id="hhu" value={hu} onChange={e=>setHu(e.target.value)}>
+              <option value="">¿Cuántos son?</option>
+              {[1,2,3,4,5,6,7,8].map(n=><option key={n} value={n}>{n===8?"8 o más":n}</option>)}
+            </select>
+          </div>
+          <button className="ir" onClick={irAConsulta}>Buscar</button>
         </div>
+        <p className="subbusca">Te contestan los lugares directamente. No cobramos comisión ni intervenimos en el precio.</p>
       </div>
 
-      {/* 01 · CONSULTA */}
+      {/* ELEGÍ POR DÓNDE EMPEZAR */}
       <section className="in reveal">
-        <SHead idx="01" title="Dónde dormir" aside="Una consulta, todos los lugares" />
-        <div className="consulta">
-          <div className="cnote">
-            <p>Contanos qué buscás y le mandamos tu consulta a todos los hospedajes que coinciden con lo que necesitás. No escribís uno por uno: escribís una vez.</p>
-            <ol className="steps">
-              <li>Completás las fechas y para cuántos son.</li>
-              <li>La consulta sale solo a los lugares que entran en eso.</li>
-              <li>Te contestan directo a vos, con su precio y su disponibilidad.</li>
-            </ol>
+        <SHead idx="01" title="Elegí por dónde empezar" aside="Lo último que se sumó" />
+        <div className="segmfila">
+        <div className="segm" role="tablist">
+          <button className={rubro==="dormir"?"on":""} onClick={()=>setRubro("dormir")}>Dormir</button>
+          <button className={rubro==="comer"?"on":""} onClick={()=>setRubro("comer")}>Comer</button>
+          <button className={rubro==="pasear"?"on":""} onClick={()=>setRubro("pasear")}>Pasear</button>
+        </div>
+        <div className="carrflechas">
+          <button onClick={()=>{const c=document.getElementById("carruHome"); if(c) c.scrollBy({left:-340,behavior:"smooth"});}} aria-label="Anterior">‹</button>
+          <button onClick={()=>{const c=document.getElementById("carruHome"); if(c) c.scrollBy({left:340,behavior:"smooth"});}} aria-label="Siguiente">›</button>
+        </div>
+        </div>
+        <div className="carrusel" id="carruHome">
+          {(data && data.loading) && [0,1,2].map(i=>(
+            <div className="card" key={i} style={{minHeight:"300px",background:"var(--papel)"}}></div>
+          ))}
+          {data && !data.loading && rubro==="dormir" && (
+            data.cabins.length
+              ? data.cabins.slice(0,6).map((c,i)=><CabinCard key={i} c={c} />)
+              : <p className="vaciohome">Todavía no hay hospedajes cargados.</p>
+          )}
+          {data && !data.loading && rubro==="comer" && (
+            data.food.length
+              ? data.food.slice(0,6).map((r,i)=><FichaHome key={i} it={r} tipo="resto" />)
+              : <p className="vaciohome">Todavía no hay lugares para comer cargados.</p>
+          )}
+          {data && !data.loading && rubro==="pasear" && (
+            data.acts.length
+              ? data.acts.slice(0,6).map((a,i)=><FichaHome key={i} it={a} tipo="actividad" />)
+              : <p className="vaciohome">Todavía no hay actividades cargadas.</p>
+          )}
+        </div>
+        <div style={{marginTop:"24px"}}>
+          <button className="ghost" onClick={()=>go(rubro==="dormir"?"aloj":rubro==="comer"?"gastro":"qhacer")}>
+            {rubro==="dormir"?"Ver todos los hospedajes":rubro==="comer"?"Ver toda la gastronomía":"Ver todas las actividades"}
+          </button>
+        </div>
+      </section>
+
+      {/* 02 · CONSULTA */}
+      <section className="in reveal">
+        <SHead idx="02" title="Dónde dormir" aside="Una consulta, todos los lugares" />
+        <div className="consulta2 worn dark">
+          <div>
+            <h3>Escribí una vez, te contestan todos</h3>
+            <p>Contanos las fechas y para cuántos son. Le mandamos tu consulta a todos los hospedajes que entran en eso, y cada uno te responde con su precio y su disponibilidad.</p>
+            <button className="btn" onClick={irAConsulta}>Hacer una consulta</button>
           </div>
-          <div className="form worn">
-            <div className="f2">
-              <div className="field"><label htmlFor="ci">Llegada</label>
-                <input id="ci" type="date" value={ci} onChange={e=>setCi(e.target.value)} /></div>
-              <div className="field"><label htmlFor="co">Salida</label>
-                <input id="co" type="date" value={co} onChange={e=>setCo(e.target.value)} /></div>
-              <div className="field"><label htmlFor="hu">Huéspedes</label>
-                <select id="hu" value={hu} onChange={e=>setHu(e.target.value)}>
-                  <option value="">¿Cuántos son?</option>
-                  {[1,2,3,4,5,6,7,8].map(n=><option key={n} value={n}>{n===8?"8 o más":n}</option>)}
-                </select></div>
-              <div className="field"><label htmlFor="pre">Presupuesto por noche</label>
-                <input id="pre" type="text" placeholder="Opcional" value={pre} onChange={e=>setPre(e.target.value)} /></div>
-              <button className="send" onClick={irAConsulta}>Buscar y consultar</button>
-              <p className="fine">Te van a escribir los lugares directamente. Nosotros no intervenimos en el precio ni en la reserva.</p>
-            </div>
+          <div className="pasos2">
+            <div><b>01</b><span>Completás las fechas y para cuántos son.</span></div>
+            <div><b>02</b><span>La consulta sale solo a los lugares que coinciden.</span></div>
+            <div><b>03</b><span>Te contestan directo a vos, con su precio y su disponibilidad.</span></div>
           </div>
         </div>
       </section>
@@ -1699,7 +1895,7 @@ function Home({ go }) {
           return (
             <a key={i} className={"tile worn dark " + (foto ? "t-photo" : clases[i%6]) + (i===1||i===5?" wide":"")}
                href={mapsLink(p.n)} target="_blank" rel="noreferrer">
-              {foto && <img src={foto} alt={p.n} loading="lazy" onError={e=>e.target.remove()} />}
+              {foto && <img src={foto} alt={p.n} loading="lazy" onError={e=>{ if(!e.target.dataset.f){ e.target.dataset.f="1"; e.target.src=FOTO_RESPALDO; } }} />}
               {foto && <div className="veil"></div>}
               <span className="kick">{p.cat}</span>
               <h4>{p.n}</h4>
@@ -1725,8 +1921,54 @@ function Home({ go }) {
         <p className="mano" style={{marginTop:"22px",fontSize:"20px"}}>cada lugar tiene su carta acá adentro</p>
       </section>
 
+      {/* UN POCO DE TANDIL */}
+      <section className="in reveal">
+        <SHead idx="05" title="Un poco de Tandil" aside="Antes de llegar" />
+        <div className="datosvt">
+          <div className="datovt"><div className="n">2.200</div><p>Millones de años tienen estas sierras: están entre las más antiguas del planeta.</p></div>
+          <div className="datovt"><div className="n">1912</div><p>El año en que se desplomó la Piedra Movediza original. La actual es una réplica.</p></div>
+          <div className="datovt"><div className="n">1</div><p>El salame de Tandil es el único del país con Denominación de Origen.</p></div>
+          <div className="datovt"><div className="n">4 h</div><p>Lo que tardás desde Buenos Aires. Entra cómodo en un fin de semana largo.</p></div>
+        </div>
+      </section>
+
+      {/* OPERADORES */}
+      <div className="in reveal" style={{paddingBottom:"70px"}}>
+        <div className="operavt">
+          <div>
+            <h3>¿Tenés un lugar en Tandil?</h3>
+            <p>Publicá tu cabaña, tu restaurante o tu actividad. Página propia, panel para editar cuando quieras y las consultas directo a tu WhatsApp.</p>
+          </div>
+          <a className="btnop" href="sumate.html">Sumá tu lugar</a>
+        </div>
+      </div>
+
       <Instagram />
     </div>
+  );
+}
+
+/* ficha corta para la home (gastronomía y actividades) */
+function FichaHome({ it, tipo }) {
+  const destino = (tipo === "resto" ? "resto.html?slug=" : "actividad.html?slug=") + it.slug + opSuffix;
+  const etiquetas = tipo === "resto"
+    ? [it.sin_tacc && "Sin TACC", it.vegetariano && "Vegetariano"].filter(Boolean)
+    : [it.category, it.duration].filter(Boolean);
+  const pie = tipo === "resto"
+    ? (it.reserva ? "Con reserva" : "Sin reserva")
+    : (it.price ? money(it.price) : "A consultar");
+  return (
+    <a className="card worn" href={destino}>
+      <div className="ph">
+        <div className="chips">{etiquetas.slice(0,2).map((t,i)=><span className="chip" key={i}>{t}</span>)}</div>
+        <img src={IMG(it.banner || (it.photos && it.photos[0]))} alt={it.name} loading="lazy" />
+      </div>
+      <div className="body">
+        <h3>{it.name}</h3>
+        <p className="meta">{it.zone}</p>
+        <div className="price"><b>{pie}</b><em>{tipo === "resto" ? "Ver la carta" : "Ver"}</em></div>
+      </div>
+    </a>
   );
 }
 
@@ -2000,7 +2242,7 @@ function OwnersPage() {
               <ul className="benef">
                 {benefits.map((b,i)=>(<li key={i}><b>{b.t}</b>{b.s}</li>))}
               </ul>
-              <p className="mano" style={{color:"#E7C79E",fontSize:"20px",marginTop:"16px"}}>te contestamos en cuanto podamos</p>
+              <p className="mano" style={{color:"#C9DEBB",fontSize:"20px",marginTop:"16px"}}>te contestamos en cuanto podamos</p>
             </div>
             <div>
               <a className="solid" href={wa} target="_blank" rel="noreferrer" style={{padding:"15px 22px"}}>Escribinos por WhatsApp</a>
@@ -2126,7 +2368,7 @@ function App() {
       <PreHeader go={go} />
       <Header view={view} go={go} onOpen={() => setMenu(true)} />
       <MobileMenu open={menu} go={go} onClose={() => setMenu(false)} />
-      {view === "home" && <Home go={go} />}
+      {view === "home" && <Home go={go} data={data} />}
       {view === "aloj" && <LodgingPage cabins={data.cabins} loading={data.loading} />}
       {view === "qhacer" && <ActivitiesPage acts={data.acts} loading={data.loading} />}
       {view === "gastro" && <FoodPage food={data.food} loading={data.loading} />}
