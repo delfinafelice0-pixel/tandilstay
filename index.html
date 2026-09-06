@@ -12,14 +12,14 @@
 <meta property="og:title" content="Visitando Tandil · Hospedajes, gastronomía y actividades en Tandil" />
 <meta property="og:description" content="Visitando Tandil en un solo lugar: dónde dormir, dónde comer y qué hacer entre las sierras." />
 <meta property="og:url" content="https://visitandotandil.com/" />
-<meta property="og:image" content="https://visitandotandil.com/og.png?v=4" />
+<meta property="og:image" content="https://visitandotandil.com/og.png?v=7" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="Visitando Tandil" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Visitando Tandil · Hospedajes, gastronomía y actividades en Tandil" />
 <meta name="twitter:description" content="Visitando Tandil en un solo lugar: dónde dormir, dónde comer y qué hacer entre las sierras." />
-<meta name="twitter:image" content="https://visitandotandil.com/og.png?v=4" />
+<meta name="twitter:image" content="https://visitandotandil.com/og.png?v=7" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
@@ -1591,6 +1591,40 @@ header, header.vt{ background:transparent !important;
   border-bottom:1px solid rgba(70,62,42,.10) !important }
 
 .lema, .next{ max-width:44ch }
+
+/* ── corazón para guardar ── */
+.card .ph{ position:relative }
+.corazon{ position:absolute; top:10px; right:10px; z-index:5; width:36px; height:36px;
+  border:0; border-radius:999px; cursor:pointer; display:grid; place-items:center;
+  background:rgba(255,255,255,.88); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+  box-shadow:0 2px 10px rgba(21,24,15,.18); transition:transform .18s ease, background .2s }
+.corazon svg{ width:19px; height:19px; fill:none; stroke:var(--tinta); stroke-width:1.7;
+  stroke-linecap:round; stroke-linejoin:round; transition:fill .2s, stroke .2s }
+.corazon:hover{ transform:scale(1.08) }
+.corazon:active{ transform:scale(.92) }
+.corazon.on{ background:#fff }
+.corazon.on svg{ fill:var(--ladrillo); stroke:var(--ladrillo) }
+
+/* ── barra de abajo ── */
+.appbar button{ display:flex; flex-direction:column; align-items:center; gap:5px; padding:6px 2px;
+  font-size:11.5px; font-weight:500; color:var(--suave); background:transparent; border:0;
+  cursor:pointer; font-family:inherit }
+.appbar button.on{ color:var(--ladrillo); font-weight:600 }
+.appbar button svg{ width:21px; height:21px; stroke:currentColor; fill:none; stroke-width:1.7;
+  stroke-linecap:round; stroke-linejoin:round }
+.appbar .ico{ position:relative; display:block }
+.appbar .globo{ position:absolute; top:-5px; right:-9px; min-width:16px; height:16px; padding:0 4px;
+  border-radius:999px; background:var(--ladrillo); color:#F5F8F2; font-size:10px; font-weight:700;
+  font-style:normal; display:grid; place-items:center; line-height:1 }
+
+/* ── página de guardados vacía ── */
+.vaciogua{ text-align:center; max-width:460px; margin:20px auto 40px; padding:44px 26px;
+  background:rgba(255,255,255,.6); border-radius:var(--rx) }
+.vaciogua svg{ width:44px; height:44px; margin:0 auto 16px; fill:none; stroke:var(--ladrillo);
+  stroke-width:1.4; stroke-linecap:round; stroke-linejoin:round; opacity:.7 }
+.vaciogua h3{ font-family:var(--display); font-size:24px; margin-bottom:10px }
+.vaciogua p{ color:var(--suave); font-size:15px }
+.vaciogua .botones{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:22px }
 </style>
 <script>
 /* si la dirección viene con barra final, la saca: así las rutas relativas resuelven bien */
@@ -1624,12 +1658,13 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const OP = (new URLSearchParams(location.search).get("op")||"").trim();
 const opSuffix = OP ? ("&op="+encodeURIComponent(OP)) : "";
 
-const WHATSAPP = "5492494000000";
+const WHATSAPP = "5492284631868";
 const wa = `https://wa.me/${WHATSAPP}`;
 
 /* Direcciones lindas: /para-dormir en vez de index.html?view=aloj */
 const RUTAS = { home:"/", aloj:"/para-dormir", gastro:"/para-comer", qhacer:"/para-pasear",
-                conoce:"/conoce-tandil", contacto:"/contacto", owners:"/operadores" };
+                conoce:"/conoce-tandil", contacto:"/contacto", owners:"/operadores",
+                guardados:"/guardados" };
 const VISTAS = {}; Object.keys(RUTAS).forEach(k => { VISTAS[RUTAS[k]] = k; });
 function limpiarRuta(){
   return (location.pathname || "/").replace(/\/index\.html$/, "/").replace(/(.)\/+$/, "$1") || "/";
@@ -2136,6 +2171,7 @@ function FichaHome({ it, tipo }) {
     <a className="card worn" href={destino}>
       <div className="ph">
         <div className="chips">{etiquetas.slice(0,2).map((t,i)=><span className="chip" key={i}>{t}</span>)}</div>
+        <Corazon id={(tipo === "resto" ? "gastronomia:" : "actividad:") + it.slug} />
         <img src={IMG(it.banner || (it.photos && it.photos[0]))} alt={it.name} loading="lazy" />
       </div>
       <div className="body">
@@ -2148,6 +2184,47 @@ function FichaHome({ it, tipo }) {
 }
 
 /* ═════════════ HOSPEDAJES ═════════════ */
+/* ══ Guardados: viven en el navegador de quien visita, no en la base ══ */
+const CLAVE_GUARDADOS = "vt-guardados";
+function leerGuardados(){
+  try { const x = JSON.parse(localStorage.getItem(CLAVE_GUARDADOS) || "[]"); return Array.isArray(x) ? x : []; }
+  catch(e){ return []; }
+}
+function escribirGuardados(lista){
+  try { localStorage.setItem(CLAVE_GUARDADOS, JSON.stringify(lista)); } catch(e){}
+  window.dispatchEvent(new Event("vt-guardados"));
+}
+function useGuardados(){
+  const [lista, setLista] = useState(leerGuardados);
+  useEffect(() => {
+    const refrescar = () => setLista(leerGuardados());
+    window.addEventListener("vt-guardados", refrescar);
+    window.addEventListener("storage", refrescar);
+    return () => { window.removeEventListener("vt-guardados", refrescar);
+                   window.removeEventListener("storage", refrescar); };
+  }, []);
+  const alternar = (id) => {
+    const l = leerGuardados();
+    const i = l.indexOf(id);
+    if (i >= 0) l.splice(i, 1); else l.push(id);
+    escribirGuardados(l);
+  };
+  return [lista, alternar];
+}
+
+function Corazon({ id }) {
+  const [lista, alternar] = useGuardados();
+  const guardado = lista.indexOf(id) >= 0;
+  return (
+    <button className={"corazon" + (guardado ? " on" : "")}
+      aria-label={guardado ? "Quitar de guardados" : "Guardar para después"}
+      title={guardado ? "Quitar de guardados" : "Guardar para después"}
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); alternar(id); }}>
+      <svg viewBox="0 0 24 24"><path d="M12 20.2s-7.2-4.7-7.2-9.8A4.5 4.5 0 0 1 12 6.9a4.5 4.5 0 0 1 7.2 3.5c0 5.1-7.2 9.8-7.2 9.8z"/></svg>
+    </button>
+  );
+}
+
 function CabinCard({ c }) {
   const cover = c.banner || (c.photos && c.photos[0]);
   const etiquetas = [];
@@ -2159,6 +2236,7 @@ function CabinCard({ c }) {
     <a className="card worn" href={"cabana.html?slug=" + c.slug + opSuffix}>
       <div className="ph">
         <div className="chips">{etiquetas.slice(0,2).map((t,i)=><span className="chip" key={i}>{t}</span>)}</div>
+        <Corazon id={"hospedaje:" + c.slug} />
         <img src={IMG(cover)} alt={c.name} loading="lazy" />
       </div>
       <div className="body">
@@ -2276,6 +2354,7 @@ function ActivitiesPage({ acts, loading }) {
                   {a.category && <span className="chip">{a.category}</span>}
                   {a.duration && <span className="chip">{a.duration}</span>}
                 </div>
+                <Corazon id={"actividad:" + a.slug} />
                 <img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} loading="lazy" />
               </div>
               <div className="body">
@@ -2328,6 +2407,7 @@ function FoodPage({ food, loading }) {
                   {a.sin_tacc && <span className="chip">Sin TACC</span>}
                   {a.vegetariano && <span className="chip">Veggie</span>}
                 </div>
+                <Corazon id={"gastronomia:" + a.slug} />
                 <img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} loading="lazy" />
               </div>
               <div className="body">
@@ -2502,6 +2582,86 @@ function Footer({ go }) {
 }
 
 /* ═════════════ APP ═════════════ */
+/* ═════════════ GUARDADOS ═════════════ */
+function GuardadosPage({ data, go }) {
+  const [lista] = useGuardados();
+  const tiene = (rubro, slug) => lista.indexOf(rubro + ":" + slug) >= 0;
+  const hosp = (data.cabins || []).filter(c => tiene("hospedaje", c.slug));
+  const gastro = (data.food || []).filter(r => tiene("gastronomia", r.slug));
+  const acts = (data.acts || []).filter(a => tiene("actividad", a.slug));
+  const total = hosp.length + gastro.length + acts.length;
+  return (
+    <div>
+      <PageTitle kicker="Tu lista" title="Guardados"
+        sub="Los lugares que fuiste marcando con el corazón. Se guardan en este celular, así que están acá cuando vuelvas." />
+      {data.loading ? (
+        <section className="in"><p className="vacio">Buscando tus lugares…</p></section>
+      ) : total === 0 ? (
+        <section className="in">
+          <div className="vaciogua">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 20.2s-7.2-4.7-7.2-9.8A4.5 4.5 0 0 1 12 6.9a4.5 4.5 0 0 1 7.2 3.5c0 5.1-7.2 9.8-7.2 9.8z"/>
+            </svg>
+            <h3>Todavía no guardaste nada</h3>
+            <p>Tocá el corazón de cualquier lugar que te guste y va a quedar acá, listo para cuando estés armando el viaje.</p>
+            <div className="botones">
+              <button className="solid" onClick={()=>go("aloj")}>Ver hospedajes</button>
+              <button className="ghost" onClick={()=>go("qhacer")}>Ver actividades</button>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <div>
+          {hosp.length > 0 && (
+            <section className="in reveal">
+              <SHead idx="01" title="Para dormir" aside={hosp.length + (hosp.length===1?" lugar":" lugares")} />
+              <div className="cards">{hosp.map((c,i)=><CabinCard key={i} c={c} />)}</div>
+            </section>
+          )}
+          {gastro.length > 0 && (
+            <section className="in reveal">
+              <SHead idx={hosp.length ? "02" : "01"} title="Para comer" aside={gastro.length + (gastro.length===1?" lugar":" lugares")} />
+              <div className="cards">{gastro.map((r,i)=><FichaHome key={i} it={r} tipo="resto" />)}</div>
+            </section>
+          )}
+          {acts.length > 0 && (
+            <section className="in reveal">
+              <SHead idx={String(1 + (hosp.length?1:0) + (gastro.length?1:0)).padStart(2,"0")}
+                     title="Para pasear" aside={acts.length + (acts.length===1?" actividad":" actividades")} />
+              <div className="cards">{acts.map((a,i)=><FichaHome key={i} it={a} tipo="actividad" />)}</div>
+            </section>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ═════════════ BARRA DE ABAJO ═════════════ */
+function BarraAbajo({ view, go }) {
+  const [lista] = useGuardados();
+  const items = [
+    ["home","Inicio","M4 11l8-6.5 8 6.5v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1v-8z"],
+    ["aloj","Dormir","M20.5 13.5a8 8 0 1 1-9.9-9.9 6.4 6.4 0 0 0 9.9 9.9z"],
+    ["gastro","Comer","M4 4v6a3 3 0 0 0 6 0V4M7 10v10 M16 4c-1.5 1.5-2 3-2 5s.5 3 2 3 2-1 2-3-.5-3.5-2-5zM16 12v8"],
+    ["qhacer","Pasear","M2 19l6.5-10 4 6 3-4.5L22 19H2z"],
+    ["guardados","Guardados","M12 20.2s-7.2-4.7-7.2-9.8A4.5 4.5 0 0 1 12 6.9a4.5 4.5 0 0 1 7.2 3.5c0 5.1-7.2 9.8-7.2 9.8z"],
+  ];
+  return (
+    <nav className="appbar" aria-label="Navegación">
+      {items.map(([clave, texto, d]) => (
+        <button key={clave} className={view === clave ? "on" : ""} onClick={()=>go(clave)}>
+          <span className="ico">
+            <svg viewBox="0 0 24 24"><path d={d} /></svg>
+            {clave === "guardados" && lista.length > 0 && <i className="globo">{lista.length}</i>}
+          </span>
+          {texto}
+        </button>
+      ))}
+    </nav>
+  );
+}
+
 function App() {
   const [menu, setMenu] = useState(false);
   const [view, setView] = useState(vistaDeURL());
@@ -2557,8 +2717,10 @@ function App() {
       {view === "gastro" && <FoodPage food={data.food} loading={data.loading} />}
       {view === "conoce" && <AboutPage />}
       {view === "owners" && <OwnersPage />}
+      {view === "guardados" && <GuardadosPage data={data} go={go} />}
       {view === "contacto" && <ContactPage />}
       <Footer go={go} />
+      <BarraAbajo view={view} go={go} />
       <Newsletter />
     </div>
   );
@@ -2595,13 +2757,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 
 
 
-<nav class="appbar">
-  <a href="index.html"><svg viewBox="0 0 24 24"><path d="M4 11l8-6.5 8 6.5v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1v-8z"/></svg>Inicio</a>
-  <a href="cabana.html"><svg viewBox="0 0 24 24"><path d="M20.5 13.5a8 8 0 1 1-9.9-9.9 6.4 6.4 0 0 0 9.9 9.9z"/></svg>Dormir</a>
-  <a href="resto.html"><svg viewBox="0 0 24 24"><path d="M4 4v6a3 3 0 0 0 6 0V4M7 10v10"/><path d="M16 4c-1.5 1.5-2 3-2 5s.5 3 2 3 2-1 2-3-.5-3.5-2-5zM16 12v8"/></svg>Comer</a>
-  <a href="actividad.html"><svg viewBox="0 0 24 24"><path d="M2 19l6.5-10 4 6 3-4.5L22 19H2z"/></svg>Pasear</a>
-  <a href="index.html?view=conoce"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-9.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7 3.5C19 15.5 12 20 12 20z"/></svg>Guardados</a>
-</nav>
+
 
 
 <script>
