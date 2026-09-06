@@ -285,6 +285,26 @@ h2::before, .titulo::before{ display:none !important; content:none !important }
 
 .pdot{ display:none !important }
 
+
+/* ── fondo: degradé suave con los colores de la marca ── */
+html{ background:var(--crudo) }
+body{ background-color:transparent !important }
+.aura{ position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(120vw 80vh at 10% -8%, rgba(223,204,174,.62), rgba(223,204,174,0) 62%),
+    radial-gradient(95vw 72vh at 94% 4%, rgba(124,143,111,.24), rgba(124,143,111,0) 58%),
+    radial-gradient(90vw 60vh at 78% 62%, rgba(226,169,78,.10), rgba(226,169,78,0) 60%),
+    radial-gradient(115vw 90vh at 42% 106%, rgba(46,53,33,.12), rgba(46,53,33,0) 62%),
+    var(--crudo);
+  background-attachment:fixed }
+
+/* ── encabezado y filtros sin fondo propio: se ve el mismo fondo de la página ── */
+header, header.vt{ background:transparent !important;
+  -webkit-backdrop-filter:saturate(1.1) blur(12px); backdrop-filter:saturate(1.1) blur(12px);
+  border-bottom:1px solid rgba(70,62,42,.10) !important }
+.filtrosbar, .filters, .filtros{ background:transparent !important;
+  -webkit-backdrop-filter:saturate(1.1) blur(12px); backdrop-filter:saturate(1.1) blur(12px);
+  border-bottom:1px solid rgba(70,62,42,.10) !important }
 </style>
 
 <style>
@@ -320,6 +340,7 @@ input, select, textarea{ color:inherit }
 </style>
 </head>
 <body>
+<div class="aura" aria-hidden="true"></div>
 <div id="root"></div>
 <script type="text/babel">
 const { useState, useEffect } = React;
@@ -777,10 +798,20 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 <script>
 (function(){
   function medir(){var p=document.querySelector('.pre');
-    if(p) document.documentElement.style.setProperty('--preH', p.offsetHeight+'px');}
+    /* si la página no tiene la franja de arriba, no hay que dejar lugar para ella */
+    document.documentElement.style.setProperty('--preH', (p ? p.offsetHeight : 0)+'px');}
   window.addEventListener('load',medir);window.addEventListener('resize',medir);
   document.addEventListener('DOMContentLoaded',medir);setInterval(medir,1200);
 })();
 </script>
+<style>
+/* ── páginas sin la franja verde de arriba: el encabezado va pegado al borde ── */
+body{ padding-top:0 !important }
+header, header.vt{ position:sticky !important; top:0 !important;
+  background:transparent !important; box-shadow:none !important;
+  -webkit-backdrop-filter:saturate(1.1) blur(12px); backdrop-filter:saturate(1.1) blur(12px);
+  border-bottom:1px solid rgba(70,62,42,.10) !important }
+.filters, .filtros{ top:66px !important; background:transparent !important }
+</style>
 </body>
 </html>
