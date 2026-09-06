@@ -244,6 +244,18 @@ header, header.vt{ background:transparent !important;
 .filtrosbar, .filters, .filtros{ background:transparent !important;
   -webkit-backdrop-filter:saturate(1.1) blur(12px); backdrop-filter:saturate(1.1) blur(12px);
   border-bottom:1px solid rgba(70,62,42,.10) !important }
+
+/* ── campos de precio: un solo recuadro, con el ARS$ adentro ── */
+.flex.items-center.border > input,
+.flex.items-center.border > span + input{
+  border:0 !important; background:transparent !important; box-shadow:none !important;
+  border-radius:0 !important; padding-left:8px !important; outline:none !important }
+.flex.items-center.border:focus-within{
+  border-color:#2E3521 !important; box-shadow:0 0 0 3px rgba(46,53,33,.10) }
+/* la flechita de los números molesta más de lo que ayuda */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
+input[type=number]{ -moz-appearance:textfield }
 </style>
 
 <style>
@@ -345,7 +357,7 @@ function Editor({ c, set }) {
             <div className="flex flex-wrap gap-2">{CATS.map(k=><button key={k} onClick={()=>set({...c,category:k})} className={"rounded-full px-3 py-1.5 ff-body text-sm border "+(c.category===k?"text-white":"text-stone-600 border-stone-300")} style={c.category===k?{background:C.moss,borderColor:C.moss}:{}}>{k}</button>)}</div>
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Precio (0 = consultar)"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="text-stone-400 text-sm">$</span><input type="number" value={c.price} onChange={e=>set({...c,price:+e.target.value})} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
+            <Field label="Precio (0 = consultar)"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="ff-body text-sm shrink-0" style={{color:"#8a836f",letterSpacing:".02em"}}>ARS$</span><input type="number" value={c.price} onChange={e=>set({...c,price:+e.target.value})} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
             <Field label="Duración"><input value={c.duration} onChange={e=>set({...c,duration:e.target.value})} placeholder="Ej: 2 horas" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
           </div>
           <Field label="Horarios"><textarea value={c.schedule} onChange={e=>set({...c,schedule:e.target.value})} rows={2} placeholder="Ej: Todos los días de 9 a 18 hs" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm resize-none" /></Field>

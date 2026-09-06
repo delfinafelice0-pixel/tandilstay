@@ -247,6 +247,18 @@ header, header.vt{ background:transparent !important;
 .filtrosbar, .filters, .filtros{ background:transparent !important;
   -webkit-backdrop-filter:saturate(1.1) blur(12px); backdrop-filter:saturate(1.1) blur(12px);
   border-bottom:1px solid rgba(70,62,42,.10) !important }
+
+/* ── campos de precio: un solo recuadro, con el ARS$ adentro ── */
+.flex.items-center.border > input,
+.flex.items-center.border > span + input{
+  border:0 !important; background:transparent !important; box-shadow:none !important;
+  border-radius:0 !important; padding-left:8px !important; outline:none !important }
+.flex.items-center.border:focus-within{
+  border-color:#2E3521 !important; box-shadow:0 0 0 3px rgba(46,53,33,.10) }
+/* la flechita de los números molesta más de lo que ayuda */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
+input[type=number]{ -moz-appearance:textfield }
 </style>
 
 <style>
@@ -573,8 +585,8 @@ function Editor({ c, set }) {
           <h3 className="ff-display text-lg mb-1" style={{color:C.ink}}>Precios base</h3>
           <p className="ff-body text-xs text-stone-500 mb-3">Se usan cuando una cabaña no tiene precio propio cargado.</p>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Precio noche"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="text-stone-400 text-sm">$</span><input type="number" value={c.price} onChange={e=>set({...c,price:+e.target.value})} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
-            <Field label="Precio finde"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="text-stone-400 text-sm">$</span><input type="number" placeholder={String(c.price)} value={c.weekendPrice||""} onChange={e=>set({...c,weekendPrice:e.target.value?+e.target.value:null})} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
+            <Field label="Precio noche"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="ff-body text-sm shrink-0" style={{color:"#8a836f",letterSpacing:".02em"}}>ARS$</span><input type="number" value={c.price} onChange={e=>set({...c,price:+e.target.value})} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
+            <Field label="Precio finde"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="ff-body text-sm shrink-0" style={{color:"#8a836f",letterSpacing:".02em"}}>ARS$</span><input type="number" placeholder={String(c.price)} value={c.weekendPrice||""} onChange={e=>set({...c,weekendPrice:e.target.value?+e.target.value:null})} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
           </div>
           <Field label="Comodidades"><div className="flex flex-wrap gap-2">{Object.keys(AMEN).map(k=>{const on=c.amenities.includes(k);return <button key={k} onClick={()=>set({...c,amenities:on?c.amenities.filter(a=>a!==k):[...c.amenities,k]})} className={"rounded-full px-3 py-1.5 ff-body text-sm border "+(on?"text-white":"text-stone-600 border-stone-300")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{AMEN[k]}{on?" ✓":""}</button>;})}</div></Field>
           <button onClick={()=>set({...c,petFriendly:!c.petFriendly})} className={"rounded-xl px-4 py-2.5 ff-body text-sm border w-full text-left "+(c.petFriendly?"border-emerald-300 text-emerald-800 bg-emerald-50":"border-stone-300 text-stone-600")}>🐾 Pet friendly {c.petFriendly?"activado ✓":"desactivado"}</button>
@@ -666,8 +678,8 @@ function Editor({ c, set }) {
         <div>
           <div className="flex flex-wrap gap-2 mb-4">{c.units.map((u,ui)=>{const on=k===ui;return <button key={ui} onClick={()=>{setCalUnit(ui);setSelDay(null);}} className={"rounded-full px-3 py-1.5 ff-body text-sm border "+(on?"text-white":"text-stone-600 border-stone-300")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{u.name||("Cabaña "+(ui+1))}</button>;})}</div>
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <Field label="Precio noche"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="text-stone-400 text-sm">$</span><input type="number" value={cu.price==null?"":cu.price} onChange={e=>setCU({price:e.target.value===""?null:+e.target.value})} placeholder={String(c.price||0)} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
-            <Field label="Precio finde"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="text-stone-400 text-sm">$</span><input type="number" value={cu.weekendPrice==null?"":cu.weekendPrice} onChange={e=>setCU({weekendPrice:e.target.value===""?null:+e.target.value})} placeholder="igual" className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
+            <Field label="Precio noche"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="ff-body text-sm shrink-0" style={{color:"#8a836f",letterSpacing:".02em"}}>ARS$</span><input type="number" value={cu.price==null?"":cu.price} onChange={e=>setCU({price:e.target.value===""?null:+e.target.value})} placeholder={String(c.price||0)} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
+            <Field label="Precio finde"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="ff-body text-sm shrink-0" style={{color:"#8a836f",letterSpacing:".02em"}}>ARS$</span><input type="number" value={cu.weekendPrice==null?"":cu.weekendPrice} onChange={e=>setCU({weekendPrice:e.target.value===""?null:+e.target.value})} placeholder="igual" className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
           </div>
           <div className="flex gap-2 mb-4">
             <button onClick={()=>{setMode("block");setSelDay(null);}} className={"flex-1 rounded-xl py-2 ff-body text-sm border "+(mode==="block"?"border-rose-300 text-rose-700 bg-rose-50":"border-stone-300 text-stone-600")}>🚫 Bloquear</button>
@@ -683,7 +695,7 @@ function Editor({ c, set }) {
                 <div className="mt-4 bg-stone-50 rounded-xl p-3">
                   <div className="ff-body text-sm text-stone-700 mb-2">Precio para <strong>{selDay}</strong></div>
                   <div className="flex items-center gap-2">
-                    <div className="flex items-center border border-stone-300 rounded-lg px-2 bg-white flex-1"><span className="text-stone-400 text-sm">$</span><input type="number" value={priceInput} onChange={e=>setPriceInput(e.target.value)} placeholder={String(nightlyPrice(up,selDay))} className="w-full py-2 ff-body text-sm outline-none" /></div>
+                    <div className="flex items-center border border-stone-300 rounded-lg px-2 bg-white flex-1"><span className="ff-body text-sm shrink-0" style={{color:"#8a836f",letterSpacing:".02em"}}>ARS$</span><input type="number" value={priceInput} onChange={e=>setPriceInput(e.target.value)} placeholder={String(nightlyPrice(up,selDay))} className="w-full py-2 ff-body text-sm outline-none" /></div>
                     <button onClick={()=>setOverride(priceInput)} className="text-white rounded-lg px-3 py-2 ff-body text-sm font-semibold" style={{background:C.moss}}>Aplicar</button>
                     <button onClick={()=>{setOverride("");setPriceInput("");}} className="border border-stone-300 rounded-lg px-3 py-2 ff-body text-sm text-stone-600">Quitar</button>
                   </div>
@@ -979,8 +991,8 @@ function Reservas({ profile, cabins, afterSync }) {
               <div className="flex gap-2">{Object.keys(EST).map(s=>{ const on=form.status===s; return <button key={s} onClick={()=>setForm({...form,status:s})} className={"flex-1 rounded-full px-3 py-1.5 ff-body text-sm border "+(on?"text-white":"text-stone-600 border-stone-300")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{EST[s].l}</button>; })}</div>
             </Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Total de la estadía"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="text-stone-400 text-sm">$</span><input type="number" value={form.total||""} onChange={e=>setForm({...form,total:e.target.value})} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
-              <Field label="Seña cobrada"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="text-stone-400 text-sm">$</span><input type="number" value={form.deposit||""} onChange={e=>setForm({...form,deposit:e.target.value})} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
+              <Field label="Total de la estadía"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="ff-body text-sm shrink-0" style={{color:"#8a836f",letterSpacing:".02em"}}>ARS$</span><input type="number" value={form.total||""} onChange={e=>setForm({...form,total:e.target.value})} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
+              <Field label="Seña cobrada"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="ff-body text-sm shrink-0" style={{color:"#8a836f",letterSpacing:".02em"}}>ARS$</span><input type="number" value={form.deposit||""} onChange={e=>setForm({...form,deposit:e.target.value})} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
             </div>
             <button onClick={()=>setForm({...form,total:sugerirTotal(form)})} className="ff-body text-sm font-semibold mb-3" style={{color:C.clay}}>↻ Calcular el total con los precios cargados</button>
             <Field label="Por dónde reservó">

@@ -305,6 +305,18 @@ header, header.vt{ background:transparent !important;
 .filtrosbar, .filters, .filtros{ background:transparent !important;
   -webkit-backdrop-filter:saturate(1.1) blur(12px); backdrop-filter:saturate(1.1) blur(12px);
   border-bottom:1px solid rgba(70,62,42,.10) !important }
+
+/* ── campos de precio: un solo recuadro, con el ARS$ adentro ── */
+.flex.items-center.border > input,
+.flex.items-center.border > span + input{
+  border:0 !important; background:transparent !important; box-shadow:none !important;
+  border-radius:0 !important; padding-left:8px !important; outline:none !important }
+.flex.items-center.border:focus-within{
+  border-color:#2E3521 !important; box-shadow:0 0 0 3px rgba(46,53,33,.10) }
+/* la flechita de los números molesta más de lo que ayuda */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
+input[type=number]{ -moz-appearance:textfield }
 </style>
 
 <style>
@@ -735,9 +747,9 @@ function App() {
     if (!op) { setData(d => ({ ...d, loading: false, missing: true })); return; }
     (async () => {
       const [a, b, c] = await Promise.all([
-        db.from("cabins").select("*").order("created_at", { ascending: false }),
-        db.from("activities").select("*").order("created_at", { ascending: false }),
-        db.from("restaurants").select("*").order("created_at", { ascending: false }),
+        db.from("cabins").select("*").order("orden", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false }),
+        db.from("activities").select("*").order("orden", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false }),
+        db.from("restaurants").select("*").order("orden", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false }),
       ]);
       const allCabins = a.data || [], allActs = b.data || [], allFood = c.data || [];
       const mine = (x) => String(x.operator || "").trim().toLowerCase() === op.toLowerCase();

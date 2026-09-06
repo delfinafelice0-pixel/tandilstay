@@ -245,6 +245,18 @@ header, header.vt{ background:transparent !important;
 .filtrosbar, .filters, .filtros{ background:transparent !important;
   -webkit-backdrop-filter:saturate(1.1) blur(12px); backdrop-filter:saturate(1.1) blur(12px);
   border-bottom:1px solid rgba(70,62,42,.10) !important }
+
+/* ── campos de precio: un solo recuadro, con el ARS$ adentro ── */
+.flex.items-center.border > input,
+.flex.items-center.border > span + input{
+  border:0 !important; background:transparent !important; box-shadow:none !important;
+  border-radius:0 !important; padding-left:8px !important; outline:none !important }
+.flex.items-center.border:focus-within{
+  border-color:#2E3521 !important; box-shadow:0 0 0 3px rgba(46,53,33,.10) }
+/* la flechita de los números molesta más de lo que ayuda */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
+input[type=number]{ -moz-appearance:textfield }
 </style>
 
 <style>
@@ -289,6 +301,125 @@ const C = { paper:"#F4EEDC", cream:"#FBF7E8", mist:"#E7E1D0", ink:"#23261A", mos
 const ROLES = [["hospedaje","Hospedaje"],["gastronomia","Gastronomía"],["actividad","Actividad"],["admin","Admin"]];
 const PANELS = { hospedaje:"panel.html", gastronomia:"gastro-panel.html", actividad:"act-panel.html" };
 
+
+/* ═══ Orden en que se muestran las publicaciones ═══ */
+const RUBROS = [
+  { clave:"cabins",      titulo:"Hospedajes" },
+  { clave:"restaurants", titulo:"Gastronomía" },
+  { clave:"activities",  titulo:"Actividades" },
+];
+
+function Orden(){
+  const [rubro,setRubro] = useState("cabins");
+  const [items,setItems] = useState([]);
+  const [cargando,setCargando] = useState(true);
+  const [guardando,setGuardando] = useState(false);
+  const [aviso,setAviso] = useState("");
+
+  const cargar = async (r) => {
+    setCargando(true); setAviso("");
+    const { data, error } = await db.from(r).select("slug,name,orden,banner,photos");
+    if(error){ setAviso("No pude leer: "+error.message); setItems([]); setCargando(false); return; }
+    const lista = (data||[]).slice().sort((a,b)=>{
+      const oa = a.orden==null ? 9999 : a.orden, ob = b.orden==null ? 9999 : b.orden;
+      if(oa!==ob) return oa-ob;
+      return (a.name||"").localeCompare(b.name||"");
+    });
+    setItems(lista); setCargando(false);
+  };
+  useEffect(()=>{ cargar(rubro); },[rubro]);
+
+  const mover = (i, dir) => {
+    const j = i+dir;
+    if(j<0 || j>=items.length) return;
+    const l = items.slice();
+    const t = l[i]; l[i] = l[j]; l[j] = t;
+    setItems(l); setAviso("");
+  };
+  const alPrincipio = (i) => {
+    const l = items.slice(); const [x] = l.splice(i,1); l.unshift(x); setItems(l); setAviso("");
+  };
+
+  const guardar = async () => {
+    setGuardando(true); setAviso("");
+    let fallo = null;
+    for(let i=0;i<items.length;i++){
+      const { error } = await db.from(rubro).update({ orden: i+1 }).eq("slug", items[i].slug);
+      if(error){ fallo = error.message; break; }
+    }
+    setGuardando(false);
+    setAviso(fallo ? ("No se pudo guardar: "+fallo) : "Orden guardado. Así se ve en el sitio.");
+    if(!fallo) cargar(rubro);
+  };
+
+  const foto = (x) => x.banner || (x.photos && x.photos[0]) || "";
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-white rounded-2xl border border-black/5 p-5">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h2 className="ff-display text-xl" style={{color:C.ink}}>Orden de las publicaciones</h2>
+            <p className="ff-body text-sm text-stone-500 mt-1">
+              El primero de la lista es el que aparece primero en el sitio. Movelo con las flechas y guardá.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            {RUBROS.map(r=>(
+              <button key={r.clave} onClick={()=>setRubro(r.clave)}
+                className={"px-3.5 py-2 rounded-full ff-body text-sm "+(rubro===r.clave?"text-white":"text-stone-600 border border-stone-300")}
+                style={rubro===r.clave?{background:C.moss}:{}}>{r.titulo}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {aviso && (
+        <div className="rounded-xl px-4 py-3 ff-body text-sm"
+          style={{background: aviso.startsWith("No") ? "#fdecec" : "rgba(46,53,33,.08)",
+                  color: aviso.startsWith("No") ? "#a33" : C.ink}}>{aviso}</div>
+      )}
+
+      <div className="bg-white rounded-2xl border border-black/5 divide-y divide-black/5">
+        {cargando ? (
+          <p className="ff-body text-stone-500 p-6">Cargando…</p>
+        ) : items.length===0 ? (
+          <p className="ff-body text-stone-500 p-6">No hay publicaciones en este rubro.</p>
+        ) : items.map((x,i)=>(
+          <div key={x.slug} className="flex items-center gap-3 p-3">
+            <span className="ff-display text-lg w-7 text-center shrink-0" style={{color:C.clay}}>{i+1}</span>
+            {foto(x)
+              ? <img src={foto(x)} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" />
+              : <div className="w-12 h-12 rounded-lg shrink-0" style={{background:"#EDE9DD"}}></div>}
+            <div className="flex-1 min-w-0">
+              <p className="ff-body text-sm font-semibold truncate" style={{color:C.ink}}>{x.name}</p>
+              <p className="ff-body text-xs text-stone-400 truncate">{x.slug}</p>
+            </div>
+            <div className="flex gap-1.5 shrink-0">
+              <button onClick={()=>alPrincipio(i)} disabled={i===0} title="Poner primero"
+                className="w-9 h-9 rounded-lg border border-stone-300 ff-body disabled:opacity-30">↑↑</button>
+              <button onClick={()=>mover(i,-1)} disabled={i===0} title="Subir"
+                className="w-9 h-9 rounded-lg border border-stone-300 ff-body disabled:opacity-30">↑</button>
+              <button onClick={()=>mover(i,1)} disabled={i===items.length-1} title="Bajar"
+                className="w-9 h-9 rounded-lg border border-stone-300 ff-body disabled:opacity-30">↓</button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {items.length>0 && (
+        <div className="flex items-center gap-3">
+          <button onClick={guardar} disabled={guardando}
+            className="text-white rounded-xl px-5 py-3 ff-body font-semibold disabled:opacity-50"
+            style={{background:C.moss}}>{guardando ? "Guardando…" : "Guardar este orden"}</button>
+          <button onClick={()=>cargar(rubro)} className="rounded-xl px-4 py-3 ff-body text-sm border border-stone-300">
+            Descartar cambios
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function Newsletter(){
   const [list,setList]=useState(null);
@@ -465,6 +596,7 @@ function App() {
             <div className="flex rounded-full border border-stone-300 overflow-hidden">
               <button onClick={()=>setTab("usuarios")} className={"px-3.5 py-2 ff-body text-sm "+(tab==="usuarios"?"text-white":"text-stone-600")} style={tab==="usuarios"?{background:C.moss}:{}}>Usuarios</button>
               <button onClick={()=>setTab("resumen")} className={"px-3.5 py-2 ff-body text-sm "+(tab==="resumen"?"text-white":"text-stone-600")} style={tab==="resumen"?{background:C.moss}:{}}>Resumen</button>
+              <button onClick={()=>setTab("orden")} className={"px-3.5 py-2 ff-body text-sm "+(tab==="orden"?"text-white":"text-stone-600")} style={tab==="orden"?{background:C.moss}:{}}>Orden</button>
               <button onClick={()=>setTab("newsletter")} className={"px-3.5 py-2 ff-body text-sm "+(tab==="newsletter"?"text-white":"text-stone-600")} style={tab==="newsletter"?{background:C.moss}:{}}>Newsletter</button>
             </div>
             <button onClick={()=>db.auth.signOut()} className="rounded-full px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">Salir</button>
@@ -547,6 +679,8 @@ function App() {
               </div>
             </div>
           </div>
+        ) : tab==="orden" ? (
+          <Orden />
         ) : tab==="newsletter" ? (
           <Newsletter />
         ) : (
