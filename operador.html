@@ -493,7 +493,7 @@ function Home({ cabins, loading, go }) {
         <div className="reveal max-w-4xl mx-auto bg-white rounded-[26px] border border-black/5 p-2.5 flex flex-col sm:flex-row items-stretch gap-1" style={{ boxShadow:"0 36px 80px -44px rgba(62,79,63,0.6)" }}>
           <div className="flex-1 px-5 py-3">
             <div className="ff-body text-[10px] uppercase tracking-[0.22em] text-stone-400 font-semibold mb-1">Zona</div>
-            <select value={zona} onChange={e=>setZona(e.target.value)} className="w-full ff-body text-[15px] bg-transparent outline-none cursor-pointer" style={{ color:C.ink }}><option value="">Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}</select>
+            
           </div>
           <div className="hidden sm:block w-px bg-stone-200 my-3"></div>
           <div className="flex-1 px-5 py-3">
@@ -576,7 +576,7 @@ function ActivitiesPage({ acts, loading }) {
         {!loading && acts.length>0 && (
           <div className="reveal flex flex-wrap items-center gap-2 mb-9">
             <select value={cat} onChange={e=>setCat(e.target.value)} className={selCls} style={selStyle}><option value="">Todas las categorías</option>{cats.map(z=><option key={z} value={z}>{z}</option>)}</select>
-            <select value={zona} onChange={e=>setZona(e.target.value)} className={selCls} style={selStyle}><option value="">Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}</select>
+            
             {active>0 && <button onClick={clear} className="ff-body text-[13px] rounded-full px-4 py-2 border" style={{ borderColor:"rgba(190,106,74,0.4)", color:C.clay }}>Limpiar ✕</button>}
             <span className="ff-body text-[13px] text-stone-400 ml-auto">{show.length} {show.length===1?"actividad":"actividades"}</span>
           </div>
@@ -610,7 +610,7 @@ function FoodPage({ food, loading }) {
       <section className="max-w-6xl mx-auto px-5 sm:px-6 pb-24">
         {!loading && food.length>0 && (
           <div className="reveal flex flex-wrap items-center gap-2 mb-9">
-            <select value={zona} onChange={e=>setZona(e.target.value)} className={selCls} style={selStyle}><option value="">Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}</select>
+            
             <select value={diet} onChange={e=>setDiet(e.target.value)} className={selCls} style={selStyle}><option value="">Toda la cocina</option><option value="sintacc">Sin TACC</option><option value="veggie">Vegetariano</option></select>
             {active>0 && <button onClick={clear} className="ff-body text-[13px] rounded-full px-4 py-2 border" style={{ borderColor:"rgba(190,106,74,0.4)", color:C.clay }}>Limpiar ✕</button>}
             <span className="ff-body text-[13px] text-stone-400 ml-auto">{show.length} {show.length===1?"lugar":"lugares"}</span>

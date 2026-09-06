@@ -1645,16 +1645,12 @@ function Listado({ items }) {
               <option value="">Todas las categorías</option>
               {cats.map(z=><option key={z} value={z}>{z}</option>)}
             </select>
-            <select className="sel" value={zona} onChange={e=>setZona(e.target.value)}>
-              <option value="">Toda la zona</option>
-              {zonas.map(z=><option key={z} value={z}>{z}</option>)}
-            </select>
             <select className="sel" value={orden} onChange={e=>setOrden(e.target.value)}>
               <option value="">Ordenar</option>
               <option value="asc">Precio: menor a mayor</option>
               <option value="desc">Precio: mayor a menor</option>
             </select>
-            {activos>0 && <button className="sel" onClick={()=>{setCat("");setZona("");setOrden("");}}>Limpiar</button>}
+            {activos>0 && <button className="sel" onClick={()=>{setCat("");setOrden("");}}>Limpiar</button>}
             <span className="cuenta">{show.length} {show.length===1?"actividad":"actividades"}</span>
           </div>
         )}

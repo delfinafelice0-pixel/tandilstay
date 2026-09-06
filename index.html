@@ -2322,12 +2322,12 @@ function LodgingPage({ cabins, loading }) {
 
 /* ═════════════ ACTIVIDADES ═════════════ */
 function ActivitiesPage({ acts, loading }) {
-  const [zona, setZona] = useState("");
+
   const [cat, setCat] = useState("");
-  const zonas = [...new Set(acts.map(a=>a.zone).filter(Boolean))].sort();
+
   const cats = [...new Set(acts.map(a=>a.category).filter(Boolean))].sort();
-  const show = acts.filter(a => (!zona || a.zone===zona) && (!cat || a.category===cat));
-  const active = (zona?1:0)+(cat?1:0);
+  const show = acts.filter(a => (!cat || a.category===cat));
+  const active = (cat?1:0);
   return (
     <div>
       <PageTitle kicker="Paseos y aventura" title="Qué hacer en Tandil" sub="Cerros, agua, historia y aire puro. Estos son los imperdibles para tu estadía." />
@@ -2337,10 +2337,7 @@ function ActivitiesPage({ acts, loading }) {
             <select className="sel" value={cat} onChange={e=>setCat(e.target.value)}>
               <option value="">Todas las categorías</option>{cats.map(z=><option key={z} value={z}>{z}</option>)}
             </select>
-            <select className="sel" value={zona} onChange={e=>setZona(e.target.value)}>
-              <option value="">Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}
-            </select>
-            {active>0 && <button className="sel" onClick={()=>{setZona("");setCat("");}}>Limpiar</button>}
+            {active>0 && <button className="sel" onClick={()=>setCat("")}>Limpiar</button>}
             <span className="count">{show.length} {show.length===1?"actividad":"actividades"}</span>
           </div>
         )}
@@ -2374,26 +2371,23 @@ function ActivitiesPage({ acts, loading }) {
 
 /* ═════════════ GASTRONOMÍA ═════════════ */
 function FoodPage({ food, loading }) {
-  const [zona, setZona] = useState("");
+
   const [diet, setDiet] = useState("");
-  const zonas = [...new Set(food.map(f=>f.zone).filter(Boolean))].sort();
-  const show = food.filter(a => (!zona || a.zone===zona) && (diet!=="sintacc" || a.sin_tacc) && (diet!=="veggie" || a.vegetariano));
-  const active = (zona?1:0)+(diet?1:0);
+
+  const show = food.filter(a => (diet!=="sintacc" || a.sin_tacc) && (diet!=="veggie" || a.vegetariano));
+  const active = (diet?1:0);
   return (
     <div>
       <PageTitle kicker="Sabores serranos" title="Dónde comer en Tandil" sub="De las picadas con salame con Denominación de Origen a la cervecería artesanal: comé como un local." />
       <section className="in">
         {!loading && food.length>0 && (
           <div className="filters">
-            <select className="sel" value={zona} onChange={e=>setZona(e.target.value)}>
-              <option value="">Toda la zona</option>{zonas.map(z=><option key={z} value={z}>{z}</option>)}
-            </select>
             <select className="sel" value={diet} onChange={e=>setDiet(e.target.value)}>
               <option value="">Toda la cocina</option>
               <option value="sintacc">Sin TACC</option>
               <option value="veggie">Vegetariano</option>
             </select>
-            {active>0 && <button className="sel" onClick={()=>{setZona("");setDiet("");}}>Limpiar</button>}
+            {active>0 && <button className="sel" onClick={()=>setDiet("")}>Limpiar</button>}
             <span className="count">{show.length} {show.length===1?"lugar":"lugares"}</span>
           </div>
         )}
