@@ -1936,14 +1936,15 @@ function MobileMenu({ open, go, onClose }) {
 }
 
 /* número que cuenta desde cero la primera vez que aparece en pantalla */
-function Numerito({ valor, sufijo = "", separador = true }) {
+function Numerito({ valor, sufijo = "", separador = true, decimales = 0 }) {
   const [n, setN] = useState(0);
   const ref = useRef(null);
   const hecho = useRef(false);
   useEffect(() => {
     const el = ref.current;
     const quieto = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!el || quieto || !("IntersectionObserver" in window)) { setN(valor); return; }
+    const fijar = (x) => setN(decimales ? Number(x.toFixed(decimales)) : Math.round(x));
+    if (!el || quieto || !("IntersectionObserver" in window)) { fijar(valor); return; }
     const io = new IntersectionObserver((entradas) => {
       entradas.forEach((e) => {
         if (e.isIntersecting && !hecho.current) {
@@ -1952,7 +1953,7 @@ function Numerito({ valor, sufijo = "", separador = true }) {
           const paso = (t) => {
             const p = Math.max(0, Math.min(1, (t - t0) / dur));
             const suave = 1 - Math.pow(1 - p, 3);
-            setN(Math.round(valor * suave));
+            fijar(valor * suave);
             if (p < 1) requestAnimationFrame(paso);
           };
           requestAnimationFrame(paso);
@@ -1962,7 +1963,9 @@ function Numerito({ valor, sufijo = "", separador = true }) {
     io.observe(el);
     return () => io.disconnect();
   }, [valor]);
-  const txt = separador ? n.toLocaleString("es-AR") : String(n);
+  const txt = separador
+    ? n.toLocaleString("es-AR", { minimumFractionDigits: decimales, maximumFractionDigits: decimales })
+    : String(n);
   return <span ref={ref}>{txt}{sufijo}</span>;
 }
 
@@ -2159,12 +2162,12 @@ function Home({ go, data }) {
           {[
             { v:2200, sep:true,  suf:"",   t:"Millones de años tienen estas sierras: están entre las más antiguas del planeta.", f:COMMONS("Cerro El Centinela.JPG", 900) },
             { v:1912, sep:false, suf:"",   t:"El año en que se desplomó la Piedra Movediza original. La actual es una réplica.", f:COMMONS("Réplica de la piedra movediza de Tandil.jpg", 900) },
-            { v:1,    sep:true,  suf:"",   t:"El salame de Tandil es el único del país con Denominación de Origen.", f:IMG("photo-1542528180-1c2803fa048c") },
+            { v:487.22, sep:true, suf:" m", dec:2, t:"Midió el salame más largo del mundo, hecho en Tandil en el Festival Chacinar de 2025. Es el único del país con Denominación de Origen.", f:"/fotos/salame-record.jpg" },
             { v:4,    sep:true,  suf:" h", t:"Lo que tardás desde Buenos Aires. Entra cómodo en un fin de semana largo.", f:IMG("photo-1502877338535-766e1452684a") },
           ].map((d,i)=>(
             <div className="datovt" key={i}>
               <img className="datofoto" src={d.f} alt="" loading="lazy" onError={e=>e.target.remove()} />
-              <div className="n"><Numerito valor={d.v} separador={d.sep} sufijo={d.suf} /></div>
+              <div className="n"><Numerito valor={d.v} separador={d.sep} sufijo={d.suf} decimales={d.dec || 0} /></div>
               <p>{d.t}</p>
             </div>
           ))}
