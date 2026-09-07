@@ -1442,6 +1442,17 @@ header, header.vt{ background:transparent !important;
 <div class="aura" aria-hidden="true"></div>
 <div id="root"></div>
 <script type="text/babel">
+function actualizarOG(item){
+  try{
+    if(!item) return;
+    const foto = item.banner || (item.photos && item.photos[0]);
+    if(!foto) return;
+    const url = String(foto).startsWith("http") ? foto : ("https://images.unsplash.com/"+foto+"?auto=format&fit=crop&w=1200&q=75");
+    document.querySelectorAll('meta[property="og:image"], meta[name="twitter:image"]').forEach(m=>m.setAttribute("content", url));
+    if(item.name){ document.title = item.name + " · Visitando Tandil"; }
+  }catch(e){}
+}
+
 const { useState, useEffect } = React;
 const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
@@ -1878,7 +1889,7 @@ function App() {
           db.from("restaurants").select("slug,name,zone,banner,photos").order("orden", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false }),
         ]);
         if(cab.error){ setState({error:true}); return; }
-        if(cab.data && cab.data[0]) setState({ cabin: fromRow(cab.data[0]), acts: act.data||[], food: res.data||[] }); else setState({ notfound:true });
+        if(cab.data && cab.data[0]){ actualizarOG(cab.data[0]); setState({ cabin: fromRow(cab.data[0]), acts: act.data||[], food: res.data||[] }); } else setState({ notfound:true });
         db.rpc("bump_view",{ p_rubro:"hospedaje", p_slug:slug }).then(()=>{});
       } else {
         const { data } = await db.from("cabins").select("slug,name,zone,price,photos,banner,capacity,units,amenities,pet_friendly,type").order("orden", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false });

@@ -278,6 +278,17 @@ header, header.vt{ background:transparent !important;
 <div id="root"></div>
 
 <script type="text/babel">
+function actualizarOG(item){
+  try{
+    if(!item) return;
+    const foto = item.banner || (item.photos && item.photos[0]);
+    if(!foto) return;
+    const url = String(foto).startsWith("http") ? foto : ("https://images.unsplash.com/"+foto+"?auto=format&fit=crop&w=1200&q=75");
+    document.querySelectorAll('meta[property="og:image"], meta[name="twitter:image"]').forEach(m=>m.setAttribute("content", url));
+    if(item.name){ document.title = item.name + " · Visitando Tandil"; }
+  }catch(e){}
+}
+
 const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
 const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
