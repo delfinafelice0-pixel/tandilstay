@@ -566,12 +566,39 @@ function App() {
   };
   const delUser=async(p)=>{
     if(session && p.id===session.user.id){ flash("No podés borrarte a vos misma"); return; }
-    if(!confirm("¿Borrar a "+p.email+"? Pierde el acceso y se elimina su cuenta.")) return;
+    /* antes de borrar la cuenta, cuento qué publicaciones quedarían huérfanas */
+    const op = (p.operator||"").trim();
+    let pubs = [];
+    if(op){
+      const [a,b,c] = await Promise.all([
+        db.from("cabins").select("slug,name").eq("operator",op),
+        db.from("restaurants").select("slug,name").eq("operator",op),
+        db.from("activities").select("slug,name").eq("operator",op),
+      ]);
+      pubs = [...(a.data||[]).map(x=>({...x,t:"cabins"})), ...(b.data||[]).map(x=>({...x,t:"restaurants"})), ...(c.data||[]).map(x=>({...x,t:"activities"}))];
+    }
+    const aviso = pubs.length
+      ? "¿Borrar a "+p.email+"?\n\nTiene "+pubs.length+" publicación"+(pubs.length===1?"":"es")+" ("+pubs.map(x=>x.name).join(", ")+").\nSe borran también, junto con sus reservas, y desaparecen del sitio."
+      : "¿Borrar a "+p.email+"? Pierde el acceso y se elimina su cuenta.";
+    if(!confirm(aviso)) return;
     setBusy(true);
+    let fallo = null;
+    if(pubs.length){
+      const slugs = pubs.map(x=>x.slug);
+      const r1 = await db.from("reservations").delete().in("slug", slugs);
+      if(r1.error) fallo = r1.error.message;
+      for(const t of ["cabins","restaurants","activities"]){
+        const mios = pubs.filter(x=>x.t===t).map(x=>x.slug);
+        if(!mios.length) continue;
+        const r = await db.from(t).delete().in("slug", mios);
+        if(r.error) fallo = r.error.message;
+      }
+    }
     const { data, error } = await db.functions.invoke("super-action", { body:{ action:"delete", id:p.id } });
     setBusy(false);
     if(error || (data&&data.error)){ flash("Error: "+((data&&data.error)||error.message)); return; }
-    flash("Usuario borrado ✓"); loadProfiles();
+    flash(fallo ? "Usuario borrado, pero alguna publicación no se pudo borrar: "+fallo : "Usuario borrado ✓" + (pubs.length ? " y sus "+pubs.length+" publicaciones también." : ""));
+    loadProfiles();
   };
   const updateProfile=async(id,patch)=>{ await db.from("profiles").update(patch).eq("id",id); loadProfiles(); };
   const billingStatus=(nd)=>{ if(!nd) return {label:"Sin pago",bg:"#ececec",fg:"#777"}; const t=new Date();t.setHours(0,0,0,0); const d=new Date(nd+"T00:00:00"); const days=Math.round((d-t)/86400000); if(days<0) return {label:"Vencido",bg:"#fde8e8",fg:"#b23b3b"}; if(days<=7) return {label:"Vence en "+days+"d",bg:"#fdf0d8",fg:"#9a6b1e"}; return {label:"Al día",bg:"#e7efe3",fg:C.moss}; };
