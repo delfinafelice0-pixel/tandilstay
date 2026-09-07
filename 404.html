@@ -1627,6 +1627,15 @@ header, header.vt{ background:transparent !important;
 .vaciogua .botones{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:22px }
 
 .chip-ok{ background:var(--monte) !important; color:#EDE4CD !important }
+
+/* ── franja de página de operador ── */
+.opstrip{ position:fixed; left:50%; transform:translateX(-50%); bottom:14px; z-index:80;
+  background:var(--monte); color:#EDE4CD; border-radius:999px; padding:10px 18px;
+  display:flex; gap:16px; align-items:center; font-size:13.5px; box-shadow:0 14px 34px -12px rgba(21,24,15,.5);
+  max-width:calc(100% - 28px) }
+.opstrip b{ color:#fff }
+.opstrip a{ color:var(--brote); font-weight:600; white-space:nowrap }
+@media(max-width:900px){ .opstrip{ bottom:104px; font-size:12.5px; padding:9px 14px } }
 </style>
 <script>
 /* si la dirección viene con barra final, la saca: así las rutas relativas resuelven bien */
@@ -2670,7 +2679,22 @@ function App() {
         db.from("activities").select("*").order("orden", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false }),
         db.from("restaurants").select("*").order("orden", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false }),
       ]);
-      setData({ loading: false, cabins: a.data || [], acts: b.data || [], food: c.data || [] });
+      let cabins = a.data || [], acts = b.data || [], food = c.data || [];
+      if (OP) {
+        /* página de un operador: se muestran sus lugares; si en un rubro no tiene, se ve la guía completa */
+        const mio = (x) => String(x.operator || "").trim().toLowerCase() === OP.toLowerCase();
+        const mc = cabins.filter(mio), ma = acts.filter(mio), mf = food.filter(mio);
+        cabins = mc.length ? mc : cabins;
+        acts   = ma.length ? ma : acts;
+        food   = mf.length ? mf : food;
+        document.title = OP + " · Visitando Tandil";
+        /* si entró a la raíz, lo llevo al rubro donde tiene publicaciones */
+        if (limpiarRuta() === "/" && !new URLSearchParams(location.search).get("view")) {
+          const destino = mc.length ? "aloj" : mf.length ? "gastro" : ma.length ? "qhacer" : null;
+          if (destino) { setView(destino); try{ history.replaceState({view:destino}, "", RUTAS[destino] + "?op=" + encodeURIComponent(OP)); }catch(e){} }
+        }
+      }
+      setData({ loading: false, cabins, acts, food });
     })();
   }, []);
   const go = (v) => {
@@ -2715,6 +2739,12 @@ function App() {
       {view === "conoce" && <AboutPage />}
       {view === "owners" && <OwnersPage />}
       {view === "guardados" && <GuardadosPage data={data} go={go} />}
+      {OP && (
+        <div className="opstrip">
+          <span>Estás viendo los lugares de <b>{OP}</b></span>
+          <a href={RUTAS[view] || "/"}>Ver toda la guía →</a>
+        </div>
+      )}
       {view === "contacto" && <ContactPage />}
       <Footer go={go} />
       <BarraAbajo view={view} go={go} />

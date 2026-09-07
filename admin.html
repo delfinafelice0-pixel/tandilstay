@@ -635,7 +635,8 @@ function App() {
               <div className="space-y-3">
                 {profiles.map(p=>{
                   const rubro = p.role && p.role!=="admin" ? p.role : null;
-                  const landing = p.operator ? ("operador.html?op="+encodeURIComponent(p.operator)+(rubro?("&rubro="+rubro):"")) : null;
+                  const rutaRubro = rubro==="gastronomia" ? "para-comer" : rubro==="actividad" ? "para-pasear" : "para-dormir";
+      const landing = p.operator ? (rutaRubro+"?op="+encodeURIComponent(p.operator)) : null;
                   const panelHref = PANELS[p.role] || null;
                   const st = billingStatus(p.next_due);
                   const initial = (p.operator||p.email||"?").trim().charAt(0).toUpperCase();
