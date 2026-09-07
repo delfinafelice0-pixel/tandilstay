@@ -355,6 +355,7 @@ const EMPTY = { name:"", operator:"", zone:"", whatsapp:"", blurb:"", capacity:2
 const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, promoText:r.promo_text||"", promos:r.promos||[], blocked:r.blocked||[], overrides:r.overrides||{}, units:r.units||[], videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], ical_urls:r.ical_urls||[], ical_blocked:r.ical_blocked||[], ical_synced_at:r.ical_synced_at||null, email:r.email||"", minNights:r.min_nights||1, type:r.type||"" });
 // Los datos generales de huéspedes/dormitorios/baños ya no se cargan a mano:
 // se calculan como el máximo de las unidades, para que el buscador y las fichas públicas sigan filtrando bien.
+const sinFotos = (u) => !((u && u.photos && u.photos.length) || (u && u.photo));
 const maxDeUnidades = (units, k, fallback) => {
   const vals = (units||[]).map(u=>Number(u&&u[k])||0).filter(n=>n>0);
   return vals.length ? Math.max(...vals) : (Number(fallback)||1);
@@ -535,6 +536,10 @@ function Editor({ c, set }) {
         <div className="bg-white rounded-2xl border border-black/5 p-5">
           <h3 className="ff-display text-lg mb-1" style={{color:C.ink}}>🏡 Unidades / cabañas</h3>
           <p className="ff-body text-sm text-stone-500 mb-3">Cargá cada cabaña o departamento con sus huéspedes, dormitorios y baños. Su disponibilidad y su precio se cargan en el calendario de la derecha.</p>
+          {(()=>{ const n=(c.units||[]).filter(sinFotos).length; if(!n) return null; return (
+            <p className="ff-body text-sm rounded-xl px-3 py-2 mb-3" style={{background:"#FDF3DF",color:"#8A6A1E"}}>
+              📷 {n===1?"Una cabaña no tiene fotos":"Hay "+n+" cabañas sin fotos"}. La foto es lo primero que mira el huésped: sin ella, en la guía se ve solo el nombre.
+            </p> ); })()}
           <div className="space-y-2">
             {(c.units||[]).map((u,i)=>(
               <div key={i} className="border border-stone-200 rounded-xl p-3 space-y-2">
@@ -571,6 +576,7 @@ function Editor({ c, set }) {
                     ))}
                     <label className="shrink-0 grid place-items-center w-16 h-16 rounded-lg border border-dashed border-stone-300 cursor-pointer ff-body text-lg text-stone-500" style={{opacity:uploading?0.6:1}}>📷<input type="file" accept="image/*" multiple onChange={e=>uploadUnitPhoto(e,i)} disabled={uploading} className="hidden" /></label>
                   </div>
+                  {!ph.length && <p className="ff-body text-xs mt-1.5" style={{color:"#8A6A1E"}}>Sin fotos: esta cabaña va a aparecer solo con su nombre.</p>}
                 </div>
                 <div>
                   <span className="ff-body text-[11px] font-semibold text-stone-500 uppercase tracking-wide">Videos (YouTube/Instagram)</span>
@@ -1245,6 +1251,7 @@ function App() {
   const [loadingList,setLoadingList]=useState(false);
   const [editing,setEditing]=useState(null);
   const [saving,setSaving]=useState(false);
+  const [avisoFotos,setAvisoFotos]=useState(false);   // el recordatorio de fotos aparece una vez por ficha
   const [soloEditor,setSoloEditor]=useState(false);
   const [toast,setToast]=useState("");
   const [profile,setProfile]=useState(null);
@@ -1280,6 +1287,7 @@ function App() {
   };
   useEffect(()=>{ if(session) load(); },[session]);
 
+  useEffect(()=>{ setAvisoFotos(false); },[editing && editing.id]);
   const flash = (m) => { setToast(m); setTimeout(()=>setToast(""),2500); };
 
   const login = async () => {
@@ -1291,6 +1299,12 @@ function App() {
 
   const save = async () => {
     if(!editing.name){ flash("Poné un nombre"); return; }
+    const faltan = (editing.units||[]).filter(sinFotos);
+    if(faltan.length && !avisoFotos){
+      const nombres = faltan.map(u=>u.name||("Cabaña "+((editing.units||[]).indexOf(u)+1))).join(", ");
+      if(!confirm("Sin fotos: "+nombres+".\n\nEn la guía se van a ver solo con el nombre. Podés guardar igual y subirlas después.\n\n¿Guardar así?")) return;
+      setAvisoFotos(true);
+    }
     setSaving(true);
     const { data, error } = await db.from("cabins").upsert(toRow(editing)).select();
     setSaving(false);

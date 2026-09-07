@@ -1214,8 +1214,11 @@ section .filters{
 .comod2{display:grid;grid-template-columns:1fr 1fr;gap:2px 20px}
 .comod2 div{display:flex;align-items:center;gap:11px;padding:9px 0;font-size:15px;color:var(--suave)}
 .comod2 i{width:6px;height:6px;border-radius:50%;background:var(--monte);flex:none}
-.unidades2{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.unidades2{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start}
 .unidad2{background:transparent;border:0;padding:0;text-align:left;cursor:pointer}
+/* sin foto no dibujamos el recuadro vacío: queda una ficha de texto, a propósito */
+.unidad2.sinfoto{background:#fff;border:1px solid var(--linea);border-radius:var(--rm);padding:15px 17px}
+.unidad2.sinfoto b{margin-top:0}
 .unidad2 .ph{position:relative;aspect-ratio:4/3;border-radius:var(--rm);overflow:hidden;background:var(--papel)}
 .unidad2 .ph img{width:100%;height:100%;object-fit:cover}
 .unidad2 .play{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:20px;
@@ -1736,11 +1739,12 @@ function Landing({ c, acts=[], food=[] }) {
                     const yid=vids[0]?ytId(vids[0]):null;
                     const poster = ph[0] ? IMG(ph[0]) : (yid ? ("https://img.youtube.com/vi/"+yid+"/hqdefault.jpg") : null);
                     return (
-                      <button className="unidad2" key={i} onClick={()=>setOpenUnit(i)}>
-                        <div className="ph">{poster && <img src={poster} alt={u.name||("Cabaña "+(i+1))} loading="lazy" />}
-                          {vids.length>0 && <span className="play">▶</span>}</div>
+                      <button className={"unidad2"+(poster?"":" sinfoto")} key={i} onClick={()=>setOpenUnit(i)}>
+                        {poster && <div className="ph"><img src={poster} alt={u.name||("Cabaña "+(i+1))} loading="lazy" />
+                          {vids.length>0 && <span className="play">▶</span>}</div>}
                         <b>{u.name||("Cabaña "+(i+1))}</b>
                         {u.capacity && <small>hasta {u.capacity}</small>}
+                        {!poster && vids.length>0 && <small>▶ Tiene video</small>}
                       </button>
                     );
                   })}
