@@ -280,7 +280,7 @@ header,header.vt{position:sticky !important;top:0 !important;
 </head>
 <body><div id="root"></div>
 <script type="text/babel">
-const { useState, useEffect } = React;
+const { useState, useEffect, useRef } = React;
 const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -458,12 +458,516 @@ const compressToWebp = async (file, maxDim=1600, quality=0.82) => {
 const delFromStorage = async (url) => { try { const m=String(url||"").match(/\/storage\/v1\/object\/public\/fotos\/(.+)$/); if(m) await db.storage.from("fotos").remove([decodeURIComponent(m[1])]); } catch(_){} };
 async function up(file, prefix){ const f=await compressToWebp(file); const path=prefix+"-"+Date.now()+"-"+Math.random().toString(36).slice(2)+"-"+f.name.replace(/[^a-zA-Z0-9.]/g,"_"); const { error }=await db.storage.from("fotos").upload(path,f); if(error) return null; return db.storage.from("fotos").getPublicUrl(path).data.publicUrl; }
 
+/* ═══════════════════════════════════════════════════════════
+   MENÚ · categorías ordenables, platos ordenables y carga masiva
+   El menú sigue siendo un array plano en la columna JSONB `menu`.
+   Invariante: el array queda AGRUPADO por categoría.
+     · orden de las categorías = orden de los grupos
+     · orden de los platos     = posición dentro del grupo
+   menu.html y resto.html ya arman las categorías con
+   [...new Set(c.menu.map(i=>i.category||"Menú"))], así que respetan
+   este orden sin cambiarles una línea.
+   ═══════════════════════════════════════════════════════════ */
+const catKey = (it) => String((it && it.category) || "").trim();
+const catLabel = (k) => k || "Menú";
+const norm = (s) => String(s==null?"":s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+
+function agrupar(menu){
+  const orden = [], mapa = Object.create(null);
+  (menu||[]).forEach(it=>{ const k = catKey(it); if(!mapa[k]){ mapa[k] = []; orden.push(k); } mapa[k].push(it); });
+  return orden.map(k=>({ cat:k, items:mapa[k] }));
+}
+const aplanar = (gs) => gs.reduce((a,g)=>a.concat(g.items.map(it=>({ ...it, category:g.cat }))), []);
+const PLATO_VACIO = { name:"", category:"", price:0, desc:"", photo:"", tags:[] };
+
+/* ── CSV ─────────────────────────────────────────────────── */
+const CSV_COLS = {
+  category:["categoria","rubro","seccion","grupo"],
+  name:["plato","nombre","producto","item"],
+  desc:["descripcion","detalle","desc"],
+  price:["precio","valor","importe","price"],
+  tags:["etiquetas","etiqueta","tags"],
+  photo:["foto","imagen","photo","foto (url)"]
+};
+
+const csvCelda = (v) => { const s = String(v==null?"":v); return /[";,\n\r]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
+
+function csvParse(texto){
+  const cab = (texto.split(/\r?\n/)[0] || "");
+  let sep = ";", mejor = -1;
+  [";",",","\t"].forEach(s=>{ const n = cab.split(s).length; if(n > mejor){ mejor = n; sep = s; } });
+  const filas = []; let fila = [], celda = "", entre = false;
+  for(let i=0;i<texto.length;i++){
+    const ch = texto[i];
+    if(entre){
+      if(ch === '"'){ if(texto[i+1] === '"'){ celda += '"'; i++; } else entre = false; }
+      else celda += ch;
+    } else if(ch === '"') entre = true;
+    else if(ch === sep){ fila.push(celda); celda = ""; }
+    else if(ch === "\n"){ fila.push(celda); filas.push(fila); fila = []; celda = ""; }
+    else if(ch !== "\r") celda += ch;
+  }
+  if(celda.length || fila.length){ fila.push(celda); filas.push(fila); }
+  return filas.filter(f=>f.some(x=>String(x).trim() !== ""));
+}
+
+/* "$15.000" → 15000 · "7,5" → 7.5 · "1.234.567" → 1234567 */
+const parsePrecio = (v) => {
+  if(typeof v === "number") return v;
+  const s = String(v==null?"":v).replace(/[^\d.,-]/g,"").trim();
+  if(!s) return 0;
+  const ult = Math.max(s.lastIndexOf(","), s.lastIndexOf("."));
+  if(ult < 0) return Number(s) || 0;
+  const decimales = s.length - ult - 1;
+  if(decimales === 3) return Number(s.replace(/[.,]/g,"")) || 0;   // separador de miles
+  return Number(s.slice(0,ult).replace(/[.,]/g,"") + "." + s.slice(ult+1)) || 0;
+};
+
+function csvAFilas(texto){
+  const filas = csvParse(String(texto||"").replace(/^\uFEFF/,""));
+  if(!filas.length) return { filas:[], sinNombre:0 };
+  const cab = filas[0].map(norm);
+  const idx = {};
+  Object.keys(CSV_COLS).forEach(k=>{ idx[k] = cab.findIndex(h => CSV_COLS[k].indexOf(h) >= 0); });
+  const conCabecera = Object.keys(idx).some(k => idx[k] >= 0);
+  const cuerpo = conCabecera ? filas.slice(1) : filas;
+  if(!conCabecera){ idx.category=0; idx.name=1; idx.desc=2; idx.price=3; idx.tags=4; idx.photo=5; }
+  const dato = (f,k) => (idx[k] >= 0 ? String(f[idx[k]] == null ? "" : f[idx[k]]).trim() : "");
+  let sinNombre = 0;
+  const out = [];
+  cuerpo.forEach(f=>{
+    const name = dato(f,"name");
+    if(!name){ sinNombre++; return; }
+    out.push({
+      category: dato(f,"category"),
+      name,
+      desc: dato(f,"desc"),
+      price: parsePrecio(dato(f,"price")),
+      tags: dato(f,"tags").split(/[,|]/).map(x=>x.trim()).filter(Boolean).slice(0,3),
+      photo: dato(f,"photo")
+    });
+  });
+  return { filas:out, sinNombre };
+}
+
+function menuACsv(menu){
+  const lin = [["Categoría","Plato","Descripción","Precio","Etiquetas","Foto (URL)"].join(";")];
+  agrupar(menu).forEach(g=>{
+    g.items.forEach(it=>{
+      lin.push([catLabel(g.cat), it.name||"", it.desc||"", it.price||0, tagsDe(it).join(", "), it.photo||""].map(csvCelda).join(";"));
+    });
+  });
+  return lin.join("\r\n");
+}
+
+const CSV_PLANTILLA = [
+  ["Categoría","Plato","Descripción","Precio","Etiquetas","Foto (URL)"].join(";"),
+  ["Para compartir","Picada serrana","Quesos y fiambres de la zona, para dos","22000","Para compartir",""].join(";"),
+  ["Para compartir","Provoleta","Con orégano y aceite de oliva","7500","Sin TACC",""].join(";"),
+  ["Principales","Bife de chorizo","400 g a la parrilla, con guarnición","36000","Recomendado, 400 g",""].join(";"),
+  ["Postres","Flan casero","Con dulce de leche y crema","6200","",""].join(";")
+].join("\r\n");
+
+function bajarCsv(nombre, texto){
+  const blob = new Blob(["\uFEFF"+texto], { type:"text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = nombre;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+}
+
+/* Excel a veces guarda en Windows-1252 y las tildes se rompen: probamos los dos. */
+async function leerTexto(file){
+  const buf = await file.arrayBuffer();
+  try { return new TextDecoder("utf-8", { fatal:true }).decode(buf); }
+  catch(_) { return new TextDecoder("windows-1252").decode(buf); }
+}
+
+/* Agrega y actualiza: el CSV manda el orden, lo que no figura se conserva. */
+function fusionar(actual, filas){
+  const porCatNombre = Object.create(null), porNombre = Object.create(null);
+  (actual||[]).forEach(it=>{
+    const n = norm(it.name); if(!n) return;
+    porCatNombre[norm(catKey(it))+"|"+n] = it;
+    (porNombre[n] = porNombre[n] || []).push(it);
+  });
+  const usados = [], orden = [], grupos = Object.create(null);
+  const meter = (cat, it) => { if(!grupos[cat]){ grupos[cat] = []; orden.push(cat); } grupos[cat].push(it); };
+  let nuevos = 0, actualizados = 0, iguales = 0;
+
+  filas.forEach(f=>{
+    const n = norm(f.name), cat = f.category.trim();
+    let prev = porCatNombre[norm(cat)+"|"+n];
+    if(!prev){
+      const cand = (porNombre[n] || []).filter(x => usados.indexOf(x) < 0);
+      if(cand.length === 1) prev = cand[0];
+    }
+    if(prev && usados.indexOf(prev) >= 0) prev = null;
+    if(prev){
+      usados.push(prev);
+      const foto = f.photo || prev.photo || "";
+      const igual = String(prev.name||"") === f.name && catKey(prev) === cat
+        && Number(prev.price||0) === Number(f.price||0) && String(prev.desc||"") === f.desc
+        && tagsDe(prev).join("|") === f.tags.join("|") && String(prev.photo||"") === foto;
+      igual ? iguales++ : actualizados++;
+      meter(cat, { ...prev, name:f.name, category:cat, price:f.price, desc:f.desc, tags:f.tags, photo:foto });
+    } else {
+      nuevos++;
+      meter(cat, { name:f.name, category:cat, price:f.price, desc:f.desc, photo:f.photo||"", tags:f.tags });
+    }
+  });
+
+  let mantenidos = 0;
+  (actual||[]).forEach(it=>{
+    if(usados.indexOf(it) >= 0) return;
+    if(norm(it.name)) mantenidos++;
+    meter(catKey(it), it);
+  });
+
+  const menu = orden.reduce((a,k)=>a.concat(grupos[k].map(it=>({ ...it, category:k }))), []);
+  return { menu, nuevos, actualizados, iguales, mantenidos };
+}
+
+/* ── Carga masiva ────────────────────────────────────────── */
+function CargaMasiva({ c, aplicar }){
+  const [abierto,setAbierto] = useState(false);
+  const [prev,setPrev] = useState(null);
+  const [error,setError] = useState("");
+
+  const subir = async (e) => {
+    const f = (e.target.files||[])[0]; e.target.value = "";
+    if(!f) return;
+    setError(""); setPrev(null);
+    try {
+      const { filas, sinNombre } = csvAFilas(await leerTexto(f));
+      if(!filas.length){ setError("No encontramos platos en el archivo. Revisá que tenga una columna con el nombre del plato."); return; }
+      setPrev({ ...fusionar(c.menu||[], filas), sinNombre, archivo:f.name, total:filas.length });
+    } catch(err){ setError("No pudimos leer el archivo: "+err.message); }
+  };
+
+  const B = "rounded-xl px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600";
+  return (
+    <div className="rounded-xl border border-stone-200 p-3 mb-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="ff-body text-sm font-semibold" style={{color:C.ink}}>Carga masiva</div>
+          <p className="ff-body text-xs text-stone-500">Bajá la carta como planilla, editala en Excel o Sheets y volvé a subirla.</p>
+        </div>
+        <button onClick={()=>setAbierto(v=>!v)} className="shrink-0 ff-body text-sm font-semibold" style={{color:C.clay}}>{abierto?"Ocultar":"Abrir"}</button>
+      </div>
+
+      {abierto && (
+        <div className="mt-3">
+          <div className="flex flex-wrap gap-2">
+            <button onClick={()=>bajarCsv("carta-"+(c.slug||slugify(c.name)||"tandil")+".csv", menuACsv(c.menu||[]))}
+              disabled={!(c.menu||[]).length} className={B+" disabled:opacity-40"}>⬇️ Bajar la carta</button>
+            <button onClick={()=>bajarCsv("plantilla-carta.csv", CSV_PLANTILLA)} className={B}>📄 Bajar plantilla</button>
+            <label className="cursor-pointer">
+              <span className="inline-flex rounded-xl px-3 py-2 ff-body text-sm font-semibold text-white" style={{background:C.moss}}>⬆️ Subir planilla</span>
+              <input type="file" accept=".csv,text/csv,text/plain" onChange={subir} className="hidden" />
+            </label>
+          </div>
+          <p className="ff-body text-[11px] text-stone-400 mt-2">
+            Columnas: categoría, plato, descripción, precio, etiquetas y foto. El orden de las filas es el orden de la carta.
+            Si dejás la foto vacía en un plato que ya existe, se mantiene la que tenía.
+          </p>
+
+          {error && <p className="ff-body text-sm text-rose-600 mt-2">{error}</p>}
+
+          {prev && (
+            <div className="mt-3 rounded-xl border p-3" style={{borderColor:C.moss, background:"#F7F5EC"}}>
+              <div className="ff-body text-sm" style={{color:C.ink}}>
+                <b>{prev.archivo}</b> · {prev.total} fila{prev.total===1?"":"s"}
+              </div>
+              <div className="ff-body text-sm mt-1" style={{color:C.ink}}>
+                {prev.nuevos} nuevo{prev.nuevos===1?"":"s"} · {prev.actualizados} actualizado{prev.actualizados===1?"":"s"} · {prev.iguales} sin cambios
+                {prev.mantenidos > 0 && <> · {prev.mantenidos} de la carta no figuran en la planilla y se mantienen</>}
+              </div>
+              {prev.sinNombre > 0 && <p className="ff-body text-xs text-amber-700 mt-1">{prev.sinNombre} fila{prev.sinNombre===1?"":"s"} sin nombre de plato: se ignoran.</p>}
+              <div className="mt-2 max-h-44 overflow-auto rounded-lg bg-white border border-black/5">
+                {agrupar(prev.menu).map((g,gi)=>(
+                  <div key={gi} className="px-2.5 py-1.5 border-b border-black/5 last:border-0">
+                    <div className="ff-body text-[11px] font-semibold text-stone-500">{catLabel(g.cat)}</div>
+                    {g.items.map((it,ii)=>(
+                      <div key={ii} className="ff-body text-xs flex justify-between gap-3" style={{color:C.ink}}>
+                        <span className="truncate">{it.name || <em className="text-stone-400">sin nombre</em>}</span>
+                        <span className="text-stone-500 shrink-0">{money(it.price)}</span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 mt-3">
+                <button onClick={()=>{ aplicar(prev.menu); setPrev(null); }}
+                  className="rounded-xl px-4 py-2 ff-body text-sm font-semibold text-white" style={{background:C.clay}}>Aplicar cambios</button>
+                <button onClick={()=>setPrev(null)} className={B}>Cancelar</button>
+              </div>
+              <p className="ff-body text-[11px] text-stone-500 mt-2">Todavía no se guardó: revisá la carta y tocá <b>Guardar</b> arriba.</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Editor del menú ─────────────────────────────────────── */
+function MenuEditor({ c, set }){
+  const [uploading,setUploading] = useState(false);
+  const [cerrado,setCerrado] = useState({});
+  const [nuevaCat,setNuevaCat] = useState("");
+  const [renombrando,setRenombrando] = useState(null);
+  const [drag,setDrag] = useState(null);      // {tipo:"cat"|"plato", gi, ii}
+  const [linea,setLinea] = useState(null);    // guía de dónde va a caer
+  const cont = useRef(null);
+  const d = useRef({});
+
+  const grupos = agrupar(c.menu||[]);
+  const setGrupos = (gs) => set({ ...c, menu:aplanar(gs) });
+  const clonar = () => grupos.map(g=>({ cat:g.cat, items:g.items.slice() }));
+  const setItem = (gi,ii,patch) => { const gs = clonar(); gs[gi].items[ii] = { ...gs[gi].items[ii], ...patch }; setGrupos(gs); };
+
+  const subirFoto = async (e,gi,ii) => {
+    const f = (e.target.files||[])[0]; e.target.value = "";
+    if(!f) return;
+    setUploading(true);
+    const vieja = ((grupos[gi]||{items:[]}).items[ii]||{}).photo;
+    const u = await up(f,"plato");
+    if(u){ if(vieja) delFromStorage(vieja); setItem(gi,ii,{ photo:u }); }
+    setUploading(false);
+  };
+
+  const agregarPlato = (gi) => { const gs = clonar(); gs[gi].items.push({ ...PLATO_VACIO, category:gs[gi].cat }); setGrupos(gs); };
+  const borrarPlato = (gi,ii) => {
+    const it = grupos[gi].items[ii];
+    if(it && it.photo) delFromStorage(it.photo);
+    const gs = clonar(); gs[gi].items.splice(ii,1); setGrupos(gs);
+  };
+  const agregarCat = () => {
+    const nombre = nuevaCat.trim(); if(!nombre) return;
+    const gs = clonar();
+    const ya = gs.findIndex(g => norm(g.cat) === norm(nombre));
+    if(ya >= 0){ gs[ya].items.push({ ...PLATO_VACIO, category:gs[ya].cat }); }
+    else gs.push({ cat:nombre, items:[{ ...PLATO_VACIO, category:nombre }] });
+    setGrupos(gs); setNuevaCat("");
+  };
+  const borrarCat = (gi) => {
+    const g = grupos[gi];
+    if(!confirm("¿Borrar la categoría «"+catLabel(g.cat)+"» y sus "+g.items.length+" plato(s)?")) return;
+    g.items.forEach(it=>{ if(it.photo) delFromStorage(it.photo); });
+    const gs = clonar(); gs.splice(gi,1); setGrupos(gs);
+  };
+  /* El nombre se edita en un borrador y se confirma al salir del campo:
+     si se escribiera letra por letra sobre c.menu, un nombre intermedio igual
+     al de otra categoría fusionaría los dos grupos sin aviso. */
+  const commitCat = () => {
+    const r = renombrando; if(!r) return;
+    setRenombrando(null);
+    const gs = clonar(); const valor = r.valor.trim();
+    if(!gs[r.gi] || gs[r.gi].cat === valor) return;
+    const otro = gs.findIndex((o,j)=> j !== r.gi && norm(o.cat) === norm(valor));
+    if(otro >= 0 && !confirm("Ya existe la categoría «"+catLabel(gs[otro].cat)+"». ¿Unir las dos?")) return;
+    gs[r.gi].cat = valor; setGrupos(gs);
+  };
+
+  /* Mover con el teclado: misma acción que arrastrar, para quien no puede. */
+  const moverCat = (gi,paso) => {
+    const j = gi + paso; if(j < 0 || j >= grupos.length) return;
+    const gs = clonar(); const [g] = gs.splice(gi,1); gs.splice(j,0,g); setGrupos(gs);
+  };
+  const moverPlato = (gi,ii,paso) => {
+    const gs = clonar(), g = gs[gi], j = ii + paso;
+    if(j < 0){ if(gi === 0) return; const [it] = g.items.splice(ii,1); gs[gi-1].items.push({ ...it, category:gs[gi-1].cat }); }
+    else if(j >= g.items.length){ if(gi === gs.length-1) return; const [it] = g.items.splice(ii,1); gs[gi+1].items.unshift({ ...it, category:gs[gi+1].cat }); }
+    else { const [it] = g.items.splice(ii,1); g.items.splice(j,0,it); }
+    setGrupos(gs);
+  };
+
+  /* ── arrastrar (mouse y touch, sin librerías) ── */
+  const medirSlots = (tipo) => {
+    const root = cont.current; if(!root) return [];
+    const sy = window.scrollY, slots = [];
+    if(tipo === "cat"){
+      const els = Array.from(root.querySelectorAll("[data-grupo]"));
+      els.forEach((el,i)=>{ const r = el.getBoundingClientRect(); slots.push({ y:r.top+sy-6, left:r.left, w:r.width, pos:i }); });
+      if(els.length){ const r = els[els.length-1].getBoundingClientRect(); slots.push({ y:r.bottom+sy+6, left:r.left, w:r.width, pos:els.length }); }
+    } else {
+      Array.from(root.querySelectorAll("[data-lista]")).forEach(lista=>{
+        const gi = +lista.getAttribute("data-lista");
+        const hijos = Array.from(lista.querySelectorAll("[data-plato]"));
+        const rl = lista.getBoundingClientRect();
+        if(!hijos.length){ slots.push({ y:rl.top+sy+8, left:rl.left, w:rl.width||160, gi, pos:0 }); return; }
+        hijos.forEach((el,i)=>{ const r = el.getBoundingClientRect(); slots.push({ y:r.top+sy-5, left:r.left, w:r.width, gi, pos:i }); });
+        const r = hijos[hijos.length-1].getBoundingClientRect();
+        slots.push({ y:r.bottom+sy+5, left:r.left, w:r.width, gi, pos:hijos.length });
+      });
+    }
+    return slots;
+  };
+
+  const guia = () => {
+    const s = d.current;
+    if(!s.slots || !s.slots.length) return;
+    const py = s.y + window.scrollY;
+    let mejor = s.slots[0], dist = Infinity;
+    s.slots.forEach(x=>{ const q = Math.abs(x.y - py); if(q < dist){ dist = q; mejor = x; } });
+    s.destino = mejor;
+    setLinea({ y:mejor.y - window.scrollY, left:mejor.left, w:mejor.w });
+  };
+
+  const tick = () => {
+    const s = d.current; if(!s.tipo) return;
+    const alto = window.innerHeight, borde = 90;
+    let v = 0;
+    if(s.y < borde) v = -Math.min(20, (borde - s.y)/3);
+    else if(s.y > alto - borde) v = Math.min(20, (s.y - (alto - borde))/3);
+    if(v){ window.scrollBy(0, v); guia(); }
+    s.raf = requestAnimationFrame(tick);
+  };
+
+  const onDown = (tipo,gi,ii) => (e) => {
+    if(e.button != null && e.button !== 0) return;
+    e.preventDefault();
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch(_){}
+    if(tipo === "plato") setCerrado({});          // para poder soltar en cualquier categoría
+    d.current = { tipo, gi, ii, y:e.clientY, slots:medirSlots(tipo) };
+    requestAnimationFrame(()=>{ if(!d.current.tipo) return; d.current.slots = medirSlots(tipo); guia(); });
+    d.current.raf = requestAnimationFrame(tick);
+    setDrag({ tipo, gi, ii });
+  };
+
+  const onMove = (e) => { if(!d.current.tipo) return; d.current.y = e.clientY; guia(); };
+
+  const onUp = () => {
+    const s = d.current;
+    if(s.raf) cancelAnimationFrame(s.raf);
+    if(s.tipo && s.destino){
+      const gs = clonar();
+      if(s.tipo === "cat"){
+        const [g] = gs.splice(s.gi,1);
+        gs.splice(s.destino.pos > s.gi ? s.destino.pos-1 : s.destino.pos, 0, g);
+      } else {
+        const [it] = gs[s.gi].items.splice(s.ii,1);
+        const destino = gs[s.destino.gi];
+        let pos = s.destino.pos;
+        if(s.destino.gi === s.gi && pos > s.ii) pos--;
+        destino.items.splice(pos, 0, { ...it, category:destino.cat });
+      }
+      setGrupos(gs);
+    }
+    d.current = {}; setDrag(null); setLinea(null);
+  };
+
+  const asaProps = (tipo,gi,ii) => ({
+    onPointerDown:onDown(tipo,gi,ii), onPointerMove:onMove, onPointerUp:onUp, onPointerCancel:onUp,
+    onKeyDown:(e)=>{
+      if(e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+      e.preventDefault(); const paso = e.key === "ArrowUp" ? -1 : 1;
+      tipo === "cat" ? moverCat(gi,paso) : moverPlato(gi,ii,paso);
+    },
+    tabIndex:0, role:"button",
+    "aria-label": tipo === "cat" ? "Mover la categoría" : "Mover el plato",
+    style:{ touchAction:"none", cursor:drag?"grabbing":"grab", color:"#a8a29e" },
+    title:"Arrastrá para mover, o usá las flechas ↑ ↓"
+  });
+
+  const platos = (c.menu||[]).length;
+  const sinNombre = (c.menu||[]).filter(x=>!String(x.name||"").trim()).length;
+
+  return (
+    <div className="bg-white rounded-2xl border border-black/5 p-5 h-fit" ref={cont} style={{ userSelect:drag?"none":"auto" }}>
+      <h3 className="ff-display text-lg mb-1" style={{color:C.ink}}>🍽️ Menú</h3>
+      <p className="ff-body text-sm text-stone-500 mb-1">Cargá tus platos con foto, precio, categoría y etiquetas.</p>
+      <p className="ff-body text-xs text-stone-400 mb-4">
+        {platos} plato{platos===1?"":"s"} en {grupos.length} categoría{grupos.length===1?"":"s"} · así se ordenan en la carta.
+        {sinNombre > 0 && <span className="text-amber-700"> · {sinNombre} sin nombre: no se ven en la carta.</span>}
+      </p>
+
+      <CargaMasiva c={c} aplicar={(m)=>set({ ...c, menu:m })} />
+
+      <div className="space-y-3">
+        {grupos.map((g,gi)=>{
+          const abierta = !cerrado[g.cat];
+          const arrastrada = drag && drag.tipo === "cat" && drag.gi === gi;
+          const choca = grupos.some((o,j)=> j !== gi && norm(o.cat) === norm(g.cat) && g.cat.trim());
+          return (
+            <div key={gi} data-grupo={gi} className="rounded-xl border border-stone-200"
+              style={arrastrada ? { opacity:.4 } : {}}>
+              <div className="flex items-center gap-1.5 px-2.5 py-2 border-b border-stone-100">
+                <span {...asaProps("cat",gi)} className="px-1 text-lg leading-none select-none">⠿</span>
+                <button onClick={()=>setCerrado({ ...cerrado, [g.cat]:abierta })} className="ff-body text-xs text-stone-400 w-4 shrink-0">{abierta?"▾":"▸"}</button>
+                <input value={renombrando && renombrando.gi === gi ? renombrando.valor : g.cat} placeholder="Menú"
+                  onChange={e=>setRenombrando({ gi, valor:e.target.value })}
+                  onBlur={commitCat}
+                  onKeyDown={e=>{ if(e.key === "Enter"){ e.preventDefault(); e.target.blur(); } if(e.key === "Escape") setRenombrando(null); }}
+                  className="flex-1 min-w-0 ff-body text-sm font-semibold bg-transparent outline-none border-b border-transparent focus:border-stone-300 py-0.5"
+                  style={{color:C.ink}} />
+                <span className="ff-body text-xs text-stone-400 shrink-0">{g.items.length}</span>
+                <button onClick={()=>borrarCat(gi)} className="text-rose-400 px-1 shrink-0" title="Borrar categoría">🗑️</button>
+              </div>
+              {choca && <p className="ff-body text-[11px] text-amber-700 px-3 pt-1.5">Hay otra categoría con este nombre: se van a unir.</p>}
+
+              <div data-lista={gi} className={"px-2.5 "+(abierta ? "py-2.5 space-y-2.5" : "py-1")}>
+                {!abierta
+                  ? <p className="ff-body text-xs text-stone-400 px-1">{g.items.length} plato{g.items.length===1?"":"s"} · tocá ▸ para abrir</p>
+                  : g.items.map((it,ii)=>{
+                      const dim = drag && drag.tipo === "plato" && drag.gi === gi && drag.ii === ii;
+                      return (
+                        <div key={ii} data-plato={ii} className="border border-stone-200 rounded-xl p-2.5" style={dim ? { opacity:.4 } : {}}>
+                          <div className="flex gap-2.5">
+                            <div className="flex flex-col items-center gap-1 shrink-0">
+                              <span {...asaProps("plato",gi,ii)} className="text-lg leading-none select-none">⠿</span>
+                              <label className="cursor-pointer">
+                                {it.photo ? <img src={IMG(it.photo)} className="w-16 h-16 rounded-lg object-cover bg-stone-200" />
+                                          : <span className="w-16 h-16 rounded-lg bg-stone-100 grid place-items-center text-xl">📷</span>}
+                                <input type="file" accept="image/*" onChange={e=>subirFoto(e,gi,ii)} disabled={uploading} className="hidden" />
+                              </label>
+                            </div>
+                            <div className="flex-1 min-w-0 space-y-2">
+                              <input value={it.name||""} onChange={e=>setItem(gi,ii,{ name:e.target.value })} placeholder="Nombre del plato" className="w-full border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                              <div className="flex items-center border border-stone-300 rounded-lg px-2 w-32"><span className="ff-body text-sm shrink-0" style={{color:"#8a836f",letterSpacing:".02em"}}>ARS$</span><input type="number" value={it.price||""} onChange={e=>setItem(gi,ii,{ price:+e.target.value })} className="w-full py-1.5 ff-body text-sm outline-none" /></div>
+                              <input value={it.desc||""} onChange={e=>setItem(gi,ii,{ desc:e.target.value })} placeholder="Descripción corta" className="w-full border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                              <Etiquetas it={it} onChange={(t)=>setItem(gi,ii,{ tags:t })} />
+                            </div>
+                            <button onClick={()=>borrarPlato(gi,ii)} className="text-rose-500 self-start shrink-0">🗑️</button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                {abierta && <button onClick={()=>agregarPlato(gi)} className="ff-body text-sm font-semibold" style={{color:C.clay}}>+ Agregar plato</button>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {!grupos.length && (
+        <div className="py-6 text-center">
+          <p className="ff-body text-sm text-stone-400">Todavía no cargaste ningún plato.</p>
+          <button onClick={()=>setGrupos([{ cat:"", items:[{ ...PLATO_VACIO }] }])} className="mt-2 ff-body text-sm font-semibold" style={{color:C.clay}}>+ Agregar el primer plato</button>
+          <p className="ff-body text-xs text-stone-400 mt-1">o creá una categoría, o subí una planilla</p>
+        </div>
+      )}
+
+      <div className="flex gap-2 mt-4">
+        <input value={nuevaCat} onChange={e=>setNuevaCat(e.target.value)}
+          onKeyDown={e=>{ if(e.key === "Enter"){ e.preventDefault(); agregarCat(); } }}
+          placeholder="Nueva categoría (Entradas, Postres…)"
+          className="flex-1 min-w-0 border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" />
+        <button onClick={agregarCat} className="rounded-xl px-3 py-2 ff-body text-sm font-semibold text-white shrink-0" style={{ background:C.moss, opacity:nuevaCat.trim()?1:.4 }}>Agregar</button>
+      </div>
+
+      {linea && <div style={{ position:"fixed", left:linea.left, width:linea.w, top:linea.y-1.5, height:3, background:C.moss, borderRadius:2, zIndex:60, pointerEvents:"none" }} />}
+      {uploading && <p className="ff-body text-xs text-stone-500 mt-2">Subiendo foto…</p>}
+    </div>
+  );
+}
+
 function Editor({ c, set }) {
   const [uploading,setUploading]=useState(false);
   const uploadBanner = async (e)=>{ const f=(e.target.files||[])[0]; if(!f)return; setUploading(true); const old=c.banner; const u=await up(f,"resto-banner"); if(u){ if(old) delFromStorage(old); set({...c,banner:u}); } setUploading(false); e.target.value=""; };
   const uploadGallery = async (e)=>{ const fs=Array.from(e.target.files||[]); if(!fs.length)return; const MAXP=15; const room=MAXP-(c.photos||[]).length; if(room<=0){ alert("Llegaste al máximo de "+MAXP+" fotos. Borrá alguna para subir otra."); e.target.value=""; return; } if(fs.length>room) alert("Solo se agregan "+room+" foto(s): el máximo es "+MAXP+"."); const toUp=fs.slice(0,room); setUploading(true); const urls=[]; for(const f of toUp){ const u=await up(f,"resto"); if(u) urls.push(u);} set({...c,photos:[...c.photos,...urls]}); setUploading(false); e.target.value=""; };
-  const uploadItem = async (e,i)=>{ const f=(e.target.files||[])[0]; if(!f)return; setUploading(true); const old=(c.menu[i]||{}).photo; const u=await up(f,"plato"); if(u){ if(old) delFromStorage(old); set({...c,menu:c.menu.map((x,j)=>j===i?{...x,photo:u}:x)}); } setUploading(false); e.target.value=""; };
-  const setItem=(i,patch)=>set({...c,menu:c.menu.map((x,j)=>j===i?{...x,...patch}:x)});
   return (
     <div className="grid md:grid-cols-2 gap-6">
       <div className="space-y-5">
@@ -553,33 +1057,7 @@ function Editor({ c, set }) {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-black/5 p-5 h-fit">
-        <h3 className="ff-display text-lg mb-1" style={{color:C.ink}}>🍽️ Menú</h3>
-        <p className="ff-body text-sm text-stone-500 mb-4">Cargá tus platos con foto, precio, categoría y etiquetas.</p>
-        <div className="space-y-4">
-          {c.menu.map((it,i)=>(
-            <div key={i} className="border border-stone-200 rounded-xl p-3">
-              <div className="flex gap-3">
-                <label className="shrink-0 cursor-pointer">
-                  {it.photo ? <img src={IMG(it.photo)} className="w-20 h-20 rounded-lg object-cover bg-stone-200" /> : <span className="w-20 h-20 rounded-lg bg-stone-100 grid place-items-center text-2xl">📷</span>}
-                  <input type="file" accept="image/*" onChange={e=>uploadItem(e,i)} className="hidden" />
-                </label>
-                <div className="flex-1 space-y-2">
-                  <input value={it.name||""} onChange={e=>setItem(i,{name:e.target.value})} placeholder="Nombre del plato" className="w-full border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
-                  <div className="flex gap-2">
-                    <input value={it.category||""} onChange={e=>setItem(i,{category:e.target.value})} placeholder="Categoría (Entradas, Principales...)" className="flex-1 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
-                    <div className="flex items-center border border-stone-300 rounded-lg px-2 w-28"><span className="ff-body text-sm shrink-0" style={{color:"#8a836f",letterSpacing:".02em"}}>ARS$</span><input type="number" value={it.price||""} onChange={e=>setItem(i,{price:+e.target.value})} className="w-full py-1.5 ff-body text-sm outline-none" /></div>
-                  </div>
-                  <input value={it.desc||""} onChange={e=>setItem(i,{desc:e.target.value})} placeholder="Descripción corta" className="w-full border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
-                  <Etiquetas it={it} onChange={(t)=>setItem(i,{tags:t})} />
-                </div>
-                <button onClick={()=>{ const it=c.menu[i]; if(it&&it.photo) delFromStorage(it.photo); set({...c,menu:c.menu.filter((_,j)=>j!==i)}); }} className="text-rose-500 self-start">🗑️</button>
-              </div>
-            </div>
-          ))}
-        </div>
-        <button onClick={()=>set({...c,menu:[...c.menu,{name:"",category:"",price:0,desc:"",photo:"",tags:[]}]})} className="mt-3 ff-body text-sm font-semibold" style={{color:C.clay}}>+ Agregar plato</button>
-      </div>
+      <MenuEditor c={c} set={set} />
     </div>
   );
 }
