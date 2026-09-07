@@ -779,7 +779,10 @@ function Reservas({ profile, cabins, afterSync }) {
   const traer = async () => {
     const { data, error } = await db.from("reservations").select("*").eq("rubro","hospedaje").order("start_date",{ascending:true});
     if(error){ setErr("No se pudieron leer las reservas. ¿Corriste el SQL de reservas en Supabase?"); return []; }
-    setErr(""); setRes(data||[]); return data||[];
+    /* segunda barrera, por si la base devolviera de más: solo reservas de MIS alojamientos */
+    const propios = new Set((cabins||[]).map(c=>c.slug));
+    const mias = (data||[]).filter(r => propios.has(r.slug));
+    setErr(""); setRes(mias); return mias;
   };
   useEffect(()=>{ (async()=>{ setLoading(true); await traer(); setLoading(false); })(); },[]);
 
@@ -884,6 +887,11 @@ function Reservas({ profile, cabins, afterSync }) {
   return (
     <div>
       {err && <div className="bg-white rounded-2xl border border-rose-200 p-4 mb-5 ff-body text-sm text-rose-700">{err}</div>}
+      {profile && profile.role==="admin" && (
+        <div className="rounded-xl px-4 py-3 mb-5 ff-body text-sm" style={{background:"rgba(46,53,33,.08)",color:C.ink}}>
+          Estás entrando como <b>admin</b>: acá ves los alojamientos y las reservas de <b>todos</b> los operadores. Cada operador, en su cuenta, ve solo lo suyo.
+        </div>
+      )}
 
       <div className="grid grid-cols-3 gap-3 mb-5">
         {[["Ocupadas hoy", filas.length?(ocupadasHoy+" de "+filas.length):"—"],
