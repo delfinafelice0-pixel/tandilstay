@@ -1426,6 +1426,15 @@ header, header.vt{ background:transparent !important;
 .filtrosbar, .filters, .filtros{ background:transparent !important;
   -webkit-backdrop-filter:saturate(1.1) blur(12px); backdrop-filter:saturate(1.1) blur(12px);
   border-bottom:1px solid rgba(70,62,42,.10) !important }
+
+/* ── alojamiento verificado ── */
+.tags2 .sello{ background:var(--monte) !important; color:#EDE4CD !important; border-color:var(--monte) !important; font-weight:600 }
+.seguro{ display:flex; gap:16px; align-items:flex-start; background:rgba(46,53,33,.06); border:1px solid rgba(46,53,33,.14);
+  border-radius:var(--r,18px); padding:18px 20px; margin:0 0 26px }
+.seguro-ico{ flex:none; width:38px; height:38px; border-radius:50%; background:var(--monte); color:#EDE4CD;
+  display:grid; place-items:center; font-weight:700; font-size:18px }
+.seguro h3{ font-family:var(--display); font-weight:400; font-size:21px; margin:0 0 6px; color:var(--tinta) }
+.seguro p{ margin:0; font-size:14.5px; color:var(--suave); line-height:1.55 }
 </style>
 </head>
 <body>
@@ -1459,7 +1468,7 @@ const AMEN = { wifi:"Wifi", aire:"Aire acondicionado", calefaccion:"Calefacción
 const DOW = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
 const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
-const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, promoText:r.promo_text||"", promos:r.promos||[], blocked:[...new Set([...(r.blocked||[]), ...(r.ical_blocked||[])])], overrides:r.overrides||{}, units:r.units||[], videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], minNights:r.min_nights||1, type:r.type||"" });
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, verificado:!!r.verificado, promoText:r.promo_text||"", promos:r.promos||[], blocked:[...new Set([...(r.blocked||[]), ...(r.ical_blocked||[])])], overrides:r.overrides||{}, units:r.units||[], videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], minNights:r.min_nights||1, type:r.type||"" });
 const nightlyPrice = (c,d) => (c.overrides && c.overrides[d]!=null ? c.overrides[d] : (isWeekend(d) && c.weekendPrice ? c.weekendPrice : c.price));
 function computeStay(c,ci,co){ if(!ci||!co) return null; let d=parseD(ci); const e=parseD(co); let sub=0,n=0; while(d<e){ sub+=nightlyPrice(c,iso(d)); n++; d=addDay(d); } let pct=0; (c.promos||[]).forEach(p=>{if(n>=p.min&&p.pct>pct)pct=p.pct;}); const disc=Math.round(sub*pct/100); return {n,sub,pct,disc,total:sub-disc}; }
 const isAvail = (c,ci,co) => { if(!ci||!co) return true; let d=parseD(ci); const e=parseD(co); while(d<e){ if(c.blocked.includes(iso(d))) return false; d=addDay(d); } return true; };
@@ -1646,6 +1655,7 @@ function Landing({ c, acts=[], food=[] }) {
             <h1>{c.name}</h1>
             {c.zone && <p className="zona2">{c.zone} · Tandil</p>}
             <div className="tags2">
+              {c.verificado && <span className="sello">✓ Alojamiento verificado</span>}
               <span>{capLabel(c)}</span>
               {c.bedrooms ? <span>{c.bedrooms} {c.bedrooms===1?"dormitorio":"dormitorios"}</span> : null}
               {c.amenities.includes("pileta") && <span>Pileta</span>}
@@ -1666,6 +1676,16 @@ function Landing({ c, acts=[], food=[] }) {
                 <h2>El lugar</h2>
                 {partes.map((p,i)=><p key={i} className="texto2">{p}</p>)}
                 {c.promoText && <p className="promo2">{c.promoText}</p>}
+              </div>
+            )}
+
+            {c.verificado && (
+              <div className="seguro reveal">
+                <div className="seguro-ico">✓</div>
+                <div>
+                  <h3>Alojamiento verificado · reservá seguro</h3>
+                  <p>Antes de publicarlo confirmamos que el lugar existe, que la dirección es real y que quien lo administra es quien dice ser. Igual, una recomendación que vale siempre: no transfieras la seña a una cuenta que no coincida con el nombre de la persona que te atiende.</p>
+                </div>
               </div>
             )}
 

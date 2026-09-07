@@ -318,7 +318,7 @@ function Orden(){
 
   const cargar = async (r) => {
     setCargando(true); setAviso("");
-    const { data, error } = await db.from(r).select("slug,name,orden,banner,photos");
+    const { data, error } = await db.from(r).select("slug,name,orden,banner,photos,verificado");
     if(error){ setAviso("No pude leer: "+error.message); setItems([]); setCargando(false); return; }
     const lista = (data||[]).slice().sort((a,b)=>{
       const oa = a.orden==null ? 9999 : a.orden, ob = b.orden==null ? 9999 : b.orden;
@@ -353,6 +353,12 @@ function Orden(){
   };
 
   const foto = (x) => x.banner || (x.photos && x.photos[0]) || "";
+  const verificar = async (x) => {
+    const nuevo = !x.verificado;
+    const { error } = await db.from(rubro).update({ verificado: nuevo }).eq("slug", x.slug);
+    if(error){ setAviso("No se pudo cambiar: "+error.message); return; }
+    setItems(items.map(i=>i.slug===x.slug ? {...i, verificado:nuevo} : i));
+  };
 
   return (
     <div className="space-y-4">
@@ -362,6 +368,7 @@ function Orden(){
             <h2 className="ff-display text-xl" style={{color:C.ink}}>Orden de las publicaciones</h2>
             <p className="ff-body text-sm text-stone-500 mt-1">
               El primero de la lista es el que aparece primero en el sitio. Movelo con las flechas y guardá.
+              En hospedajes también podés marcar cuáles están verificados: el sello aparece en la tarjeta y en la ficha.
             </p>
           </div>
           <div className="flex gap-2">
@@ -395,6 +402,11 @@ function Orden(){
               <p className="ff-body text-sm font-semibold truncate" style={{color:C.ink}}>{x.name}</p>
               <p className="ff-body text-xs text-stone-400 truncate">{x.slug}</p>
             </div>
+            {rubro==="cabins" && (
+              <button onClick={()=>verificar(x)} title={x.verificado ? "Quitar verificación" : "Marcar como verificado"}
+                className={"rounded-full px-3 h-9 ff-body text-xs font-semibold shrink-0 "+(x.verificado?"text-white":"text-stone-500 border border-stone-300")}
+                style={x.verificado?{background:C.moss}:{}}>{x.verificado ? "✓ Verificado" : "Verificar"}</button>
+            )}
             <div className="flex gap-1.5 shrink-0">
               <button onClick={()=>alPrincipio(i)} disabled={i===0} title="Poner primero"
                 className="w-9 h-9 rounded-lg border border-stone-300 ff-body disabled:opacity-30">↑↑</button>

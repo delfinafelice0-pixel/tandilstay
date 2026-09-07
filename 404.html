@@ -1625,6 +1625,8 @@ header, header.vt{ background:transparent !important;
 .vaciogua h3{ font-family:var(--display); font-size:24px; margin-bottom:10px }
 .vaciogua p{ color:var(--suave); font-size:15px }
 .vaciogua .botones{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:22px }
+
+.chip-ok{ background:var(--monte) !important; color:#EDE4CD !important }
 </style>
 <script>
 /* si la dirección viene con barra final, la saca: así las rutas relativas resuelven bien */
@@ -2228,6 +2230,7 @@ function Corazon({ id }) {
 function CabinCard({ c }) {
   const cover = c.banner || (c.photos && c.photos[0]);
   const etiquetas = [];
+  if(c.verificado) etiquetas.push("✓ Verificado");
   const cap = capRange(c); if(cap) etiquetas.push(cap);
   if((c.amenities||[]).includes("pileta")) etiquetas.push("Pileta");
   else if((c.amenities||[]).includes("parrilla")) etiquetas.push("Parrilla");
@@ -2235,7 +2238,7 @@ function CabinCard({ c }) {
   return (
     <a className="card worn" href={"cabana.html?slug=" + c.slug + opSuffix}>
       <div className="ph">
-        <div className="chips">{etiquetas.slice(0,2).map((t,i)=><span className="chip" key={i}>{t}</span>)}</div>
+        <div className="chips">{etiquetas.slice(0,3).map((t,i)=><span className={"chip"+(t.startsWith("✓")?" chip-ok":"")} key={i}>{t}</span>)}</div>
         <Corazon id={"hospedaje:" + c.slug} />
         <img src={IMG(cover)} alt={c.name} loading="lazy" />
       </div>

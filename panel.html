@@ -259,6 +259,12 @@ header, header.vt{ background:transparent !important;
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
 input[type=number]{ -moz-appearance:textfield }
+
+/* ── fotos que se arrastran para ordenar ── */
+.fotoarr{ cursor:grab; transition:transform .15s ease, opacity .15s ease }
+.fotoarr:active{ cursor:grabbing }
+.fotoarr.arrastrando{ opacity:.35; transform:scale(.96) }
+.fotoarr.destino{ outline:3px solid #2E3521; outline-offset:2px; border-radius:10px; transform:scale(1.03) }
 </style>
 
 <style>
@@ -441,6 +447,8 @@ function Editor({ c, set }) {
   const [priceInput,setPriceInput]=useState("");
   const [uploading,setUploading]=useState(false);
   const [syncing,setSyncing]=useState(false);
+  const [arrastre,setArrastre]=useState(null);   // qué foto se está arrastrando
+  const [sobre,setSobre]=useState(null);         // sobre cuál está pasando
   const [syncMsg,setSyncMsg]=useState("");
   const fmtSync = (s) => { if(!s) return ""; const d=new Date(s); return d.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"})+" "+d.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}); };
   const syncIcal = async () => {
@@ -501,8 +509,12 @@ function Editor({ c, set }) {
   };
   const calIdx = () => Math.max(0, Math.min(calUnit, (c.units||[]).length-1));
   const unitPrice = (u) => ({ price:(u&&u.price!=null&&u.price!=="")?+u.price:c.price, weekendPrice:(u&&u.weekendPrice!=null&&u.weekendPrice!=="")?+u.weekendPrice:c.weekendPrice, overrides:(u&&u.overrides)||{} });
-  const toggleBlock = (day) => { const k=calIdx(); set({...c, units:c.units.map((x,j)=>{ if(j!==k) return x; const man=x.blockedManual||x.blocked||[]; const res=x.resBlocked||[]; const nm=man.includes(day)?man.filter(d=>d!==day):[...man,day]; return {...x, blockedManual:nm, resBlocked:res, blocked:[...new Set([...nm,...res])]}; })}); };
-  const setOverride = (val) => { const k=calIdx(); set({...c, units:c.units.map((x,j)=>{ if(j!==k) return x; const o={...(x.overrides||{})}; if(val) o[selDay]=+val; else delete o[selDay]; return {...x, overrides:o}; })}); };
+  const toggleBlock = (day) => {
+    if(!(c.units||[]).length){ const man=c.blocked||[]; set({...c, blocked: man.includes(day)?man.filter(d=>d!==day):[...man,day]}); return; }
+    const k=calIdx(); set({...c, units:c.units.map((x,j)=>{ if(j!==k) return x; const man=x.blockedManual||x.blocked||[]; const res=x.resBlocked||[]; const nm=man.includes(day)?man.filter(d=>d!==day):[...man,day]; return {...x, blockedManual:nm, resBlocked:res, blocked:[...new Set([...nm,...res])]}; })}); };
+  const setOverride = (val) => {
+    if(!(c.units||[]).length){ const o={...(c.overrides||{})}; if(val) o[selDay]=+val; else delete o[selDay]; set({...c, overrides:o}); return; }
+    const k=calIdx(); set({...c, units:c.units.map((x,j)=>{ if(j!==k) return x; const o={...(x.overrides||{})}; if(val) o[selDay]=+val; else delete o[selDay]; return {...x, overrides:o}; })}); };
   return (
     <div className="grid md:grid-cols-2 gap-6">
       <div className="space-y-5">
@@ -628,8 +640,14 @@ function Editor({ c, set }) {
           {c.photos.length>0 && (
             <div className="grid grid-cols-3 gap-2 my-2">
               {c.photos.map((p,i)=>(
-                <div key={i} className="relative">
-                  <img src={IMG(p)} className="w-full h-20 rounded-lg object-cover bg-stone-200" />
+                <div key={p+i} className={"relative fotoarr "+(arrastre===i?"arrastrando":"")+(sobre===i?" destino":"")}
+                  draggable
+                  onDragStart={e=>{ setArrastre(i); e.dataTransfer.effectAllowed="move"; try{e.dataTransfer.setData("text/plain",String(i));}catch(x){} }}
+                  onDragOver={e=>{ e.preventDefault(); if(sobre!==i) setSobre(i); }}
+                  onDragLeave={()=>{ if(sobre===i) setSobre(null); }}
+                  onDrop={e=>{ e.preventDefault(); const desde = arrastre!=null ? arrastre : +e.dataTransfer.getData("text/plain"); if(desde!==i && desde!=null && !isNaN(desde)){ const a=[...c.photos]; const [m]=a.splice(desde,1); a.splice(i,0,m); set({...c,photos:a}); } setArrastre(null); setSobre(null); }}
+                  onDragEnd={()=>{ setArrastre(null); setSobre(null); }}>
+                  <img src={IMG(p)} className="w-full h-20 rounded-lg object-cover bg-stone-200 pointer-events-none" />
                   <span className="absolute top-1 left-1 px-1.5 rounded bg-black/55 text-white text-[10px] ff-body">{i+1}</span>
                   <button onClick={()=>{ delFromStorage(p); set({...c,photos:c.photos.filter((_,j)=>j!==i)}); }} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-white text-xs grid place-items-center">✕</button>
                   <div className="absolute bottom-1 inset-x-1 flex justify-between">
@@ -640,6 +658,7 @@ function Editor({ c, set }) {
               ))}
             </div>
           )}
+          {c.photos.length>1 && <p className="ff-body text-xs text-stone-400 mt-2">Arrastrá las fotos para cambiarles el orden. La primera es la de portada.</p>}
           {c.photos.length>=15
             ? <p className="ff-body text-sm text-stone-500 mt-2">Llegaste al máximo de 15 fotos. Borrá alguna para subir otra.</p>
             : <label className="block mt-2"><span className="inline-flex items-center gap-2 cursor-pointer rounded-xl px-4 py-2.5 ff-body text-sm font-semibold text-white" style={{background:C.moss, opacity:uploading?0.6:1}}>{uploading?"Subiendo…":"📷 Subir fotos ("+c.photos.length+"/15)"}</span><input type="file" accept="image/*" multiple onChange={upload} disabled={uploading} className="hidden" /></label>}
@@ -672,11 +691,20 @@ function Editor({ c, set }) {
       <div className="bg-white rounded-2xl border border-black/5 p-5">
         <h3 className="ff-display text-lg mb-1" style={{color:C.ink}}>Disponibilidad y precios por cabaña</h3>
         <p className="ff-body text-xs text-stone-500 mb-3">Elegí una cabaña y cargá su precio y los días ocupados. Cada cabaña tiene su propio calendario.</p>
-        {(c.units||[]).length===0 ? (
-          <p className="ff-body text-sm text-stone-500 bg-stone-50 rounded-xl p-3">Primero agregá al menos una cabaña arriba.</p>
-        ) : (()=>{ const k=Math.max(0,Math.min(calUnit,c.units.length-1)); const cu=c.units[k]; const setCU=(patch)=>set({...c,units:c.units.map((x,j)=>j===k?{...x,...patch}:x)}); const up=unitPrice(cu); return (
+        {(()=>{
+          const sola = !(c.units||[]).length;
+          const k = sola ? 0 : Math.max(0,Math.min(calUnit,c.units.length-1));
+          /* sin cabañas, la propiedad entera es la unidad: usa sus propios campos */
+          const cu = sola
+            ? { price:c.price, weekendPrice:c.weekendPrice, overrides:c.overrides||{}, blocked:c.blocked||[], blockedManual:c.blocked||[], resBlocked:[...(c.resBlocked||[]), ...(c.ical_blocked||[])] }
+            : c.units[k];
+          const setCU = sola
+            ? (patch)=>set({...c, ...patch})
+            : (patch)=>set({...c,units:c.units.map((x,j)=>j===k?{...x,...patch}:x)});
+          const up=unitPrice(cu); return (
         <div>
-          <div className="flex flex-wrap gap-2 mb-4">{c.units.map((u,ui)=>{const on=k===ui;return <button key={ui} onClick={()=>{setCalUnit(ui);setSelDay(null);}} className={"rounded-full px-3 py-1.5 ff-body text-sm border "+(on?"text-white":"text-stone-600 border-stone-300")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{u.name||("Cabaña "+(ui+1))}</button>;})}</div>
+          {sola && <p className="ff-body text-xs text-stone-500 -mt-1 mb-3">Esta propiedad se alquila entera. Si tenés varias cabañas adentro, agregalas arriba y cada una tendrá su calendario.</p>}
+          <div className="flex flex-wrap gap-2 mb-4">{(sola?[]:c.units).map((u,ui)=>{const on=k===ui;return <button key={ui} onClick={()=>{setCalUnit(ui);setSelDay(null);}} className={"rounded-full px-3 py-1.5 ff-body text-sm border "+(on?"text-white":"text-stone-600 border-stone-300")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{u.name||("Cabaña "+(ui+1))}</button>;})}</div>
           <div className="grid grid-cols-2 gap-3 mb-4">
             <Field label="Precio noche"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="ff-body text-sm shrink-0" style={{color:"#8a836f",letterSpacing:".02em"}}>ARS$</span><input type="number" value={cu.price==null?"":cu.price} onChange={e=>setCU({price:e.target.value===""?null:+e.target.value})} placeholder={String(c.price||0)} className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
             <Field label="Precio finde"><div className="flex items-center border border-stone-300 rounded-xl px-2"><span className="ff-body text-sm shrink-0" style={{color:"#8a836f",letterSpacing:".02em"}}>ARS$</span><input type="number" value={cu.weekendPrice==null?"":cu.weekendPrice} onChange={e=>setCU({weekendPrice:e.target.value===""?null:+e.target.value})} placeholder="igual" className="w-full py-2 ff-body text-sm outline-none" /></div></Field>
@@ -703,6 +731,30 @@ function Editor({ c, set }) {
               )}
             </div>
           )}
+
+          <div className="mt-5 pt-4 border-t border-stone-200">
+            <h4 className="ff-body text-sm font-semibold" style={{color:C.ink}}>Sincronizar con Airbnb o Booking</h4>
+            <p className="ff-body text-xs text-stone-500 mt-1 mb-2">Pegá el link de exportar calendario (termina en .ics). Los días reservados allá aparecen ocupados acá.</p>
+            <div className="space-y-2">
+              {(c.ical_urls||[]).map((u,i)=>(
+                <div key={i} className="flex items-center gap-2">
+                  <input value={u} onChange={e=>set({...c, ical_urls:(c.ical_urls||[]).map((x,j)=>j===i?e.target.value:x)})}
+                    placeholder="https://www.airbnb.com/calendar/ical/…ics" className="flex-1 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                  <button onClick={()=>set({...c, ical_urls:(c.ical_urls||[]).filter((_,j)=>j!==i)})} className="text-rose-500">🗑️</button>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-3 mt-2 flex-wrap">
+              <button onClick={()=>set({...c, ical_urls:[...(c.ical_urls||[]),""]})} className="ff-body text-sm font-semibold" style={{color:C.clay}}>+ Agregar calendario</button>
+              {(c.ical_urls||[]).some(Boolean) && (
+                <button onClick={syncIcal} disabled={syncing} className="text-white rounded-lg px-3 py-1.5 ff-body text-sm font-semibold disabled:opacity-50" style={{background:C.moss}}>
+                  {syncing ? "Sincronizando…" : "Sincronizar ahora"}
+                </button>
+              )}
+              {c.ical_synced_at && <span className="ff-body text-xs text-stone-400">Última vez: {fmtSync(c.ical_synced_at)}</span>}
+            </div>
+            {syncMsg && <p className="ff-body text-sm mt-2" style={{color: syncMsg.startsWith("Listo") ? "#2f6b3a" : "#a33"}}>{syncMsg}</p>}
+          </div>
         </div>
         ); })()}
       </div>
@@ -720,6 +772,7 @@ function Reservas({ profile, cabins, afterSync }) {
   const [saving,setSaving]=useState(false);
   const [formMsg,setFormMsg]=useState("");
   const [mesCur,setMesCur]=useState(new Date(TODAY.getFullYear(),TODAY.getMonth(),1));
+  const [vista,setVista]=useState("mes");
   const hoy = iso(TODAY);
 
   const traer = async () => {
@@ -752,14 +805,24 @@ function Reservas({ profile, cabins, afterSync }) {
   };
 
   // Después de tocar una reserva: recargar y volver a escribir los días ocupados en la ficha.
-  const sincronizar = async (slug) => {
+  const sincronizar = async (slug, quitar=[]) => {
     const todas = await traer();
     const cab = (cabins||[]).find(c=>c.slug===slug);
-    if(cab && cab.id && (cab.units||[]).length){
-      const units = recalcUnidades(cab, todas.filter(r=>r.slug===slug));
+    if(!cab || !cab.id) return;
+    const mias = todas.filter(r=>r.slug===slug);
+    if((cab.units||[]).length){
+      const units = recalcUnidades(cab, mias);
       await db.from("cabins").update({ units }).eq("id", cab.id);
-      if(afterSync) afterSync();
+    } else {
+      /* propiedad sola: las noches reservadas van directo a los días ocupados de la ficha */
+      const nochesActivas = [];
+      mias.forEach(r=>{ if(r.status!=="cancelada") nochesActivas.push(...nightsBetween(r.start_date, r.end_date)); });
+      const nochesViejas = new Set([...quitar, ...mias.filter(r=>r.status==="cancelada").flatMap(r=>nightsBetween(r.start_date, r.end_date))]);
+      const base = (cab.blocked||[]).filter(d=>!nochesViejas.has(d));
+      const blocked = [...new Set([...base, ...nochesActivas])].sort();
+      await db.from("cabins").update({ blocked }).eq("id", cab.id);
     }
+    if(afterSync) afterSync();
   };
 
   const abrirNueva = (pre={}) => { setFormMsg(""); setForm({ ...RES_EMPTY, slug:(filas[0]&&filas[0].slug)||"", unit:(filas[0]&&filas[0].name)||"", ...pre }); };
@@ -787,7 +850,7 @@ function Reservas({ profile, cabins, afterSync }) {
     if(!confirm("¿Borrar la reserva de "+r.guest_name+"?")) return;
     await db.from("reservations").delete().eq("id",r.id);
     setSel({t:"dia",d:r.start_date});
-    await sincronizar(r.slug);
+    await sincronizar(r.slug, nightsBetween(r.start_date, r.end_date));
   };
 
   if(loading) return <p className="ff-body text-stone-500 text-center py-16">Cargando reservas…</p>;
@@ -832,7 +895,71 @@ function Reservas({ profile, cabins, afterSync }) {
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-4 items-start">
+      {filas.length>1 && (
+        <div className="flex gap-2 mb-4">
+          {[["mes","Calendario"],["general","Vista general"]].map(([k,l])=>(
+            <button key={k} onClick={()=>setVista(k)}
+              className={"rounded-full px-4 py-2 ff-body text-sm "+(vista===k?"text-white":"text-stone-600 border border-stone-300")}
+              style={vista===k?{background:C.moss}:{}}>{l}</button>
+          ))}
+        </div>
+      )}
+
+      {vista==="general" && filas.length>1 && (()=>{
+        const dias = Array.from({length:dim},(_,i)=>i+1);
+        const fecha = (d) => iso(new Date(y,m,d));
+        const dow = ["D","L","M","M","J","V","S"];
+        const ancho = 34;
+        return (
+          <div className="bg-white rounded-2xl border border-black/5 p-4 mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <button onClick={()=>setMesCur(new Date(y,m-1,1))} className="w-8 h-8 rounded-full border border-stone-300 ff-body">‹</button>
+                <span className="ff-display text-lg" style={{color:C.ink}}>{mesCur.toLocaleDateString("es-AR",{month:"long",year:"numeric"})}</span>
+                <button onClick={()=>setMesCur(new Date(y,m+1,1))} className="w-8 h-8 rounded-full border border-stone-300 ff-body">›</button>
+              </div>
+              <button onClick={()=>setMesCur(new Date(TODAY.getFullYear(),TODAY.getMonth(),1))} className="ff-body text-xs border border-stone-300 rounded-full px-3 py-1">Hoy</button>
+            </div>
+            <p className="ff-body text-xs text-stone-500 mb-3">Todas las cabañas en un solo vistazo. Verde: reserva. Gris: día ocupado a mano. Tocá una reserva para verla.</p>
+            <div className="overflow-x-auto">
+              <div style={{minWidth: 210 + dias.length*ancho}}>
+                <div className="flex" style={{paddingLeft:210}}>
+                  {dias.map(d=>{ const f=fecha(d); const esHoy=f===hoy; const fin=[0,6].includes(new Date(y,m,d).getDay());
+                    return <div key={d} style={{width:ancho}} className="text-center">
+                      <div className="ff-body text-[10px] text-stone-400">{dow[new Date(y,m,d).getDay()]}</div>
+                      <div className={"ff-body text-xs rounded-full w-6 h-6 mx-auto grid place-items-center "+(esHoy?"text-white":fin?"text-stone-700":"text-stone-500")} style={esHoy?{background:C.clay}:{}}>{d}</div>
+                    </div>; })}
+                </div>
+                {filas.map((f,fi)=>(
+                  <div key={fi} className="flex items-center border-t border-stone-100" style={{height:40}}>
+                    <div className="ff-body text-sm truncate pr-3 shrink-0" style={{width:210, color:C.ink}} title={etiqueta(f)}>{etiqueta(f)}</div>
+                    {dias.map(d=>{
+                      const day=fecha(d); const r=reservaEn(f,day); const manual=!r && (f.manual||[]).includes(day);
+                      const pasado = day<hoy;
+                      const inicio = r && r.start_date===day, fin = r && nightsBetween(r.start_date,r.end_date).slice(-1)[0]===day;
+                      return (
+                        <div key={d} style={{width:ancho, height:40}} className="flex items-center px-px">
+                          {r ? (
+                            <button onClick={()=>{ setVista("mes"); setMesCur(new Date(r.start_date.slice(0,4), +r.start_date.slice(5,7)-1, 1)); setSel({t:"dia",d:r.start_date}); }} title={r.guest_name+" · "+r.start_date+" → "+r.end_date}
+                              className={"h-6 w-full text-left overflow-hidden ff-body text-[10px] text-white "+(inicio?"rounded-l-full pl-2 ":"")+(fin?"rounded-r-full ":"")}
+                              style={chipStyle(r)}>{inicio ? r.guest_name : ""}</button>
+                          ) : manual ? (
+                            <div className="h-6 w-full rounded-sm" style={{background:"#DAD6C8"}} title="Ocupado a mano"></div>
+                          ) : (
+                            <div className="h-6 w-full rounded-sm" style={{background: pasado ? "#F6F3EA" : "#FBF7E8", border:"1px solid rgba(70,62,42,.06)"}}></div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      <div className={"grid lg:grid-cols-3 gap-4 items-start "+(vista==="general"?"hidden":"")}>
 
         <div className="lg:col-span-2 bg-white rounded-2xl border border-black/5 p-4">
           <div className="flex items-center gap-2 mb-3">
@@ -1157,7 +1284,11 @@ function App() {
               </>
             ) : (
               <>
-                {!atLimit && <button onClick={()=>setEditing({...EMPTY, operator:(profile&&profile.operator)||""})} className="rounded-full px-4 py-2 ff-body text-sm font-semibold text-white" style={{background:C.clay}}>+ Nuevo</button>}
+                {!atLimit && <button onClick={()=>{
+                    /* arranca con los datos de contacto de la última publicación del operador */
+                    const ultima = (list||[]).find(x=>x.whatsapp||x.email) || {};
+                    setEditing({...EMPTY, operator:(profile&&profile.operator)||"", whatsapp:ultima.whatsapp||"", email:ultima.email||(profile&&profile.email)||""});
+                  }} className="rounded-full px-4 py-2 ff-body text-sm font-semibold text-white" style={{background:C.clay}}>+ Nuevo</button>}
                 <button onClick={logout} className="rounded-full px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">Salir</button>
               </>
             )}
