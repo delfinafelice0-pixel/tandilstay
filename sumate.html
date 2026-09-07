@@ -272,6 +272,24 @@ header, header.vt{ background:transparent !important;
   border-bottom:1px solid rgba(70,62,42,.10) !important }
 
 .lema, .next{ max-width:44ch }
+
+/* ── bloque con foto (la carta) ── */
+.nota-foto{ grid-template-columns:220px 1fr auto; overflow:hidden; padding:0 34px 0 0 }
+.nota-foto > div{ padding:34px 0 }
+.notaimg{ width:220px; height:100%; min-height:190px; object-fit:cover; display:block }
+@media(max-width:760px){
+  .nota-foto{ grid-template-columns:1fr; padding:0 24px 28px }
+  .notaimg{ width:calc(100% + 48px); margin:0 -24px 6px; height:180px; min-height:0 }
+  .nota-foto > div{ padding:18px 0 0 }
+}
+
+/* ── paisaje de fondo en el precio, apenas insinuado ── */
+.tarifa .lado{ position:relative; overflow:hidden }
+.ladofoto{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 40%;
+  opacity:.22; filter:saturate(.75); z-index:0; pointer-events:none }
+.tarifa .lado::before{ content:""; position:absolute; inset:0; z-index:1;
+  background:linear-gradient(180deg, rgba(46,53,33,.55) 0%, rgba(46,53,33,.85) 100%) }
+.tarifa .lado > *:not(.ladofoto){ position:relative; z-index:2 }
 </style>
 </head>
 <body>
@@ -399,7 +417,8 @@ header, header.vt{ background:transparent !important;
         <div class="rasgo"><p class="cat">Día a día</p><h3>Cambios en tiempo real</h3>
           <p>Subió un precio o se terminó un plato: lo editás y se ve al toque.</p></div>
       </div>
-      <div class="nota">
+      <div class="nota nota-foto">
+        <img class="notaimg" src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=900&q=75" alt="" loading="lazy" onerror="this.remove()">
         <div>
           <h3>Tu carta también funciona como página</h3>
           <p>El mismo link te sirve para el QR de la mesa, para la bio de Instagram y para responderle a quien te pregunta qué tenés.</p>
@@ -469,6 +488,7 @@ header, header.vt{ background:transparent !important;
     </div>
     <div class="tarifa">
       <div class="lado worn">
+        <img class="ladofoto" src="banner-tandil.jpg" alt="" loading="lazy" onerror="this.remove()">
         <span class="et">Un solo plan</span>
         <div class="num" id="js-precio">$40.000</div>
         <div class="per" id="js-periodo">Por mes</div>
