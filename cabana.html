@@ -1488,6 +1488,14 @@ function computeStay(c,ci,co){ if(!ci||!co) return null; let d=parseD(ci); const
 const isAvail = (c,ci,co) => { if(!ci||!co) return true; let d=parseD(ci); const e=parseD(co); while(d<e){ if(c.blocked.includes(iso(d))) return false; d=addDay(d); } return true; };
 const uPhotos = (u) => (u.photos && u.photos.length) ? u.photos : (u.photo ? [u.photo] : []);
 const uVideos = (u) => (u.videos && u.videos.length) ? u.videos : (u.video ? [u.video] : []);
+const fichaUnidad = (u, c) => {
+  const n = (k) => { const v = (u && u[k]!=null && u[k]!=="") ? Number(u[k]) : Number((c||{})[k]); return v>0 ? v : 0; };
+  const cap=n("capacity"), dor=n("bedrooms"), ban=n("bathrooms"), out=[];
+  if(cap) out.push("Hasta "+cap+" huésped"+(cap===1?"":"es"));
+  if(dor) out.push(dor+" dormitorio"+(dor===1?"":"s"));
+  if(ban) out.push(ban+" baño"+(ban===1?"":"s"));
+  return out;
+};
 const capLabel = (c) => { const caps=(c.units||[]).map(u=>u.capacity).filter(Boolean); if(!caps.length) return `Hasta ${c.capacity}`; const mn=Math.min(...caps), mx=Math.max(...caps); return mn===mx?`Hasta ${mx}`:`${mn} a ${mx}`; };
 const parrafos = (t) => String(t||"").split(/\n+/).map(s=>s.trim()).filter(Boolean);
 
@@ -1603,7 +1611,7 @@ function Nearby({ acts=[], food=[], cabins=[] }) {
       <div className="mini">
         {items.slice(0,4).map((x,i)=>(
           <a key={i} href={href(x)}>
-            <div className="ph"><img src={IMGc(x)} alt={x.name} loading="lazy" /></div>
+            <div className="ph"><img src={IMGc(x)} alt={x.name} loading="lazy" onError={e=>e.target.remove()} /></div>
             <h4>{x.name}</h4>
             {sub(x) && <p>{sub(x)}</p>}
           </a>
@@ -1708,7 +1716,8 @@ function Landing({ c, acts=[], food=[] }) {
                 <h2>Las fotos</h2>
                 <div className="galeria2">
                   {photos.slice(0,5).map((p,i)=>(
-                    <img key={i} className="lb-img" src={IMG(p)} alt="" loading="lazy" />
+                    <img key={i} className="lb-img" src={IMG(p)} alt="" loading="lazy"
+                      onError={e=>{ const b=e.target.parentElement; e.target.remove(); if(b && !b.querySelector("img")) b.remove(); }} />
                   ))}
                 </div>
                 {photos.length>5 && <p className="texto2" style={{marginTop:"12px"}}>Y {photos.length-5} fotos más. Tocá cualquiera para verlas todas.</p>}
@@ -1739,11 +1748,15 @@ function Landing({ c, acts=[], food=[] }) {
                     const yid=vids[0]?ytId(vids[0]):null;
                     const poster = ph[0] ? IMG(ph[0]) : (yid ? ("https://img.youtube.com/vi/"+yid+"/hqdefault.jpg") : null);
                     return (
-                      <button className={"unidad2"+(poster?"":" sinfoto")} key={i} onClick={()=>setOpenUnit(i)}>
+                      <button className={"unidad2"+(poster?"":" sinfoto")} key={i}
+                        onClick={()=>{ if(ph.length||vids.length){ setOpenUnit(i); return; }
+                          setSelUnit(i); setTimeout(()=>irA("calendario"),60); }}>
                         {poster && <div className="ph"><img src={poster} alt={u.name||("Cabaña "+(i+1))} loading="lazy" />
                           {vids.length>0 && <span className="play">▶</span>}</div>}
                         <b>{u.name||("Cabaña "+(i+1))}</b>
-                        {u.capacity && <small>hasta {u.capacity}</small>}
+                        {poster
+                          ? (u.capacity ? <small>hasta {u.capacity}</small> : null)
+                          : <small>{fichaUnidad(u,c).join(" · ")}</small>}
                         {!poster && vids.length>0 && <small>▶ Tiene video</small>}
                       </button>
                     );
@@ -1760,14 +1773,14 @@ function Landing({ c, acts=[], food=[] }) {
                     <button onClick={()=>setOpenUnit(null)} aria-label="Cerrar">✕</button>
                   </div>
                   <div className="modalbody">
-                    {uPhotos(units[openUnit]).map((p,k)=><img key={k} src={IMG(p)} alt="" />)}
+                    {uPhotos(units[openUnit]).map((p,k)=><img key={k} src={IMG(p)} alt="" onError={e=>e.target.remove()} />)}
                     {uVideos(units[openUnit]).map((v,k)=>{
                       const uyt=ytEmbed(v); const uig=igEmbed(v);
                       if(uyt) return <iframe key={k} title={"uvid"+k} src={uyt} allowFullScreen></iframe>;
                       if(uig) return <blockquote key={k} className="instagram-media" data-instgrm-permalink={uig} data-instgrm-version="14" style={{margin:0,width:"100%",minWidth:0}}></blockquote>;
                       return <a key={k} className="ghost" href={v} target="_blank" rel="noreferrer">Ver video</a>;
                     })}
-                    {units[openUnit].capacity && <p className="texto2" style={{margin:0}}>Hasta {units[openUnit].capacity} huéspedes</p>}
+                    {fichaUnidad(units[openUnit],c).length>0 && <p className="texto2" style={{margin:0}}>{fichaUnidad(units[openUnit],c).join(" · ")}</p>}
                     <button className="solid" onClick={()=>{ setSelUnit(openUnit); setOpenUnit(null); setTimeout(()=>irA("calendario"),60); }}>Reservar esta cabaña</button>
                     {validBooking(units[openUnit]) && <a className="ghost" href={units[openUnit].bookingUrl} target="_blank" rel="noreferrer">Ver en Booking o Airbnb</a>}
                   </div>
@@ -1786,7 +1799,10 @@ function Landing({ c, acts=[], food=[] }) {
                       </button>
                     ))}
                   </div>
-                  {selUnit==null && <p className="aviso2">Elegí tu cabaña para ver su disponibilidad real.</p>}
+                  {selUnit==null
+                    ? <p className="aviso2">Elegí tu cabaña para ver su disponibilidad real.</p>
+                    : (fichaUnidad(units[selUnit],c).length>0 &&
+                        <p className="texto2" style={{margin:"10px 0 0",fontSize:"13.5px"}}>{fichaUnidad(units[selUnit],c).join(" · ")}</p>)}
                 </div>
               )}
               <div className={"calbox"+(ready?"":" off")}>

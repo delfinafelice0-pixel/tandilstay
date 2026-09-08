@@ -531,6 +531,63 @@ function Newsletter(){
   );
 }
 
+
+/* Publicaciones que quedaron sin dueño: el operador ya no existe como usuario.
+   Son las que "seguís viendo en el sitio" después de borrar una cuenta. */
+function Huerfanas({ profiles, flash }){
+  const [items,setItems] = useState(null);
+  const [busy,setBusy] = useState(false);
+  const TABLAS = [["cabins","Hospedaje"],["restaurants","Gastronomía"],["activities","Actividad"]];
+
+  const buscar = async () => {
+    setBusy(true);
+    const res = await Promise.all(TABLAS.map(([t])=>db.from(t).select("slug,name,operator")));
+    const ops = new Set(profiles.map(p=>String(p.operator||"").trim().toLowerCase()).filter(Boolean));
+    const todo = [];
+    res.forEach((r,i)=>(r.data||[]).forEach(x=>todo.push({ ...x, t:TABLAS[i][0], rubro:TABLAS[i][1] })));
+    setItems(todo.filter(x=>!ops.has(String(x.operator||"").trim().toLowerCase())));
+    setBusy(false);
+  };
+
+  const borrar = async (x) => {
+    if(!confirm("¿Borrar «"+(x.name||x.slug)+"» del sitio?\n\nDesaparece de la guía junto con sus reservas. No se puede deshacer.")) return;
+    setBusy(true);
+    await db.from("reservations").delete().eq("slug", x.slug);
+    const { data, error } = await db.from(x.t).delete().eq("slug", x.slug).select("slug");
+    setBusy(false);
+    if(error){ flash("No se pudo borrar: "+error.message); return; }
+    if(!(data||[]).length){ flash("La base rechazó el borrado (permisos RLS): sigue publicada."); return; }
+    flash("Borrada ✓");
+    setItems(items.filter(y=>!(y.t===x.t && y.slug===x.slug)));
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-black/5 p-5 mt-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="ff-display text-lg" style={{color:C.ink}}>Publicaciones sin dueño</h3>
+          <p className="ff-body text-sm text-stone-500">Siguen en el sitio pero su operador ya no es un usuario. Suele pasar al borrar una cuenta.</p>
+        </div>
+        <button onClick={buscar} disabled={busy} className="shrink-0 rounded-lg px-3 py-1.5 ff-body text-sm border border-stone-300 disabled:opacity-50">{busy?"…":"Buscar"}</button>
+      </div>
+      {items && !items.length && <p className="ff-body text-sm mt-3" style={{color:C.moss}}>No hay publicaciones sin dueño ✓</p>}
+      {items && items.length>0 && (
+        <div className="mt-3 space-y-2">
+          {items.map((x,i)=>(
+            <div key={i} className="flex items-center gap-3 border border-stone-200 rounded-xl px-3 py-2">
+              <div className="min-w-0">
+                <div className="ff-body text-sm font-semibold truncate" style={{color:C.ink}}>{x.name||x.slug}</div>
+                <div className="ff-body text-xs text-stone-500 truncate">{x.rubro} · operador: {x.operator||"(vacío)"}</div>
+              </div>
+              <button onClick={()=>borrar(x)} disabled={busy} className="ml-auto shrink-0 rounded-lg px-3 py-1.5 ff-body text-sm border border-rose-200 text-rose-600 disabled:opacity-50">🗑️ Borrar</button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function App() {
   const [session,setSession]=useState(null), [ready,setReady]=useState(false), [me,setMe]=useState(null);
   const [email,setEmail]=useState(""), [pass,setPass]=useState(""), [authErr,setAuthErr]=useState("");
@@ -587,12 +644,18 @@ function App() {
       const slugs = pubs.map(x=>x.slug);
       const r1 = await db.from("reservations").delete().in("slug", slugs);
       if(r1.error) fallo = r1.error.message;
+      let borradas = 0;
       for(const t of ["cabins","restaurants","activities"]){
         const mios = pubs.filter(x=>x.t===t).map(x=>x.slug);
         if(!mios.length) continue;
-        const r = await db.from(t).delete().in("slug", mios);
+        /* .select() es clave: con RLS, un delete sin permiso NO da error,
+           borra cero filas y devuelve éxito. Sin esto el admin miente. */
+        const r = await db.from(t).delete().in("slug", mios).select("slug");
         if(r.error) fallo = r.error.message;
+        else borradas += (r.data||[]).length;
       }
+      if(!fallo && borradas < pubs.length)
+        fallo = "la base solo borró "+borradas+" de "+pubs.length+" (revisá los permisos RLS)";
     }
     const { data, error } = await db.functions.invoke("super-action", { body:{ action:"delete", id:p.id } });
     setBusy(false);
@@ -717,6 +780,7 @@ function App() {
                   );
                 })}
               </div>
+              <Huerfanas profiles={profiles} flash={flash} />
             </div>
           </div>
         ) : tab==="orden" ? (
