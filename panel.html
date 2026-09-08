@@ -356,6 +356,9 @@ const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator
 // Los datos generales de huéspedes/dormitorios/baños ya no se cargan a mano:
 // se calculan como el máximo de las unidades, para que el buscador y las fichas públicas sigan filtrando bien.
 const sinFotos = (u) => !((u && u.photos && u.photos.length) || (u && u.photo));
+/* El .ics es el calendario para sincronizar; el link de reserva es la ficha
+   pública. Se parecen y se confunden, así que los detectamos. */
+const esIcal = (v) => { const x=String(v||"").toLowerCase(); return x.includes(".ics") || x.includes("/calendar/ical"); };
 const maxDeUnidades = (units, k, fallback) => {
   const vals = (units||[]).map(u=>Number(u&&u[k])||0).filter(n=>n>0);
   return vals.length ? Math.max(...vals) : (Number(fallback)||1);
@@ -591,6 +594,24 @@ function Editor({ c, set }) {
                 <div>
                   <span className="ff-body text-[11px] font-semibold text-stone-500 uppercase tracking-wide">Link de reserva (Booking / Airbnb)</span>
                   <input value={u.bookingUrl||""} onChange={e=>setU({bookingUrl:e.target.value})} placeholder="https://www.booking.com/… o https://airbnb.com/…" className="w-full border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm mt-1" />
+                  {esIcal(u.bookingUrl) && (
+                    <div className="mt-1.5 rounded-lg px-2.5 py-2" style={{background:"#FDF3DF"}}>
+                      <p className="ff-body text-xs" style={{color:"#8A6A1E"}}>
+                        Esto es un <b>calendario</b> (.ics), no un link de reserva. Acá no sincroniza nada ni se muestra en la guía:
+                        va en «Sincronizar con Airbnb o Booking», en la columna del calendario.
+                      </p>
+                      <button
+                        onClick={()=>{ const url=u.bookingUrl;
+                          const ya=(c.ical_urls||[]).filter(Boolean);
+                          set({ ...c,
+                            ical_urls: ya.includes(url) ? ya : [...ya, url],
+                            units: (c.units||[]).map((x,j)=> j===i ? { ...x, bookingUrl:"" } : x) });
+                        }}
+                        className="mt-1.5 rounded-lg px-2.5 py-1 ff-body text-xs font-semibold text-white" style={{background:C.moss}}>
+                        Moverlo al lugar correcto
+                      </button>
+                    </div>
+                  )}
                 </div>
                 </>); })()}
               </div>
@@ -749,6 +770,9 @@ function Editor({ c, set }) {
                   <button onClick={()=>set({...c, ical_urls:(c.ical_urls||[]).filter((_,j)=>j!==i)})} className="text-rose-500">🗑️</button>
                 </div>
               ))}
+              {(c.ical_urls||[]).some(u=>u && !esIcal(u)) && (
+                <p className="ff-body text-xs" style={{color:"#8A6A1E"}}>Alguno de estos links no es un calendario. Tiene que ser el de «exportar calendario», que termina en .ics.</p>
+              )}
             </div>
             <div className="flex items-center gap-3 mt-2 flex-wrap">
               <button onClick={()=>set({...c, ical_urls:[...(c.ical_urls||[]),""]})} className="ff-body text-sm font-semibold" style={{color:C.clay}}>+ Agregar calendario</button>
