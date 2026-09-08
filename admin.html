@@ -588,6 +588,113 @@ function Huerfanas({ profiles, flash }){
   );
 }
 
+
+/* ═══ Videos tutoriales ═══
+   Alta, orden y visibilidad. Los paneles leen esta misma tabla. */
+const ytIdDe = (url) => { const m = String(url||"").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/))([\w-]{11})/); return m ? m[1] : null; };
+const RUBROS_TUT = [["todos","Todos los rubros"],["hospedaje","Hospedajes"],["gastronomia","Gastronomía"],["actividad","Actividades"]];
+const TUT_NUEVO = { titulo:"", url:"", rubro:"todos", duracion:"", descripcion:"", orden:0, visible:true };
+
+function Tutoriales(){
+  const [list,setList] = useState([]);
+  const [nuevo,setNuevo] = useState(TUT_NUEVO);
+  const [msg,setMsg] = useState("");
+  const [busy,setBusy] = useState(false);
+
+  const cargar = async () => {
+    const { data, error } = await db.from("tutoriales").select("*").order("orden",{ascending:true});
+    if(error){ setMsg("No se pudo leer la tabla. ¿Corriste el SQL? ("+error.message+")"); return; }
+    setList(data||[]);
+  };
+  useEffect(()=>{ cargar(); },[]);
+
+  const agregar = async () => {
+    if(!nuevo.titulo.trim()){ setMsg("Poné un título."); return; }
+    if(!ytIdDe(nuevo.url)){ setMsg("El link no parece de YouTube. Pegá el de la barra del navegador."); return; }
+    setBusy(true); setMsg("");
+    const orden = list.length ? Math.max(...list.map(x=>x.orden||0))+1 : 1;
+    const { error } = await db.from("tutoriales").insert({ ...nuevo, titulo:nuevo.titulo.trim(), url:nuevo.url.trim(), orden });
+    setBusy(false);
+    if(error){ setMsg("No se pudo guardar: "+error.message); return; }
+    setNuevo(TUT_NUEVO); cargar();
+  };
+
+  const actualizar = async (id, patch) => {
+    setList(list.map(x=>x.id===id?{...x,...patch}:x));
+    const { error } = await db.from("tutoriales").update(patch).eq("id",id);
+    if(error){ setMsg("No se pudo actualizar: "+error.message); cargar(); }
+  };
+
+  const mover = async (i, paso) => {
+    const j = i + paso; if(j<0 || j>=list.length) return;
+    const a = list[i], b = list[j];
+    const copia = list.slice(); copia[i]=b; copia[j]=a; setList(copia);
+    await db.from("tutoriales").update({ orden:b.orden }).eq("id",a.id);
+    await db.from("tutoriales").update({ orden:a.orden }).eq("id",b.id);
+    cargar();
+  };
+
+  const borrar = async (x) => {
+    if(!confirm("¿Borrar «"+x.titulo+"»?")) return;
+    const { data, error } = await db.from("tutoriales").delete().eq("id",x.id).select("id");
+    if(error){ setMsg("No se pudo borrar: "+error.message); return; }
+    if(!(data||[]).length){ setMsg("La base rechazó el borrado (permisos RLS)."); return; }
+    cargar();
+  };
+
+  const inp = "w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm";
+  return (
+    <div className="grid lg:grid-cols-2 gap-6">
+      <div className="bg-white rounded-2xl border border-black/5 p-5 h-fit">
+        <h3 className="ff-display text-lg mb-1" style={{color:C.ink}}>Agregar un video</h3>
+        <p className="ff-body text-sm text-stone-500 mb-3">Subilo a YouTube como «no listado» y pegá acá el link.</p>
+        <input value={nuevo.titulo} onChange={e=>setNuevo({...nuevo,titulo:e.target.value})} placeholder="Título (ej: Cómo subir tus fotos)" className={inp+" mb-2"} />
+        <input value={nuevo.url} onChange={e=>setNuevo({...nuevo,url:e.target.value})} placeholder="https://www.youtube.com/watch?v=…" className={inp+" mb-2"} />
+        <select value={nuevo.rubro} onChange={e=>setNuevo({...nuevo,rubro:e.target.value})} className={inp+" mb-2 bg-white"}>
+          {RUBROS_TUT.map(([v,l])=><option key={v} value={v}>{l}</option>)}
+        </select>
+        <input value={nuevo.duracion} onChange={e=>setNuevo({...nuevo,duracion:e.target.value})} placeholder="Duración (ej: 2:14)" className={inp+" mb-2"} />
+        <input value={nuevo.descripcion} onChange={e=>setNuevo({...nuevo,descripcion:e.target.value})} placeholder="Una línea de descripción (opcional)" className={inp+" mb-3"} />
+        <button onClick={agregar} disabled={busy} className="w-full text-white rounded-xl py-2.5 ff-body font-semibold disabled:opacity-50" style={{background:C.clay}}>{busy?"Guardando…":"Agregar video"}</button>
+        {msg && <p className="ff-body text-sm mt-2" style={{color:"#a33"}}>{msg}</p>}
+        <p className="ff-body text-xs text-stone-400 mt-2">Mientras no haya ningún video de un rubro, el botón «Videos» no aparece en ese panel.</p>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-black/5 p-5">
+        <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Videos cargados ({list.length})</h3>
+        {!list.length && <p className="ff-body text-sm text-stone-400">Todavía no cargaste ninguno.</p>}
+        <div className="space-y-2">
+          {list.map((x,i)=>(
+            <div key={x.id} className="border border-stone-200 rounded-xl p-2.5">
+              <div className="flex items-center gap-3">
+                <img src={"https://img.youtube.com/vi/"+ytIdDe(x.url)+"/mqdefault.jpg"} alt="" className="w-20 h-12 rounded-lg object-cover bg-stone-200 shrink-0" onError={e=>e.target.remove()} />
+                <div className="min-w-0 flex-1">
+                  <div className="ff-body text-sm font-semibold truncate" style={{color:C.ink}}>{x.titulo}</div>
+                  <div className="ff-body text-xs text-stone-500 truncate">{(RUBROS_TUT.find(r=>r[0]===x.rubro)||["","?"])[1]}{x.duracion?" · "+x.duracion:""}</div>
+                </div>
+                <div className="flex flex-col shrink-0">
+                  <button onClick={()=>mover(i,-1)} disabled={i===0} className="ff-body text-xs px-1 disabled:opacity-25">▲</button>
+                  <button onClick={()=>mover(i,1)} disabled={i===list.length-1} className="ff-body text-xs px-1 disabled:opacity-25">▼</button>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 mt-2">
+                <label className="ff-body text-xs text-stone-600 flex items-center gap-1.5">
+                  <input type="checkbox" checked={!!x.visible} onChange={e=>actualizar(x.id,{visible:e.target.checked})} />
+                  Visible
+                </label>
+                <select value={x.rubro} onChange={e=>actualizar(x.id,{rubro:e.target.value})} className="border border-stone-300 rounded-lg px-2 py-1 ff-body text-xs bg-white">
+                  {RUBROS_TUT.map(([v,l])=><option key={v} value={v}>{l}</option>)}
+                </select>
+                <button onClick={()=>borrar(x)} className="ml-auto ff-body text-xs text-rose-600">🗑️ Borrar</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [session,setSession]=useState(null), [ready,setReady]=useState(false), [me,setMe]=useState(null);
   const [email,setEmail]=useState(""), [pass,setPass]=useState(""), [authErr,setAuthErr]=useState("");
@@ -700,6 +807,7 @@ function App() {
               <button onClick={()=>setTab("resumen")} className={"px-3.5 py-2 ff-body text-sm "+(tab==="resumen"?"text-white":"text-stone-600")} style={tab==="resumen"?{background:C.moss}:{}}>Resumen</button>
               <button onClick={()=>setTab("orden")} className={"px-3.5 py-2 ff-body text-sm "+(tab==="orden"?"text-white":"text-stone-600")} style={tab==="orden"?{background:C.moss}:{}}>Orden</button>
               <button onClick={()=>setTab("newsletter")} className={"px-3.5 py-2 ff-body text-sm "+(tab==="newsletter"?"text-white":"text-stone-600")} style={tab==="newsletter"?{background:C.moss}:{}}>Newsletter</button>
+              <button onClick={()=>setTab("tutoriales")} className={"px-3.5 py-2 ff-body text-sm "+(tab==="tutoriales"?"text-white":"text-stone-600")} style={tab==="tutoriales"?{background:C.moss}:{}}>Tutoriales</button>
             </div>
             <button onClick={()=>db.auth.signOut()} className="rounded-full px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">Salir</button>
           </div>
@@ -785,6 +893,8 @@ function App() {
           </div>
         ) : tab==="orden" ? (
           <Orden />
+        ) : tab==="tutoriales" ? (
+          <Tutoriales />
         ) : tab==="newsletter" ? (
           <Newsletter />
         ) : (

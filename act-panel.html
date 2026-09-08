@@ -451,6 +451,107 @@ function ProfileBar({ profile }) {
   );
 }
 
+/* ═══ Videos tutoriales ═══
+   Se cargan desde admin.html (tabla `tutoriales` en Supabase).
+   Si no hay ninguno para este rubro, el botón directamente no se dibuja:
+   un botón que abre una lista vacía es peor que no tener botón. */
+const ytIdDe = (url) => { const m = String(url||"").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/))([\w-]{11})/); return m ? m[1] : null; };
+const ytMiniatura = (url) => { const id = ytIdDe(url); return id ? "https://img.youtube.com/vi/"+id+"/mqdefault.jpg" : null; };
+
+function Tutoriales({ rubro }){
+  const [videos,setVideos] = useState([]);
+  const [abierto,setAbierto] = useState(false);
+  const [activo,setActivo] = useState(null);
+
+  useEffect(()=>{ (async()=>{
+    try{
+      const { data } = await db.from("tutoriales").select("*")
+        .eq("visible", true).in("rubro", [rubro, "todos"])
+        .order("orden", { ascending:true });
+      setVideos((data||[]).filter(v=>ytIdDe(v.url)));
+    }catch(_){}
+  })(); },[]);
+
+  useEffect(()=>{
+    if(!abierto) return;
+    const esc = (e)=>{ if(e.key==="Escape") setAbierto(false); };
+    window.addEventListener("keydown", esc);
+    return ()=>window.removeEventListener("keydown", esc);
+  },[abierto]);
+
+  if(!videos.length) return null;
+
+  return (
+    <>
+      <button onClick={()=>{ setAbierto(true); setActivo(null); }} title="Videos tutoriales"
+        className="rounded-full px-3 py-2 ff-body text-sm font-semibold text-white shrink-0" style={{background:C.moss}}>
+        🎬<span className="hidden sm:inline"> Videos</span>
+      </button>
+
+      {abierto && (
+        <div onClick={()=>setAbierto(false)} role="dialog" aria-modal="true" aria-label="Videos tutoriales"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{background:"rgba(28,32,20,.55)"}}>
+          <div onClick={e=>e.stopPropagation()} className="w-full max-w-lg rounded-2xl overflow-hidden flex flex-col"
+            style={{background:C.cream, maxHeight:"88vh"}}>
+
+            <div className="flex items-center justify-between px-4 py-3 border-b border-black/10 shrink-0">
+              <h3 className="ff-display text-lg" style={{color:C.ink}}>Videos tutoriales</h3>
+              <button onClick={()=>setAbierto(false)} aria-label="Cerrar" className="text-2xl leading-none px-1" style={{color:C.sage}}>×</button>
+            </div>
+
+            <div className="overflow-auto p-3">
+              {activo && (
+                <div className="mb-3">
+                  <div style={{position:"relative",width:"100%",paddingTop:"56.25%",borderRadius:"12px",overflow:"hidden",background:"#000"}}>
+                    <iframe src={"https://www.youtube.com/embed/"+ytIdDe(activo.url)+"?rel=0&autoplay=1"}
+                      title={activo.titulo||"Video"} allow="accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen"
+                      allowFullScreen frameBorder="0"
+                      style={{position:"absolute",inset:0,width:"100%",height:"100%",border:0}} />
+                  </div>
+                  <p className="ff-body text-sm font-semibold mt-2" style={{color:C.ink}}>{activo.titulo}</p>
+                  {activo.descripcion && <p className="ff-body text-xs text-stone-500">{activo.descripcion}</p>}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                {videos.map(v=>{
+                  const esActivo = activo && activo.id===v.id;
+                  const mini = ytMiniatura(v.url);
+                  return (
+                    <button key={v.id} onClick={()=>setActivo(v)}
+                      className="w-full flex items-center gap-3 p-2 rounded-xl border text-left"
+                      style={{background:"#fff", borderColor: esActivo ? C.moss : "rgba(46,53,33,.14)"}}>
+                      <span className="shrink-0 rounded-lg overflow-hidden grid place-items-center"
+                        style={{width:"72px",height:"46px",background:C.moss}}>
+                        {mini
+                          ? <img src={mini} alt="" className="w-full h-full object-cover" onError={e=>e.target.remove()} />
+                          : <span style={{color:C.cream}}>▶</span>}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block ff-body text-sm font-semibold truncate" style={{color:C.ink}}>{v.titulo}</span>
+                        <span className="block ff-body text-xs text-stone-500 truncate">
+                          {[v.duracion, v.rubro==="todos" ? "Para todos" : null].filter(Boolean).join(" · ")}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="px-4 py-3 border-t border-black/10 shrink-0">
+              <a href={"ayuda.html?rubro="+rubro} target="_blank" rel="noreferrer" className="ff-body text-sm" style={{color:C.sage}}>
+                ¿Necesitás más? Mirá la guía escrita →
+              </a>
+            </div>
+
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 function App() {
   const [session,setSession]=useState(null), [ready,setReady]=useState(false);
   const [email,setEmail]=useState(""), [pass,setPass]=useState(""), [authErr,setAuthErr]=useState("");
@@ -481,6 +582,7 @@ function App() {
         <div className="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5"><div className="w-9 h-9 rounded-xl grid place-items-center text-xl" style={{background:C.moss}}>🧭</div><div><div className="ff-display text-lg leading-none" style={{color:C.ink}}>Actividades</div><div className="ff-body text-[11px] text-stone-500">Visitando Tandil</div></div></div>
           <div className="flex items-center gap-2">
+            <Tutoriales rubro="actividad" />
             <a href="ayuda.html?rubro=actividad" target="_blank" rel="noreferrer" title="¿Cómo cargar? Ayuda" className="rounded-full px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">❓ Ayuda</a>
             {(editing||soloEditor) ? (<>
               {verSitio && <a href={verSitio} target="_blank" rel="noreferrer" className="rounded-full px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">👁️ Ver sitio</a>}
