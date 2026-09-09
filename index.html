@@ -1673,6 +1673,14 @@ header, header.vt{ background:transparent !important;
 /* La appbar flota fija abajo pero nada compensaba su altura: tapaba el final
    del contenido (el formulario de consulta, el pie de página). */
 @media(max-width:899px){ body{ padding-bottom:96px } }
+
+/* Los dos campos de fecha viven adentro de la barra de filtros: mismo alto y
+   misma forma que los <select>, con la etiqueta chiquita arriba del valor. */
+.selfecha{display:inline-flex;flex-direction:column;justify-content:center;gap:1px;
+  line-height:1.1;text-align:left;padding-top:5px;padding-bottom:5px}
+.selfecha span{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#8A8578}
+.selfecha input{border:0;background:transparent;font:inherit;font-size:13.5px;
+  color:inherit;padding:0;outline:none;min-width:104px}
 </style>
 <script>
 /* si la dirección viene con barra final, la saca: así las rutas relativas resuelven bien */
@@ -2031,6 +2039,14 @@ function Home({ go, data }) {
     if (OP) q.set("op", OP);
     location.href = "consulta.html" + (q.toString() ? "?" + q.toString() : "");
   };
+  /* El buscador de la portada lleva a la sábana filtrada, no al formulario:
+     primero mirás lo que hay libre y después consultás si querés. */
+  const buscar = () => {
+    const q = new URLSearchParams();
+    if (ci) q.set("ci", ci); if (co) q.set("co", co); if (hu) q.set("hu", hu);
+    if (OP) q.set("op", OP);
+    location.href = RUTAS.aloj + (q.toString() ? "?" + q.toString() : "");
+  };
   const destacados = PLACES.filter(p => ["Cerro El Centinela","Lago del Fuerte","Monumento a Don Quijote de la Mancha","Monte Calvario","Plaza Independencia","Castillo Morisco"].includes(p.n));
   const FOTOS_LUGAR = {
     "Monumento a Don Quijote de la Mancha":"don-quijote.jpg",
@@ -2081,7 +2097,7 @@ function Home({ go, data }) {
               {[1,2,3,4,5,6,7,8].map(n=><option key={n} value={n}>{n===8?"8 o más":n}</option>)}
             </select>
           </div>
-          <button className="ir" onClick={irAConsulta}>Buscar</button>
+          <button className="ir" onClick={buscar}>Buscar</button>
         </div>
         <p className="subbusca">Te contestan los lugares directamente. No cobramos comisión ni intervenimos en el precio.</p>
       </div>
@@ -2284,7 +2300,27 @@ function Corazon({ id }) {
   );
 }
 
-function CabinCard({ c }) {
+/* ¿Queda libre toda la estadía? Mira los días bloqueados a mano y los que
+   trajo la sincronización de Airbnb/Booking. Con varias cabañas alcanza con
+   que una esté libre para que el lugar aparezca en los resultados. */
+const fmtCorta = (iso) => { const [a,m,d] = String(iso).split("-"); return d+"/"+m; };
+const diasEntre = (ci, co) => {
+  const out = []; const f = new Date(co+"T00:00:00");
+  for(let d = new Date(ci+"T00:00:00"); d < f; d.setDate(d.getDate()+1))
+    out.push(d.toISOString().slice(0,10));
+  return out;
+};
+const libreEn = (c, ci, co) => {
+  if(!ci || !co || co <= ci) return true;
+  const dias = diasEntre(ci, co);
+  if(dias.length < (c.min_nights || 1)) return false;
+  const gen = new Set([...(c.blocked||[]), ...(c.ical_blocked||[])]);
+  const us = c.units || [];
+  if(!us.length) return dias.every(d => !gen.has(d));
+  return us.some(u => { const b = new Set([...(u.blocked||[]), ...gen]); return dias.every(d => !b.has(d)); });
+};
+
+function CabinCard({ c, q }) {
   const cover = c.banner || (c.photos && c.photos[0]);
   const etiquetas = [];
   if(c.verificado) etiquetas.push("✓ Verificado");
@@ -2293,7 +2329,7 @@ function CabinCard({ c }) {
   else if((c.amenities||[]).includes("parrilla")) etiquetas.push("Parrilla");
   if(c.pet_friendly && etiquetas.length<2) etiquetas.push("Mascotas");
   return (
-    <a className="card worn" href={"cabana.html?slug=" + c.slug + opSuffix}>
+    <a className="card worn" href={"cabana.html?slug=" + c.slug + opSuffix + (q||"")}>
       <div className="ph">
         <div className="chips">{etiquetas.slice(0,3).map((t,i)=><span className={"chip"+(t.startsWith("✓")?" chip-ok":"")} key={i}>{t}</span>)}</div>
         <Corazon id={"hospedaje:" + c.slug} />
@@ -2309,7 +2345,10 @@ function CabinCard({ c }) {
 }
 
 function LodgingPage({ cabins, loading }) {
-  const [guests, setGuests] = useState("");
+  const P = new URLSearchParams(location.search);
+  const [ci, setCi] = useState(P.get("ci") || "");
+  const [co, setCo] = useState(P.get("co") || "");
+  const [guests, setGuests] = useState(P.get("hu") || "");
   const [maxPrice, setMaxPrice] = useState("");
   const [tipo, setTipo] = useState("");
   const [order, setOrder] = useState("");
@@ -2323,13 +2362,16 @@ function LodgingPage({ cabins, loading }) {
     if (tipo && c.type !== tipo) return false;
     if (amen.length && !amen.every(a=>(c.amenities||[]).includes(a))) return false;
     if (pet && !c.pet_friendly) return false;
+    if (ci && co && !libreEn(c, ci, co)) return false;
     return true;
   };
+  const fechasMal = ci && co && co <= ci;
+  const qFicha = (ci && co) ? ("&ci="+ci+"&co="+co+(guests?("&hu="+guests):"")) : "";
   let show = cabins.filter(match);
   if (order==="asc") show = [...show].sort((a,b)=>(a.price||0)-(b.price||0));
   else if (order==="desc") show = [...show].sort((a,b)=>(b.price||0)-(a.price||0));
-  const activeCount = (guests?1:0)+(maxPrice?1:0)+(tipo?1:0)+(order?1:0)+amen.length+(pet?1:0);
-  const clear = () => { setGuests(""); setMaxPrice(""); setTipo(""); setOrder(""); setAmen([]); setPet(false); };
+  const activeCount = (guests?1:0)+(maxPrice?1:0)+(tipo?1:0)+(order?1:0)+amen.length+(pet?1:0)+((ci&&co)?1:0);
+  const clear = () => { setGuests(""); setMaxPrice(""); setTipo(""); setOrder(""); setAmen([]); setPet(false); setCi(""); setCo(""); };
   return (
     <div>
       <PageTitle kicker="Dónde dormir" title="Hospedajes en Tandil" sub="Cabañas, departamentos y casas de campo elegidos uno por uno. Encontrá el tuyo." />
@@ -2337,6 +2379,10 @@ function LodgingPage({ cabins, loading }) {
         {!loading && cabins.length>0 && (
           <div className="filterwrap">
             <div className="filters">
+              <label className="sel selfecha"><span>Llegada</span>
+                <input type="date" value={ci} onChange={e=>setCi(e.target.value)} /></label>
+              <label className="sel selfecha"><span>Salida</span>
+                <input type="date" value={co} min={ci||undefined} onChange={e=>setCo(e.target.value)} /></label>
               <select className="sel" value={guests} onChange={e=>setGuests(e.target.value)}>
                 <option value="">Para todos</option>
                 {[1,2,3,4,5,6,7,8].map(n=><option key={n} value={n}>Para {n}</option>)}
@@ -2373,8 +2419,12 @@ function LodgingPage({ cabins, loading }) {
         )}
         {loading ? <p className="vacio">Cargando alojamientos…</p>
         : cabins.length === 0 ? <p className="vacio">Pronto vas a ver los alojamientos acá.</p>
-        : show.length === 0 ? <p className="vacio">No hay alojamientos con esos filtros. Probá aflojar alguno.</p>
-        : <div className="cards reveal">{show.map((c,i)=><CabinCard key={i} c={c} />)}</div>}
+        : fechasMal ? <p className="vacio">La salida tiene que ser posterior a la llegada.</p>
+        : show.length === 0 ? <p className="vacio">{(ci&&co) ? "Ningún hospedaje tiene lugar en esas fechas. Probá con otras o aflojá los demás filtros." : "No hay alojamientos con esos filtros. Probá aflojar alguno."}</p>
+        : <>
+            {ci && co && <p className="ff-body" style={{margin:"0 0 14px",fontSize:"14px",color:"#6A6553"}}>{show.length===1?"1 lugar libre":show.length+" lugares libres"} del {fmtCorta(ci)} al {fmtCorta(co)}.</p>}
+            <div className="cards reveal">{show.map((c,i)=><CabinCard key={i} c={c} q={qFicha} />)}</div>
+          </>}
       </section>
     </div>
   );

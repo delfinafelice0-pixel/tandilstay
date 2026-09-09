@@ -1686,8 +1686,14 @@ function Nearby({ acts=[], food=[], cabins=[] }) {
 }
 
 function Landing({ c, acts=[], food=[] }) {
-  const [q,setQ]=useState({ci:"",co:""});
-  const [cursor,setCursor]=useState(new Date(TODAY.getFullYear(), TODAY.getMonth(), 1));
+  /* Si venís de la sábana con fechas buscadas, llegan por la URL y el
+     calendario abre en ese mes con los días ya elegidos. Se pueden cambiar. */
+  const URLQ = new URLSearchParams(location.search);
+  const ciURL = URLQ.get("ci")||"", coURL = URLQ.get("co")||"";
+  const [q,setQ]=useState((ciURL && coURL && coURL>ciURL) ? {ci:ciURL,co:coURL} : {ci:"",co:""});
+  const [cursor,setCursor]=useState(
+    q.ci ? new Date(+q.ci.slice(0,4), +q.ci.slice(5,7)-1, 1)
+         : new Date(TODAY.getFullYear(), TODAY.getMonth(), 1));
   const [openUnit,setOpenUnit]=useState(null);
   const units=c.units||[];
   const multi=units.length>1;
