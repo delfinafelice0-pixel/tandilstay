@@ -291,8 +291,8 @@ const slugify = (s) => (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\
 
 const DAYS = [["mon","Lunes"],["tue","Martes"],["wed","Miércoles"],["thu","Jueves"],["fri","Viernes"],["sat","Sábado"],["sun","Domingo"]];
 const EMPTY = { name:"", operator:"", zone:"", whatsapp:"", phone:"", blurb:"", sinTacc:false, vegetariano:false, reserva:false, comoReservar:"", menuUrl:"", videos:[], banner:"", photos:[], menu:[], hours:null, theme:null };
-const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano, reserva:r.reserva, comoReservar:r.como_reservar||"", menuUrl:r.menu_url||"", videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], menu:r.menu||[], hours:r.hours||null, theme:r.theme||null });
-const toRow = (c) => { const r = { slug:c.slug||slugify(c.name), name:c.name, operator:c.operator, zone:c.zone, whatsapp:c.whatsapp, phone:c.phone, blurb:c.blurb, sin_tacc:c.sinTacc, vegetariano:c.vegetariano, reserva:c.reserva, como_reservar:c.comoReservar, menu_url:c.menuUrl, videos:c.videos, banner:c.banner, photos:c.photos, menu:c.menu, hours:c.hours||null, theme:c.theme||null }; if(c.id) r.id=c.id; return r; };
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano, reserva:r.reserva, comoReservar:r.como_reservar||"", menuUrl:r.menu_url||"", videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], menu:r.menu||[], hours:r.hours||null, theme:r.theme||null, waFloat:(r.wa_float!==false) });
+const toRow = (c) => { const r = { slug:c.slug||slugify(c.name), name:c.name, operator:c.operator, zone:c.zone, whatsapp:c.whatsapp, phone:c.phone, blurb:c.blurb, sin_tacc:c.sinTacc, vegetariano:c.vegetariano, reserva:c.reserva, como_reservar:c.comoReservar, menu_url:c.menuUrl, videos:c.videos, banner:c.banner, photos:c.photos, menu:c.menu, hours:c.hours||null, theme:c.theme||null, wa_float:(c.waFloat!==false) }; if(c.id) r.id=c.id; return r; };
 
 const PRESETS = {
   serrano: { nombre:"Serrano", detalle:"Crema y verde monte · DM Serif Display", bg:"#FBF7E8", surf:"#FFFFFF", ink:"#23261A", acc:"#2E3521" },
@@ -979,6 +979,15 @@ function Editor({ c, set }) {
           {c.zone && <iframe title="mapa" loading="lazy" className="w-full h-40 rounded-xl border border-black/5 mb-3" src={"https://www.google.com/maps?q="+encodeURIComponent(c.zone)+"&output=embed"}></iframe>}
           <div className="grid grid-cols-2 gap-3">
             <Field label="WhatsApp"><input value={c.whatsapp} onChange={e=>set({...c,whatsapp:e.target.value})} placeholder="54920..." className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
+          <div className="rounded-xl border border-stone-200 p-3 mt-3">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input type="checkbox" checked={c.waFloat!==false} onChange={e=>set({...c, waFloat:e.target.checked})} className="mt-0.5" />
+              <span className="min-w-0">
+                <span className="block ff-body text-sm font-semibold" style={{color:C.ink}}>Mostrar el globito de WhatsApp</span>
+                <span className="block ff-body text-xs text-stone-500">Un botón fijo en tu ficha para que te escriban directo. Si no cargaste el WhatsApp, no aparece igual.</span>
+              </span>
+            </label>
+          </div>
             <Field label="Teléfono"><input value={c.phone} onChange={e=>set({...c,phone:e.target.value})} className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
           </div>
           <Field label="Descripción"><textarea value={c.blurb} onChange={e=>set({...c,blurb:e.target.value})} rows={2} className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm resize-none" /></Field>

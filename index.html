@@ -1650,6 +1650,25 @@ header, header.vt{ background:transparent !important;
 .datovt:hover .datofoto{ opacity:.78; transform:scale(1.12) }
 .datovt .n, .datovt p{ position:relative; z-index:1 }
 .datovt .n{ text-shadow:0 1px 0 rgba(255,255,255,.6) }
+
+/* ═══════════ TABLET (761–1024px) ═══════════
+   Dos problemas que solo se veían acá:
+   1) .sabana y .filtrosbar usaban 32px de padding mientras .in y .mosaic usaban 40px.
+      Centrado en desktop no se nota; en tablet el ancho lo fija la pantalla y las
+      secciones quedan desalineadas entre sí.
+   2) Las grillas se mantenían en 3 y 4 columnas hasta 760px: a 800px de ancho
+      quedaban tarjetas de 200px. */
+@media(min-width:761px){
+  .in, .mosaic, .sabana, .filtrosbar .in{
+    padding-left:40px !important; padding-right:40px !important }
+}
+@media(min-width:761px) and (max-width:1024px){
+  .in, .mosaic, .sabana, .filtrosbar .in{
+    padding-left:28px !important; padding-right:28px !important }
+  .cards, .gA, .gridhome{ grid-template-columns:repeat(2,1fr) !important }
+  .momentos{ grid-template-columns:repeat(2,1fr) !important }
+  .carrusel > *{ flex:0 0 46% }
+}
 </style>
 <script>
 /* si la dirección viene con barra final, la saca: así las rutas relativas resuelven bien */

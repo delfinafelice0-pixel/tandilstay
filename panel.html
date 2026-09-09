@@ -352,7 +352,7 @@ const delFromStorage = async (url) => { try { const m=String(url||"").match(/\/s
 
 const EMPTY = { name:"", operator:"", zone:"", whatsapp:"", blurb:"", capacity:2, bedrooms:1, bathrooms:1, price:0, weekendPrice:null, amenities:[], petFriendly:false, promoText:"", promos:[], blocked:[], overrides:{}, units:[], videos:[], banner:"", photos:[], ical_urls:[], email:"", minNights:1, type:"" };
 
-const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, promoText:r.promo_text||"", promos:r.promos||[], blocked:r.blocked||[], overrides:r.overrides||{}, units:r.units||[], videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], ical_urls:r.ical_urls||[], ical_blocked:r.ical_blocked||[], ical_synced_at:r.ical_synced_at||null, email:r.email||"", minNights:r.min_nights||1, type:r.type||"" });
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, promoText:r.promo_text||"", promos:r.promos||[], blocked:r.blocked||[], overrides:r.overrides||{}, units:r.units||[], videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], ical_urls:r.ical_urls||[], ical_blocked:r.ical_blocked||[], ical_synced_at:r.ical_synced_at||null, email:r.email||"", minNights:r.min_nights||1, type:r.type||"", waFloat:(r.wa_float!==false) });
 // Los datos generales de huéspedes/dormitorios/baños ya no se cargan a mano:
 // se calculan como el máximo de las unidades, para que el buscador y las fichas públicas sigan filtrando bien.
 const sinFotos = (u) => !((u && u.photos && u.photos.length) || (u && u.photo));
@@ -363,7 +363,7 @@ const maxDeUnidades = (units, k, fallback) => {
   const vals = (units||[]).map(u=>Number(u&&u[k])||0).filter(n=>n>0);
   return vals.length ? Math.max(...vals) : (Number(fallback)||1);
 };
-const toRow = (c) => { const r = { slug: c.slug || slugify(c.name), name:c.name, operator:c.operator, zone:c.zone, whatsapp:c.whatsapp, blurb:c.blurb, capacity:maxDeUnidades(c.units,"capacity",c.capacity), bedrooms:maxDeUnidades(c.units,"bedrooms",c.bedrooms), bathrooms:maxDeUnidades(c.units,"bathrooms",c.bathrooms), price:c.price, weekend_price:c.weekendPrice, amenities:c.amenities, pet_friendly:c.petFriendly, promo_text:c.promoText, promos:c.promos, blocked:c.blocked, overrides:c.overrides, units:c.units, videos:c.videos, banner:c.banner, photos:c.photos, ical_urls:c.ical_urls||[], email:c.email, min_nights:c.minNights||1, type:c.type||null }; if (c.id) r.id = c.id; return r; };
+const toRow = (c) => { const r = { slug: c.slug || slugify(c.name), name:c.name, operator:c.operator, zone:c.zone, whatsapp:c.whatsapp, blurb:c.blurb, capacity:maxDeUnidades(c.units,"capacity",c.capacity), bedrooms:maxDeUnidades(c.units,"bedrooms",c.bedrooms), bathrooms:maxDeUnidades(c.units,"bathrooms",c.bathrooms), price:c.price, weekend_price:c.weekendPrice, amenities:c.amenities, pet_friendly:c.petFriendly, promo_text:c.promoText, promos:c.promos, blocked:c.blocked, overrides:c.overrides, units:c.units, videos:c.videos, banner:c.banner, photos:c.photos, ical_urls:c.ical_urls||[], email:c.email, min_nights:c.minNights||1, type:c.type||null, wa_float:(c.waFloat!==false) }; if (c.id) r.id = c.id; return r; };
 
 const nightlyPrice = (c,d) => (c.overrides && c.overrides[d]!=null ? c.overrides[d] : (isWeekend(d) && c.weekendPrice ? c.weekendPrice : c.price));
 
@@ -528,6 +528,15 @@ function Editor({ c, set }) {
           <Field label="Dirección / ubicación (como en Google Maps)"><input value={c.zone} onChange={e=>set({...c,zone:e.target.value})} placeholder="Ej: López de Osornio 1264, Tandil" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
           {c.zone && <iframe title="mapa" loading="lazy" className="w-full h-40 rounded-xl border border-black/5 mb-3" src={"https://www.google.com/maps?q="+encodeURIComponent(c.zone)+"&output=embed"}></iframe>}
           <Field label="WhatsApp (cód país, sin +)"><input value={c.whatsapp} onChange={e=>set({...c,whatsapp:e.target.value})} className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
+          <div className="rounded-xl border border-stone-200 p-3 mt-3">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input type="checkbox" checked={c.waFloat!==false} onChange={e=>set({...c, waFloat:e.target.checked})} className="mt-0.5" />
+              <span className="min-w-0">
+                <span className="block ff-body text-sm font-semibold" style={{color:C.ink}}>Mostrar el globito de WhatsApp</span>
+                <span className="block ff-body text-xs text-stone-500">Un botón fijo en tu ficha para que te escriban directo. Si no cargaste el WhatsApp, no aparece igual.</span>
+              </span>
+            </label>
+          </div>
           <Field label="Email de contacto (para consultas)"><input type="email" value={c.email} onChange={e=>set({...c,email:e.target.value})} placeholder="tucabaña@mail.com" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
           <Field label="Operador / cuenta (agrupa alojamientos de un mismo dueño)"><input value={c.operator} onChange={e=>set({...c,operator:e.target.value})} placeholder="Ej: hospedatentandil" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
           <Field label="Descripción"><textarea value={c.blurb} onChange={e=>set({...c,blurb:e.target.value})} rows={3} className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm resize-none" /></Field>
