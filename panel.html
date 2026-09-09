@@ -820,8 +820,11 @@ function Reservas({ profile, cabins, afterSync }) {
   const filas = [];
   (cabins||[]).forEach(c=>{
     const us = c.units||[];
-    if(us.length) us.forEach((u,i)=> filas.push({ slug:c.slug, cab:c.name, name:u.name||("Cabaña "+(i+1)), cap:u.capacity||c.capacity, manual:(u.blockedManual||u.blocked||[]), c, u }));
-    else filas.push({ slug:c.slug, cab:c.name, name:"", cap:c.capacity, manual:(c.blocked||[]), c, u:null });
+    /* ical_blocked vive a nivel del alojamiento, no de cada unidad:
+       los días importados valen para todas sus cabañas. */
+    const sinc = c.ical_blocked||[], conCal = (c.ical_urls||[]).filter(Boolean).length>0;
+    if(us.length) us.forEach((u,i)=> filas.push({ slug:c.slug, cab:c.name, name:u.name||("Cabaña "+(i+1)), cap:u.capacity||c.capacity, manual:(u.blockedManual||u.blocked||[]), ical:sinc, conCal, c, u }));
+    else filas.push({ slug:c.slug, cab:c.name, name:"", cap:c.capacity, manual:(c.blocked||[]), ical:sinc, conCal, c, u:null });
   });
   const variosAloj = new Set(filas.map(f=>f.slug)).size > 1;
   const etiqueta = (f) => variosAloj ? (f.cab + (f.name?" · "+f.name:"")) : (f.name || f.cab);
@@ -1002,19 +1005,22 @@ function Reservas({ profile, cabins, afterSync }) {
                         <div className="min-w-0">
                           <p className="ff-body text-sm font-semibold truncate" style={{color:C.ink}} title={etiqueta(f)}>{f.name || f.cab}</p>
                           {f.name && <p className="ff-body text-[11px] text-stone-400 truncate">{f.cab}</p>}
+                          {f.conCal && !(f.ical||[]).length && <p className="ff-body text-[11px] truncate" style={{color:"#8A6A1E"}} title="Tiene calendarios cargados pero no trajo ninguna fecha. Entrá a su ficha y tocá «Sincronizar ahora».">⚠ sin sincronizar</p>}
                         </div>
                       </div>
                       {dias.map(d=>{
                         const day=fecha(d); const dd=new Date(y,m,d).getDay(); const finde=dd===0||dd===6;
                         const manual = !reservaEn(f,day) && (f.manual||[]).includes(day);
+                        const sincro = !reservaEn(f,day) && !manual && (f.ical||[]).includes(day);
                         const pasado = day<hoy;
                         const bg = manual ? "repeating-linear-gradient(135deg, #E6E1D3 0 4px, #F4F0E6 4px 9px)"
+                                 : sincro ? "repeating-linear-gradient(135deg, #CFDAC0 0 4px, #E8EEDD 4px 9px)"
                                  : pasado ? "#F4F1E9" : finde ? "#FBF8F0" : "#fff";
                         return (
                           <div key={d} style={{width:ANCHO, height:ALTO, background:bg, borderRight: day===hoy ? "2px solid "+C.clay : "1px solid #F0EDE4"}}
                             className="shrink-0 cursor-pointer hover:bg-stone-50"
-                            title={manual ? "Ocupado a mano" : pasado ? "" : "Tocá para cargar una reserva desde este día"}
-                            onClick={()=>{ if(pasado || manual) return; setVista("mes"); setMesCur(new Date(y,m,1)); abrirNueva({ slug:f.slug, unit:f.name||"", start_date:day, end_date:fecha(Math.min(dim,d+1)) }); }}>
+                            title={manual ? "Ocupado a mano" : sincro ? "Ocupado en Airbnb o Booking" : pasado ? "" : "Tocá para cargar una reserva desde este día"}
+                            onClick={()=>{ if(pasado || manual || sincro) return; setVista("mes"); setMesCur(new Date(y,m,1)); abrirNueva({ slug:f.slug, unit:f.name||"", start_date:day, end_date:fecha(Math.min(dim,d+1)) }); }}>
                           </div>
                         );
                       })}
@@ -1039,6 +1045,7 @@ function Reservas({ profile, cabins, afterSync }) {
               <span className="flex items-center gap-1.5"><i className="inline-block w-4 h-3 rounded-full" style={{background:C.moss}}></i> Reserva</span>
               <span className="flex items-center gap-1.5"><i className="inline-block w-4 h-3 rounded-full" style={{background:"#f0d9a8"}}></i> Pendiente</span>
               <span className="flex items-center gap-1.5"><i className="inline-block w-4 h-3 rounded-sm" style={{background:"repeating-linear-gradient(135deg, #E6E1D3 0 3px, #F4F0E6 3px 6px)"}}></i> Ocupado a mano</span>
+              <span className="flex items-center gap-1.5"><i className="inline-block w-4 h-3 rounded-sm" style={{background:"repeating-linear-gradient(135deg, #CFDAC0 0 3px, #E8EEDD 3px 6px)"}}></i> Airbnb / Booking</span>
               <span className="flex items-center gap-1.5"><i className="inline-block w-4 h-3 rounded-sm" style={{background:"#F4F1E9"}}></i> Pasado</span>
               <span className="ml-auto">Tocá un día libre para cargar una reserva.</span>
             </div>
