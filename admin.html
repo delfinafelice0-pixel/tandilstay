@@ -695,6 +695,93 @@ function Tutoriales(){
   );
 }
 
+
+/* ═══ Alta de cliente: el paso a paso interno ═══ */
+const PRECIOS = { hospedaje:"$40.000", gastronomia:"$40.000", actividad:"$30.000" };
+
+const PASOS_ALTA = [
+  { n:"01", t:"Crear la cuenta", d:"En la pestaña Usuarios, arriba a la izquierda. Email, contraseña, rubro, operador y cuántas publicaciones puede cargar.",
+    ojo:"El campo «Operador» es la llave que une la cuenta con sus publicaciones. Tiene que quedar idéntico al que se cargue después en el panel: mismas mayúsculas, tildes y espacios. Si no coinciden, el cliente entra y no ve sus publicaciones, y si algún día borrás la cuenta las publicaciones quedan sueltas en el sitio." },
+  { n:"02", t:"Mandarle el acceso", d:"Email y contraseña por WhatsApp, junto con el link de su panel según el rubro. Decile que puede cambiar la contraseña desde su panel.",
+    links:[["Hospedajes","panel.html"],["Gastronomía","gastro-panel.html"],["Actividades","act-panel.html"]] },
+  { n:"03", t:"Que cargue su lugar", d:"Lo mínimo para que la ficha no se vea a medias: nombre, dirección tal cual figura en Google Maps, WhatsApp con código de país y sin el +, una descripción corta, foto de portada y al menos tres fotos más.",
+    ojo:"La primera vez conviene hacerlo juntas por videollamada. Es donde más se traban y donde se define si la ficha queda linda o no." },
+  { n:"04", t:"Lo propio de cada rubro", d:"",
+    rubros:[
+      ["Hospedajes","Cada cabaña o depto con huéspedes, dormitorios, baños y sus propias fotos. Precio por noche y de finde. El calendario de días ocupados. Si usa Airbnb o Booking, el link .ics va en «Sincronizar con Airbnb o Booking», nunca en «Link de reserva»: ahí no sincroniza nada."],
+      ["Gastronomía","Las categorías y los platos, con foto, precio y etiquetas. Si ya tiene la carta en una planilla, conviene usar Carga masiva y subirla en CSV en vez de cargar plato por plato."],
+      ["Actividades","Categoría, duración, horarios, precio, qué incluye y cómo se reserva."]
+    ] },
+  { n:"05", t:"Revisar el front antes de avisarle", d:"Con el botón «Abrir front» de su tarjeta. Chequeá que aparezca en el listado, que todas las fotos carguen, que el WhatsApp abra con el mensaje correcto y que el mapa apunte bien.",
+    ojo:"Miralo también desde un celular. Varios problemas de fotos solo se ven ahí." },
+  { n:"06", t:"Ubicarlo en la guía", d:"Pestaña Orden: define en qué posición aparece dentro de su rubro." },
+  { n:"07", t:"Registrar el cobro", d:"En su tarjeta, cargá Último pago y Próximo pago, o tocá «Pagó hoy» y se completa solo. El estado de la tarjeta pasa a «Al día» y avisa cuando falta poco para el vencimiento.",
+    precios:true },
+  { n:"08", t:"Pasarle su link para compartir", d:"El botón «Copiar» de su tarjeta arma la URL con su operador ya puesto. Sirve para la bio de Instagram o para mandar por WhatsApp. Contale que en su panel tiene el botón Videos y la guía escrita en Ayuda." },
+];
+
+function AltaCliente(){
+  return (
+    <div className="max-w-3xl mx-auto">
+      <div className="bg-white rounded-2xl border border-black/5 p-5 mb-4">
+        <h3 className="ff-display text-xl mb-1" style={{color:C.ink}}>Alta de un cliente nuevo</h3>
+        <p className="ff-body text-sm text-stone-500">Todo lo que tiene que estar hecho para que un cliente funcione bien en Visitando Tandil. Es una guía interna, no la ve nadie de afuera.</p>
+      </div>
+
+      <div className="space-y-3">
+        {PASOS_ALTA.map(p=>(
+          <div key={p.n} className="bg-white rounded-2xl border border-black/5 p-5">
+            <div className="flex gap-3">
+              <span className="ff-display text-lg shrink-0" style={{color:C.sage}}>{p.n}</span>
+              <div className="min-w-0">
+                <h4 className="ff-body font-semibold mb-1" style={{color:C.ink}}>{p.t}</h4>
+                {p.d && <p className="ff-body text-sm text-stone-600">{p.d}</p>}
+
+                {p.links && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {p.links.map(([l,u])=>(
+                      <a key={u} href={u} target="_blank" rel="noreferrer" className="rounded-lg px-2.5 py-1 ff-body text-xs border border-stone-300 text-stone-600">{l} · /{u}</a>
+                    ))}
+                  </div>
+                )}
+
+                {p.rubros && (
+                  <div className="space-y-2 mt-1">
+                    {p.rubros.map(([r,txt])=>(
+                      <div key={r}>
+                        <span className="ff-body text-xs font-semibold uppercase tracking-wide" style={{color:C.sage}}>{r}</span>
+                        <p className="ff-body text-sm text-stone-600">{txt}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {p.precios && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {[["Hospedajes",PRECIOS.hospedaje],["Gastronomía",PRECIOS.gastronomia],["Actividades",PRECIOS.actividad]].map(([r,v])=>(
+                      <span key={r} className="rounded-lg px-2.5 py-1 ff-body text-xs" style={{background:C.sun,color:C.ink}}>{r} · {v} por mes</span>
+                    ))}
+                    <span className="rounded-lg px-2.5 py-1 ff-body text-xs border border-stone-300 text-stone-600">El primer mes es sin costo</span>
+                  </div>
+                )}
+
+                {p.ojo && (
+                  <p className="ff-body text-sm rounded-xl px-3 py-2 mt-2" style={{background:"#FDF3DF",color:"#8A6A1E"}}>{p.ojo}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-white rounded-2xl border border-black/5 p-5 mt-4">
+        <h4 className="ff-body font-semibold mb-1" style={{color:C.ink}}>Cuando un cliente se da de baja</h4>
+        <p className="ff-body text-sm text-stone-600">Borrar la cuenta desde su tarjeta también borra sus publicaciones y sus reservas. Después pasá por «Publicaciones sin dueño», abajo del listado de usuarios, y verificá que no haya quedado nada suelto en el sitio.</p>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [session,setSession]=useState(null), [ready,setReady]=useState(false), [me,setMe]=useState(null);
   const [email,setEmail]=useState(""), [pass,setPass]=useState(""), [authErr,setAuthErr]=useState("");
@@ -807,6 +894,7 @@ function App() {
               <button onClick={()=>setTab("resumen")} className={"px-3.5 py-2 ff-body text-sm "+(tab==="resumen"?"text-white":"text-stone-600")} style={tab==="resumen"?{background:C.moss}:{}}>Resumen</button>
               <button onClick={()=>setTab("orden")} className={"px-3.5 py-2 ff-body text-sm "+(tab==="orden"?"text-white":"text-stone-600")} style={tab==="orden"?{background:C.moss}:{}}>Orden</button>
               <button onClick={()=>setTab("newsletter")} className={"px-3.5 py-2 ff-body text-sm "+(tab==="newsletter"?"text-white":"text-stone-600")} style={tab==="newsletter"?{background:C.moss}:{}}>Newsletter</button>
+              <button onClick={()=>setTab("alta")} className={"px-3.5 py-2 ff-body text-sm "+(tab==="alta"?"text-white":"text-stone-600")} style={tab==="alta"?{background:C.moss}:{}}>Alta de cliente</button>
               <button onClick={()=>setTab("tutoriales")} className={"px-3.5 py-2 ff-body text-sm "+(tab==="tutoriales"?"text-white":"text-stone-600")} style={tab==="tutoriales"?{background:C.moss}:{}}>Tutoriales</button>
             </div>
             <button onClick={()=>db.auth.signOut()} className="rounded-full px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">Salir</button>
@@ -893,6 +981,8 @@ function App() {
           </div>
         ) : tab==="orden" ? (
           <Orden />
+        ) : tab==="alta" ? (
+          <AltaCliente />
         ) : tab==="tutoriales" ? (
           <Tutoriales />
         ) : tab==="newsletter" ? (

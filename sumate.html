@@ -484,12 +484,12 @@ header, header.vt{ background:transparent !important;
     <div class="shead">
       <span class="idx">03</span>
       <h2>El precio</h2>
-      <span class="aside">Uno solo, para los tres rubros</span>
+      <span class="aside">Según el rubro</span>
     </div>
     <div class="tarifa">
       <div class="lado worn">
         <img class="ladofoto" src="banner-tandil.jpg" alt="" loading="lazy" onerror="this.remove()">
-        <span class="et">Un solo plan</span>
+        <span class="et" id="js-plan">Alojamientos</span>
         <div class="num" id="js-precio">$40.000</div>
         <div class="per" id="js-periodo">Por mes</div>
         <p class="fine">Sin costo de armado y sin permanencia. Si no te sirve, lo dás de baja y listo.</p>
@@ -603,7 +603,9 @@ header, header.vt{ background:transparent !important;
 (function(){
   /* ═══ EDITÁ ACÁ ═══ */
   var WHATSAPP = "5492284631868";   // país + área + número, sin + ni espacios
-  var PRECIO   = "$40.000";
+  /* Un precio por rubro. Se actualiza al cambiar de solapa arriba. */
+  var PRECIOS  = { dormir:"$40.000", comer:"$40.000", hacer:"$30.000" };
+  var PLANES   = { dormir:"Alojamientos", comer:"Gastronomía", hacer:"Actividades" };
   var PERIODO  = "Por mes";         // poné "" si alguna vez es pago único
   /* ════════════════ */
 
@@ -614,10 +616,16 @@ header, header.vt{ background:transparent !important;
   };
   var actual = "dormir";
 
-  document.getElementById("js-precio").textContent = PRECIO;
   document.getElementById("js-periodo").textContent = PERIODO;
 
+  function precio(){
+    document.getElementById("js-precio").textContent = PRECIOS[actual] || PRECIOS.dormir;
+    document.getElementById("js-plan").textContent   = PLANES[actual]  || PLANES.dormir;
+  }
+  precio();
+
   function refrescar(){
+    precio();
     var url = "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(mensajes[actual]);
     document.querySelectorAll("[data-wa]").forEach(function(a){
       a.href = url; a.target = "_blank"; a.rel = "noopener";
