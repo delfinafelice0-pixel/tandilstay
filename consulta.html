@@ -1030,6 +1030,10 @@ header, header.vt{ background:transparent !important;
 .filtrosbar, .filters, .filtros{ background:transparent !important;
   -webkit-backdrop-filter:saturate(1.1) blur(12px); backdrop-filter:saturate(1.1) blur(12px);
   border-bottom:1px solid rgba(70,62,42,.10) !important }
+
+/* La appbar flota fija abajo pero nada compensaba su altura: tapaba el final
+   del contenido (el formulario de consulta, el pie de página). */
+@media(max-width:899px){ body{ padding-bottom:96px } }
 </style>
 </head>
 <body>

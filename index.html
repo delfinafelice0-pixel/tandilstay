@@ -1669,6 +1669,10 @@ header, header.vt{ background:transparent !important;
   .momentos{ grid-template-columns:repeat(2,1fr) !important }
   .carrusel > *{ flex:0 0 46% }
 }
+
+/* La appbar flota fija abajo pero nada compensaba su altura: tapaba el final
+   del contenido (el formulario de consulta, el pie de página). */
+@media(max-width:899px){ body{ padding-bottom:96px } }
 </style>
 <script>
 /* si la dirección viene con barra final, la saca: así las rutas relativas resuelven bien */
