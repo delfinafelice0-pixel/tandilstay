@@ -1752,6 +1752,11 @@ const FACTS = [
   { e:"🚌", text:"Tandil está a menos de 4 horas de CABA, ideal para un finde largo." },
 ];
 
+/* Top 10 de Tandil. Mientras esté vacío, la sección no se dibuja:
+   una sección con el título y nada abajo se ve como un error.
+   Formato: { n:"Nombre", b:"Por qué vale la pena", cat:"Sierras" } */
+const TOP10 = [];
+
 const PLACES = [
   { n:"Plaza Independencia", cat:"Centro", b:"El corazón de la ciudad: diseño simétrico, mucha arboleda y la parroquia enfrente." },
   { n:"Parroquia Santísimo Sacramento", cat:"Centro", b:"El principal templo católico de Tandil, frente a la plaza." },
@@ -1779,21 +1784,7 @@ const FOTO_RESPALDO = "https://images.unsplash.com/photo-1518780664697-55e3ad937
 
 const mapsLink = (n) => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(n + ", Tandil, Buenos Aires");
 
-const ITINERARIES = [
-  { days:"1 día", sub:"El centro histórico a pie", plan:[
-    { d:"Mañana", stops:["Plaza Independencia","Parroquia Santísimo Sacramento","Palacio Municipal"] },
-    { d:"Tarde", stops:["Parque Independencia y Castillo Morisco","Lago del Fuerte","Monumento a Don Quijote"] },
-  ]},
-  { days:"2 días", sub:"Un día tranqui y uno activo", plan:[
-    { d:"Día tranqui · el centro", stops:["Plaza Independencia","Parroquia Santísimo Sacramento","Parque Independencia y Castillo Morisco","Lago del Fuerte"] },
-    { d:"Día activo · las sierras", stops:["Monte Calvario","Cristo de las Sierras","Cerro El Centinela","Cerro del Libertador"] },
-  ]},
-  { days:"3 días", sub:"Para verlo con calma", plan:[
-    { d:"Día tranqui · el centro", stops:["Plaza Independencia","Parroquia Santísimo Sacramento","Palacio Municipal","Lago del Fuerte"] },
-    { d:"Día activo · monumentos serranos", stops:["Monte Calvario","Cristo de las Sierras","Parque Independencia y Castillo Morisco","Cerro del Libertador"] },
-    { d:"Día aventura · naturaleza", stops:["Sendero de las Ánimas","Camino Misterioso","Paseo de los Pioneros","Parque del Origen (de los Dinosaurios)"] },
-  ]},
-];
+
 
 const MOMENTOS = [
   { t:"Desayuno y merienda", s:"Cafés, panaderías y casas de té.", f:"photo-1495474472287-4d71bcdd2085" },
@@ -2028,10 +2019,8 @@ function PageTitle({ kicker, title, sub }) {
 
 /* ═════════════ HOME ═════════════ */
 function Home({ go, data }) {
-  const [it, setIt] = useState(1);
   const [rubro, setRubro] = useState("dormir");
   const [ci, setCi] = useState(""), [co, setCo] = useState(""), [hu, setHu] = useState(""), [pre, setPre] = useState("");
-  const sel = ITINERARIES[it];
   const irAConsulta = () => {
     const q = new URLSearchParams();
     if (ci) q.set("ci", ci); if (co) q.set("co", co);
@@ -2181,7 +2170,7 @@ function Home({ go, data }) {
         })}
       </div>
       <div className="in" style={{padding:"26px 34px 0"}}>
-        <button className="ghost" onClick={()=>go("conoce")}>Ver los 18 lugares gratis</button>
+        <button className="ghost" onClick={()=>go("conoce")}>Ver los lugares para visitar</button>
       </div>
 
       {/* 04 · PARA COMER */}
@@ -2528,8 +2517,6 @@ function FoodPage({ food, loading }) {
 
 /* ═════════════ CONOCÉ TANDIL ═════════════ */
 function AboutPage() {
-  const [it, setIt] = useState(1);
-  const sel = ITINERARIES[it];
   return (
     <div>
       <PageTitle kicker="La ciudad" title="Conocé Tandil" sub="Tandil es una ciudad serrana del centro de la provincia, rodeada de cerros milenarios, arroyos y aire limpio. Combina la calma del campo con la comodidad de una ciudad completa." />
@@ -2540,30 +2527,27 @@ function AboutPage() {
         </div>
       </section>
 
-      <section className="in reveal">
-        <SHead idx="02" title="Itinerarios sugeridos" aside={sel.sub} />
-        <div className="tabs">
-          {ITINERARIES.map((p,i)=>(<button key={i} className={it===i?"on":""} onClick={()=>setIt(i)}>{p.days}</button>))}
-        </div>
-        <div className="plan">
-          {sel.plan.map((day,di)=>(
-            <div className="day" key={di}>
-              <h4>{day.d}</h4>
-              <ul className="stops">
-                {day.stops.map((s,si)=>(
-                  <li key={si}>
-                    <span className="nm">{s}</span>
-                    <a className="mp" href={mapsLink(s)} target="_blank" rel="noreferrer">Mapa</a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </section>
+      {TOP10.length > 0 && (
+        <section className="in reveal">
+          <SHead idx="02" title={"Top "+TOP10.length+" de Tandil"} aside="Lo que no te podés perder" />
+          <div className="places">
+            {TOP10.map((p,i)=>(
+              <div className="place" key={i}>
+                <p className="cat">{String(i+1).padStart(2,"0")}{p.cat ? " · "+p.cat : ""}</p>
+                <h3>{p.n}</h3>
+                <p>{p.b}</p>
+                <div className="l">
+                  <span className="cat">{p.gratis===false ? "Con entrada" : "Entrada libre"}</span>
+                  <a className="mp" href={mapsLink(p.n)} target="_blank" rel="noreferrer">Ver en el mapa</a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="in reveal">
-        <SHead idx="03" title="Lugares para visitar, gratis" aside={PLACES.length + " lugares"} />
+        <SHead idx={TOP10.length>0 ? "03" : "02"} title="Lugares para visitar" aside={PLACES.length + " lugares"} />
         <div className="places">
           {PLACES.map((p,i)=>(
             <div className="place" key={i}>
@@ -2571,7 +2555,7 @@ function AboutPage() {
               <h3>{p.n}</h3>
               <p>{p.b}</p>
               <div className="l">
-                <span className="cat">Entrada libre</span>
+                <span className="cat">{p.gratis===false ? "Con entrada" : "Entrada libre"}</span>
                 <a className="mp" href={mapsLink(p.n)} target="_blank" rel="noreferrer">Ver en el mapa</a>
               </div>
             </div>
@@ -2662,8 +2646,7 @@ function Footer({ go }) {
             <h5>Planificar</h5>
             <ul>
               <li><a href={"consulta.html" + (OP?("?op="+encodeURIComponent(OP)):"")}>Hacer una consulta</a></li>
-              <li><button onClick={()=>go("conoce")}>Itinerarios</button></li>
-              <li><button onClick={()=>go("conoce")}>Lugares gratis</button></li>
+              <li><button onClick={()=>go("conoce")}>Lugares para visitar</button></li>
             </ul>
           </div>
           <div>
