@@ -1735,7 +1735,7 @@ const NAV = [
   { key:"aloj", label:"Para dormir" },
   { key:"gastro", label:"Para comer" },
   { key:"qhacer", label:"Para pasear" },
-  { key:"conoce", label:"Conocé Tandil" },
+  { key:"conoce", label:"Qué ver en Tandil" },
 ];
 
 const IMG = (p) => (!p ? "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=900&q=80" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=900&q=80`));
@@ -2519,7 +2519,7 @@ function FoodPage({ food, loading }) {
 function AboutPage() {
   return (
     <div>
-      <PageTitle kicker="La ciudad" title="Conocé Tandil" sub="Tandil es una ciudad serrana del centro de la provincia, rodeada de cerros milenarios, arroyos y aire limpio. Combina la calma del campo con la comodidad de una ciudad completa." />
+      <PageTitle kicker="La ciudad" title="Qué ver en Tandil" sub="Tandil es una ciudad serrana del centro de la provincia, rodeada de cerros milenarios, arroyos y aire limpio. Combina la calma del campo con la comodidad de una ciudad completa." />
       <section className="in reveal">
         <SHead idx="01" title="Datos curiosos" />
         <div className="facts">
@@ -2639,7 +2639,7 @@ function Footer({ go }) {
               <li><button onClick={()=>go("aloj")}>Para dormir</button></li>
               <li><button onClick={()=>go("gastro")}>Para comer</button></li>
               <li><button onClick={()=>go("qhacer")}>Para pasear</button></li>
-              <li><button onClick={()=>go("conoce")}>Conocé Tandil</button></li>
+              <li><button onClick={()=>go("conoce")}>Qué ver en Tandil</button></li>
             </ul>
           </div>
           <div>
