@@ -101,8 +101,10 @@ input{font:inherit}
   overflow:hidden;box-shadow:var(--sombra);transition:transform .5s var(--curva),opacity .5s;
   transform:scale(.94);opacity:.62;text-align:left;width:100%}
 .dest.foco{transform:scale(1);opacity:1}
-.dest .im{aspect-ratio:4/3;background:var(--line);position:relative}
-.dest .im img{width:100%;height:100%;object-fit:cover}
+.dest .im{aspect-ratio:4/3;background:var(--line);position:relative;
+  margin:7px 7px 0;border-radius:calc(var(--r) - 7px);overflow:hidden}
+.dest .im img,.dest .im .ini{position:absolute;inset:0;width:100%;height:100%;
+  aspect-ratio:auto;object-fit:cover}
 .dest .txt{padding:13px 15px 15px}
 .dest h3{margin:0;font-size:19px}
 .dest .pr{margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -120,8 +122,10 @@ input{font:inherit}
 .plato{background:var(--surf);border-radius:var(--rm);overflow:hidden;text-align:left;width:100%;
   box-shadow:var(--sombra);transition:transform .22s var(--curva);display:flex;flex-direction:column}
 .plato:active{transform:scale(.975)}
-.plato .im{aspect-ratio:1/1;background:var(--line);position:relative}
-.plato .im img{width:100%;height:100%;object-fit:cover}
+.plato .im{aspect-ratio:1/1;background:var(--line);position:relative;
+  margin:6px 6px 0;border-radius:calc(var(--rm) - 6px);overflow:hidden}
+.plato .im img,.plato .im .ini{position:absolute;inset:0;width:100%;height:100%;
+  aspect-ratio:auto;object-fit:cover}
 .plato .txt{padding:11px 12px 12px;flex:1;display:flex;flex-direction:column}
 .plato h3{margin:0;font-size:16.5px}
 .plato .d{font-size:12.5px;color:var(--soft);margin:3px 0 0;line-height:1.35}
@@ -136,7 +140,7 @@ input{font:inherit}
 .fila .d{font-size:13px;color:var(--soft);margin:3px 0 0;line-height:1.4}
 .fila .pr{margin-top:9px;display:flex;align-items:center;gap:10px}
 .fila .im{flex:0 0 82px;height:82px;border-radius:var(--rs);overflow:hidden;background:var(--line)}
-.fila .im img{width:100%;height:100%;object-fit:cover}
+.fila .im img,.fila .im .ini{width:100%;height:100%;aspect-ratio:auto;object-fit:cover}
 
 .precio{font-family:var(--disp);font-size:18px}
 .sinp{font-size:12.5px;color:var(--soft)}
