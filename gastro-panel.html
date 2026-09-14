@@ -290,9 +290,9 @@ const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
 const slugify = (s) => (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 
 const DAYS = [["mon","Lunes"],["tue","Martes"],["wed","Miércoles"],["thu","Jueves"],["fri","Viernes"],["sat","Sábado"],["sun","Domingo"]];
-const EMPTY = { name:"", operator:"", zone:"", whatsapp:"", phone:"", blurb:"", sinTacc:false, vegetariano:false, reserva:false, comoReservar:"", menuUrl:"", videos:[], banner:"", photos:[], menu:[], hours:null, theme:null };
-const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano, reserva:r.reserva, comoReservar:r.como_reservar||"", menuUrl:r.menu_url||"", videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], menu:r.menu||[], hours:r.hours||null, theme:r.theme||null, waFloat:(r.wa_float!==false) });
-const toRow = (c) => { const r = { slug:c.slug||slugify(c.name), name:c.name, operator:c.operator, zone:c.zone, whatsapp:c.whatsapp, phone:c.phone, blurb:c.blurb, sin_tacc:c.sinTacc, vegetariano:c.vegetariano, reserva:c.reserva, como_reservar:c.comoReservar, menu_url:c.menuUrl, videos:c.videos, banner:c.banner, photos:c.photos, menu:c.menu, hours:c.hours||null, theme:c.theme||null, wa_float:(c.waFloat!==false) }; if(c.id) r.id=c.id; return r; };
+const EMPTY = { name:"", operator:"", zone:"", whatsapp:"", phone:"", blurb:"", sinTacc:false, vegetariano:false, reserva:false, comoReservar:"", menuUrl:"", videos:[], banner:"", bannerMob:"", logo:"", photos:[], menu:[], hours:null, theme:null };
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano, reserva:r.reserva, comoReservar:r.como_reservar||"", menuUrl:r.menu_url||"", videos:r.videos||[], banner:r.banner||"", bannerMob:r.banner_mobile||"", logo:r.logo||"", photos:r.photos||[], menu:r.menu||[], hours:r.hours||null, theme:r.theme||null, waFloat:(r.wa_float!==false) });
+const toRow = (c) => { const r = { slug:c.slug||slugify(c.name), name:c.name, operator:c.operator, zone:c.zone, whatsapp:c.whatsapp, phone:c.phone, blurb:c.blurb, sin_tacc:c.sinTacc, vegetariano:c.vegetariano, reserva:c.reserva, como_reservar:c.comoReservar, menu_url:c.menuUrl, videos:c.videos, banner:c.banner, banner_mobile:c.bannerMob||"", logo:c.logo||"", photos:c.photos, menu:c.menu, hours:c.hours||null, theme:c.theme||null, wa_float:(c.waFloat!==false) }; if(c.id) r.id=c.id; return r; };
 
 const PRESETS = {
   serrano: { nombre:"Serrano", detalle:"Crema y verde monte · DM Serif Display", bg:"#FBF7E8", surf:"#FFFFFF", ink:"#23261A", acc:"#2E3521" },
@@ -966,7 +966,10 @@ function MenuEditor({ c, set }){
 
 function Editor({ c, set }) {
   const [uploading,setUploading]=useState(false);
+  const [bannerMobAbierto,setBannerMobAbierto]=useState(false);
   const uploadBanner = async (e)=>{ const f=(e.target.files||[])[0]; if(!f)return; setUploading(true); const old=c.banner; const u=await up(f,"resto-banner"); if(u){ if(old) delFromStorage(old); set({...c,banner:u}); } setUploading(false); e.target.value=""; };
+  const uploadLogo = async (e)=>{ const f=(e.target.files||[])[0]; if(!f)return; setUploading(true); const old=c.logo; const u=await up(f,"resto-logo"); if(u){ if(old) delFromStorage(old); set({...c,logo:u}); } setUploading(false); e.target.value=""; };
+  const uploadBannerMob = async (e)=>{ const f=(e.target.files||[])[0]; if(!f)return; setUploading(true); const old=c.bannerMob; const u=await up(f,"resto-banner-mob"); if(u){ if(old) delFromStorage(old); set({...c,bannerMob:u}); } setUploading(false); e.target.value=""; };
   const uploadGallery = async (e)=>{ const fs=Array.from(e.target.files||[]); if(!fs.length)return; const MAXP=15; const room=MAXP-(c.photos||[]).length; if(room<=0){ alert("Llegaste al máximo de "+MAXP+" fotos. Borrá alguna para subir otra."); e.target.value=""; return; } if(fs.length>room) alert("Solo se agregan "+room+" foto(s): el máximo es "+MAXP+"."); const toUp=fs.slice(0,room); setUploading(true); const urls=[]; for(const f of toUp){ const u=await up(f,"resto"); if(u) urls.push(u);} set({...c,photos:[...c.photos,...urls]}); setUploading(false); e.target.value=""; };
   return (
     <div className="grid md:grid-cols-2 gap-6">
@@ -1053,11 +1056,28 @@ function Editor({ c, set }) {
 
         <div className="bg-white rounded-2xl border border-black/5 p-5">
           <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Fotos</h3>
+
+          <span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">Logo</span>
+          <p className="ff-body text-xs text-stone-500 mt-0.5 mb-2">Se muestra en un círculo, al lado del nombre. Mejor cuadrado y con fondo propio.</p>
+          <div className="mb-4">
+            {c.logo ? <div className="relative inline-block"><img src={IMG(c.logo)} className="w-20 h-20 rounded-full object-contain bg-white border border-black/10 p-1" /><button onClick={()=>{ delFromStorage(c.logo); set({...c,logo:""}); }} className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-rose-500 text-white text-xs grid place-items-center">✕</button></div>
+            : <label className="block"><span className="inline-flex cursor-pointer rounded-xl px-4 py-2.5 ff-body text-sm font-semibold text-white" style={{background:C.moss,opacity:uploading?0.6:1}}>{uploading?"Subiendo…":"⭕ Subir logo"}</span><input type="file" accept="image/*" onChange={uploadLogo} disabled={uploading} className="hidden" /></label>}
+          </div>
+
           <span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">Banner</span>
           <div className="mt-1 mb-3">
             {c.banner ? <div className="relative inline-block w-full"><img src={IMG(c.banner)} className="w-full h-28 rounded-xl object-cover bg-stone-200" /><button onClick={()=>{ delFromStorage(c.banner); set({...c,banner:""}); }} className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-rose-500 text-white text-xs grid place-items-center">✕</button></div>
             : <label className="block"><span className="inline-flex cursor-pointer rounded-xl px-4 py-2.5 ff-body text-sm font-semibold text-white" style={{background:C.clay,opacity:uploading?0.6:1}}>{uploading?"Subiendo…":"🖼️ Subir banner"}</span><input type="file" accept="image/*" onChange={uploadBanner} disabled={uploading} className="hidden" /></label>}
           </div>
+          {c.banner && (bannerMobAbierto || c.bannerMob
+            ? <div className="mb-3">
+                <span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">Banner para celular</span>
+                <p className="ff-body text-xs text-stone-500 mt-0.5 mb-2">Opcional. Si no cargás ninguno, en el celular se usa el de arriba.</p>
+                {c.bannerMob ? <div className="relative inline-block w-40"><img src={IMG(c.bannerMob)} className="w-40 h-32 rounded-xl object-cover bg-stone-200" /><button onClick={()=>{ delFromStorage(c.bannerMob); set({...c,bannerMob:""}); }} className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-rose-500 text-white text-xs grid place-items-center">✕</button></div>
+                : <label className="block"><span className="inline-flex cursor-pointer rounded-xl px-4 py-2.5 ff-body text-sm font-semibold text-white" style={{background:C.clay,opacity:uploading?0.6:1}}>{uploading?"Subiendo…":"📱 Subir versión celular"}</span><input type="file" accept="image/*" onChange={uploadBannerMob} disabled={uploading} className="hidden" /></label>}
+              </div>
+            : <button onClick={()=>setBannerMobAbierto(true)} className="ff-body text-sm font-semibold mb-3" style={{color:C.clay}}>+ Agregar versión para celular</button>)}
+
           <span className="ff-body text-xs font-semibold text-stone-500 uppercase tracking-wide">Galería</span>
           {c.photos.length>0 && <div className="grid grid-cols-3 gap-2 my-2">{c.photos.map((p,i)=><div key={i} className="relative"><img src={IMG(p)} className="w-full h-20 rounded-lg object-cover bg-stone-200" /><button onClick={()=>{ delFromStorage(p); set({...c,photos:c.photos.filter((_,j)=>j!==i)}); }} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-white text-xs grid place-items-center">✕</button></div>)}</div>}
           {c.photos.length>=15
