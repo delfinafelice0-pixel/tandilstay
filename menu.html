@@ -79,6 +79,10 @@ input{font:inherit}
 .perfil .marca{font-size:11.5px;letter-spacing:.02em;color:var(--soft);margin:0 0 3px}
 .perfil h1{margin:0;font-size:clamp(26px,6.6vw,34px);color:var(--ink)}
 .perfil .meta{margin:5px 0 0;font-size:13.5px;color:var(--soft)}
+.perfil .meta.corta{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.perfil .vermas{margin-top:3px;padding:0;font-size:13px;font-weight:600;color:var(--acc2);
+  background:none;border:0;cursor:pointer}
+.perfil .vermas:active{opacity:.6}
 
 /* ── la hoja que sube por encima de la foto ── */
 .hoja{position:relative;z-index:4;margin-top:-34px;border-radius:30px 30px 0 0;background:var(--bg);
@@ -88,6 +92,24 @@ input{font:inherit}
   border:1px solid var(--line)}
 .consulta{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:500;
   color:var(--acc2);text-decoration:none}
+
+/* ── estado de apertura y hoja de horarios ── */
+.tag.hs{display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+  border-color:var(--line);color:var(--ink);font-weight:500}
+.tag.hs i{width:7px;height:7px;border-radius:50%;flex:none;background:#8a8a7e}
+.tag.hs.si i{background:#2f9e55}
+.tag.hs.no i{background:#c0563f}
+.tag.hs u{text-decoration:none;color:var(--soft);font-size:12px}
+.hs-lista{padding:2px 0 6px}
+.hs-fila{display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+  padding:11px 2px;border-bottom:1px solid var(--line)}
+.hs-fila:last-child{border-bottom:0}
+.hs-fila.hoy{font-weight:600;color:var(--ink)}
+.hs-fila .d{font-size:14.5px;color:var(--soft)}
+.hs-fila.hoy .d{color:var(--ink)}
+.hs-fila .h{font-size:14px;color:var(--soft);text-align:right}
+.hs-fila.hoy .h{color:var(--ink)}
+.hs-fila .h.cerr{color:#c0563f}
 
 /* ── riel de categorías ── */
 .riel{position:sticky;top:0;z-index:30;background:var(--bg);padding:10px 0 9px;
@@ -327,9 +349,35 @@ const qs = new URLSearchParams(location.search);
 const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=1200&q=80`));
 const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
 const slugId = (s) => "cat-" + String(s).replace(/[^a-zA-Z0-9]+/g,"-");
+
+/* ── horarios: misma logica que resto.html, para que no se contradigan ── */
+const DIAS_H = [["mon","Lunes"],["tue","Martes"],["wed","Miércoles"],["thu","Jueves"],
+                ["fri","Viernes"],["sat","Sábado"],["sun","Domingo"]];
+const _toMin = (s) => { if(!s || !/^\d{1,2}:\d{2}$/.test(s)) return null; const [h,m]=s.split(":").map(Number); return h*60+m; };
+function arNow(){
+  const parts = new Intl.DateTimeFormat("en-US",{timeZone:"America/Argentina/Buenos_Aires", weekday:"short", hour:"2-digit", minute:"2-digit", hour12:false}).formatToParts(new Date());
+  const wd = parts.find(p=>p.type==="weekday").value;
+  const hh = parts.find(p=>p.type==="hour").value;
+  const mm = parts.find(p=>p.type==="minute").value;
+  const map = {Sun:"sun",Mon:"mon",Tue:"tue",Wed:"wed",Thu:"thu",Fri:"fri",Sat:"sat"};
+  return { dayKey: map[wd]||"mon", mins: Number(hh)*60+Number(mm) };
+}
+function hoursStatus(hours){
+  if(!hours) return null;
+  const { dayKey, mins } = arNow();
+  const order = ["mon","tue","wed","thu","fri","sat","sun"];
+  const prev = order[(order.indexOf(dayKey)+6)%7];
+  const today = hours[dayKey];
+  if(today && today.open) for(const rg of (today.r||[])){ const f=_toMin(rg[0]); let t=_toMin(rg[1]); if(f==null||t==null) continue; if(t<=f) t+=1440; if(mins>=f && mins<t) return { open:true, until:rg[1], dayKey }; }
+  const py = hours[prev];
+  if(py && py.open) for(const rg of (py.r||[])){ const f=_toMin(rg[0]); const t=_toMin(rg[1]); if(f==null||t==null) continue; if(t<=f && mins<t) return { open:true, until:rg[1], dayKey }; }
+  return { open:false, dayKey };
+}
+const fmtDay = (h) => { if(!h || !h.open) return "Cerrado"; const rs=(h.r||[]).filter(r=>r[0]&&r[1]).map(r=>r[0]+" a "+r[1]); return rs.length ? rs.join(" · ") : "Abierto"; };
 const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"",
   phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano,
-  menu:r.menu||[], banner:r.banner||"", bannerMob:r.banner_mobile||"", logo:r.logo||"", photos:r.photos||[], tema:r.theme||r.tema||null });
+  menu:r.menu||[], banner:r.banner||"", bannerMob:r.banner_mobile||"", logo:r.logo||"", photos:r.photos||[],
+  hours:r.hours||null, tema:r.theme||r.tema||null });
 
 const lum = (hex) => { const h=String(hex).replace("#",""); const n=h.length===3?h.split("").map(x=>x+x).join(""):h;
   const r=parseInt(n.substr(0,2),16), g=parseInt(n.substr(2,2),16), b=parseInt(n.substr(4,2),16);
@@ -528,6 +576,55 @@ function Fila({ it, qty, add, dec, abrir }){
   );
 }
 
+function Blurb({ texto }){
+  const ref = useRef(null);
+  const abiertoRef = useRef(false);
+  const [abierto,setAbierto] = useState(false);
+  const [hayMas,setHayMas] = useState(false);
+  useEffect(()=>{
+    const el = ref.current; if(!el) return;
+    const medir = () => { if(abiertoRef.current) return; setHayMas(el.scrollHeight > el.clientHeight + 1); };
+    medir();
+    window.addEventListener("resize", medir);
+    return ()=>window.removeEventListener("resize", medir);
+  },[texto]);
+  const alternar = () => { abiertoRef.current = !abierto; setAbierto(a=>!a); };
+  return (
+    <React.Fragment>
+      <p ref={ref} className={"meta"+(abierto?"":" corta")}>{texto}</p>
+      {(hayMas || abierto) && (
+        <button className="vermas" onClick={alternar}>{abierto ? "Ver menos" : "Ver más"}</button>
+      )}
+    </React.Fragment>
+  );
+}
+
+function HojaHorarios({ abierta, cerrar, hours, st }){
+  return (
+    <Hoja abierta={abierta} cerrar={cerrar}>
+      <div className="wrap" style={{paddingBottom:"10px"}}>
+        <h3 className="disp" style={{margin:"0 0 2px",fontSize:"23px"}}>Horarios</h3>
+        <p style={{margin:"0 0 10px",fontSize:"13.5px",color:"var(--soft)"}}>
+          {st ? (st.open ? (st.until ? "Abierto ahora · cierra a las "+st.until : "Abierto ahora") : "Cerrado ahora") : "Consultá con el lugar"}
+        </p>
+        <div className="hs-lista">
+          {DIAS_H.map(([k,lbl])=>{
+            const h = hours && hours[k];
+            const hoy = st && st.dayKey===k;
+            const txt = fmtDay(h);
+            return (
+              <div key={k} className={"hs-fila"+(hoy?" hoy":"")}>
+                <span className="d">{lbl}{hoy ? " · hoy" : ""}</span>
+                <span className={"h"+(txt==="Cerrado"?" cerr":"")}>{txt}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </Hoja>
+  );
+}
+
 /* ─────────── ficha del plato ─────────── */
 function Ficha({ plato, qty, add, dec, nota, setNota, cerrar, fav, toggleFav }){
   const it = plato ? plato.it : null;
@@ -591,6 +688,9 @@ function Menu({ c }){
   const cartOn = !!c.whatsapp;
   const wa = c.whatsapp ? `https://wa.me/${c.whatsapp}?text=`+encodeURIComponent(`Hola! Quiero hacer una consulta sobre ${c.name}.`) : null;
   const tags = [c.zone, c.sinTacc && "Sin TACC", c.vegetariano && "Opciones veggie"].filter(Boolean);
+  const [verHs,setVerHs] = useState(false);
+  const [st,setSt] = useState(()=>hoursStatus(c.hours));
+  useEffect(()=>{ const t=setInterval(()=>setSt(hoursStatus(c.hours)), 60000); return ()=>clearInterval(t); },[c.hours]);
 
   const add = (idx) => { setCart(p => ({ ...p, [idx]: (p[idx]||0)+1 })); setLate(true); setTimeout(()=>setLate(false),360); };
   const dec = (idx) => setCart(p => { const q=(p[idx]||0)-1; const n={...p}; if(q<=0) delete n[idx]; else n[idx]=q; return n; });
@@ -710,11 +810,19 @@ function Menu({ c }){
             <div className="info">
               <p className="marca">Carta del lugar</p>
               <h1 className="disp">{c.name}</h1>
-              {c.blurb && <p className="meta clamp2">{c.blurb}</p>}
+              {c.blurb && <Blurb texto={c.blurb} />}
             </div>
           </div>
         </div>
-        {tags.length>0 && <div className="wrap"><div className="tags">{tags.map((t,i)=><span key={i} className="tag">{t}</span>)}</div></div>}
+        {(tags.length>0 || c.hours) && <div className="wrap"><div className="tags">
+          {c.hours && (
+            <button className={"tag hs "+(st && st.open ? "si" : "no")} onClick={()=>setVerHs(true)}>
+              <i />{st && st.open ? (st.until ? "Abierto · cierra "+st.until : "Abierto ahora") : "Cerrado ahora"}
+              <u>Ver horarios</u>
+            </button>
+          )}
+          {tags.map((t,i)=><span key={i} className="tag">{t}</span>)}
+        </div></div>}
 
         {verDest && destacados.length>1 && (
           <section>
@@ -797,6 +905,8 @@ function Menu({ c }){
           </button>
         </div>
       )}
+
+      <HojaHorarios abierta={verHs} cerrar={()=>setVerHs(false)} hours={c.hours} st={st} />
 
       <Ficha plato={ficha}
         qty={ficha ? (cart[ficha.idx]||0) : 0}
