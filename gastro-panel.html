@@ -204,6 +204,13 @@ h2::before,.titulo::before{content:"" !important;display:inline-block;width:8px;
 .mini h4{margin:11px 8px 0 !important;font-size:17px !important}
 .mini p{margin:2px 8px 10px !important}
 
+/* ── encabezado compacto en celulares angostos ── */
+@media(max-width:560px){
+  header .rounded-full{padding-left:11px !important;padding-right:11px !important;
+    padding-top:7px !important;padding-bottom:7px !important;font-size:13px !important;
+    white-space:nowrap}
+}
+
 /* ── barra de abajo ── */
 .appbar{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:85;
   background:rgba(255,255,255,.84);-webkit-backdrop-filter:blur(20px) saturate(1.2);
@@ -1314,9 +1321,9 @@ function App() {
   return (
     <div className="min-h-screen ff-body" style={{background:C.paper}}>
       <header className="sticky top-0 z-30 border-b border-black/5" style={{background:C.paper,boxShadow:"0 6px 20px rgba(35,38,26,.07)"}}>
-        <div className="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5"><div className="w-9 h-9 rounded-xl grid place-items-center text-xl" style={{background:C.clay}}>🍴</div><div><div className="ff-display text-lg leading-none" style={{color:C.ink}}>Gastronomía</div><div className="ff-body text-[11px] text-stone-500">Visitando Tandil</div></div></div>
-          <div className="flex items-center gap-2">
+        <div className="max-w-5xl mx-auto px-4 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-2" style={{minHeight:"64px"}}>
+          <div className="flex items-center gap-2.5 shrink-0 min-w-0"><div className="w-9 h-9 rounded-xl grid place-items-center text-xl shrink-0" style={{background:C.clay}}>🍴</div><div className="min-w-0"><div className="ff-display text-lg leading-none" style={{color:C.ink}}>Gastronomía</div><div className="ff-body text-[11px] text-stone-500">Visitando Tandil</div></div></div>
+          <div className="flex items-center flex-wrap justify-end gap-1.5 sm:gap-2 min-w-0">
             <Tutoriales rubro="gastronomia" />
             <a href="ayuda.html?rubro=gastronomia" target="_blank" rel="noreferrer" title="¿Cómo cargar? Ayuda" className="rounded-full px-3 py-2 ff-body text-sm border border-stone-300 text-stone-600">❓ Ayuda</a>
             {(editing||soloEditor) ? (<>
