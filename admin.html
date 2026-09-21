@@ -534,6 +534,42 @@ function Newsletter(){
 
 /* Publicaciones que quedaron sin dueño: el operador ya no existe como usuario.
    Son las que "seguís viendo en el sitio" después de borrar una cuenta. */
+/* ═══ Accesos: varios mails entran al mismo negocio ═══
+   Todos los perfiles con el mismo operador comparten publicaciones.
+   El más antiguo es el "principal": su tarjeta muestra a todo el grupo. */
+function Accesos({ grupo, max, busy, onAgregar, onQuitar, meId }){
+  const [abierto,setAbierto] = useState(false);
+  const [em,setEm] = useState(""), [pw,setPw] = useState("");
+  const lleno = grupo.length >= max;
+  const cerrar = ()=>{ setAbierto(false); setEm(""); setPw(""); };
+  const enviar = async ()=>{ const ok = await onAgregar(em.trim(), pw); if(ok) cerrar(); };
+  return (
+    <div className="mt-3 pt-3 border-t border-stone-100">
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="ff-body text-[11px] text-stone-500 uppercase tracking-wide">Accesos · {grupo.length} de {max}</span>
+        {!lleno && !abierto && <button onClick={()=>setAbierto(true)} className="ff-body text-xs font-semibold" style={{color:C.clay}}>+ Agregar mail</button>}
+        {lleno && <span className="ff-body text-[11px] text-stone-400">Completo</span>}
+      </div>
+      <div className="space-y-1">
+        {grupo.map((g,i)=>(
+          <div key={g.id} className="flex items-center gap-2">
+            <span className="ff-body text-xs truncate flex-1" style={{color:C.ink}}>{g.email}{i===0 && <span className="text-stone-400"> · principal</span>}</span>
+            {grupo.length>1 && g.id!==meId && <button onClick={()=>onQuitar(g)} disabled={busy} className="ff-body text-[11px] text-rose-600 disabled:opacity-50 shrink-0">Quitar</button>}
+          </div>
+        ))}
+      </div>
+      {abierto && (
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          <input value={em} onChange={e=>setEm(e.target.value)} placeholder="email" type="email" className="flex-1 min-w-[140px] border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+          <input value={pw} onChange={e=>setPw(e.target.value)} placeholder="contraseña" type="text" className="w-32 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+          <button onClick={enviar} disabled={busy} className="rounded-lg px-3 py-1.5 ff-body text-xs font-semibold text-white disabled:opacity-50" style={{background:C.moss}}>Crear</button>
+          <button onClick={cerrar} className="rounded-lg px-2 py-1.5 ff-body text-xs text-stone-500">Cancelar</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Huerfanas({ profiles, flash }){
   const [items,setItems] = useState(null);
   const [busy,setBusy] = useState(false);
@@ -808,6 +844,8 @@ function App() {
   const login=async()=>{ setAuthErr(""); const {error}=await db.auth.signInWithPassword({email,password:pass}); if(error) setAuthErr("No pudimos entrar."); };
   const crearUsuario=async()=>{
     if(!nu.email||!nu.password){ flash("Completá email y contraseña"); return; }
+    { const k=String(nu.operator||"").trim().toLowerCase();
+      if(k && nu.role!=="admin" && profiles.filter(x=>opKey(x)===k).length >= MAX_ACCESOS){ flash("Ese negocio ya tiene "+MAX_ACCESOS+" accesos"); return; } }
     setBusy(true);
     const body = { ...nu, max_listings: nu.max_listings===""?null:parseInt(nu.max_listings,10) };
     const { data, error } = await db.functions.invoke("super-action", { body });
@@ -817,6 +855,9 @@ function App() {
   };
   const delUser=async(p)=>{
     if(session && p.id===session.user.id){ flash("No podés borrarte a vos misma"); return; }
+    /* si hay otros mails en el mismo negocio, esto es quitar un acceso:
+       las publicaciones siguen siendo de los demas y NO se tocan */
+    if(grupoDe(p).length > 1) return quitarAcceso(p);
     /* antes de borrar la cuenta, cuento qué publicaciones quedarían huérfanas */
     const op = (p.operator||"").trim();
     let pubs = [];
@@ -862,7 +903,37 @@ function App() {
   const fmtDate=(s)=> s ? new Date(s+"T00:00:00").toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric"}) : "—";
   const todayISO=()=>new Date().toISOString().slice(0,10);
   const addMonthISO=(d)=>{ const x=new Date(d+"T00:00:00"); x.setMonth(x.getMonth()+1); return x.toISOString().slice(0,10); };
-  const markPaid=(p)=>{ const lp=todayISO(); updateProfile(p.id,{last_paid:lp,next_due:addMonthISO(lp)}); };
+  /* ── grupos de acceso: mismo operador = mismo negocio ── */
+  const MAX_ACCESOS = 5;
+  const opKey = (p) => (p && p.role!=="admin" ? String(p.operator||"").trim().toLowerCase() : "");
+  const grupoDe = (p) => { const k=opKey(p); if(!k) return [p]; return profiles.filter(x=>opKey(x)===k).sort((a,b)=>String(a.created_at||"").localeCompare(String(b.created_at||""))); };
+  const esPrincipal = (p) => { const g=grupoDe(p); return !!g[0] && g[0].id===p.id; };
+  /* los cambios de rol, operador, tope y pagos se aplican a todo el grupo,
+     porque cada panel lee el perfil de quien entra: si no, un segundo mail
+     veria "pago sin registrar" o un tope distinto */
+  const updateGrupo = async (p, patch) => { const ids=grupoDe(p).map(x=>x.id); await db.from("profiles").update(patch).in("id", ids); loadProfiles(); };
+  const markPaid=(p)=>{ const lp=todayISO(); updateGrupo(p,{last_paid:lp,next_due:addMonthISO(lp)}); };
+  const agregarAcceso = async (p, mail, clave) => {
+    if(!mail||!clave){ flash("Completá email y contraseña"); return false; }
+    if(grupoDe(p).length >= MAX_ACCESOS){ flash("Máximo "+MAX_ACCESOS+" accesos por negocio"); return false; }
+    setBusy(true);
+    const body = { email:mail, password:clave, role:p.role, operator:p.operator, max_listings:(p.max_listings??null) };
+    const { data, error } = await db.functions.invoke("super-action", { body });
+    if(error || (data&&data.error)){ setBusy(false); flash("Error: "+((data&&data.error)||error.message)); return false; }
+    /* el alta nueva hereda pagos y logo del negocio */
+    await db.from("profiles").update({ last_paid:p.last_paid||null, next_due:p.next_due||null, logo:p.logo||null }).eq("email", mail);
+    setBusy(false);
+    flash("Acceso agregado ✓"); loadProfiles();
+    return true;
+  };
+  const quitarAcceso = async (p) => {
+    if(!confirm("¿Quitarle el acceso a "+p.email+"?\n\nSolo se borra ese login. La publicación y los otros accesos quedan como están.")) return;
+    setBusy(true);
+    const { data, error } = await db.functions.invoke("super-action", { body:{ action:"delete", id:p.id } });
+    setBusy(false);
+    if(error || (data&&data.error)){ flash("Error: "+((data&&data.error)||error.message)); return; }
+    flash("Acceso quitado ✓"); loadProfiles();
+  };
   const copyUrl=(rel)=>{ try{ navigator.clipboard.writeText(new URL(rel,location.href).href); flash("Link copiado ✓"); }catch(e){ flash("No se pudo copiar"); } };
 
   if(!ready) return <div className="min-h-screen grid place-items-center ff-body" style={{background:C.paper,color:C.moss}}>Cargando…</div>;
@@ -917,13 +988,14 @@ function App() {
               <p className="ff-body text-xs text-stone-400 mt-2">El usuario entra a su panel según su rol con ese email y contraseña.</p>
             </div>
             <div className="bg-white rounded-2xl border border-black/5 p-5">
-              <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Usuarios ({profiles.length})</h3>
+              <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Usuarios ({profiles.filter(esPrincipal).length})</h3>
               <div className="space-y-3">
                 {profiles.map(p=>{
+                  if(!esPrincipal(p)) return null;
                   const rubro = p.role && p.role!=="admin" ? p.role : null;
                   const rutaRubro = rubro==="gastronomia" ? "para-comer" : rubro==="actividad" ? "para-pasear" : "para-dormir";
       const landing = p.operator ? (rutaRubro+"?op="+encodeURIComponent(p.operator)) : null;
-                  const panelHref = PANELS[p.role] || null;
+                  const panelHref = PANELS[p.role] ? PANELS[p.role] + (p.operator ? "?op="+encodeURIComponent(p.operator) : "") : null;
                   const st = billingStatus(p.next_due);
                   const initial = (p.operator||p.email||"?").trim().charAt(0).toUpperCase();
                   const isMe = session && p.id===session.user.id;
@@ -939,11 +1011,11 @@ function App() {
                     </div>
 
                     <div className="flex gap-2 mt-3">
-                      <select value={p.role||"hospedaje"} onChange={e=>updateProfile(p.id,{role:e.target.value})} className="border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm bg-white">{ROLES.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select>
-                      <input defaultValue={p.operator||""} onBlur={e=>updateProfile(p.id,{operator:e.target.value})} placeholder="operador" className="flex-1 min-w-0 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                      <select value={p.role||"hospedaje"} onChange={e=>updateGrupo(p,{role:e.target.value})} className="border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm bg-white">{ROLES.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select>
+                      <input defaultValue={p.operator||""} onBlur={e=>updateGrupo(p,{operator:e.target.value})} placeholder="operador" className="flex-1 min-w-0 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
                       <div className="flex items-center gap-1.5 shrink-0">
                         <span className="ff-body text-xs text-stone-500">Pub.</span>
-                        <input defaultValue={p.max_listings??""} onBlur={e=>updateProfile(p.id,{max_listings:e.target.value===""?null:parseInt(e.target.value,10)})} placeholder="∞" className="w-12 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                        <input defaultValue={p.max_listings??""} onBlur={e=>updateGrupo(p,{max_listings:e.target.value===""?null:parseInt(e.target.value,10)})} placeholder="∞" className="w-12 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
                       </div>
                     </div>
 
@@ -959,14 +1031,16 @@ function App() {
                     <div className="flex flex-wrap items-end gap-x-3 gap-y-2 mt-2.5">
                       <div>
                         <div className="ff-body text-[11px] text-stone-500 mb-0.5">Último pago</div>
-                        <input key={"lp"+(p.last_paid||"")} type="date" defaultValue={p.last_paid||""} onBlur={e=>updateProfile(p.id,{last_paid:e.target.value||null})} className="border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                        <input key={"lp"+(p.last_paid||"")} type="date" defaultValue={p.last_paid||""} onBlur={e=>updateGrupo(p,{last_paid:e.target.value||null})} className="border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
                       </div>
                       <div>
                         <div className="ff-body text-[11px] text-stone-500 mb-0.5">Próximo pago</div>
-                        <input key={"nd"+(p.next_due||"")} type="date" defaultValue={p.next_due||""} onBlur={e=>updateProfile(p.id,{next_due:e.target.value||null})} className="border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                        <input key={"nd"+(p.next_due||"")} type="date" defaultValue={p.next_due||""} onBlur={e=>updateGrupo(p,{next_due:e.target.value||null})} className="border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
                       </div>
                       <button onClick={()=>markPaid(p)} className="rounded-lg px-3 py-1.5 ff-body text-xs font-semibold text-white" style={{background:C.moss}}>✓ Pagó hoy</button>
                     </div>
+
+                    {opKey(p) && <Accesos grupo={grupoDe(p)} max={MAX_ACCESOS} busy={busy} onAgregar={(m,c)=>agregarAcceso(p,m,c)} onQuitar={quitarAcceso} meId={session&&session.user.id} />}
 
                     <div className="flex items-center gap-3 mt-3">
                       {panelHref && <a href={panelHref} target="_blank" rel="noreferrer" className="ff-body text-xs" style={{color:C.clay}}>Abrir su panel →</a>}
