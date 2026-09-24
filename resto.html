@@ -1409,7 +1409,7 @@ const opSuffix = OP ? ("&op="+encodeURIComponent(OP)) : "";
 
 const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=1200&q=80`));
 const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
-const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano, reserva:r.reserva, comoReservar:r.como_reservar||"", menuUrl:r.menu_url||"", videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], menu:r.menu||[], hours:r.hours||null, waFloat:(r.wa_float!==false) });
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano, servicios:r.servicios||[], reserva:r.reserva, comoReservar:r.como_reservar||"", menuUrl:r.menu_url||"", videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], menu:r.menu||[], hours:r.hours||null, waFloat:(r.wa_float!==false) });
 const DAYS_R = [["mon","Lunes"],["tue","Martes"],["wed","Miércoles"],["thu","Jueves"],["fri","Viernes"],["sat","Sábado"],["sun","Domingo"]];
 const _toMin = (s) => { if(!s || !/^\d{1,2}:\d{2}$/.test(s)) return null; const [h,m]=s.split(":").map(Number); return h*60+m; };
 function arNow(){
@@ -1565,6 +1565,9 @@ function Resto({ c, cabins=[], acts=[] }) {
               {st && <span className={st.open?"abierto2":"cerrado2"}>{st.open ? (st.until ? "Abierto · cierra "+st.until : "Abierto ahora") : "Cerrado ahora"}</span>}
               {c.sinTacc && <span>Sin TACC</span>}
               {c.vegetariano && <span>Vegetariano</span>}
+              {(c.servicios||[]).includes("salon") && <span>Para comer ahí</span>}
+              {(c.servicios||[]).includes("llevar") && <span>Para llevar</span>}
+              {(c.servicios||[]).includes("envios") && <span>Hace envíos</span>}
               <span>{c.reserva ? "Conviene reservar" : "Sin reserva"}</span>
               {c.menu.length>0 && <span>{c.menu.length} platos</span>}
             </div>
@@ -1700,7 +1703,7 @@ function App() {
         if(r.data&&r.data[0]){ actualizarOG(r.data[0]); setState({c:fromRow(r.data[0]),cabins:cab.data||[],acts:act.data||[]}); } else setState({notfound:true});
         db.rpc("bump_view",{p_rubro:"gastronomia",p_slug:slug}).then(()=>{});
       } else {
-        const {data}=await db.from("restaurants").select("slug,name,zone,banner,photos,sin_tacc,vegetariano,hours").order("orden", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false });
+        const {data}=await db.from("restaurants").select("slug,name,zone,banner,photos,sin_tacc,vegetariano,hours,servicios").order("orden", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false });
         setState({listing:data||[]});
       }
     })();
@@ -1718,15 +1721,17 @@ function Listado({ items }) {
   const [zona,setZona]=useState("");
   const [cocina,setCocina]=useState("");
   const [abierto,setAbierto]=useState(false);
+  const [servicio,setServicio]=useState("");
   const zonas=[...new Set(items.map(x=>x.zone).filter(Boolean))].sort();
   const show=items.filter(x=>{
     if(zona && x.zone!==zona) return false;
     if(cocina==="sintacc" && !x.sin_tacc) return false;
     if(cocina==="veggie" && !x.vegetariano) return false;
+    if(servicio && !(x.servicios||[]).includes(servicio)) return false;
     if(abierto){ const st=hoursStatus(x.hours); if(!st || !st.open) return false; }
     return true;
   });
-  const activos=(zona?1:0)+(cocina?1:0)+(abierto?1:0);
+  const activos=(zona?1:0)+(cocina?1:0)+(abierto?1:0)+(servicio?1:0);
   return (
     <div>
       <SiteHeader />
@@ -1749,8 +1754,14 @@ function Listado({ items }) {
               <option value="sintacc">Sin TACC</option>
               <option value="veggie">Vegetariano</option>
             </select>
+<select className="sel" value={servicio} onChange={e=>setServicio(e.target.value)}>
+              <option value="">Cualquier servicio</option>
+              <option value="salon">Para comer ahí</option>
+              <option value="llevar">Para llevar</option>
+              <option value="envios">Con envío</option>
+            </select>
             <button className={"sel"+(abierto?" on":"")} onClick={()=>setAbierto(a=>!a)}>Abierto ahora</button>
-            {activos>0 && <button className="sel" onClick={()=>{setZona("");setCocina("");setAbierto(false);}}>Limpiar</button>}
+            {activos>0 && <button className="sel" onClick={()=>{setZona("");setCocina("");setAbierto(false);setServicio("");}}>Limpiar</button>}
             <span className="cuenta">{show.length} {show.length===1?"lugar":"lugares"}</span>
           </div>
         )}
@@ -1771,6 +1782,7 @@ function Listado({ items }) {
                     <div className="chips">
                       {c.sin_tacc && <span className="chip">Sin TACC</span>}
                       {c.vegetariano && <span className="chip">Veggie</span>}
+                      {(c.servicios||[]).includes("envios") && <span className="chip">Envíos</span>}
                     </div>
                     {(c.banner||(c.photos&&c.photos[0])) && <img src={IMG(c.banner||c.photos[0])} alt={c.name} loading="lazy" />}
                   </div>

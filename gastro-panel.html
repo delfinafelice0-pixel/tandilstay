@@ -297,9 +297,9 @@ const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
 const slugify = (s) => (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 
 const DAYS = [["mon","Lunes"],["tue","Martes"],["wed","Miércoles"],["thu","Jueves"],["fri","Viernes"],["sat","Sábado"],["sun","Domingo"]];
-const EMPTY = { name:"", operator:"", zone:"", whatsapp:"", phone:"", blurb:"", sinTacc:false, vegetariano:false, reserva:false, comoReservar:"", menuUrl:"", videos:[], banner:"", bannerMob:"", logo:"", photos:[], menu:[], hours:null, theme:null };
-const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano, reserva:r.reserva, comoReservar:r.como_reservar||"", menuUrl:r.menu_url||"", videos:r.videos||[], banner:r.banner||"", bannerMob:r.banner_mobile||"", logo:r.logo||"", photos:r.photos||[], menu:r.menu||[], hours:r.hours||null, theme:r.theme||null, waFloat:(r.wa_float!==false) });
-const toRow = (c) => { const r = { slug:c.slug||slugify(c.name), name:c.name, operator:c.operator, zone:c.zone, whatsapp:c.whatsapp, phone:c.phone, blurb:c.blurb, sin_tacc:c.sinTacc, vegetariano:c.vegetariano, reserva:c.reserva, como_reservar:c.comoReservar, menu_url:c.menuUrl, videos:c.videos, banner:c.banner, banner_mobile:c.bannerMob||"", logo:c.logo||"", photos:c.photos, menu:c.menu, hours:c.hours||null, theme:c.theme||null, wa_float:(c.waFloat!==false) }; if(c.id) r.id=c.id; return r; };
+const EMPTY = { name:"", operator:"", zone:"", whatsapp:"", phone:"", blurb:"", sinTacc:false, vegetariano:false, servicios:[], reserva:false, comoReservar:"", menuUrl:"", videos:[], banner:"", bannerMob:"", logo:"", photos:[], menu:[], hours:null, theme:null };
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano, servicios:r.servicios||[], reserva:r.reserva, comoReservar:r.como_reservar||"", menuUrl:r.menu_url||"", videos:r.videos||[], banner:r.banner||"", bannerMob:r.banner_mobile||"", logo:r.logo||"", photos:r.photos||[], menu:r.menu||[], hours:r.hours||null, theme:r.theme||null, waFloat:(r.wa_float!==false) });
+const toRow = (c) => { const r = { slug:c.slug||slugify(c.name), name:c.name, operator:c.operator, zone:c.zone, whatsapp:c.whatsapp, phone:c.phone, blurb:c.blurb, sin_tacc:c.sinTacc, vegetariano:c.vegetariano, servicios:c.servicios||[], reserva:c.reserva, como_reservar:c.comoReservar, menu_url:c.menuUrl, videos:c.videos, banner:c.banner, banner_mobile:c.bannerMob||"", logo:c.logo||"", photos:c.photos, menu:c.menu, hours:c.hours||null, theme:c.theme||null, wa_float:(c.waFloat!==false) }; if(c.id) r.id=c.id; return r; };
 
 const PRESETS = {
   serrano: { nombre:"Serrano", detalle:"Crema y verde monte · DM Serif Display", bg:"#FBF7E8", surf:"#FFFFFF", ink:"#23261A", acc:"#2E3521" },
@@ -1005,6 +1005,19 @@ function Editor({ c, set }) {
 
         <div className="bg-white rounded-2xl border border-black/5 p-5">
           <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Opciones y reserva</h3>
+          <p className="ff-body text-xs font-semibold uppercase tracking-wide text-stone-500 mb-2">Cómo atiende · marcá todas las que hagas</p>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {[["salon","🍽️ Comer en el lugar"],["llevar","🥡 Para llevar"],["envios","🛵 Envíos a domicilio"]].map(([k,l])=>{ const on=(c.servicios||[]).includes(k); return (
+              <button key={k} onClick={()=>set({...c, servicios: on ? (c.servicios||[]).filter(x=>x!==k) : [...(c.servicios||[]), k]})}
+                className={"rounded-full px-3 py-1.5 ff-body text-sm border "+(on?"text-white":"text-stone-600 border-stone-300")} style={on?{background:C.moss,borderColor:C.moss}:{}}>{l}{on?" ✓":""}</button>
+            ); })}
+          </div>
+          <p className="ff-body text-xs mb-4" style={{color:(c.servicios||[]).length?"#78716c":"#8A6A1E"}}>{
+            !(c.servicios||[]).length ? "Todavía no elegiste ninguna: marcalas para aparecer en los filtros de la guía."
+            : ((c.servicios||[]).includes("llevar") || (c.servicios||[]).includes("envios"))
+              ? "Tu carta permite armar un pedido y mandarlo por WhatsApp" + ((c.servicios||[]).includes("envios") && (c.servicios||[]).includes("llevar") ? " (con envío o para retirar)." : (c.servicios||[]).includes("envios") ? " con envío a domicilio." : " para retirar en el local.")
+              : "Solo carta: la gente ve tus platos y precios, pero no puede armar pedidos."}</p>
+          <p className="ff-body text-xs font-semibold uppercase tracking-wide text-stone-500 mb-2">Opciones de cocina</p>
           <div className="flex flex-wrap gap-2 mb-3">
             {[["sinTacc","🌾 Sin TACC"],["vegetariano","🥗 Vegetariano"]].map(([k,l])=>(
               <button key={k} onClick={()=>set({...c,[k]:!c[k]})} className={"rounded-full px-3 py-1.5 ff-body text-sm border "+(c[k]?"text-white":"text-stone-600 border-stone-300")} style={c[k]?{background:C.moss,borderColor:C.moss}:{}}>{l}{c[k]?" ✓":""}</button>

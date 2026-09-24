@@ -375,7 +375,7 @@ function hoursStatus(hours){
 }
 const fmtDay = (h) => { if(!h || !h.open) return "Cerrado"; const rs=(h.r||[]).filter(r=>r[0]&&r[1]).map(r=>r[0]+" a "+r[1]); return rs.length ? rs.join(" · ") : "Abierto"; };
 const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"",
-  phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano,
+  phone:r.phone||"", blurb:r.blurb||"", sinTacc:r.sin_tacc, vegetariano:r.vegetariano, servicios:r.servicios||[],
   menu:r.menu||[], banner:r.banner||"", bannerMob:r.banner_mobile||"", logo:r.logo||"", photos:r.photos||[],
   hours:r.hours||null, tema:r.theme||r.tema||null });
 
@@ -685,7 +685,11 @@ function Menu({ c }){
   const heroRef = useRef(null), rielRef = useRef(null), marcaRef = useRef(null), main = useRef(null);
   const favs = useFavs(c.slug);
 
-  const cartOn = !!c.whatsapp;
+  /* Pedidos: solo si el lugar hace para llevar o envíos. Si no lo configuró todavía (lista vacía), se deja como antes. */
+  const sv = c.servicios||[];
+  const haceEnvios = sv.includes("envios"), haceLlevar = sv.includes("llevar");
+  const cartOn = !!c.whatsapp && (sv.length===0 || haceEnvios || haceLlevar);
+  const [modo,setModo] = useState(haceEnvios && !haceLlevar ? "envio" : haceLlevar && !haceEnvios ? "retiro" : "");
   const wa = c.whatsapp ? `https://wa.me/${c.whatsapp}?text=`+encodeURIComponent(`Hola! Quiero hacer una consulta sobre ${c.name}.`) : null;
   const tags = [c.zone, c.sinTacc && "Sin TACC", c.vegetariano && "Opciones veggie"].filter(Boolean);
   const [verHs,setVerHs] = useState(false);
@@ -706,7 +710,8 @@ function Menu({ c }){
     let msg = `Hola!`;
     if (name.trim()) msg += ` Soy ${name.trim()}.`;
     msg += ` Quiero hacer este pedido en ${c.name}:\n\n${lines.join("\n")}\n\nTotal estimado: ${money(total)}`;
-    if (addr.trim()) msg += `\n\nDirección de entrega: ${addr.trim()}`;
+    if (modo==="retiro") msg += `\n\nLo paso a retirar por el local.`;
+    else if (addr.trim()) msg += `\n\nDirección de entrega: ${addr.trim()}`;
     return `https://wa.me/${c.whatsapp}?text=`+encodeURIComponent(msg);
   })();
 
@@ -951,20 +956,30 @@ function Menu({ c }){
           {entries.length>0 && (
             <div style={{display:"grid",gap:"8px",marginBottom:"14px"}}>
               <input className="campo" value={name} onChange={e=>setName(e.target.value)} placeholder="Tu nombre" />
-              <input className="campo" value={addr} onChange={e=>setAddr(e.target.value)} placeholder="Dirección de entrega (o 'retiro en el local')" />
+              {haceEnvios && haceLlevar && (
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
+                  {[["envio","🛵 Con envío"],["retiro","🥡 Lo retiro"]].map(([k,l])=>(
+                    <button key={k} onClick={()=>setModo(k)} className="campo"
+                      style={{textAlign:"center",fontWeight:500,cursor:"pointer",background:modo===k?"var(--ink)":undefined,color:modo===k?"var(--bg)":undefined}}>{l}</button>
+                  ))}
+                </div>
+              )}
+              {modo==="retiro"
+                ? <p style={{fontSize:"13.5px",color:"var(--soft)",margin:"2px 0"}}>🥡 Lo retirás en el local. Te avisan por WhatsApp cuándo está listo.</p>
+                : (modo==="envio" || sv.length===0) && <input className="campo" value={addr} onChange={e=>setAddr(e.target.value)} placeholder={sv.length===0 ? "Dirección de entrega (o 'retiro en el local')" : "Dirección de entrega"} />}
             </div>
           )}
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:"14px"}}>
             <span style={{fontWeight:500}}>Total estimado</span>
             <span className="disp" style={{fontSize:"27px"}}>{money(total)}</span>
           </div>
-          {orderUrl
+          {orderUrl && !(haceEnvios && haceLlevar && !modo)
             ? <a className="cta wsp" href={orderUrl} target="_blank" rel="noreferrer">Enviar pedido por WhatsApp</a>
-            : <p style={{textAlign:"center",color:"var(--soft)",fontSize:"14px",margin:"6px 0"}}>Agregá algún plato para enviar el pedido.</p>}
+            : <p style={{textAlign:"center",color:"var(--soft)",fontSize:"14px",margin:"6px 0"}}>{count>0 ? "Elegí si lo querés con envío o lo retirás." : "Agregá algún plato para enviar el pedido."}</p>}
           {entries.length>0 && <button onClick={()=>{ setCart({}); setNotes({}); }}
             style={{display:"block",width:"100%",textAlign:"center",marginTop:"12px",color:"var(--soft)",fontSize:"14px"}}>Vaciar pedido</button>}
           <p style={{fontSize:"12px",color:"var(--soft)",textAlign:"center",margin:"12px 0 0",lineHeight:1.4}}>
-            El total es estimado. El local confirma disponibilidad, pago y envío por WhatsApp.</p>
+            El total es estimado. El local confirma disponibilidad, pago{modo==="retiro"?" y horario de retiro":" y envío"} por WhatsApp.</p>
         </div>
       </Hoja>
     </div>

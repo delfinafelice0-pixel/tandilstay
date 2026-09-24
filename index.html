@@ -2478,9 +2478,10 @@ function ActivitiesPage({ acts, loading }) {
 function FoodPage({ food, loading }) {
 
   const [diet, setDiet] = useState("");
+  const [servicio, setServicio] = useState("");
 
-  const show = food.filter(a => (diet!=="sintacc" || a.sin_tacc) && (diet!=="veggie" || a.vegetariano));
-  const active = (diet?1:0);
+  const show = food.filter(a => (diet!=="sintacc" || a.sin_tacc) && (diet!=="veggie" || a.vegetariano) && (!servicio || (a.servicios||[]).includes(servicio)));
+  const active = (diet?1:0)+(servicio?1:0);
   return (
     <div>
       <PageTitle kicker="Sabores serranos" title="Dónde comer en Tandil" sub="De las picadas con salame con Denominación de Origen a la cervecería artesanal: comé como un local." />
@@ -2492,7 +2493,13 @@ function FoodPage({ food, loading }) {
               <option value="sintacc">Sin TACC</option>
               <option value="veggie">Vegetariano</option>
             </select>
-            {active>0 && <button className="sel" onClick={()=>setDiet("")}>Limpiar</button>}
+            <select className="sel" value={servicio} onChange={e=>setServicio(e.target.value)}>
+              <option value="">Cualquier servicio</option>
+              <option value="salon">Para comer ahí</option>
+              <option value="llevar">Para llevar</option>
+              <option value="envios">Con envío</option>
+            </select>
+            {active>0 && <button className="sel" onClick={()=>{setDiet("");setServicio("");}}>Limpiar</button>}
             <span className="count">{show.length} {show.length===1?"lugar":"lugares"}</span>
           </div>
         )}
@@ -2505,6 +2512,7 @@ function FoodPage({ food, loading }) {
                 <div className="chips">
                   {a.sin_tacc && <span className="chip">Sin TACC</span>}
                   {a.vegetariano && <span className="chip">Veggie</span>}
+                  {(a.servicios||[]).includes("envios") && <span className="chip">Envíos</span>}
                 </div>
                 <Corazon id={"gastronomia:" + a.slug} />
                 <img src={IMG(a.banner || (a.photos && a.photos[0]))} alt={a.name} loading="lazy" />
