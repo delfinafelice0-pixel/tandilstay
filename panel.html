@@ -352,13 +352,41 @@ const delFromStorage = async (url) => { try { const m=String(url||"").match(/\/s
 
 const EMPTY = { name:"", operator:"", zone:"", whatsapp:"", blurb:"", capacity:2, bedrooms:1, bathrooms:1, price:0, weekendPrice:null, amenities:[], petFriendly:false, promoText:"", promos:[], blocked:[], overrides:{}, units:[], videos:[], banner:"", photos:[], ical_urls:[], email:"", minNights:1, type:"" };
 
-const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, promoText:r.promo_text||"", promos:r.promos||[], blocked:r.blocked||[], overrides:r.overrides||{}, units:r.units||[], videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], ical_urls:r.ical_urls||[], ical_blocked:r.ical_blocked||[], ical_synced_at:r.ical_synced_at||null, email:r.email||"", minNights:r.min_nights||1, type:r.type||"", waFloat:(r.wa_float!==false) });
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, operator:r.operator||"", zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, promoText:r.promo_text||"", promos:r.promos||[], blocked:r.blocked||[], overrides:r.overrides||{}, units:r.units||[], videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], ical_urls:r.ical_urls||[], ical_blocked:r.ical_blocked||[], ical_units:r.ical_units||{}, ical_synced_at:r.ical_synced_at||null, email:r.email||"", minNights:r.min_nights||1, type:r.type||"", waFloat:(r.wa_float!==false) });
 // Los datos generales de huéspedes/dormitorios/baños ya no se cargan a mano:
 // se calculan como el máximo de las unidades, para que el buscador y las fichas públicas sigan filtrando bien.
 const sinFotos = (u) => !((u && u.photos && u.photos.length) || (u && u.photo));
 /* El .ics es el calendario para sincronizar; el link de reserva es la ficha
    pública. Se parecen y se confunden, así que los detectamos. */
 const esIcal = (v) => { const x=String(v||"").toLowerCase(); return x.includes(".ics") || x.includes("/calendar/ical"); };
+/* Cada cabaña tiene su propio calendario de Airbnb/Booking: los links viven en units[i].ical_urls
+   y las fechas importadas en cabins.ical_units[nombre]. cabins.ical_urls queda como "calendario
+   general" (para propiedades sin cabañas, o para bloquear todas a la vez). */
+const uNom = (u,i) => (u && u.name) || ("Cabaña "+(i+1));
+const icalDeUnidad = (c,u,i) => [...new Set([...(c.ical_blocked||[]), ...(((c.ical_units||{})[uNom(u,i)])||[])])];
+const hayCalendario = (c) => (c.ical_urls||[]).some(Boolean) || (c.units||[]).some(u=>(u.ical_urls||[]).some(Boolean));
+/* Precio que se muestra en la tarjeta: con cabañas, el más barato de ellas ("desde"). */
+const preciosUnidades = (c) => (c.units||[]).map(u=>(u.price!=null&&u.price!=="")?+u.price:(+c.price||0)).filter(p=>p>0);
+const precioDesde = (c) => { const ps=preciosUnidades(c); return ps.length?Math.min(...ps):(+c.price||0); };
+const preciosVarian = (c) => new Set(preciosUnidades(c)).size>1;
+function IcalLinks({ urls, onChange }){
+  const us = urls||[];
+  return (<>
+    <div className="space-y-2">
+      {us.map((u,i)=>(
+        <div key={i} className="flex items-center gap-2">
+          <input value={u} onChange={e=>onChange(us.map((x,j)=>j===i?e.target.value:x))}
+            placeholder="https://www.airbnb.com/calendar/ical/…ics" className="flex-1 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+          <button onClick={()=>onChange(us.filter((_,j)=>j!==i))} className="text-rose-500">🗑️</button>
+        </div>
+      ))}
+      {us.some(u=>u && !esIcal(u)) && (
+        <p className="ff-body text-xs" style={{color:"#8A6A1E"}}>Alguno de estos links no es un calendario. Tiene que ser el de «exportar calendario», que termina en .ics.</p>
+      )}
+    </div>
+    <button onClick={()=>onChange([...us,""])} className="mt-2 ff-body text-sm font-semibold" style={{color:C.clay}}>+ Agregar calendario</button>
+  </>);
+}
 const maxDeUnidades = (units, k, fallback) => {
   const vals = (units||[]).map(u=>Number(u&&u[k])||0).filter(n=>n>0);
   return vals.length ? Math.max(...vals) : (Number(fallback)||1);
@@ -457,7 +485,7 @@ function Editor({ c, set }) {
   const fmtSync = (s) => { if(!s) return ""; const d=new Date(s); return d.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"})+" "+d.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}); };
   const syncIcal = async () => {
     if(!c.name){ setSyncMsg("Poné un nombre y guardá primero."); return; }
-    if(!(c.ical_urls||[]).length){ setSyncMsg("Pegá al menos un link de Booking o Airbnb."); return; }
+    if(!hayCalendario(c)){ setSyncMsg("Pegá al menos un link de Booking o Airbnb."); return; }
     setSyncing(true); setSyncMsg("");
     const { data: saved, error: e1 } = await db.from("cabins").upsert(toRow(c)).select();
     if(e1){ setSyncing(false); setSyncMsg("No se pudo guardar antes de sincronizar."); return; }
@@ -526,7 +554,7 @@ function Editor({ c, set }) {
           <h3 className="ff-display text-lg mb-3" style={{color:C.ink}}>Datos</h3>
           <Field label="Nombre"><input value={c.name} onChange={e=>set({...c,name:e.target.value})} className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
           <Field label="Dirección / ubicación (como en Google Maps)"><input value={c.zone} onChange={e=>set({...c,zone:e.target.value})} placeholder="Ej: López de Osornio 1264, Tandil" className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
-          {c.zone && <iframe title="mapa" loading="lazy" className="w-full h-40 rounded-xl border border-black/5 mb-3" src={"https://www.google.com/maps?q="+encodeURIComponent(c.zone)+"&output=embed"}></iframe>}
+          {c.zone && <iframe title="mapa" loading="lazy" className="w-full h-40 rounded-xl border border-black/5 mb-3" src={"https://www.google.com/maps?q="+encodeURIComponent(/,|tandil/i.test(c.zone)?c.zone:c.zone+", Tandil, Buenos Aires, Argentina")+"&z=16&output=embed"}></iframe>}
           <Field label="WhatsApp (cód país, sin +)"><input value={c.whatsapp} onChange={e=>set({...c,whatsapp:e.target.value})} className="w-full border border-stone-300 rounded-xl px-3 py-2 ff-body text-sm" /></Field>
           <div className="rounded-xl border border-stone-200 p-3 mt-3">
             <label className="flex items-start gap-3 cursor-pointer">
@@ -737,6 +765,9 @@ function Editor({ c, set }) {
           const setCU = sola
             ? (patch)=>set({...c, ...patch})
             : (patch)=>set({...c,units:c.units.map((x,j)=>j===k?{...x,...patch}:x)});
+          const icalCu = sola ? (c.ical_blocked||[]) : icalDeUnidad(c, c.units[k], k);
+          const lockCu = sola ? (cu.resBlocked||[]) : [...new Set([...(cu.resBlocked||[]), ...icalCu])];
+          const nomCu = sola ? c.name : uNom(c.units[k], k);
           const up=unitPrice(cu); return (
         <div>
           {sola && <p className="ff-body text-xs text-stone-500 -mt-1 mb-3">Esta propiedad se alquila entera. Si tenés varias cabañas adentro, agregalas arriba y cada una tendrá su calendario.</p>}
@@ -750,11 +781,11 @@ function Editor({ c, set }) {
             <button onClick={()=>{setMode("price");setSelDay(null);}} className={"flex-1 rounded-xl py-2 ff-body text-sm border "+(mode==="price"?"border-amber-300 text-amber-700 bg-amber-50":"border-stone-300 text-stone-600")}>🏷️ Precio por día</button>
           </div>
           {mode==="block" ? (
-            <div><p className="ff-body text-sm text-stone-500 mb-3">Tocá un día para ocuparlo o liberarlo. Los días en verde vienen de una reserva cargada y se cambian desde 📅 Reservas.</p><Calendar cursor={cursor} setCursor={setCursor} blocked={cu.blockedManual||cu.blocked||[]} locked={cu.resBlocked||[]} onDay={(day,info)=>{if(info.past)return; if(info.isRes){ alert("Ese día está tomado por una reserva. Editala o borrala desde la pestaña 📅 Reservas."); return; } toggleBlock(day);}} /></div>
+            <div><p className="ff-body text-sm text-stone-500 mb-3">Tocá un día para ocuparlo o liberarlo. Los días en verde vienen de una reserva cargada y se cambian desde 📅 Reservas.</p><Calendar cursor={cursor} setCursor={setCursor} blocked={cu.blockedManual||cu.blocked||[]} locked={lockCu} onDay={(day,info)=>{if(info.past)return; if(info.isRes && icalCu.includes(day) && !(sola ? (c.resBlocked||[]) : (cu.resBlocked||[])).includes(day)){ alert("Ese día viene del calendario de Airbnb o Booking. Se libera allá y se actualiza al sincronizar."); return; } if(info.isRes){ alert("Ese día está tomado por una reserva. Editala o borrala desde la pestaña 📅 Reservas."); return; } toggleBlock(day);}} /></div>
           ) : (
             <div>
               <p className="ff-body text-sm text-stone-500 mb-3">Tocá un día para ponerle precio especial.</p>
-              <Calendar cursor={cursor} setCursor={setCursor} blocked={cu.blockedManual||cu.blocked||[]} locked={cu.resBlocked||[]} selectedDay={selDay} priceOf={(d)=>nightlyPrice(up,d)} onDay={(day,info)=>{if(info.past)return;setSelDay(day);setPriceInput((cu.overrides&&cu.overrides[day]!=null)?String(cu.overrides[day]):"");}} />
+              <Calendar cursor={cursor} setCursor={setCursor} blocked={cu.blockedManual||cu.blocked||[]} locked={lockCu} selectedDay={selDay} priceOf={(d)=>nightlyPrice(up,d)} onDay={(day,info)=>{if(info.past)return;setSelDay(day);setPriceInput((cu.overrides&&cu.overrides[day]!=null)?String(cu.overrides[day]):"");}} />
               {selDay && (
                 <div className="mt-4 bg-stone-50 rounded-xl p-3">
                   <div className="ff-body text-sm text-stone-700 mb-2">Precio para <strong>{selDay}</strong></div>
@@ -769,23 +800,27 @@ function Editor({ c, set }) {
           )}
 
           <div className="mt-5 pt-4 border-t border-stone-200">
-            <h4 className="ff-body text-sm font-semibold" style={{color:C.ink}}>Sincronizar con Airbnb o Booking</h4>
-            <p className="ff-body text-xs text-stone-500 mt-1 mb-2">Pegá el link de exportar calendario (termina en .ics). Los días reservados allá aparecen ocupados acá.</p>
-            <div className="space-y-2">
-              {(c.ical_urls||[]).map((u,i)=>(
-                <div key={i} className="flex items-center gap-2">
-                  <input value={u} onChange={e=>set({...c, ical_urls:(c.ical_urls||[]).map((x,j)=>j===i?e.target.value:x)})}
-                    placeholder="https://www.airbnb.com/calendar/ical/…ics" className="flex-1 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
-                  <button onClick={()=>set({...c, ical_urls:(c.ical_urls||[]).filter((_,j)=>j!==i)})} className="text-rose-500">🗑️</button>
-                </div>
-              ))}
-              {(c.ical_urls||[]).some(u=>u && !esIcal(u)) && (
-                <p className="ff-body text-xs" style={{color:"#8A6A1E"}}>Alguno de estos links no es un calendario. Tiene que ser el de «exportar calendario», que termina en .ics.</p>
-              )}
-            </div>
-            <div className="flex items-center gap-3 mt-2 flex-wrap">
-              <button onClick={()=>set({...c, ical_urls:[...(c.ical_urls||[]),""]})} className="ff-body text-sm font-semibold" style={{color:C.clay}}>+ Agregar calendario</button>
-              {(c.ical_urls||[]).some(Boolean) && (
+            <h4 className="ff-body text-sm font-semibold" style={{color:C.ink}}>{sola ? "Sincronizar con Airbnb o Booking" : ("Sincronizar "+nomCu+" con Airbnb o Booking")}</h4>
+            <p className="ff-body text-xs text-stone-500 mt-1 mb-2">{sola
+              ? "Pegá el link de exportar calendario (termina en .ics). Los días reservados allá aparecen ocupados acá."
+              : "Pegá el link de exportar calendario de esta cabaña (termina en .ics). En Airbnb cada cabaña es un anuncio con su propio link: elegí otra cabaña arriba para cargar el suyo."}</p>
+            {sola
+              ? <IcalLinks urls={c.ical_urls} onChange={(v)=>set({...c, ical_urls:v})} />
+              : <IcalLinks urls={cu.ical_urls} onChange={(v)=>setCU({ical_urls:v})} />}
+            {!sola && (c.ical_urls||[]).some(Boolean) && (
+              <div className="mt-3 rounded-xl p-3" style={{background:"#FBF3DE",border:"1px solid #EAD9A8"}}>
+                <p className="ff-body text-xs" style={{color:"#6E5418"}}><b>Calendario general:</b> estos links bloquean <b>todas</b> las cabañas a la vez. Si cada cabaña tiene su propio anuncio en Airbnb, pasá cada link a la cabaña que corresponde.</p>
+                {(c.ical_urls||[]).map((u,i)=> u ? (
+                  <div key={i} className="flex items-center gap-2 mt-2">
+                    <span className="flex-1 min-w-0 truncate ff-body text-xs text-stone-600" title={u}>{u}</span>
+                    <button onClick={()=>set({...c, ical_urls:(c.ical_urls||[]).filter((_,j)=>j!==i), units:c.units.map((x,j)=>j===k?{...x, ical_urls:[...((x.ical_urls||[]).filter(Boolean)), u]}:x)})}
+                      className="shrink-0 rounded-lg px-2 py-1 ff-body text-xs font-semibold text-white" style={{background:C.moss}}>Pasar a {nomCu}</button>
+                    <button onClick={()=>set({...c, ical_urls:(c.ical_urls||[]).filter((_,j)=>j!==i)})} className="text-rose-500 shrink-0">🗑️</button>
+                  </div>) : null)}
+              </div>
+            )}
+            <div className="flex items-center gap-3 mt-3 flex-wrap">
+              {hayCalendario(c) && (
                 <button onClick={syncIcal} disabled={syncing} className="text-white rounded-lg px-3 py-1.5 ff-body text-sm font-semibold disabled:opacity-50" style={{background:C.moss}}>
                   {syncing ? "Sincronizando…" : "Sincronizar ahora"}
                 </button>
@@ -829,10 +864,9 @@ function Reservas({ profile, cabins, afterSync }) {
   const filas = [];
   (cabins||[]).forEach(c=>{
     const us = c.units||[];
-    /* ical_blocked vive a nivel del alojamiento, no de cada unidad:
-       los días importados valen para todas sus cabañas. */
+    /* Cada cabaña suma lo de su propio calendario (ical_units) más el calendario general. */
     const sinc = c.ical_blocked||[], conCal = (c.ical_urls||[]).filter(Boolean).length>0;
-    if(us.length) us.forEach((u,i)=> filas.push({ slug:c.slug, cab:c.name, name:u.name||("Cabaña "+(i+1)), cap:u.capacity||c.capacity, manual:(u.blockedManual||u.blocked||[]), ical:sinc, conCal, c, u }));
+    if(us.length) us.forEach((u,i)=> filas.push({ slug:c.slug, cab:c.name, name:u.name||("Cabaña "+(i+1)), cap:u.capacity||c.capacity, manual:(u.blockedManual||u.blocked||[]), ical:icalDeUnidad(c,u,i), conCal: conCal || (u.ical_urls||[]).some(Boolean), c, u }));
     else filas.push({ slug:c.slug, cab:c.name, name:"", cap:c.capacity, manual:(c.blocked||[]), ical:sinc, conCal, c, u:null });
   });
   const variosAloj = new Set(filas.map(f=>f.slug)).size > 1;
@@ -1535,7 +1569,7 @@ function App() {
                   <h3 className="ff-display text-lg" style={{color:C.ink}}>{c.name}</h3>
                   <p className="ff-body text-sm text-stone-500">{c.zone}</p>
                   {c.operator && <a href={"operador.html?op="+encodeURIComponent(c.operator)} target="_blank" rel="noreferrer" className="ff-body text-xs" style={{color:C.clay}}>👤 {c.operator}</a>}
-                  <p className="ff-body text-sm mt-1" style={{color:C.ink}}><span className="font-bold">{money(c.price)}</span> / noche · hasta {c.capacity}</p>
+                  <p className="ff-body text-sm mt-1" style={{color:C.ink}}>{preciosVarian(c) && "desde "}<span className="font-bold">{money(precioDesde(c))}</span> / noche · hasta {c.capacity}</p>
                   <p className="ff-body text-xs text-stone-400 mt-1">👁 {views[c.slug]||0} visitas</p>
                   <div className="flex gap-2 mt-3">
                     <button onClick={()=>setEditing(c)} className="flex-1 rounded-lg py-2 ff-body text-sm font-semibold text-white" style={{background:C.moss}}>Editar</button>

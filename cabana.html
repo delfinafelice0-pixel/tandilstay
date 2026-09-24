@@ -1523,6 +1523,12 @@ const ytEmbed = (url) => { const m=(url||"").match(/(?:youtu\.be\/|youtube\.com\
 const igEmbed = (url) => { const m=(url||"").match(/instagram\.com\/(reel|reels|p|tv)\/([\w-]+)/); return m?`https://www.instagram.com/${m[1]==="reels"?"reel":m[1]}/${m[2]}/`:null; };
 const ytId = (url) => { const m=(url||"").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/); return m?m[1]:null; };
 const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
+/* Con varias cabañas, el precio que se muestra es el de la más barata ("desde"). */
+const _precios = (c) => (c.units||[]).map(u=>(u.price!=null&&u.price!=="")?+u.price:(+(c.price)||0)).filter(p=>p>0);
+const pDesde = (c) => { const ps=_precios(c); return ps.length?Math.min(...ps):(+(c.price)||0); };
+const pVaria = (c) => new Set(_precios(c)).size>1;
+/* Fechas de Airbnb/Booking de una cabaña: su propio calendario + el general del alojamiento. */
+const icalUnidad = (c,u,i) => [...(c.ical_blocked||[]), ...(((c.ical_units||{})[(u&&u.name)||("Cabaña "+(i+1))])||[])];
 const kFmt = (n) => (n >= 1000 ? Math.round(n/1000)+"k" : ""+n);
 const pad = (n) => String(n).padStart(2,"0");
 const iso = (dt) => `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
@@ -1536,7 +1542,7 @@ const AMEN = { wifi:"Wifi", aire:"Aire acondicionado", calefaccion:"Calefacción
 const DOW = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
 const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
-const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, verificado:!!r.verificado, promoText:r.promo_text||"", promos:r.promos||[], blocked:[...new Set([...(r.blocked||[]), ...(r.ical_blocked||[])])], overrides:r.overrides||{}, units:r.units||[], videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], minNights:r.min_nights||1, type:r.type||"", waFloat:(r.wa_float!==false) });
+const fromRow = (r) => ({ id:r.id, slug:r.slug, name:r.name, zone:r.zone||"", whatsapp:r.whatsapp||"", blurb:r.blurb||"", capacity:r.capacity, bedrooms:r.bedrooms, bathrooms:r.bathrooms, price:r.price, weekendPrice:r.weekend_price, amenities:r.amenities||[], petFriendly:r.pet_friendly, verificado:!!r.verificado, promoText:r.promo_text||"", promos:r.promos||[], blocked:[...new Set([...(r.blocked||[]), ...(r.ical_blocked||[])])], ical_blocked:r.ical_blocked||[], ical_units:r.ical_units||{}, overrides:r.overrides||{}, units:r.units||[], videos:r.videos||[], banner:r.banner||"", photos:r.photos||[], minNights:r.min_nights||1, type:r.type||"", waFloat:(r.wa_float!==false) });
 const nightlyPrice = (c,d) => (c.overrides && c.overrides[d]!=null ? c.overrides[d] : (isWeekend(d) && c.weekendPrice ? c.weekendPrice : c.price));
 function computeStay(c,ci,co){ if(!ci||!co) return null; let d=parseD(ci); const e=parseD(co); let sub=0,n=0; while(d<e){ sub+=nightlyPrice(c,iso(d)); n++; d=addDay(d); } let pct=0; (c.promos||[]).forEach(p=>{if(n>=p.min&&p.pct>pct)pct=p.pct;}); const disc=Math.round(sub*pct/100); return {n,sub,pct,disc,total:sub-disc}; }
 const isAvail = (c,ci,co) => { if(!ci||!co) return true; let d=parseD(ci); const e=parseD(co); while(d<e){ if(c.blocked.includes(iso(d))) return false; d=addDay(d); } return true; };
@@ -1699,12 +1705,12 @@ function Landing({ c, acts=[], food=[] }) {
   const multi=units.length>1;
   const [selUnit,setSelUnit]=useState(units.length===1?0:null);
   const su = (selUnit!=null && units[selUnit]) ? units[selUnit] : null;
-  const cv = su ? { price:(su.price!=null&&su.price!=="")?+su.price:c.price, weekendPrice:(su.weekendPrice!=null&&su.weekendPrice!=="")?+su.weekendPrice:c.weekendPrice, overrides:su.overrides||{}, blocked:su.blocked||[], promos:c.promos, promoText:c.promoText } : c;
+  const cv = su ? { price:(su.price!=null&&su.price!=="")?+su.price:c.price, weekendPrice:(su.weekendPrice!=null&&su.weekendPrice!=="")?+su.weekendPrice:c.weekendPrice, overrides:su.overrides||{}, blocked:[...new Set([...(su.blocked||[]), ...icalUnidad(c,su,selUnit)])], promos:c.promos, promoText:c.promoText } : c;
   const ready = !multi || selUnit!=null;
   const pv = ready ? cv : (units[0] ? { price:(units[0].price!=null&&units[0].price!=="")?+units[0].price:c.price, weekendPrice:(units[0].weekendPrice!=null&&units[0].weekendPrice!=="")?+units[0].weekendPrice:c.weekendPrice, overrides:units[0].overrides||{} } : c);
   const stay=computeStay(cv,q.ci,q.co);
   const avail=isAvail(cv,q.ci,q.co);
-  const pick=(day,info)=>{ if(info.past||info.isBlocked) return; if(!q.ci||(q.ci&&q.co)){setQ({ci:day,co:""});return;} if(day<=q.ci){setQ({ci:day,co:""});return;} let d=parseD(q.ci),ok=true; while(d<parseD(day)){if(c.blocked.includes(iso(d))){ok=false;break;}d=addDay(d);} setQ(ok?{ci:q.ci,co:day}:{ci:day,co:""}); };
+  const pick=(day,info)=>{ if(info.past||info.isBlocked) return; if(!q.ci||(q.ci&&q.co)){setQ({ci:day,co:""});return;} if(day<=q.ci){setQ({ci:day,co:""});return;} let d=parseD(q.ci),ok=true; while(d<parseD(day)){if(cv.blocked.includes(iso(d))){ok=false;break;}d=addDay(d);} setQ(ok?{ci:q.ci,co:day}:{ci:day,co:""}); };
   let msg=`Hola! Quiero consultar por ${c.name}${su?(" - "+(su.name||("Cabaña "+(selUnit+1)))):""}.`; if(q.ci&&q.co) msg+=` Del ${fmtDMY(q.ci)} al ${fmtDMY(q.co)}.`; if(stay&&avail) msg+=` Total estimado ${money(stay.total)}.`;
   const wa=`https://wa.me/${c.whatsapp}?text=${encodeURIComponent(msg)}`;
   const photos = c.photos.length ? c.photos : [];
@@ -1899,7 +1905,7 @@ function Landing({ c, acts=[], food=[] }) {
                 <h2>Cómo llegar</h2>
                 <p className="texto2" style={{marginBottom:"14px"}}>{c.zone}</p>
                 <iframe className="mapa" title="mapa" loading="lazy"
-                  src={"https://www.google.com/maps?q="+encodeURIComponent(c.zone)+"&output=embed"}></iframe>
+                  src={"https://www.google.com/maps?q="+encodeURIComponent(/,|tandil/i.test(c.zone)?c.zone:c.zone+", Tandil, Buenos Aires, Argentina")+"&z=16&output=embed"}></iframe>
               </div>
             )}
           </div>
@@ -2028,13 +2034,13 @@ function Listado({ items }) {
   const tipos=[...new Set(items.map(x=>x.type).filter(Boolean))].sort();
   let show=items.filter(c=>{
     if(huesp && capOf(c)<Number(huesp)) return false;
-    if(precio){ const p=c.price||0; if(precio.endsWith("+")){ if(p<=parseInt(precio,10)) return false; } else if(p>parseInt(precio,10)) return false; }
+    if(precio){ const p=pDesde(c); if(precio.endsWith("+")){ if(p<=parseInt(precio,10)) return false; } else if(p>parseInt(precio,10)) return false; }
     if(tipo && c.type!==tipo) return false;
     if(mascotas && !c.pet_friendly) return false;
     return true;
   });
-  if(orden==="asc") show=[...show].sort((a,b)=>(a.price||0)-(b.price||0));
-  else if(orden==="desc") show=[...show].sort((a,b)=>(b.price||0)-(a.price||0));
+  if(orden==="asc") show=[...show].sort((a,b)=>pDesde(a)-pDesde(b));
+  else if(orden==="desc") show=[...show].sort((a,b)=>pDesde(b)-pDesde(a));
   const activos=(huesp?1:0)+(precio?1:0)+(tipo?1:0)+(mascotas?1:0)+(orden?1:0);
   const etiquetasDe=(c)=>{
     const e=[]; const cap=capOf(c); if(cap) e.push("Hasta "+cap);
@@ -2102,7 +2108,7 @@ function Listado({ items }) {
                   <h3>{c.name}</h3>
                   <p className="z">{c.zone}</p>
                   <div className="pie">
-                    <span className="pr">{money(c.price)}</span>
+                    <span className="pr">{pVaria(c)?"desde ":""}{money(pDesde(c))}</span>
                     <span className="ver">Ver</span>
                   </div>
                 </div>

@@ -1597,7 +1597,7 @@ function Actividad({ c, cabins=[], food=[] }) {
                 <h2>Dónde es</h2>
                 <p className="texto2" style={{marginBottom:"14px"}}>{c.zone}</p>
                 <iframe className="mapa" title="mapa" loading="lazy"
-                  src={"https://www.google.com/maps?q="+encodeURIComponent(c.zone)+"&output=embed"}></iframe>
+                  src={"https://www.google.com/maps?q="+encodeURIComponent(/,|tandil/i.test(c.zone)?c.zone:c.zone+", Tandil, Buenos Aires, Argentina")+"&z=16&output=embed"}></iframe>
               </div>
             )}
           </div>
