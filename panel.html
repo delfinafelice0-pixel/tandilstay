@@ -369,24 +369,36 @@ const hayCalendario = (c) => (c.ical_urls||[]).some(Boolean) || (c.units||[]).so
 const preciosUnidades = (c) => (c.units||[]).map(u=>(u.price!=null&&u.price!=="")?+u.price:(+c.price||0)).filter(p=>p>0);
 const precioDesde = (c) => { const ps=preciosUnidades(c); return ps.length?Math.min(...ps):(+c.price||0); };
 const preciosVarian = (c) => new Set(preciosUnidades(c)).size>1;
-function IcalLinks({ urls, onChange }){
-  const us = urls||[];
+/* Links de calendario de UNA cabaña (o del alojamiento si no tiene cabañas).
+   Normalmente es uno solo (Airbnb). Se puede sumar otro solo si la misma cabaña
+   también está en otra plataforma, por ejemplo Booking. */
+const plataforma = (u) => { const x=String(u||"").toLowerCase(); return x.includes("airbnb") ? "Airbnb" : x.includes("booking") ? "Booking" : x ? "Otro" : ""; };
+function IcalLinks({ urls, onChange, nombre }){
+  const us = (urls && urls.length) ? urls : [""];
+  const upd = (v) => onChange(v.length===1 && !v[0] ? [] : v);
+  const llenos = us.every(u=>String(u||"").trim());
   return (<>
     <div className="space-y-2">
       {us.map((u,i)=>(
         <div key={i} className="flex items-center gap-2">
-          <input value={u} onChange={e=>onChange(us.map((x,j)=>j===i?e.target.value:x))}
-            placeholder="https://www.airbnb.com/calendar/ical/…ics" className="flex-1 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
-          <button onClick={()=>onChange(us.filter((_,j)=>j!==i))} className="text-rose-500">🗑️</button>
+          <span className="shrink-0 ff-body text-xs font-semibold rounded-md px-2 py-1" style={{background:"#EFE8D4",color:"#5F5945",minWidth:"62px",textAlign:"center"}}>{plataforma(u) || "Link"}</span>
+          <input value={u} onChange={e=>upd(us.map((x,j)=>j===i?e.target.value:x))}
+            placeholder="https://www.airbnb.com/calendar/ical/…ics" className="flex-1 min-w-0 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+          {(us.length>1 || u) && <button onClick={()=>upd(us.length>1 ? us.filter((_,j)=>j!==i) : [])} className="text-rose-500 shrink-0" title="Quitar">🗑️</button>}
         </div>
       ))}
       {us.some(u=>u && !esIcal(u)) && (
         <p className="ff-body text-xs" style={{color:"#8A6A1E"}}>Alguno de estos links no es un calendario. Tiene que ser el de «exportar calendario», que termina en .ics.</p>
       )}
     </div>
-    <button onClick={()=>onChange([...us,""])} className="mt-2 ff-body text-sm font-semibold" style={{color:C.clay}}>+ Agregar calendario</button>
+    {llenos && us.length<3 && (
+      <button onClick={()=>onChange([...us,""])} className="mt-2 ff-body text-xs font-semibold" style={{color:C.clay}}>
+        + {nombre ? nombre+" también está" : "También está"} en otra plataforma (ej. Booking)
+      </button>
+    )}
   </>);
 }
+
 const maxDeUnidades = (units, k, fallback) => {
   const vals = (units||[]).map(u=>Number(u&&u[k])||0).filter(n=>n>0);
   return vals.length ? Math.max(...vals) : (Number(fallback)||1);
@@ -803,10 +815,10 @@ function Editor({ c, set }) {
             <h4 className="ff-body text-sm font-semibold" style={{color:C.ink}}>{sola ? "Sincronizar con Airbnb o Booking" : ("Sincronizar "+nomCu+" con Airbnb o Booking")}</h4>
             <p className="ff-body text-xs text-stone-500 mt-1 mb-2">{sola
               ? "Pegá el link de exportar calendario (termina en .ics). Los días reservados allá aparecen ocupados acá."
-              : "Pegá el link de exportar calendario de esta cabaña (termina en .ics). En Airbnb cada cabaña es un anuncio con su propio link: elegí otra cabaña arriba para cargar el suyo."}</p>
+              : "Pegá acá el link de exportar calendario (.ics) del anuncio de "+nomCu+". Cada depto tiene el suyo: para cargar el del otro, elegilo arriba."}</p>
             {sola
               ? <IcalLinks urls={c.ical_urls} onChange={(v)=>set({...c, ical_urls:v})} />
-              : <IcalLinks urls={cu.ical_urls} onChange={(v)=>setCU({ical_urls:v})} />}
+              : <IcalLinks urls={cu.ical_urls} nombre={nomCu} onChange={(v)=>setCU({ical_urls:v})} />}
             {!sola && (c.ical_urls||[]).some(Boolean) && (
               <div className="mt-3 rounded-xl p-3" style={{background:"#FBF3DE",border:"1px solid #EAD9A8"}}>
                 <p className="ff-body text-xs" style={{color:"#6E5418"}}><b>Calendario general:</b> estos links bloquean <b>todas</b> las cabañas a la vez. Si cada cabaña tiene su propio anuncio en Airbnb, pasá cada link a la cabaña que corresponde.</p>
