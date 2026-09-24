@@ -2333,7 +2333,7 @@ function CabinCard({ c, q }) {
       <div className="body">
         <h3>{c.name}</h3>
         <p className="meta">{c.zone}</p>
-        <div className="price"><b>{pVaria(c) && <span className="meta" style={{marginRight:"5px"}}>desde</span>}{money(pDesde(c))}<span className="meta" style={{marginLeft:"6px"}}>noche</span></b><em>Ver</em></div>
+        <div className="price"><b><span className="meta" style={{marginLeft:0,marginRight:"6px"}}>desde</span>{money(pDesde(c))}<span className="meta" style={{marginLeft:"6px"}}>noche</span></b><em>Ver</em></div>
       </div>
     </a>
   );
