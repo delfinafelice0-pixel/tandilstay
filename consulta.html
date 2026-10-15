@@ -1047,8 +1047,23 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const Q = new URLSearchParams(location.search);
-const OP = (Q.get("op")||"").trim();
-const opSuffix = OP ? ("&op="+encodeURIComponent(OP)) : "";
+/* Dominio propio de un cliente (ej. hospedatentandil.com.ar): el operador sale del dominio,
+   como si viniera ?op=, pero sin mostrarlo en la dirección. En visitandotandil.com todo sigue igual. */
+const HOST = location.hostname.toLowerCase().replace(/^www\./, "");
+const POR_DOMINIO = HOST.includes(".") && !/^[\d.]+$/.test(HOST) && !/^visitandotandil\.com$|\.(github\.io|netlify\.app|pages\.dev)$/.test(HOST);
+let OP = POR_DOMINIO ? "" : (new URLSearchParams(location.search).get("op")||"").trim();
+const OP_LISTO = (POR_DOMINIO
+  ? db.rpc("operador_por_dominio", { p_dominio: HOST }).then(({ data }) => { OP = String(data||"").trim(); }, () => {})
+  : Promise.resolve()
+).then(() => {
+  if (!POR_DOMINIO) return;
+  try{ const q = new URLSearchParams(location.search);
+       if (q.has("op")) { q.delete("op"); history.replaceState(history.state, "", location.pathname + (q.toString() ? "?"+q : "") + location.hash); } }catch(e){}
+});
+/* en dominio propio los links no llevan ?op=: la página de destino lo vuelve a sacar del dominio */
+const opEnLink = () => (OP && !POR_DOMINIO) ? encodeURIComponent(OP) : "";
+let opSuffix = "";
+OP_LISTO.then(() => { opSuffix = opEnLink() ? "&op="+opEnLink() : ""; });
 
 const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=800&q=80`));
 const money = (n) => "$" + Number(n||0).toLocaleString("es-AR");
@@ -1076,7 +1091,7 @@ const NAV=[["home","Para dormir"],["gastro","Para comer"],["qhacer","Para pasear
 function App(){
   const [menu,setMenu]=useState(false);
   useEffect(()=>{ document.body.classList.toggle("lock",menu); return ()=>document.body.classList.remove("lock"); },[menu]);
-  const volver = "index.html" + (OP?("?op="+encodeURIComponent(OP)):"");
+  const volver = "index.html" + (opEnLink()?"?op="+opEnLink():"");
   const [all,setAll]=useState(null);
   /* los datos que llegan desde la portada */
   const [huesp,setHuesp]=useState(Q.get("hu")||"");
@@ -1167,7 +1182,7 @@ function App(){
             <p className="wm">Visitando Tandil</p>
           </a>
           <nav className="nav">
-            {NAV.map(([k,l])=><a key={k} href={"index.html?view="+k+(OP?"&op="+encodeURIComponent(OP):"")}>{l}</a>)}
+            {NAV.map(([k,l])=><a key={k} href={"index.html?view="+k+opSuffix}>{l}</a>)}
           </nav>
           <button className="burger" onClick={()=>setMenu(true)} aria-label="Abrir el menú"><i></i><i></i><i></i></button>
         </div>
@@ -1180,7 +1195,7 @@ function App(){
             <button className="pclose" onClick={()=>setMenu(false)} aria-label="Cerrar">✕</button>
           </div>
           <nav>
-            {NAV.map(([k,l])=><a key={k} href={"index.html?view="+k+(OP?"&op="+encodeURIComponent(OP):"")}>{l}</a>)}
+            {NAV.map(([k,l])=><a key={k} href={"index.html?view="+k+opSuffix}>{l}</a>)}
             <a href={volver}>Volver al inicio</a>
           </nav>
         </div>
@@ -1296,7 +1311,7 @@ function App(){
     </div>
   );
 }
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+OP_LISTO.then(() => ReactDOM.createRoot(document.getElementById("root")).render(<App/>));
 </script>
 
 

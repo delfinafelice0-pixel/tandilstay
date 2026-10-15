@@ -1711,8 +1711,25 @@ const { useState, useEffect, useRef } = React;
 const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const OP = (new URLSearchParams(location.search).get("op")||"").trim();
-const opSuffix = OP ? ("&op="+encodeURIComponent(OP)) : "";
+/* Dominio propio de un cliente (ej. hospedatentandil.com.ar): el operador sale del dominio,
+   como si viniera ?op=, pero sin mostrarlo en la dirección. En visitandotandil.com todo sigue igual. */
+const HOST = location.hostname.toLowerCase().replace(/^www\./, "");
+const POR_DOMINIO = HOST.includes(".") && !/^[\d.]+$/.test(HOST) && !/^visitandotandil\.com$|\.(github\.io|netlify\.app|pages\.dev)$/.test(HOST);
+let OP = POR_DOMINIO ? "" : (new URLSearchParams(location.search).get("op")||"").trim();
+const OP_LISTO = (POR_DOMINIO
+  ? db.rpc("operador_por_dominio", { p_dominio: HOST }).then(({ data }) => { OP = String(data||"").trim(); }, () => {})
+  : Promise.resolve()
+).then(() => {
+  if (!POR_DOMINIO) return;
+  try{ const q = new URLSearchParams(location.search);
+       if (q.has("op")) { q.delete("op"); history.replaceState(history.state, "", location.pathname + (q.toString() ? "?"+q : "") + location.hash); } }catch(e){}
+});
+/* en dominio propio los links no llevan ?op=: la página de destino lo vuelve a sacar del dominio */
+const opEnLink = () => (OP && !POR_DOMINIO) ? encodeURIComponent(OP) : "";
+let opSuffix = "", opQuery = "";
+OP_LISTO.then(() => { opSuffix = opEnLink() ? "&op="+opEnLink() : ""; opQuery = opEnLink() ? "?op="+opEnLink() : ""; });
+/* operador → dominio propio, para que la sábana mande a cada cliente a su sitio */
+let DOMINIOS = {};
 
 const WHATSAPP = "5492284631868";
 const wa = `https://wa.me/${WHATSAPP}`;
@@ -1937,7 +1954,7 @@ function Header({ view, go, onOpen }) {
           ))}
         </nav>
         <div className="acts">
-          <a className="solid" href={"consulta.html" + (OP?("?op="+encodeURIComponent(OP)):"")}>Consultar</a>
+          <a className="solid" href={"consulta.html" + opQuery}>Consultar</a>
           <button className="burger" onClick={onOpen} aria-label="Abrir el menú"><i></i><i></i><i></i></button>
         </div>
       </div>
@@ -1962,7 +1979,7 @@ function MobileMenu({ open, go, onClose }) {
         {items.map(n => <button key={n.key} onClick={()=>{ go(n.key); onClose(); }}>{n.label}</button>)}
         <a href="sumate.html" style={{padding:"16px 2px",borderBottom:"1px solid var(--linea)",fontFamily:"var(--display)",fontSize:"22px"}}>Sumá tu lugar</a>
       </nav>
-      <a className="solid" href={"consulta.html" + (OP?("?op="+encodeURIComponent(OP)):"")}>Hacer una consulta</a>
+      <a className="solid" href={"consulta.html" + opQuery}>Hacer una consulta</a>
     </div>
   );
 }
@@ -2031,7 +2048,7 @@ function Home({ go, data }) {
     const q = new URLSearchParams();
     if (ci) q.set("ci", ci); if (co) q.set("co", co);
     if (hu) q.set("hu", hu); if (pre) q.set("presu", pre);
-    if (OP) q.set("op", OP);
+    if (opEnLink()) q.set("op", OP);
     location.href = "consulta.html" + (q.toString() ? "?" + q.toString() : "");
   };
   /* El buscador de la portada lleva a la sábana filtrada, no al formulario:
@@ -2039,7 +2056,7 @@ function Home({ go, data }) {
   const buscar = () => {
     const q = new URLSearchParams();
     if (ci) q.set("ci", ci); if (co) q.set("co", co); if (hu) q.set("hu", hu);
-    if (OP) q.set("op", OP);
+    if (opEnLink()) q.set("op", OP);
     location.href = RUTAS.aloj + (q.toString() ? "?" + q.toString() : "");
   };
   const destacados = PLACES.filter(p => ["Cerro El Centinela","Lago del Fuerte","Monumento a Don Quijote de la Mancha","Monte Calvario","Plaza Independencia","Castillo Morisco"].includes(p.n));
@@ -2323,8 +2340,10 @@ function CabinCard({ c, q }) {
   if((c.amenities||[]).includes("pileta")) etiquetas.push("Pileta");
   else if((c.amenities||[]).includes("parrilla")) etiquetas.push("Parrilla");
   if(c.pet_friendly && etiquetas.length<2) etiquetas.push("Mascotas");
+  /* si el dueño tiene dominio propio, la tarjeta lleva a su sitio (en pestaña nueva) */
+  const dom = !OP && DOMINIOS[String(c.operator || "").trim().toLowerCase()];
   return (
-    <a className="card worn" href={"cabana.html?slug=" + c.slug + opSuffix + (q||"")}>
+    <a className="card worn" href={dom ? ("https://" + dom + "/cabana.html?slug=" + c.slug + (q||"")) : ("cabana.html?slug=" + c.slug + opSuffix + (q||""))} {...(dom ? { target:"_blank", rel:"noopener" } : {})}>
       <div className="ph">
         <div className="chips">{etiquetas.slice(0,3).map((t,i)=><span className={"chip"+(t.startsWith("✓")?" chip-ok":"")} key={i}>{t}</span>)}</div>
         <Corazon id={"hospedaje:" + c.slug} />
@@ -2629,7 +2648,7 @@ function ContactPage() {
         <div style={{marginTop:"46px",paddingTop:"34px",borderTop:"1px solid var(--linea)"}}>
           <h2>¿No sabés por dónde empezar?</h2>
           <p style={{color:"var(--suave)",maxWidth:"46ch",margin:"12px 0 22px"}}>Contanos las fechas, cuántos son y qué te gustaría. Le mandamos la consulta a todos los lugares que coinciden.</p>
-          <a className="solid" href={"consulta.html" + (OP?("?op="+encodeURIComponent(OP)):"")}>Hacer una consulta</a>
+          <a className="solid" href={"consulta.html" + opQuery}>Hacer una consulta</a>
         </div>
       </section>
     </div>
@@ -2659,7 +2678,7 @@ function Footer({ go }) {
           <div>
             <h5>Planificar</h5>
             <ul>
-              <li><a href={"consulta.html" + (OP?("?op="+encodeURIComponent(OP)):"")}>Hacer una consulta</a></li>
+              <li><a href={"consulta.html" + opQuery}>Hacer una consulta</a></li>
               <li><button onClick={()=>go("conoce")}>Lugares para visitar</button></li>
             </ul>
           </div>
@@ -2769,11 +2788,14 @@ function App() {
   const [data, setData] = useState({ loading: true, cabins: [], acts: [], food: [] });
   useEffect(() => {
     (async () => {
-      const [a, b, c] = await Promise.all([
+      const [a, b, c, d] = await Promise.all([
         db.from("cabins").select("*").order("orden", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false }),
         db.from("activities").select("*").order("orden", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false }),
         db.from("restaurants").select("*").order("orden", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false }),
+        OP ? Promise.resolve({ data: [] }) : db.rpc("dominios_publicos"),
       ]);
+      const dm = {}; (d.data || []).forEach(r => { if (r.operator && r.dominio) dm[String(r.operator).trim().toLowerCase()] = r.dominio; });
+      DOMINIOS = dm;
       let cabins = a.data || [], acts = b.data || [], food = c.data || [];
       if (OP) {
         /* página de un operador: se muestran sus lugares; si en un rubro no tiene, se ve la guía completa */
@@ -2786,7 +2808,7 @@ function App() {
         /* si entró a la raíz, lo llevo al rubro donde tiene publicaciones */
         if (limpiarRuta() === "/" && !new URLSearchParams(location.search).get("view")) {
           const destino = mc.length ? "aloj" : mf.length ? "gastro" : ma.length ? "qhacer" : null;
-          if (destino) { setView(destino); try{ history.replaceState({view:destino}, "", RUTAS[destino] + "?op=" + encodeURIComponent(OP)); }catch(e){} }
+          if (destino) { setView(destino); try{ history.replaceState({view:destino}, "", RUTAS[destino] + opQuery); }catch(e){} }
         }
       }
       setData({ loading: false, cabins, acts, food });
@@ -2837,7 +2859,7 @@ function App() {
       {OP && (
         <div className="opstrip">
           <span>Estás viendo los lugares de <b>{OP}</b></span>
-          <a href={RUTAS[view] || "/"}>Ver toda la guía →</a>
+          <a href={(POR_DOMINIO ? "https://visitandotandil.com" : "") + (RUTAS[view] || "/")}>Ver toda la guía →</a>
         </div>
       )}
       {view === "contacto" && <ContactPage />}
@@ -2847,7 +2869,7 @@ function App() {
     </div>
   );
 }
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+OP_LISTO.then(() => ReactDOM.createRoot(document.getElementById("root")).render(<App />));
 </script>
 
 <script>

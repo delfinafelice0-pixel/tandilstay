@@ -309,6 +309,8 @@ const RECUPERO = (()=>{
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const C = { paper:"#F4EEDC", cream:"#FBF7E8", mist:"#E7E1D0", ink:"#23261A", moss:"#2E3521", mossdeep:"#232817", sage:"#63653F", clay:"#2E3521", sun:"#DFCCAE" };
 const ROLES = [["hospedaje","Hospedaje"],["gastronomia","Gastronomía"],["actividad","Actividad"],["admin","Admin"]];
+/* "https://www.Hospeda.com.ar/" → "hospeda.com.ar" (así se guarda y así lo busca la guía) */
+const limpiarDominio = (d) => String(d||"").trim().toLowerCase().replace(/^[a-z]+:\/\//,"").replace(/^www\./,"").replace(/[\/?#].*$/,"").replace(/\.$/,"");
 const PANELS = { hospedaje:"panel.html", gastronomia:"gastro-panel.html", actividad:"act-panel.html" };
 
 
@@ -1073,7 +1075,8 @@ function App() {
                   if(!esPrincipal(p)) return null;
                   const rubro = p.role && p.role!=="admin" ? p.role : null;
                   const rutaRubro = rubro==="gastronomia" ? "para-comer" : rubro==="actividad" ? "para-pasear" : "para-dormir";
-      const landing = p.operator ? (rutaRubro+"?op="+encodeURIComponent(p.operator)) : null;
+                  const dominio = limpiarDominio(p.dominio);
+                  const landing = dominio ? ("https://"+dominio) : p.operator ? (rutaRubro+"?op="+encodeURIComponent(p.operator)) : null;
                   const panelHref = PANELS[p.role] ? PANELS[p.role] + (p.operator ? "?op="+encodeURIComponent(p.operator) : "") : null;
                   const st = billingStatus(p.next_due);
                   const initial = (p.operator||p.email||"?").trim().charAt(0).toUpperCase();
@@ -1097,6 +1100,13 @@ function App() {
                         <input defaultValue={p.max_listings??""} onBlur={e=>updateGrupo(p,{max_listings:e.target.value===""?null:parseInt(e.target.value,10)})} placeholder="∞" className="w-12 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
                       </div>
                     </div>
+
+                    {rubro && (
+                      <div className="flex items-center gap-1.5 mt-2.5">
+                        <span className="ff-body text-xs text-stone-500 shrink-0">Dominio propio</span>
+                        <input key={"dom"+(p.dominio||"")} defaultValue={dominio} onBlur={e=>{ const d=limpiarDominio(e.target.value); e.target.value=d; if(d!==dominio) updateGrupo(p,{dominio:d||null}); }} placeholder="ej: hospedatentandil.com.ar" className="flex-1 min-w-0 border border-stone-300 rounded-lg px-2 py-1.5 ff-body text-sm" />
+                      </div>
+                    )}
 
                     {landing && (
                       <div className="flex items-center gap-1.5 mt-2.5 bg-stone-50 rounded-lg px-2 py-1.5">

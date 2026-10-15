@@ -1514,9 +1514,25 @@ const { useState, useEffect } = React;
 const SUPABASE_URL = "https://unzytiqqitdfkdnpcgyz.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuenl0aXFxaXRkZmtkbnBjZ3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Njg4NjAsImV4cCI6MjA5NjQ0NDg2MH0.jdwNTU1WpjjadG2tyfvqf69YbkczL-CrSayHbPj70CM";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const OP = (new URLSearchParams(location.search).get("op")||"").trim();
-const homeHref = OP ? ("operador.html?op="+encodeURIComponent(OP)) : "index.html";
-const navHref = (k) => OP ? ("operador.html?op="+encodeURIComponent(OP)+"&view="+k) : ("index.html?view="+k);
+/* Dominio propio de un cliente (ej. hospedatentandil.com.ar): el operador sale del dominio,
+   como si viniera ?op=, pero sin mostrarlo en la dirección. En visitandotandil.com todo sigue igual. */
+const HOST = location.hostname.toLowerCase().replace(/^www\./, "");
+const POR_DOMINIO = HOST.includes(".") && !/^[\d.]+$/.test(HOST) && !/^visitandotandil\.com$|\.(github\.io|netlify\.app|pages\.dev)$/.test(HOST);
+let OP = POR_DOMINIO ? "" : (new URLSearchParams(location.search).get("op")||"").trim();
+const OP_LISTO = (POR_DOMINIO
+  ? db.rpc("operador_por_dominio", { p_dominio: HOST }).then(({ data }) => { OP = String(data||"").trim(); }, () => {})
+  : Promise.resolve()
+).then(() => {
+  if (!POR_DOMINIO) return;
+  try{ const q = new URLSearchParams(location.search);
+       if (q.has("op")) { q.delete("op"); history.replaceState(history.state, "", location.pathname + (q.toString() ? "?"+q : "") + location.hash); } }catch(e){}
+});
+/* en dominio propio los links no llevan ?op=: la página de destino lo vuelve a sacar del dominio */
+const opEnLink = () => (OP && !POR_DOMINIO) ? encodeURIComponent(OP) : "";
+let homeHref = "index.html", navHref = (k) => "index.html?view="+k, opSuffix = "";
+OP_LISTO.then(() => { if (opEnLink()) {
+  homeHref = "operador.html?op="+opEnLink(); navHref = (k) => "operador.html?op="+opEnLink()+"&view="+k; opSuffix = "&op="+opEnLink();
+} else if (POR_DOMINIO) homeHref = "/"; });
 
 const IMG = (p) => (!p ? "" : (String(p).startsWith("http") ? p : `https://images.unsplash.com/${p}?auto=format&fit=crop&w=1200&q=80`));
 const ytEmbed = (url) => { const m=(url||"").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/); return m?`https://www.youtube.com/embed/${m[1]}`:null; };
@@ -1683,9 +1699,9 @@ function Nearby({ acts=[], food=[], cabins=[] }) {
   return (
     <section className="cerca worn">
       <div className="in reveal">
-        <Tira kicker="Dónde quedarte" title="Otros hospedajes" items={cabins} href={x=>"cabana.html?slug="+x.slug+(OP?"&op="+encodeURIComponent(OP):"")} sub={x=>x.zone||""} />
-        <Tira kicker="Para pasear" title="Actividades cerca" items={acts} href={x=>"actividad.html?slug="+x.slug+(OP?"&op="+encodeURIComponent(OP):"")} sub={x=>[x.category,x.duration].filter(Boolean).join(" · ")} />
-        <Tira kicker="Para comer" title="Dónde comer" items={food} href={x=>"resto.html?slug="+x.slug+(OP?"&op="+encodeURIComponent(OP):"")} sub={x=>x.zone||""} />
+        <Tira kicker="Dónde quedarte" title="Otros hospedajes" items={cabins} href={x=>"cabana.html?slug="+x.slug+opSuffix} sub={x=>x.zone||""} />
+        <Tira kicker="Para pasear" title="Actividades cerca" items={acts} href={x=>"actividad.html?slug="+x.slug+opSuffix} sub={x=>[x.category,x.duration].filter(Boolean).join(" · ")} />
+        <Tira kicker="Para comer" title="Dónde comer" items={food} href={x=>"resto.html?slug="+x.slug+opSuffix} sub={x=>x.zone||""} />
       </div>
     </section>
   );
@@ -2099,7 +2115,7 @@ function Listado({ items }) {
         <div className="sabana worn dark">
           <div className="gA reveal">
             {show.map((c,i)=>(
-              <a className="pA" key={i} href={"cabana.html?slug="+c.slug+(OP?"&op="+encodeURIComponent(OP):"")}>
+              <a className="pA" key={i} href={"cabana.html?slug="+c.slug+opSuffix}>
                 <div className="ph">
                   <div className="chips">{etiquetasDe(c).map((t,k)=><span className="chip" key={k}>{t}</span>)}</div>
                   {(c.banner || (c.photos&&c.photos[0])) && <img src={IMG(c.banner||c.photos[0])} alt={c.name} loading="lazy" />}
@@ -2128,7 +2144,7 @@ function Listado({ items }) {
     </div>
   );
 }
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+OP_LISTO.then(() => ReactDOM.createRoot(document.getElementById("root")).render(<App />));
 </script>
 
 <script>

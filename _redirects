@@ -1,0 +1,9 @@
+# Netlify / Cloudflare Pages: las direcciones lindas sirven la guía (index.html) con estado 200.
+# Reemplaza el truco del 404.html de GitHub Pages (404.html queda igual como red de seguridad).
+/para-dormir     /index.html  200
+/para-comer      /index.html  200
+/para-pasear     /index.html  200
+/conoce-tandil   /index.html  200
+/contacto        /index.html  200
+/operadores      /index.html  200
+/guardados       /index.html  200
